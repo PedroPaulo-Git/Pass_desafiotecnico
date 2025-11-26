@@ -1,0 +1,10 @@
+# Services
+
+Services contêm toda a lógica de negócio:
+- Validações de regras de negócio
+- Chamadas ao Prisma (banco de dados)
+- Tratamento de erros customizados (AppError)
+
+Exemplo:
+- `CreateVehicleService.ts`
+- `UpdateVehicleService.ts`

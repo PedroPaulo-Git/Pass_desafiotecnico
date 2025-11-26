@@ -1,0 +1,7 @@
+# Schemas
+
+Schemas Zod reutilizáveis para validação de entrada.
+
+Exemplo:
+- `vehicleSchemas.ts`
+- `driverSchemas.ts`
