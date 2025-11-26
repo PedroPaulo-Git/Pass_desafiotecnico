@@ -1,4 +1,5 @@
 import fastify from 'fastify'
+import 'dotenv/config';
 import cors from '@fastify/cors'
 import {
   serializerCompiler,
@@ -7,6 +8,8 @@ import {
 } from 'fastify-type-provider-zod'
 import { ZodError } from 'zod'
 import { AppError } from './utils/AppError'
+
+import { vehicleRoutes } from './http/routes/vehicle.routes'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -54,7 +57,7 @@ app.get('/health', async () => {
 })
 
 // Registrar rotas aqui quando forem criadas
-// app.register(vehicleRoutes, { prefix: '/vehicles' })
+app.register(vehicleRoutes, { prefix: '/vehicles' })
 
 // Iniciar servidor
 const start = async () => {
@@ -64,6 +67,8 @@ const start = async () => {
 
     await app.listen({ port, host })
     console.log(`🚀 Servidor rodando em http://localhost:${port}`)
+     console.log('DB URL:', process.env.DATABASE_URL);
+
   } catch (err) {
     app.log.error(err)
     process.exit(1)

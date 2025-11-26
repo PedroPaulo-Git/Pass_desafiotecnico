@@ -1,8 +1,0 @@
-# Routes
-
-Definição das rotas do Fastify, agrupadas por entidade.
-
-Exemplo:
-- `vehicles.routes.ts`
-- `drivers.routes.ts`
-- `maintenance.routes.ts`

@@ -5,6 +5,13 @@
     "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./src",
+    "paths": {
+      // Aqui você mapeia o alias.
+      // Qualquer import que use "@/" será resolvido a partir do diretório "src".
+      "@/*": ["src/*"], 
+      // Se a pasta fosse "app", você usaria: "@/app/*": ["app/*"]
+    },
+    "baseUrl": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
