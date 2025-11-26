@@ -48,7 +48,7 @@ Siga esta ordem para construir o backend manualmente:
 > "Estou criando a rota de `POST /vehicles`. Como tipar o `request.body` dentro do handler do Fastify usando a inferência do Zod (`z.infer`) para eu não precisar criar interfaces manuais?"
 
 ### Sobre Regras de Negócio e Prisma
-> "No meu `CreateVehicleService`, preciso verificar se a placa já existe antes de criar. Qual método do Prisma é mais performático para isso: `findUnique` ou `count`? E como devo retornar esse erro para o Controller?"
+> "No meu `create-vehicles.service`, preciso verificar se a placa já existe antes de criar. Qual método do Prisma é mais performático para isso: `findUnique` ou `count`? E como devo retornar esse erro para o Controller?"
 
 > "Preciso salvar a data de abastecimento que vem do front (string) no banco (DateTime). O Zod consegue fazer essa transformação (coerce) automaticamente na validação? Como fica o schema?"
 

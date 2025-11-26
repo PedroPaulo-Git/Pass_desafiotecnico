@@ -9,15 +9,24 @@ import { updateVehicleService } from "@/services/vehicleServices/update-vehicles
 import { deleteVehicleService } from "@/services/vehicleServices/delete-vehicles.service";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
+
+
   // get all vehicles
-  app.get("/", async (request, reply) => {
+  app.get("/", async (_request, reply) => {
     const vehicles = await listVehiclesService();
-    return [vehicles];
+    if (!vehicles) {
+      return reply.status(404).send({ error: "Vehicle not found" });
+    }
+    return vehicles;
   });
+
   // get vehicle by id
   app.get<{ Params: VehicleParams }>("/:id", async (request, reply) => {
     const vehicleId = request.params.id;
     const vehicle = await listVehicleByIdService(vehicleId);
+    if (!vehicle) {
+      return reply.status(404).send({ error: "Vehicle not found" });
+    }
     return vehicle;
   });
 
@@ -32,8 +41,8 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
         const vehicles = await createVehicleService(vehicleBody);
         reply.status(201).send(vehicles);
       } catch (error) {
-        console.error("Error creating vehicle:", error);
-        reply.status(500).send({ error: "Failed to create vehicle" });
+        const message = error instanceof Error ? error.message : "Erro ao criar veículo";
+        reply.status(400).send({ error: message });
       }
     }
   );
@@ -64,13 +73,13 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
             console.log("Updated vehicle data:", data);
             reply.status(201).send(data);
           } catch (error) {
-            console.error("Error updating vehicle:", error);
-            reply.status(500).send({ error: "Failed to update vehicle" });
+            const message = error instanceof Error ? error.message : "Erro ao atualizar veículo";
+            reply.status(400).send({ error: message });
           }
         }
       } catch (error) {
-        console.error("Error updating vehicle:", error);
-        reply.status(500).send({ error: "Failed to update vehicle" });
+        const message = error instanceof Error ? error.message : "Erro ao atualizar veículo";
+        reply.status(400).send({ error: message });
       }
     }
   );
