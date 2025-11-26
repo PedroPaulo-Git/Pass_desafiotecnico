@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// backend/prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -9,10 +8,143 @@ datasource db {
   provider = "postgresql"
 }
 
-// Modelo temporário para permitir a geração do cliente
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  createdAt DateTime @default(now())
+// --- ENUMS (Padronização dos Selects das imagens) ---
+
+enum VehicleStatus {
+  LIBERADO
+  EM_MANUTENCAO
+  INDISPONIVEL
+  VENDIDO
 }
 
+enum FuelType {
+  DIESEL
+  DIESEL_S10
+  GASOLINA
+  ETANOL
+  ARLA32
+}
+
+enum VehicleCategory {
+  ONIBUS
+  VAN
+  CARRO
+  CAMINHAO
+}
+
+enum VehicleClassification {
+  PREMIUM
+  BASIC
+  EXECUTIVO
+}
+
+enum SeverityLevel {
+  BAIXA
+  MEDIA
+  ALTA
+  GRAVE
+}
+
+// --- MODELS ---
+
+model Vehicle {
+  id             String        @id @default(uuid())
+  internalId     String?       @unique // Campo "Identificador" (ex: 316)
+  
+  // Dados Básicos
+  plate          String        @unique // Placa
+  renavam        String?       @unique
+  chassis        String?       @unique
+  model          String        // Ex: Busscar Buss Vissta 340
+  brand          String        // Ex: Scania
+  year           Int
+  color          String?
+  
+  // Detalhes Técnicos
+  category       VehicleCategory
+  classification VehicleClassification
+  capacity       Int           // Capacidade de passageiros
+  doors          Int           @default(1)
+  fuelType       FuelType      // Combustível padrão do veículo
+  
+  // Localização e Estado
+  state          String?       // UF
+  currentKm      Int           @default(0) // Revisão (Km) atual
+  status         VehicleStatus @default(LIBERADO)
+  
+  companyName    String?       // Nome da Companhia (visto no dropdown)
+  description    String?       @db.Text
+
+  // Relacionamentos
+  images         VehicleImage[]
+  fuelings       Fueling[]
+  incidents      Incident[]
+  documents      VehicleDocument[]
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("vehicles")
+}
+
+model VehicleImage {
+  id        String  @id @default(uuid())
+  url       String  // URL do MinIO/S3
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_images")
+}
+
+model Fueling {
+  id            String   @id @default(uuid())
+  vehicleId     String
+  vehicle       Vehicle  @relation(fields: [vehicleId], references: [id])
+  
+  date          DateTime
+  provider      String   // Posto de Combustível
+  fuelType      FuelType
+  liters        Float
+  totalValue    Float    // Valor Total
+  odometer      Int      // Km no momento do abastecimento
+  
+  receiptUrl    String?  // Foto do comprovante
+
+  createdAt     DateTime @default(now())
+
+  @@map("fuelings")
+}
+
+model Incident {
+  id             String        @id @default(uuid())
+  vehicleId      String
+  vehicle        Vehicle       @relation(fields: [vehicleId], references: [id])
+  
+  title          String?       // Breve resumo
+  classification String        // Classificação do select (#1104)
+  severity       SeverityLevel
+  date           DateTime
+  description    String?       @db.Text
+  
+  attachmentUrl  String?       // Anexo
+
+  createdAt      DateTime      @default(now())
+
+  @@map("incidents")
+}
+
+model VehicleDocument {
+  id           String   @id @default(uuid())
+  vehicleId    String
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
+  
+  name         String   // Ex: Tacógrafo
+  expiryDate   DateTime // Vencimento
+  alertDays    Int?     // Dias de Antecipação para aviso
+  activeAlert  Boolean  @default(true) // Toggle de ativar alerta
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("vehicle_documents")
+}

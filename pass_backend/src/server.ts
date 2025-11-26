@@ -22,6 +22,7 @@ app.setSerializerCompiler(serializerCompiler)
 // Error Handler Global
 app.setErrorHandler((error, request, reply) => {
   // Erros de validação do Zod
+  console.log(request);
   if (error instanceof ZodError) {
     return reply.status(400).send({
       message: 'Erro de validação',
