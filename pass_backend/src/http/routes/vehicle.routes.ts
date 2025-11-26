@@ -6,7 +6,7 @@ import {
 import { createVehicleService } from "@/services/vehicleServices/create-vehicles.service";
 import { VehicleType, VehicleParams } from "@/type/vehicleType";
 import { updateVehicleService } from "@/services/vehicleServices/update-vehicles.service";
-// import { PrismaClient } from '@prisma/client';
+import { deleteVehicleService } from "@/services/vehicleServices/delete-vehicles.service";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
   // get all vehicles
@@ -14,7 +14,7 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
     const vehicles = await listVehiclesService();
     return [vehicles];
   });
-
+  // get vehicle by id
   app.get<{ Params: VehicleParams }>("/:id", async (request, reply) => {
     const vehicleId = request.params.id;
     const vehicle = await listVehicleByIdService(vehicleId);
@@ -58,25 +58,26 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
         console.log("vehicleBody :", vehicleBody);
         console.log("vehicleId :", vehicleId);
 
-
         if (PreviousVehicleData) {
           try {
             const data = await updateVehicleService(vehicleBody, vehicleId);
             console.log("Updated vehicle data:", data);
             reply.status(201).send(data);
-
           } catch (error) {
-
             console.error("Error updating vehicle:", error);
             reply.status(500).send({ error: "Failed to update vehicle" });
           }
         }
-
-
       } catch (error) {
         console.error("Error updating vehicle:", error);
         reply.status(500).send({ error: "Failed to update vehicle" });
       }
     }
   );
+  //delete vehicle
+  app.delete<{ Params: VehicleParams }>("/:id", async (request, reply) => {
+    const vehicleId = request.params.id;
+    await deleteVehicleService(vehicleId);
+    return reply.status(204).send();
+  });
 };
