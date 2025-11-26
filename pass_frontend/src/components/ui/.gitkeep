@@ -1,0 +1,12 @@
+# UI Components
+
+Componentes base do Shadcn/ui.
+
+**NÃO alterar a lógica deles, apenas estilo se necessário.**
+
+Para adicionar novos componentes:
+```bash
+npx shadcn-ui@latest add button
+npx shadcn-ui@latest add input
+npx shadcn-ui@latest add form
+```

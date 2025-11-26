@@ -1,0 +1,8 @@
+# Services
+
+Funções que fazem chamadas diretas ao Axios para comunicação com a API.
+
+Exemplo:
+- `vehicleService.ts` - métodos `getAll()`, `create()`, `update()`, `delete()`
+- `driverService.ts`
+- `maintenanceService.ts`

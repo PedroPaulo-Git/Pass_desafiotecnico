@@ -1,0 +1,8 @@
+# Feature Components
+
+Componentes complexos de negócio específicos do domínio.
+
+Exemplo:
+- `VehicleForm.tsx` - Formulário de cadastro/edição de veículo
+- `FleetTable.tsx` - Tabela de listagem de frota
+- `MaintenanceSchedule.tsx` - Calendário de manutenções
