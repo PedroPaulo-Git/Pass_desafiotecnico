@@ -1,26 +1,82 @@
 import { FastifyInstance } from "fastify";
-import { listVehiclesService } from "@/services/vehicleServices/list-vehicles.service";
-import { create } from "domain";
-import { createVehicleService } from "@/services/vehicleServices/create-vehicle.service";
-import { VehicleType } from "@/type/vehicleType";
+import {
+  listVehicleByIdService,
+  listVehiclesService,
+} from "@/services/vehicleServices/list-vehicles.service";
+import { createVehicleService } from "@/services/vehicleServices/create-vehicles.service";
+import { VehicleType, VehicleParams } from "@/type/vehicleType";
+import { updateVehicleService } from "@/services/vehicleServices/update-vehicles.service";
 // import { PrismaClient } from '@prisma/client';
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
+  // get all vehicles
   app.get("/", async (request, reply) => {
     const vehicles = await listVehiclesService();
     return [vehicles];
   });
 
-  app.post("/", async (request, reply) => {
-    console.log("body :", request.body);
-    const body: VehicleType | unknown = request.body;
-
-    try {
-      const vehicles = await createVehicleService(body as VehicleType);
-      reply.status(201).send(vehicles);
-    } catch (error) {
-      console.error("Error creating vehicle:", error);
-      reply.status(500).send({ error: "Failed to create vehicle" });
-    }
+  app.get<{ Params: VehicleParams }>("/:id", async (request, reply) => {
+    const vehicleId = request.params.id;
+    const vehicle = await listVehicleByIdService(vehicleId);
+    return vehicle;
   });
+
+  //create vehicle
+  app.post<{ Body: VehicleType; Params: VehicleParams }>(
+    "/",
+    async (request, reply) => {
+      console.log("vehicleBody :", request.body);
+      const vehicleBody = request.body;
+
+      try {
+        const vehicles = await createVehicleService(vehicleBody);
+        reply.status(201).send(vehicles);
+      } catch (error) {
+        console.error("Error creating vehicle:", error);
+        reply.status(500).send({ error: "Failed to create vehicle" });
+      }
+    }
+  );
+
+  //update vehicle
+  app.put<{ Body: VehicleType; Params: VehicleParams }>(
+    "/:id",
+    async (request, reply) => {
+      if (!request.params?.id) {
+        return reply.status(400).send({ error: "Vehicle ID is required" });
+      }
+      try {
+        const vehicleId = request.params.id;
+        const PreviousVehicleData = await listVehicleByIdService(vehicleId);
+        console.log("Previous vehicle data:", PreviousVehicleData);
+
+        if (!PreviousVehicleData) {
+          return reply.status(404).send({ error: "Vehicle not found" });
+        }
+        const vehicleBody = request.body;
+
+        console.log("vehicleBody :", vehicleBody);
+        console.log("vehicleId :", vehicleId);
+
+
+        if (PreviousVehicleData) {
+          try {
+            const data = await updateVehicleService(vehicleBody, vehicleId);
+            console.log("Updated vehicle data:", data);
+            reply.status(201).send(data);
+
+          } catch (error) {
+
+            console.error("Error updating vehicle:", error);
+            reply.status(500).send({ error: "Failed to update vehicle" });
+          }
+        }
+
+
+      } catch (error) {
+        console.error("Error updating vehicle:", error);
+        reply.status(500).send({ error: "Failed to update vehicle" });
+      }
+    }
+  );
 };

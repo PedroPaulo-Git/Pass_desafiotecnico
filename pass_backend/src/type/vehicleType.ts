@@ -4,6 +4,10 @@ export type FuelType = 'DIESEL' | 'DIESEL_S10' | 'GASOLINA' | 'ETANOL' | 'ARLA32
  * Categorias/Espécies de Veículos (Ex: O que ele é?)
  * Baseado na classificação veicular brasileira (Ônibus, Carro, Moto, etc.)
  */
+export type VehicleParams = {
+  id: string; // ID é para o PARÂMETRO da rota
+};
+
 export type VehicleCategory = 
     'ONIBUS' | 
     'VAN' | 
