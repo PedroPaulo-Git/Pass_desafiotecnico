@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma";
-import { VehicleType } from "@/type/vehicleType";
+import { UpdateVehicleInput } from "@/schemas/vehicleSchema";
 
-export const updateVehicleService = async (vehicleData: VehicleType, id: string) => {
+export const updateVehicleService = async (vehicleData: UpdateVehicleInput, id: string) => {
   const updateVehicle = await prisma.vehicle.update({
     where: {
       id: id,

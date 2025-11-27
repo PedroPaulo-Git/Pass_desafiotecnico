@@ -1,8 +1,8 @@
 import { prisma } from '../../lib/prisma'
-import { VehicleType } from '@/type/vehicleType'
+import { CreateVehicleInput } from '@/schemas/vehicleSchema';
 
 
-export const createVehicleService = async (vehicleData: VehicleType) => {
+export const createVehicleService = async (vehicleData: CreateVehicleInput) => {
 
     const existingVehicle = await prisma.vehicle.findUnique({
         where:{

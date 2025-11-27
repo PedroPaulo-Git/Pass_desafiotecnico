@@ -1,56 +1,49 @@
-# Projeto FleetManager (Desafio Técnico)
+# ESPECIFICAÇÃO FUNCIONAL: SISTEMA DE GESTÃO DE FROTAS (FLEET MANAGER)
 
-Este projeto é um sistema completo de gestão de frotas utilizando **Next.js** (Frontend) e **Fastify** (Backend).
+## 1. Visão Geral do Produto
+O Fleet Manager é uma plataforma SaaS para controle operacional de frotas de veículos pesados e leves. O sistema centraliza o cadastro dos ativos (veículos), controla custos variáveis (abastecimentos), monitora sinistros (ocorrências) e garante a conformidade legal (documentos e vencimentos).
 
-## 🚀 Objetivo
-Construir um sistema robusto para gerenciar veículos, abastecimentos, ocorrências e documentos, focando em performance, tipagem estática e arquitetura limpa.
-
-## 🛠 Stack Tecnológica
-- **Backend:** Node.js, Fastify, TypeScript, Prisma ORM, Zod, PostgreSQL.
-- **Frontend:** Next.js (App Router), React Query, Shadcn/ui, Tailwind.
-- **Infra:** Docker (Postgres + MinIO).
+O sistema é composto por 4 módulos principais interconectados, onde o **Veículo** é a entidade central.
 
 ---
 
-## 🗺️ Guia de Inicialização (Passo a Passo para o Desenvolvedor)
+## 2. Módulos e Regras de Negócio
 
-Siga esta ordem para construir o backend manualmente:
+### 2.1. Módulo de Veículos (Core)
+Responsável pelo inventário da frota.
+- **Identificação:** Cada veículo possui dois identificadores únicos: a `Placa` (Legal) e o `Identificador Interno` (ex: "316" - Organizacional).
+- **Categorização:** Os veículos são tipados (Ônibus, Van, Carro) e classificados (Premium, Basic) para relatórios de uso.
+- **Status Operacional:** O veículo possui um ciclo de vida:
+    - `LIBERADO`: Apto para rodar.
+    - `EM_MANUTENCAO`: Bloqueado para novas viagens.
+    - `INDISPONIVEL`: Parado por problemas legais ou falta de motorista.
+- **Galeria:** Suporte a múltiplas fotos para vistoria visual do estado do veículo.
 
-### Fase 1: Fundação
-1.  **Docker:** Subir o container do PostgreSQL e garantir que consegue conectar nele.
-2.  **Setup Node:** Inicializar `package.json`, instalar TypeScript, Fastify e criar o `tsconfig.json`.
-3.  **Database:** Criar o arquivo `schema.prisma` (já fornecido), rodar o `npx prisma migrate dev` para criar as tabelas no Docker.
-4.  **Server Entrypoint:** Criar o arquivo `server.ts` simples que apenas sobe o servidor na porta 3333.
+### 2.2. Módulo de Abastecimento (Custos)
+Responsável pelo controle financeiro de combustível.
+- **Vínculo:** Todo abastecimento obrigatoriamente pertence a um veículo.
+- **Consumo:** Registra-se o `Odômetro (KM)` no momento do abastecimento. Isso é crucial para, no futuro, calcular a média de consumo (KM/L) comparando com o abastecimento anterior.
+- **Auditoria:** É obrigatório o upload da foto do comprovante/nota fiscal para evitar fraudes.
+- **Dados Financeiros:** Registra litros e valor total.
 
-### Fase 2: Estrutura e Primeira Rota
-1.  **Pastas:** Criar `src/http/controllers`, `src/http/routes`, `src/services`, `src/lib`.
-2.  **Lib:** Configurar a instância do Prisma Client em `src/lib/prisma.ts`.
-3.  **Rota de Criação (POST /vehicles):**
-    * Criar validação com Zod (body schema).
-    * Criar o Controller (recebe req/res).
-    * Criar o Service (chama o Prisma).
-    * Registrar a rota no `server.ts`.
+### 2.3. Módulo de Ocorrências (Segurança)
+Responsável por registrar eventos não planejados (multas, batidas, falhas mecânicas).
+- **Classificação:** Ocorrências possuem severidade (`BAIXA` a `GRAVE`). Isso ajuda gestores a priorizarem a resolução.
+- **Evidências:** Permite descrição textual detalhada e upload de arquivos (fotos da avaria ou PDFs de multas).
+- **Histórico:** Cria um log vitalício da "saúde" do veículo.
+
+### 2.4. Módulo de Documentação (Compliance)
+Responsável por evitar multas por documentos vencidos.
+- **Monitoramento:** Cadastra-se documentos recorrentes (Tacógrafo, Licenciamento, Seguro).
+- **Sistema de Alerta:** O campo `alertDays` define com quantos dias de antecedência o sistema deve notificar o gestor sobre o vencimento.
+- **Status:** Documentos podem ter o alerta ativado ou desativado manualmente.
 
 ---
 
-## 🤖 Perguntas Guia para Consultar a IA (Mentor Mode)
+## 3. Fluxos de Dados (Data Flow)
 
-*Utilize estas perguntas quando estiver travado ou quiser validar se seu código está seguindo boas práticas. Copie e cole no chat.*
+1. **Cadastro:** O usuário cria o veículo com dados básicos.
+2. **Operação:** O usuário lança abastecimentos e ocorrências ao longo do tempo.
+3. **Atualização Automática (Sugestão):** Ao lançar um abastecimento com KM 50.000, o sistema deve atualizar automaticamente o `currentKm` do cadastro do veículo para refletir a realidade.
 
-### Sobre Configuração Inicial
-> "Estou configurando o `server.ts` com Fastify. Qual é a maneira correta de registrar o validador e o serializador do **Zod** para que ele faça a validação automática dos tipos nas rotas?"
-
-> "Criei meu `docker-compose.yml` para o Postgres. Como configuro a variável `DATABASE_URL` no meu `.env` para que o Prisma consiga acessar esse container rodando localmente?"
-
-### Sobre Criação de Rotas e Arquitetura
-> "Fiz a separação em Controllers e Services. O meu Controller deve ter try/catch ou é melhor configurar um `errorHandler` global no Fastify? Se for global, como seria uma estrutura simples disso?"
-
-> "Estou criando a rota de `POST /vehicles`. Como tipar o `request.body` dentro do handler do Fastify usando a inferência do Zod (`z.infer`) para eu não precisar criar interfaces manuais?"
-
-### Sobre Regras de Negócio e Prisma
-> "No meu `create-vehicles.service`, preciso verificar se a placa já existe antes de criar. Qual método do Prisma é mais performático para isso: `findUnique` ou `count`? E como devo retornar esse erro para o Controller?"
-
-> "Preciso salvar a data de abastecimento que vem do front (string) no banco (DateTime). O Zod consegue fazer essa transformação (coerce) automaticamente na validação? Como fica o schema?"
-
-### Sobre Uploads (Futuro)
-> "Para a rota de upload de imagens, vou usar o `fastify-multipart`. Qual é a melhor estratégia: salvar o arquivo em disco temporário e depois subir pro MinIO, ou fazer stream direto da requisição para o bucket?"
+---
