@@ -10,7 +10,7 @@
 ### 1. Backend (`pass_backend/src`)
 - **`/http/controllers`**: Apenas recebem a Request/Response, validam o body com Zod e chamam o Service. Não contém regra de negócio. Retornam HTTP Status.
 - **`/http/routes`**: Definição das rotas do Fastify, agrupadas por entidade (ex: `vehicles.routes.ts`).
-- **`/services`**: Contém TODA a regra de negócio (ex: `CreateVehicleService.ts`). É aqui que o Prisma é chamado. Deve lançar erros customizados (AppError).
+- **`/services`**: Contém TODA a regra de negócio (ex: `create-vehicles.service.ts`). É aqui que o Prisma é chamado. Deve lançar erros customizados (AppError).
 - **`/lib`**: Configurações de terceiros (instância do Prisma Client, instância do Axios, configuração do MinIO/Upload).
 - **`/utils`**: Funções auxiliares puras (formatadores, validadores de CPF/CNPJ).
 - **`/schemas`**: Schemas do Zod reutilizáveis para validação de entrada.
