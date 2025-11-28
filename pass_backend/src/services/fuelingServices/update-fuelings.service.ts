@@ -40,8 +40,6 @@ export const updateFuelingService = async (
       }
     );
   }
-  console.log("Fuel type matches: ", vehicle.fuelType);
-
   //validate odometer is not less than previous reading
   if (
     fuelingData.odometer !== undefined &&
@@ -50,19 +48,29 @@ export const updateFuelingService = async (
     throw new AppError(
       "Odometer reading cannot be less than the previous reading",
       400,
-      "INVALID_ODOMETER_READING"
+      "INVALID_ODOMETER_READING",
+      { previousOdometer: fueling.odometer, newOdometer: fuelingData.odometer }
     );
   }
 
   //validate date is not in the future
   if (fuelingData.date !== undefined && fuelingData.date > new Date()) {
-    throw new AppError("Date cannot be in the future", 400, "INVALID_DATE");
+    throw new AppError("Date cannot be in the future", 400, "INVALID_DATE", {
+      date: fuelingData.date,
+    });
   }
-
-  console.log("Existing fueling data: ", fueling);
-  console.log("New fueling data: ", fuelingData);
-
-  
+  //validate date is not before 1886
+  if (
+    fuelingData.date !== undefined &&
+    fuelingData.date < new Date("1886-01-01")
+  ) {
+    throw new AppError(
+      "Date must be after January 1, 1886",
+      400,
+      "INVALID_DATE",
+      { date: fuelingData.date }
+    );
+  }
   // Recalculate total fuel cost if liters or unit price are updated
   if (fuelingData.liters !== undefined || fuelingData.unitPrice !== undefined) {
     fuelingData.totalValue =

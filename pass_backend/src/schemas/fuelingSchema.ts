@@ -7,7 +7,7 @@ const createFuelingSchema = z.object({
   fuelType: z.enum(["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]),
   liters: z.number().min(0, "Liters must be non-negative"),
   unitPrice: z.number().min(0, "Unit price must be non-negative"),
-  totalValue: z.number().min(0, "Total must be non-negative"),
+  totalValue: z.number().min(0, "Total must be non-negative").optional(),
   notes: z.string().optional(),
 });
 
