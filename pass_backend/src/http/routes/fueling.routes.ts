@@ -12,9 +12,4 @@ export const fuelingRoutes = async (app: FastifyInstance) => {
     "/:id",
     controllerFueling.updateFueling
   );
-  // create a fueling
-  // app.post<{ Body: CreateFuelingInput; Params: VehicleIdParam }>(
-  //   "/fuelings",
-  //   controllerFueling.createFueling
-  // );
 };

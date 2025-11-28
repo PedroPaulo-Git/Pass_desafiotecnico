@@ -11,6 +11,7 @@ import {
   UpdateFuelingInput,
   createFuelingSchema,
   FuelingIdParam,
+  updateFuelingSchema,
 } from "@/schemas/fuelingSchema";
 import { VehicleIdParam } from "@/schemas/vehicleSchema";
 export class FuelingController {
@@ -44,7 +45,8 @@ export class FuelingController {
     reply: FastifyReply
   ) {
     const fuelingId = request.params;
-    const fuelingData = request.body;
+    const fuelingData = updateFuelingSchema.parse(request.body);
+    
     const result = await updateFuelingService(fuelingId, fuelingData);
     return reply.status(200).send(result);
   }
