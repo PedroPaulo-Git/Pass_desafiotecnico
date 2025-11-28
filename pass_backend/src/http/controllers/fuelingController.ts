@@ -1,11 +1,17 @@
 import {
-  createFuelingService,
   listFuelingById,
   listFuelingService,
   listFuelingServiceByVehicleId,
+  createFuelingService,
+  updateFuelingService,
 } from "@/services/fuelingServices";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateFuelingInput, createFuelingSchema, FuelingIdParam } from "@/schemas/fuelingSchema";
+import {
+  CreateFuelingInput,
+  UpdateFuelingInput,
+  createFuelingSchema,
+  FuelingIdParam,
+} from "@/schemas/fuelingSchema";
 import { VehicleIdParam } from "@/schemas/vehicleSchema";
 export class FuelingController {
   async listFuelings(_request: FastifyRequest, reply: FastifyReply) {
@@ -17,6 +23,7 @@ export class FuelingController {
     reply: FastifyReply
   ) {
     const fuelingId = request.params;
+
     const result = await listFuelingById(fuelingId.id);
     return reply.status(200).send(result);
   }
@@ -27,6 +34,19 @@ export class FuelingController {
     const result = await listFuelingServiceByVehicleId(request.params.id);
     return reply.status(200).send(result);
     // Logic to list fuelings by vehicle ID
+  }
+
+  async updateFueling(
+    request: FastifyRequest<{
+      Body: UpdateFuelingInput;
+      Params: FuelingIdParam;
+    }>,
+    reply: FastifyReply
+  ) {
+    const fuelingId = request.params;
+    const fuelingData = request.body;
+    const result = await updateFuelingService(fuelingId, fuelingData);
+    return reply.status(200).send(result);
   }
   //create fueling
   async createFueling(

@@ -36,6 +36,7 @@ const fuelingIdParamSchema = z.object({
 });
 
 export type CreateFuelingInput = z.infer<typeof createFuelingSchema>;
+export type UpdateFuelingInput = z.infer<typeof updateFuelingSchema>;
 export type FuelingIdParam = z.infer<typeof fuelingIdParamSchema>;
 
 export {

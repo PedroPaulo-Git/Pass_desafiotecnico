@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { FuelingController } from "../controllers/fuelingController";
+import { FuelingIdParam, UpdateFuelingInput } from "@/schemas/fuelingSchema";
 const controllerFueling = new FuelingController();
 
 export const fuelingRoutes = async (app: FastifyInstance) => {
@@ -7,7 +8,10 @@ export const fuelingRoutes = async (app: FastifyInstance) => {
 
   app.get("/:id", controllerFueling.listFuelingById);
 
-  
+  app.put<{ Body: UpdateFuelingInput; Params: FuelingIdParam }>(
+    "/:id",
+    controllerFueling.updateFueling
+  );
   // create a fueling
   // app.post<{ Body: CreateFuelingInput; Params: VehicleIdParam }>(
   //   "/fuelings",
