@@ -4,6 +4,7 @@ import {
   listFuelingServiceByVehicleId,
   createFuelingService,
   updateFuelingService,
+  deleteFuelingService,
 } from "@/services/fuelingServices";
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
@@ -123,5 +124,16 @@ export class FuelingController {
 
     const result = await createFuelingService(vehicleId, fuelingData);
     return reply.status(201).send(result);
+  }
+
+  //delete fueling
+  async deleteFueling(
+    request: FastifyRequest<{ Params: FuelingIdParam }>,
+    reply: FastifyReply
+  ) {
+    const fuelingId = request.params;
+
+    const result = await deleteFuelingService(fuelingId.id);
+    return reply.status(200).send(result);
   }
 }

@@ -12,4 +12,6 @@ export const fuelingRoutes = async (app: FastifyInstance) => {
     "/:id",
     controllerFueling.updateFueling
   );
+
+  app.delete<{ Params: FuelingIdParam }>("/:id", controllerFueling.deleteFueling);
 };
