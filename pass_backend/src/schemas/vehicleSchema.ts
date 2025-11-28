@@ -2,8 +2,16 @@ import { z } from "zod";
 
 const createVehicleSchema = z.object({
   internalId: z.string().min(1, "Internal ID").optional(),
-  plate: z.string().min(7, "Plate is required"),
-  chassis: z.string().length(17, "Chassi must be exactly 17 characters").optional(),
+  plate: z
+    .string()
+    .transform((val) => val.replace(/-/g, "").toUpperCase())
+    .refine((v) => v.length === 7, {
+      message: "Plate must be exactly 7 characters, (Ex: ABC1C23).",
+    }),
+  chassis: z
+    .string()
+    .length(17, "Chassi must be exactly 17 characters")
+    .optional(),
   renavam: z
     .string()
     .length(11, "RENAVAM must be exactly 11 characters")
@@ -21,7 +29,9 @@ const createVehicleSchema = z.object({
   classification: z.enum(["PREMIUM", "BASIC", "EXECUTIVO"]),
 
   state: z.string().length(2, "State must be exactly 2 characters").optional(),
-  status: z.enum(["LIBERADO", "EM_MANUTENCAO", "VENDIDO", "INDISPONIVEL"]).optional(),
+  status: z
+    .enum(["LIBERADO", "EM_MANUTENCAO", "VENDIDO", "INDISPONIVEL"])
+    .optional(),
   currentKm: z.number().min(0, "Current KM must be non-negative").optional(),
 
   companyName: z.string().min(1, "Company Name").optional(),
@@ -30,7 +40,12 @@ const createVehicleSchema = z.object({
 
 const updateVehicleSchema = createVehicleSchema.partial();
 
-export type CreateVehicleInput = z.infer<typeof createVehicleSchema>
-export type UpdateVehicleInput = z.infer<typeof updateVehicleSchema>
+const vehicleIdParamSchema = z.object({
+  id: z.string().uuid({ message: "O ID do veículo deve ser um UUID válido." }),
+});
 
-export { createVehicleSchema, updateVehicleSchema };
+export type CreateVehicleInput = z.infer<typeof createVehicleSchema>;
+export type UpdateVehicleInput = z.infer<typeof updateVehicleSchema>;
+export type VehicleIdParam = z.infer<typeof vehicleIdParamSchema>;
+
+export { createVehicleSchema, updateVehicleSchema, vehicleIdParamSchema };

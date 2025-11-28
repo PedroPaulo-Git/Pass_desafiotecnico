@@ -1,8 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { VehicleType, VehicleParams } from "@/type/vehicleType";
 
 import { VehicleController } from "@/http/controllers/vehicleController";
-import { CreateVehicleInput,UpdateVehicleInput } from "@/schemas/vehicleSchema";
+import {
+  CreateVehicleInput,
+  UpdateVehicleInput,
+  VehicleIdParam,
+} from "@/schemas/vehicleSchema";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
   const controller = new VehicleController();
@@ -13,16 +16,13 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
   app.get("/:id", controller.listVehicleById);
 
   //create vehicle
-  app.post<{ Body: CreateVehicleInput; Params: VehicleParams }>(
-    "/",
-    controller.createVehicle
-  );
+  app.post<{ Body: CreateVehicleInput }>("/", controller.createVehicle);
 
   //update vehicle
-  app.put<{ Body: UpdateVehicleInput; Params: VehicleParams }>(
+  app.put<{ Body: UpdateVehicleInput; Params: VehicleIdParam }>(
     "/:id",
     controller.updateVehicle
   );
   //delete vehicle
-  app.delete("/:id", controller.deleteVehicle);
+  app.delete<{ Params: VehicleIdParam }>("/:id", controller.deleteVehicle);
 };

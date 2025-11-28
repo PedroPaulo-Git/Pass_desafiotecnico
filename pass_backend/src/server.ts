@@ -1,78 +1,83 @@
-import fastify from 'fastify'
-import 'dotenv/config';
-import cors from '@fastify/cors'
+import fastify from "fastify";
+import "dotenv/config";
+import cors from "@fastify/cors";
 import {
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
-} from 'fastify-type-provider-zod'
-import { ZodError } from 'zod'
-import { AppError } from './utils/AppError'
+} from "fastify-type-provider-zod";
+import { ZodError } from "zod";
+import { AppError } from "./utils/AppError";
 
-import { vehicleRoutes } from './http/routes/vehicle.routes'
+import { vehicleRoutes } from "./http/routes/vehicle.routes";
 
-const app = fastify().withTypeProvider<ZodTypeProvider>()
+const app = fastify().withTypeProvider<ZodTypeProvider>();
 
 // Configuração do CORS
 app.register(cors, {
   origin: true, // Em produção, especifique os domínios permitidos
-})
+});
 
 // Configuração dos validadores e serializadores Zod
-app.setValidatorCompiler(validatorCompiler)
-app.setSerializerCompiler(serializerCompiler)
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
 
 // Error Handler Global
-app.setErrorHandler((error, request, reply) => {
+app.setErrorHandler((error, _request, reply) => {
   // Erros de validação do Zod
-  console.log(request);
   if (error instanceof ZodError) {
     return reply.status(400).send({
-      message: 'Erro de validação',
-      errors: error.flatten().fieldErrors,
-    })
+      error: "Validation error",
+      code: "VALIDATION_ERROR",
+      status: 400,
+      details: error.flatten().fieldErrors,
+    });
   }
 
-  // Erros customizados da aplicação
+  //Custom application errors
   if (error instanceof AppError) {
     return reply.status(error.statusCode).send({
-      message: error.message,
-    })
+      error: error.message,
+      code: error.code,
+      status: error.statusCode,
+      details: error.details,
+    });
   }
 
   // Log de erros não tratados (em produção, enviar para serviço de monitoramento)
-  if (process.env.NODE_ENV !== 'production') {
-    console.error(error)
+  if (process.env.NODE_ENV !== "production") {
+    console.error(error);
   }
 
   // Erro genérico
   return reply.status(500).send({
-    message: 'Erro interno do servidor',
-  })
-})
+    error: "Internal server error",
+    code: "INTERNAL_SERVER_ERROR",
+    status: 500,
+  });
+});
 
 // Health check endpoint
-app.get('/health', async () => {
-  return { status: 'ok', timestamp: new Date().toISOString() }
-})
+app.get("/health", async () => {
+  return { status: "ok", timestamp: new Date().toISOString() };
+});
 
 // Registrar rotas aqui quando forem criadas
-app.register(vehicleRoutes, { prefix: '/vehicles' })
+app.register(vehicleRoutes, { prefix: "/vehicles" });
 
 // Iniciar servidor
 const start = async () => {
   try {
-    const port = Number(process.env.PORT) || 3333
-    const host = '0.0.0.0'
+    const port = Number(process.env.PORT) || 3333;
+    const host = "0.0.0.0";
 
-    await app.listen({ port, host })
-    console.log(`🚀 Servidor rodando em http://localhost:${port}`)
-     console.log('DB URL:', process.env.DATABASE_URL);
-
+    await app.listen({ port, host });
+    console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+    console.log("DB URL:", process.env.DATABASE_URL);
   } catch (err) {
-    app.log.error(err)
-    process.exit(1)
+    app.log.error(err);
+    process.exit(1);
   }
-}
+};
 
-start()
+start();

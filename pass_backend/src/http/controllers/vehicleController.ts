@@ -5,9 +5,8 @@ import {
   updateVehicleService,
   deleteVehicleService,
 } from "@/services/vehicleServices";
-import { VehicleParams } from "@/type/vehicleType";
 import { FastifyReply, FastifyRequest } from "fastify";
-
+import { ZodError } from "zod";
 import {
   createVehicleSchema,
   updateVehicleSchema,
@@ -15,52 +14,64 @@ import {
 import {
   CreateVehicleInput,
   UpdateVehicleInput,
+  VehicleIdParam,
 } from "@/schemas/vehicleSchema";
 
-import { ZodError } from "zod";
 import { vehicleSchemaQuery } from "@/schemas/vehicleListQuerySchema";
+import { AppError } from "@/utils/AppError";
 
 export class VehicleController {
   //list all vehicles
   async listVehicles(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const queryValidated = vehicleSchemaQuery.parse(request.query);
-      
-      const page = queryValidated.page;
-      const limit = queryValidated.limit;
-      const where: any = {};
-      if (queryValidated.status) where.status = queryValidated.status;
-      if (queryValidated.category) where.category = queryValidated.category;
-      if (queryValidated.classification) where.classification = queryValidated.classification;
-      if (queryValidated.plate) where.plate = queryValidated.plate;
-      if (queryValidated.brand) where.brand = queryValidated.brand;
-      if (queryValidated.state) where.state = queryValidated.state;
+    const queryValidated = vehicleSchemaQuery.parse(request.query);
 
-      const result = await listVehicleService({ page, limit, where });
-      return reply.status(200).send(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const formattedErrors = error.flatten().fieldErrors;
-        return reply
-          .status(400)
-          .send({ error: "Validation error", details: formattedErrors });
-      }
-      const message = error instanceof Error ? error.message : "Erro ao listar veículos";
-      return reply.status(500).send({ error: message });
-    }
+    const page = queryValidated.page;
+    const limit = queryValidated.limit;
+    const where: any = {};
+    if (queryValidated.status) where.status = queryValidated.status;
+    if (queryValidated.category) where.category = queryValidated.category;
+    if (queryValidated.classification)
+      where.classification = queryValidated.classification;
+    if (queryValidated.plate) where.plate = queryValidated.plate;
+    if (queryValidated.brand) where.brand = queryValidated.brand;
+    if (queryValidated.state) where.state = queryValidated.state;
+
+    const result = await listVehicleService({ page, limit, where });
+
+    return reply.status(200).send(result);
   }
 
   //list vehicle by id
   async listVehicleById(
-    request: FastifyRequest<{ Params: VehicleParams }>,
+    request: FastifyRequest<{ Params: VehicleIdParam }>,
     reply: FastifyReply
   ) {
-    const vehicleId = request?.params.id;
-    const vehicle = await listVehicleByIdService(vehicleId);
-    if (!vehicle) {
-      return reply.status(404).send({ error: "Vehicle not found" });
+    try {
+      const vehicleId = request?.params.id;
+      const vehicle = await listVehicleByIdService(vehicleId);
+
+      return reply.status(200).send(vehicle);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.flatten();
+        return reply.status(400).send({
+          message: "Validation error",
+          details: errors.fieldErrors,
+        });
+      }
+
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          error: error.message,
+          code: error.code,
+          status: error.statusCode,
+          details: error.details,
+        });
+      }
+      const message =
+        error instanceof Error ? error.message : "Error fetching vehicle";
+      reply.status(400).send({ error: message });
     }
-    return reply.status(200).send(vehicle);
   }
 
   //create vehicle
@@ -74,13 +85,22 @@ export class VehicleController {
       reply.status(201).send(vehicles);
     } catch (error) {
       if (error instanceof ZodError) {
-        const formattedErrors = error.flatten().fieldErrors;
+        const errors = error.flatten();
         return reply
           .status(400)
-          .send({ error: "Validation error", details: formattedErrors });
+          .send({ message: "Validation error", details: errors.fieldErrors });
+      }
+
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          error: error.message,
+          code: error.code,
+          status: error.statusCode,
+          details: error.details,
+        });
       }
       const message =
-        error instanceof Error ? error.message : "Erro ao criar veículo";
+        error instanceof Error ? error.message : "Error creating vehicle";
       reply.status(400).send({ error: message });
     }
   }
@@ -89,7 +109,7 @@ export class VehicleController {
   async updateVehicle(
     request: FastifyRequest<{
       Body: UpdateVehicleInput;
-      Params: VehicleParams;
+      Params: VehicleIdParam;
     }>,
     reply: FastifyReply
   ) {
@@ -99,33 +119,60 @@ export class VehicleController {
     try {
       const validateVehicle = updateVehicleSchema.parse(request.body);
       const vehicleId = request.params.id;
-      const previousVehicleData = await listVehicleByIdService(vehicleId);
-
-      if (!previousVehicleData) {
-        return reply.status(404).send({ error: "Vehicle not found" });
-      }
       const data = await updateVehicleService(validateVehicle, vehicleId);
       reply.status(200).send(data);
     } catch (error) {
       if (error instanceof ZodError) {
-        const formattedErrors = error.flatten().fieldErrors;
-        return reply
-          .status(400)
-          .send({ error: "Validation error", details: formattedErrors });
+        const errors = error.flatten();
+        return reply.status(400).send({
+          message: "Validation error",
+          details: errors.fieldErrors,
+        });
+      }
+
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          error: error.message,
+          code: error.code,
+          status: error.statusCode,
+          details: error.details,
+        });
       }
       const message =
-        error instanceof Error ? error.message : "Erro ao atualizar veículo";
+        error instanceof Error ? error.message : "Error updating vehicle";
       reply.status(400).send({ error: message });
     }
   }
 
   //delete vehicle
   async deleteVehicle(
-    request: FastifyRequest<{ Params: VehicleParams }>,
+    request: FastifyRequest<{ Params: VehicleIdParam }>,
     reply: FastifyReply
   ) {
-    const vehicleId = request.params.id;
-    await deleteVehicleService(vehicleId);
-    return reply.status(204).send();
+    try {
+      const vehicleId = request.params.id;
+      await deleteVehicleService(vehicleId);
+      return reply.status(204).send();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.flatten();
+        return reply.status(400).send({
+          message: "Validation error",
+          details: errors.fieldErrors,
+        });
+      }
+
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          error: error.message,
+          code: error.code,
+          status: error.statusCode,
+          details: error.details,
+        });
+      }
+      const message =
+        error instanceof Error ? error.message : "Error deleting vehicle";
+      reply.status(400).send({ error: message });
+    }
   }
 }

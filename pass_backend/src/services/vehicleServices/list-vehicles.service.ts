@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { Prisma } from "@prisma/client";
+import { AppError } from "@/utils/AppError";
 
 interface ListVehicleParams {
   page: number;
@@ -28,19 +29,29 @@ export const listVehicleService = async ({
 
   const totalPages = Math.ceil(total / limit);
 
-  return {
+  const result = {
     items,
     page,
     limit,
     total,
     totalPages,
   };
+  return result;
 };
 
-export const listVehicleByIdService = async (VehicleId: string) => {
-  return await prisma.vehicle.findUnique({
+export const listVehicleByIdService = async (vehicleId: string) => {
+  if (!vehicleId || vehicleId === undefined || vehicleId === null) {
+    throw new AppError("Vehicle ID is required", 400, "VEHICLE_ID_REQUIRED");
+  }
+  const vehicle = await prisma.vehicle.findUnique({
     where: {
-      id: VehicleId,
+      id: vehicleId,
     },
   });
+  if (!vehicle) {
+    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", {
+      id: vehicleId,
+    });
+  }
+  return vehicle;
 };
