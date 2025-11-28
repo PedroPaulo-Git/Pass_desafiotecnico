@@ -6,12 +6,14 @@ interface ListVehicleParams {
   page: number;
   limit: number;
   where: Prisma.VehicleWhereInput;
+  orderBy?: Prisma.VehicleOrderByWithRelationInput;
 }
 
 export const listVehicleService = async ({
   page,
   limit,
   where,
+  orderBy,
 }: ListVehicleParams) => {
   const skip = (page - 1) * limit;
 
@@ -21,9 +23,7 @@ export const listVehicleService = async ({
       where,
       skip,
       take: limit,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: orderBy ?? { createdAt: "desc" },
     }),
   ]);
 

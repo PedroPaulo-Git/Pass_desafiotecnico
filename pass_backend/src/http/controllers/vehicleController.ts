@@ -17,6 +17,7 @@ import {
 } from "@/schemas/vehicleSchema";
 
 import { vehicleSchemaQuery } from "@/schemas/vehicleSchema";
+import { Prisma } from "@prisma/client";
 
 export class VehicleController {
   //list all vehicles
@@ -25,7 +26,7 @@ export class VehicleController {
 
     const page = queryValidated.page;
     const limit = queryValidated.limit;
-    const where: any = {};
+    const where: Prisma.VehicleWhereInput = {};
     if (queryValidated.status) where.status = queryValidated.status;
     if (queryValidated.category) where.category = queryValidated.category;
     if (queryValidated.classification)
