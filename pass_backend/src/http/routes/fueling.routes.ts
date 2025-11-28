@@ -5,6 +5,8 @@ const controllerFueling = new FuelingController();
 export const fuelingRoutes = async (app: FastifyInstance) => {
   app.get("/", controllerFueling.listFuelings);
 
+  app.get("/:id", controllerFueling.listFuelingById);
+
   
   // create a fueling
   // app.post<{ Body: CreateFuelingInput; Params: VehicleIdParam }>(

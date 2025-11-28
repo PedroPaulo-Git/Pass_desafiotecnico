@@ -6,6 +6,20 @@ export const listFuelingService = async () => {
   return result;
 };
 
+export const listFuelingById = async (fuelingId: string) => {
+  const fueling = await prisma.fueling.findUnique({
+    where: {
+      id: fuelingId,
+    },
+  });
+  if (!fueling) {
+    throw new AppError("Fueling not found", 404, "FUELING_NOT_FOUND", {
+      fuelingId,
+    });
+  }
+  return fueling;
+};
+
 export const listFuelingServiceByVehicleId = async (vehicleId: string) => {
   const result = await prisma.fueling.findMany({
     where: {

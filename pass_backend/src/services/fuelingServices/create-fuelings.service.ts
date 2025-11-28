@@ -7,13 +7,7 @@ export const createFuelingService = async (
   vehicleId: VehicleIdParam,
   fuelingData: CreateFuelingInput
 ) => {
-  if (fuelingData.provider === null || fuelingData.provider === undefined) {
-    throw new AppError(
-      "Provider is required",
-      400,
-      "FUELING_PROVIDER_REQUIRED"
-    );
-  }
+ 
   const vehicle = await prisma.vehicle.findUnique({
     where: {
       id: vehicleId.id,
@@ -21,7 +15,7 @@ export const createFuelingService = async (
   });
 
   if (!vehicle) {
-    throw new Error("Vehicle not found");
+    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", {});
   }
 
   console.log("vehicle : ", vehicle);

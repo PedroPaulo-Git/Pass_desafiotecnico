@@ -45,4 +45,6 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
 
   // get a fueling for a vehicle
   app.get("/:id/fuelings", controllerFueling.listFuelingByVehicleId);
+
+  
 };
