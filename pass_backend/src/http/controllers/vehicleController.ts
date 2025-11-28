@@ -6,7 +6,6 @@ import {
   deleteVehicleService,
 } from "@/services/vehicleServices";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ZodError } from "zod";
 import {
   createVehicleSchema,
   updateVehicleSchema,
@@ -18,7 +17,6 @@ import {
 } from "@/schemas/vehicleSchema";
 
 import { vehicleSchemaQuery } from "@/schemas/vehicleListQuerySchema";
-import { AppError } from "@/utils/AppError";
 
 export class VehicleController {
   //list all vehicles
@@ -46,32 +44,10 @@ export class VehicleController {
     request: FastifyRequest<{ Params: VehicleIdParam }>,
     reply: FastifyReply
   ) {
-    try {
-      const vehicleId = request?.params.id;
-      const vehicle = await listVehicleByIdService(vehicleId);
+    const vehicleId = request?.params.id;
+    const vehicle = await listVehicleByIdService(vehicleId);
 
-      return reply.status(200).send(vehicle);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const errors = error.flatten();
-        return reply.status(400).send({
-          message: "Validation error",
-          details: errors.fieldErrors,
-        });
-      }
-
-      if (error instanceof AppError) {
-        return reply.status(error.statusCode).send({
-          error: error.message,
-          code: error.code,
-          status: error.statusCode,
-          details: error.details,
-        });
-      }
-      const message =
-        error instanceof Error ? error.message : "Error fetching vehicle";
-      reply.status(400).send({ error: message });
-    }
+    return reply.status(200).send(vehicle);
   }
 
   //create vehicle
@@ -79,30 +55,9 @@ export class VehicleController {
     request: FastifyRequest<{ Body: CreateVehicleInput }>,
     reply: FastifyReply
   ) {
-    try {
-      const validateVehicle = createVehicleSchema.parse(request.body);
-      const vehicles = await createVehicleService(validateVehicle);
-      reply.status(201).send(vehicles);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const errors = error.flatten();
-        return reply
-          .status(400)
-          .send({ message: "Validation error", details: errors.fieldErrors });
-      }
-
-      if (error instanceof AppError) {
-        return reply.status(error.statusCode).send({
-          error: error.message,
-          code: error.code,
-          status: error.statusCode,
-          details: error.details,
-        });
-      }
-      const message =
-        error instanceof Error ? error.message : "Error creating vehicle";
-      reply.status(400).send({ error: message });
-    }
+    const validateVehicle = createVehicleSchema.parse(request.body);
+    const vehicles = await createVehicleService(validateVehicle);
+    reply.status(201).send(vehicles);
   }
 
   //update vehicle
@@ -116,32 +71,11 @@ export class VehicleController {
     if (!request.params?.id) {
       return reply.status(400).send({ error: "Vehicle ID is required" });
     }
-    try {
-      const validateVehicle = updateVehicleSchema.parse(request.body);
-      const vehicleId = request.params.id;
-      const data = await updateVehicleService(validateVehicle, vehicleId);
-      reply.status(200).send(data);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const errors = error.flatten();
-        return reply.status(400).send({
-          message: "Validation error",
-          details: errors.fieldErrors,
-        });
-      }
 
-      if (error instanceof AppError) {
-        return reply.status(error.statusCode).send({
-          error: error.message,
-          code: error.code,
-          status: error.statusCode,
-          details: error.details,
-        });
-      }
-      const message =
-        error instanceof Error ? error.message : "Error updating vehicle";
-      reply.status(400).send({ error: message });
-    }
+    const validateVehicle = updateVehicleSchema.parse(request.body);
+    const vehicleId = request.params.id;
+    const data = await updateVehicleService(validateVehicle, vehicleId);
+    reply.status(200).send(data);
   }
 
   //delete vehicle
@@ -149,30 +83,8 @@ export class VehicleController {
     request: FastifyRequest<{ Params: VehicleIdParam }>,
     reply: FastifyReply
   ) {
-    try {
-      const vehicleId = request.params.id;
-      await deleteVehicleService(vehicleId);
-      return reply.status(204).send();
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const errors = error.flatten();
-        return reply.status(400).send({
-          message: "Validation error",
-          details: errors.fieldErrors,
-        });
-      }
-
-      if (error instanceof AppError) {
-        return reply.status(error.statusCode).send({
-          error: error.message,
-          code: error.code,
-          status: error.statusCode,
-          details: error.details,
-        });
-      }
-      const message =
-        error instanceof Error ? error.message : "Error deleting vehicle";
-      reply.status(400).send({ error: message });
-    }
+    const vehicleId = request.params.id;
+    await deleteVehicleService(vehicleId);
+    return reply.status(204).send();
   }
 }
