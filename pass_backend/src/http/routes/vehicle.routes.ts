@@ -1,14 +1,20 @@
 import { FastifyInstance } from "fastify";
 
 import { VehicleController } from "@/http/controllers/vehicleController";
+import { FuelingController } from "../controllers/fuelingController";
+
 import {
   CreateVehicleInput,
   UpdateVehicleInput,
   VehicleIdParam,
 } from "@/schemas/vehicleSchema";
+import { CreateFuelingInput } from "@/schemas/fuelingSchema";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
   const controller = new VehicleController();
+  const controllerFueling = new FuelingController();
+
+
   // get all vehicles
   app.get("/", controller.listVehicles);
 
@@ -25,4 +31,18 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
   );
   //delete vehicle
   app.delete<{ Params: VehicleIdParam }>("/:id", controller.deleteVehicle);
+
+
+
+
+  // Fueling routes related to vehicles
+
+  // create a fueling for a vehicle
+  app.post<{ Body: CreateFuelingInput; Params: VehicleIdParam }>(
+    "/:id/fuelings",
+    controllerFueling.createFueling
+  );
+
+  // get a fueling for a vehicle
+  app.get("/:id/fuelings", controllerFueling.listFuelingByVehicleId);
 };

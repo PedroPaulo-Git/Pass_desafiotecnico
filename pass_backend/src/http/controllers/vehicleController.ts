@@ -16,7 +16,7 @@ import {
   VehicleIdParam,
 } from "@/schemas/vehicleSchema";
 
-import { vehicleSchemaQuery } from "@/schemas/vehicleListQuerySchema";
+import { vehicleSchemaQuery } from "@/schemas/vehicleSchema";
 
 export class VehicleController {
   //list all vehicles

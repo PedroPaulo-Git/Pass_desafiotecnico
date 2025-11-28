@@ -106,6 +106,7 @@ model Fueling {
   fuelType      FuelType
   liters        Float
   totalValue    Float    // Valor Total
+  unitPrice     Float    // Preço Unitário
   odometer      Int      // Km no momento do abastecimento
   
   receiptUrl    String?  // Foto do comprovante

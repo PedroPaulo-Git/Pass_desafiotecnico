@@ -5,9 +5,9 @@ import { CreateVehicleInput } from "@/schemas/vehicleSchema";
 export const createVehicleService = async (vehicleData: CreateVehicleInput) => {
   const uniqueConstraints = [
     { plate: vehicleData.plate },
-    { chassis: vehicleData.chassis }, // Assumindo que você tenha esse campo
+    { chassis: vehicleData.chassis }, 
     { renavam: vehicleData.renavam },
-    { internalId: vehicleData.internalId }, // Assumindo que você tenha esse campo
+    { internalId: vehicleData.internalId },
   ];
   const conflitsValues = await prisma.vehicle.findFirst({
     where: {
