@@ -5,12 +5,15 @@ import {
   createIncidentSchema,
   IncidentIdParam,
   incidentSchemaQuery,
+  UpdateIncidentInput,
+  updateIncidentSchema,
 } from "@/schemas/incidentSchema";
 import {
   listIncidentService,
   listIncidentServiceByVehicleId,
-  createIncidentService,
   listIncidentById,
+  createIncidentService,
+  updateIncidentService,
 } from "@/services/incidentService";
 import { VehicleIdParam } from "@/schemas/vehicleSchema";
 
@@ -74,6 +77,18 @@ export class IncidentController {
     const result = await createIncidentService(vehicleId, validateIncident);
     console.log(result);
     reply.status(201).send(result);
-    // Implementation for creating an incident
+  }
+
+  async updateIncident(
+    request: FastifyRequest<{
+      Body: UpdateIncidentInput;
+      Params: IncidentIdParam;
+    }>,
+    reply: FastifyReply
+  ) {
+    const incidentId = request.params;
+    const validateIncident = updateIncidentSchema.parse(request.body);
+    const result = await updateIncidentService(incidentId, validateIncident);
+    reply.status(200).send(result);
   }
 }
