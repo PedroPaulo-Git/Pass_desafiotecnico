@@ -16,19 +16,65 @@ Controller → Service → Prisma
 
 ## Current Structure
 ```
-src/
-├── http/
-│   ├── controllers/   # vehicleController, fuelingController
-│   └── routes/        # vehicle.routes, fueling.routes
-├── schemas/           # Zod schemas (create, update, query)
-│   ├── fuelingSchema/   # CRUD operations
-│   └── vehicleSchema/   # CRUD operations
-├── services/
-│   ├── vehicleServices/   # CRUD operations
-│   └── fuelingServices/   # CRUD operations
-├── utils/
-│   └── AppError.ts    # Custom error class (message, statusCode, code, details)
-└── server.ts          # Global error handler, CORS, route registration
+.
+├── .env.example
+├── .gitignore
+├── .npmrc
+├── CONTEXT.md
+├── Explain.md
+├── package.json
+├── package-lock.json
+├── prisma.config.ts
+├── README.md
+├── tsconfig.json
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+│       ├── migration_lock.toml
+│       ├── 20251126074339_init/
+│       │   └── migration.sql
+│       └── 20251128120219_add_unit_price_to_fueling/
+│           └── migration.sql
+└── src/
+  ├── server.ts          # Global error handler, CORS, route registration
+  ├── http/
+  │   ├── controllers/
+  │   │   ├── vehicleController.ts
+  │   │   ├── fuelingController.ts
+  │   │   └── incidentController.ts
+  │   └── routes/
+  │       ├── vehicle.routes.ts
+  │       ├── fueling.routes.ts
+  │       └── incident.routes.ts
+  ├── lib/
+  │   └── prisma.ts
+  ├── schemas/           # Zod schemas (create, update, query)
+  │   ├── vehicleSchema.ts
+  │   ├── fuelingSchema.ts
+  │   └── incidentSchema.ts
+  ├── services/
+  │   ├── vehicleServices/
+  │   │   ├── create-vehicles.service.ts
+  │   │   ├── delete-vehicles.service.ts
+  │   │   ├── list-vehicles.service.ts
+  │   │   └── update-vehicles.service.ts
+  │   ├── fuelingServices/
+  │   │   ├── create-fuelings.service.ts
+  │   │   ├── delete-fuelings.service.ts
+  │   │   ├── list-fuelings.service.ts
+  │   │   └── update-fuelings.service.ts
+  │   ├── incidentServices/
+  │   │   ├── create-incidents.service.ts
+  │   │   ├── delete-incidents.service.ts
+  │   │   ├── list-incidents.service.ts
+  │   │   └── update-incidents.service.ts
+  │   ├── vehicleServices.ts
+  │   ├── fuelingServices.ts
+  │   ├── incidentService.ts
+  ├── type/
+  │   └── vehicleType.ts
+  └── utils/
+    └── AppError.ts
 ```
 
 ## Implemented Patterns
@@ -73,9 +119,15 @@ src/
   - TotalValue always calculated (liters × unitPrice)
   - Transaction: creates fueling + updates vehicle.currentKm atomically
 
-### ❌ Incident (Not Started)
-- Schema: title, classification, severity (enum), date, description, attachmentUrl
-- Rules: date not future, severity validation
+### ✅ Incident (Complete)
+- **CRUD:** create, read (by id), list (paginated + filtered), update, delete
+- **Validations:** Zod schemas for create/update/query
+- **Filters:** severity, classification, date range, vehicleId
+- **Business Rules:**
+  - Date cannot be future
+  - Date must be after 1886
+  - Severity must be a valid enum value (BAIXA, MEDIA, ALTA, GRAVE)
+  - VehicleId must reference an existing vehicle
 
 ### ❌ VehicleDocument (Not Started)
 - Schema: name, expiryDate, alertDays, activeAlert
@@ -90,12 +142,12 @@ src/
 ## Checklist - Next Steps
 
 ### Incident Module
-- [ ] Create `incidentSchema.ts` (create, update, query, idParam)
-- [ ] Create `incidentServices/` (create, list, listById, update, delete)
-- [ ] Create `incidentController.ts`
-- [ ] Create `incident.routes.ts`
-- [ ] Validations: date not future, severity enum
-- [ ] Add pagination + filters (severity, date range, classification)
+- [x] Create `incidentSchema.ts` (create, update, query, idParam)
+- [x] Create `incidentServices/` (create, list, listById, update, delete)
+- [x] Create `incidentController.ts`
+- [x] Create `incident.routes.ts`
+- [x] Validations: date not future, severity enum
+- [x] Add pagination + filters (severity, date range, classification)
 
 ### VehicleDocument Module
 - [ ] Create `vehicleDocumentSchema.ts`
