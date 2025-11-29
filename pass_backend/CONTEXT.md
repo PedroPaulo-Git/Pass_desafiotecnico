@@ -46,12 +46,14 @@ Controller → Service → Prisma
   │       ├── vehicle.routes.ts
   │       ├── fueling.routes.ts
   │       └── incident.routes.ts
+  │       └── vehicleDocument.routes.ts
   ├── lib/
   │   └── prisma.ts
   ├── schemas/           # Zod schemas (create, update, query)
   │   ├── vehicleSchema.ts
   │   ├── fuelingSchema.ts
   │   └── incidentSchema.ts
+  │   └── vehicleDocumentSchema.ts
   ├── services/
   │   ├── vehicleServices/
   │   │   ├── create-vehicles.service.ts
@@ -68,6 +70,12 @@ Controller → Service → Prisma
   │   │   ├── delete-incidents.service.ts
   │   │   ├── list-incidents.service.ts
   │   │   └── update-incidents.service.ts
+  │   ├── vehicleDocumentServices/
+  │   │   ├── create-documents.service.ts
+  │   │   ├── delete-documents.service.ts
+  │   │   ├── list-documents.service.ts
+  │   │   └── update-documents.service.ts
+  │   ├── vehicleDocumentServices.ts
   │   ├── vehicleServices.ts
   │   ├── fuelingServices.ts
   │   ├── incidentService.ts
@@ -133,6 +141,14 @@ Controller → Service → Prisma
 - Schema: name, expiryDate, alertDays, activeAlert
 - Rules: alert logic based on days before expiry
 
+### ✅ VehicleDocument (Complete)
+- **CRUD:** create, read (by id), list (paginated + filtered), update, delete
+- **Validations:** Zod schemas for create/update/query (expiryDate future, alertDays >= 0, activeAlert)
+- **Filters:** name, vehicleId, expiryDate range, activeAlert, expiringWithinDays
+- **Business Rules:**
+  - Expiry date cannot be in the past
+  - Alert logic: expiringWithinDays combines future window + activeAlert=true
+
 ### ❌ VehicleImage (Not Started)
 - Schema: url, vehicleId
 - Rules: metadata only (no file storage yet)
@@ -150,11 +166,11 @@ Controller → Service → Prisma
 - [x] Add pagination + filters (severity, date range, classification)
 
 ### VehicleDocument Module
-- [ ] Create `vehicleDocumentSchema.ts`
-- [ ] Create `vehicleDocumentServices/`
-- [ ] Create `vehicleDocumentController.ts`
-- [ ] Create `vehicleDocument.routes.ts`
-- [ ] Alert logic: filter docs expiring within alertDays
+- [x] Create `vehicleDocumentSchema.ts`
+- [x] Create `vehicleDocumentServices/`
+- [x] Create `vehicleDocumentController.ts`
+- [x] Create `vehicleDocument.routes.ts`
+- [x] Alert logic: filter docs expiring within alertDays / expiringWithinDays
 
 ### VehicleImage Module
 - [ ] Create `vehicleImageSchema.ts`

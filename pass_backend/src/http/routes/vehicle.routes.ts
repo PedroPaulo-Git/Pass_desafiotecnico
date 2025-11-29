@@ -10,12 +10,15 @@ import {
 } from "@/schemas/vehicleSchema";
 import { CreateFuelingInput } from "@/schemas/fuelingSchema";
 import { CreateIncidentInput } from "@/schemas/incidentSchema";
+import { CreateVehicleDocumentInput } from "@/schemas/vehicleDocumentSchema";
 import { IncidentController } from "../controllers/incidentController";
+import { VehicleDocumentController } from "../controllers/vehicleDocumentController";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
   const controllerVehicle = new VehicleController();
   const controllerFueling = new FuelingController();
   const controllerIncident = new IncidentController();
+  const controllerVehicleDocument = new VehicleDocumentController();
 
   // get all vehicles
   app.get("/", controllerVehicle.listVehicles);
@@ -54,6 +57,14 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
   app.post<{ Body: CreateIncidentInput; Params: VehicleIdParam }>(
     "/:id/incidents",
     controllerIncident.createIncident
+  );
+
+  // Vehicle Document routes related to vehicles
+  app.get("/:id/documents", controllerVehicleDocument.listDocumentByVehicleId);
+
+  app.post<{ Body: CreateVehicleDocumentInput; Params: VehicleIdParam }>(
+    "/:id/documents",
+    controllerVehicleDocument.createDocument
   );
 
 };
