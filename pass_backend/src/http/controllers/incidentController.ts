@@ -14,6 +14,7 @@ import {
   listIncidentById,
   createIncidentService,
   updateIncidentService,
+  deleteIncidentService,
 } from "@/services/incidentService";
 import { VehicleIdParam } from "@/schemas/vehicleSchema";
 
@@ -90,5 +91,14 @@ export class IncidentController {
     const validateIncident = updateIncidentSchema.parse(request.body);
     const result = await updateIncidentService(incidentId, validateIncident);
     reply.status(200).send(result);
+  }
+  
+  async deleteIncident(
+    request: FastifyRequest<{ Params: IncidentIdParam }>,
+    reply: FastifyReply
+  ) {
+    const incidentId = request.params;
+    const result = await deleteIncidentService(incidentId);
+    reply.status(204).send(result);
   }
 }

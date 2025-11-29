@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { CreateIncidentInput, IncidentIdParam } from "@/schemas/incidentSchema";
+import { CreateIncidentInput } from "@/schemas/incidentSchema";
 import { VehicleIdParam } from "@/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 

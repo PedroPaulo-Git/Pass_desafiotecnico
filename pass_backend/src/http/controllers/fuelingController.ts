@@ -83,7 +83,7 @@ export class FuelingController {
   ) {
     const fuelingId = request.params;
 
-    const result = await listFuelingById(fuelingId.id);
+    const result = await listFuelingById(fuelingId);
     return reply.status(200).send(result);
   }
 
@@ -92,7 +92,8 @@ export class FuelingController {
     request: FastifyRequest<{ Params: VehicleIdParam }>,
     reply: FastifyReply
   ) {
-    const result = await listFuelingServiceByVehicleId(request.params.id);
+    const vehicleId = request.params;
+    const result = await listFuelingServiceByVehicleId(vehicleId);
     return reply.status(200).send(result);
     // Logic to list fuelings by vehicle ID
   }
@@ -134,7 +135,7 @@ export class FuelingController {
   ) {
     const fuelingId = request.params;
 
-    const result = await deleteFuelingService(fuelingId.id);
+    const result = await deleteFuelingService(fuelingId);
     return reply.status(200).send(result);
   }
 }

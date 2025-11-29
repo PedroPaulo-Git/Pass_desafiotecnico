@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { AppError } from "@/utils/AppError";
+import { FuelingIdParam } from "@/schemas/fuelingSchema";
 
-export const deleteFuelingService = async (fuelingId: string) => {
+export const deleteFuelingService = async (fuelingId: FuelingIdParam) => {
   if (!fuelingId || fuelingId === undefined || fuelingId === null) {
     throw new AppError("Fueling ID is required", 400, "FUELING_ID_REQUIRED");
   }
   const fueling = await prisma.fueling.findUnique({
     where: {
-      id: fuelingId,
+      id: fuelingId.id,
     },
   });
   if (!fueling) {
@@ -15,7 +16,7 @@ export const deleteFuelingService = async (fuelingId: string) => {
   }
   const result = await prisma.fueling.delete({
     where: {
-      id: fuelingId,
+      id: fuelingId.id,
     },
   });
   return result;

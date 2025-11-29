@@ -14,5 +14,8 @@ export const incidentRoutes = async (app: FastifyInstance) => {
     controllerIncident.updateIncident
   );
 
-//   app.delete<{ Params: IncidentIdParam }>("/:id", controllerIncident.deleteIncident);
+  app.delete<{ Params: IncidentIdParam }>(
+    "/:id",
+    controllerIncident.deleteIncident
+  );
 };

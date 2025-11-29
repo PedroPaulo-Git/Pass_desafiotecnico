@@ -1,21 +1,22 @@
 import { prisma } from "@/lib/prisma";
+import { IncidentIdParam } from "@/schemas/incidentSchema";
 import { AppError } from "@/utils/AppError";
 
-export const deleteFuelingService = async (fuelingId: string) => {
-  if (!fuelingId || fuelingId === undefined || fuelingId === null) {
-    throw new AppError("Fueling ID is required", 400, "FUELING_ID_REQUIRED");
+export const deleteIncidentService = async (incidentId: IncidentIdParam) => {
+  if (!incidentId || incidentId === undefined || incidentId === null) {
+    throw new AppError("Incident ID is required", 400, "INCIDENT_ID_REQUIRED");
   }
-  const fueling = await prisma.fueling.findUnique({
+  const incident = await prisma.incident.findUnique({
     where: {
-      id: fuelingId,
+      id: incidentId.id,
     },
   });
-  if (!fueling) {
-    throw new AppError("Fueling not found", 404, "FUELING_NOT_FOUND");
+  if (!incident) {
+    throw new AppError("Incident not found", 404, "INCIDENT_NOT_FOUND");
   }
-  const result = await prisma.fueling.delete({
+  const result = await prisma.incident.delete({
     where: {
-      id: fuelingId,
+      id: incidentId.id,
     },
   });
   return result;

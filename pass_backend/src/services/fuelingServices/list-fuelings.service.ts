@@ -1,5 +1,7 @@
 import { Prisma } from ".prisma/client/default";
 import { prisma } from "@/lib/prisma";
+import { FuelingIdParam } from "@/schemas/fuelingSchema";
+import { VehicleIdParam } from "@/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 interface ListFuelingParams {
@@ -38,10 +40,10 @@ export const listFuelingService = async ({
   return result;
 };
 
-export const listFuelingById = async (fuelingId: string) => {
+export const listFuelingById = async (fuelingId: FuelingIdParam) => {
   const fueling = await prisma.fueling.findUnique({
     where: {
-      id: fuelingId,
+      id: fuelingId.id,
     },
   });
   if (!fueling) {
@@ -52,10 +54,10 @@ export const listFuelingById = async (fuelingId: string) => {
   return fueling;
 };
 
-export const listFuelingServiceByVehicleId = async (vehicleId: string) => {
+export const listFuelingServiceByVehicleId = async (vehicleId: VehicleIdParam) => {
   const result = await prisma.fueling.findMany({
     where: {
-      vehicleId,
+      vehicleId: vehicleId.id,
     },
   });
 
