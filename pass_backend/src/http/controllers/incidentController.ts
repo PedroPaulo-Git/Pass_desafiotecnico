@@ -1,17 +1,63 @@
 import { Prisma } from "@prisma/client";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateIncidentInput, createIncidentSchema, IncidentIdParam } from "@/schemas/incidentSchema";
-import {createIncidentService} from "@/services/incidentService";
+import {
+  CreateIncidentInput,
+  createIncidentSchema,
+  IncidentIdParam,
+  incidentSchemaQuery,
+} from "@/schemas/incidentSchema";
+import {
+  listIncidentService,
+  listIncidentServiceByVehicleId,
+  createIncidentService,
+  listIncidentById,
+} from "@/services/incidentService";
 import { VehicleIdParam } from "@/schemas/vehicleSchema";
 
 export class IncidentController {
   async listIncidents(request: FastifyRequest, reply: FastifyReply) {
+    const queryValidated = incidentSchemaQuery.parse(request.query);
+
+    const page = queryValidated.page;
+    const limit = queryValidated.limit;
+    const where: Prisma.IncidentWhereInput = {};
+
+    const sortField = queryValidated.sortBy ?? "date";
+    const sortOrder = queryValidated.sortOrder ?? "desc";
+    let orderBy:
+      | Prisma.IncidentOrderByWithRelationInput
+      | Prisma.IncidentOrderByWithRelationInput[] = {
+      [sortField]: sortOrder,
+    };
+
+    if (sortField === "date") {
+      orderBy = [{ date: sortOrder }, { createdAt: "desc" }];
+    } else {
+      orderBy = [{ [sortField]: sortOrder }];
+    }
+    if (queryValidated.severity) where.severity = queryValidated.severity;
+    const result = await listIncidentService({ page, limit, where, orderBy });
+    reply.status(200).send(result);
+
     // Implementation for listing incidents
   }
   async listIncidentById(
     request: FastifyRequest<{ Params: IncidentIdParam }>,
     reply: FastifyReply
   ) {
+    const incidentId = request.params.id;
+    const result = await listIncidentById(incidentId);
+    reply.status(200).send(result);
+
+    // Implementation for listing incidents
+  }
+
+  async listIncidentByVehicleId(
+    request: FastifyRequest<{ Params: VehicleIdParam }>,
+    reply: FastifyReply
+  ) {
+    const result = await listIncidentServiceByVehicleId(request.params.id);
+    reply.status(200).send(result);
     // Implementation for listing an incident by ID
   }
 
@@ -26,9 +72,8 @@ export class IncidentController {
     const validateIncident = createIncidentSchema.parse(request.body);
 
     const result = await createIncidentService(vehicleId, validateIncident);
-    console.log(result)
+    console.log(result);
     reply.status(201).send(result);
     // Implementation for creating an incident
   }
 }
-    

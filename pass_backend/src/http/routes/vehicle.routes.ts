@@ -13,28 +13,32 @@ import { CreateIncidentInput } from "@/schemas/incidentSchema";
 import { IncidentController } from "../controllers/incidentController";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
-  const controller = new VehicleController();
+  const controllerVehicle = new VehicleController();
   const controllerFueling = new FuelingController();
   const controllerIncident = new IncidentController();
 
   // get all vehicles
-  app.get("/", controller.listVehicles);
+  app.get("/", controllerVehicle.listVehicles);
 
   // get vehicle by id
-  app.get("/:id", controller.listVehicleById);
+  app.get("/:id", controllerVehicle.listVehicleById);
 
   //create vehicle
-  app.post<{ Body: CreateVehicleInput }>("/", controller.createVehicle);
+  app.post<{ Body: CreateVehicleInput }>("/", controllerVehicle.createVehicle);
 
   //update vehicle
   app.put<{ Body: UpdateVehicleInput; Params: VehicleIdParam }>(
     "/:id",
-    controller.updateVehicle
+    controllerVehicle.updateVehicle
   );
   //delete vehicle
-  app.delete<{ Params: VehicleIdParam }>("/:id", controller.deleteVehicle);
+  app.delete<{ Params: VehicleIdParam }>("/:id", controllerVehicle.deleteVehicle);
 
   // Fueling routes related to vehicles
+
+
+  // get a fueling for a vehicle
+  app.get("/:id/fuelings", controllerFueling.listFuelingByVehicleId);
 
   // create a fueling for a vehicle
   app.post<{ Body: CreateFuelingInput; Params: VehicleIdParam }>(
@@ -42,13 +46,14 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
     controllerFueling.createFueling
   );
 
-  // get a fueling for a vehicle
-  app.get("/:id/fuelings", controllerFueling.listFuelingByVehicleId);
 
   // Incident routes related to vehicles can be added here similarly
 
+  app.get("/:id/incidents", controllerIncident.listIncidentByVehicleId);
+  
   app.post<{ Body: CreateIncidentInput; Params: VehicleIdParam }>(
     "/:id/incidents",
     controllerIncident.createIncident
   );
+
 };

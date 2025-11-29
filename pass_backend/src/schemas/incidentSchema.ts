@@ -13,10 +13,15 @@ const incidentSchemaQuery = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),
   limit: z.coerce.number().int().positive().min(1).max(100).default(10),
   severity: z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"]).optional(),
+  sortBy: z
+    .enum(["date", "severity"])
+    .default("date")
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
 });
 
 const incidentIdParam = z.object({
-  incidentId: z.string().uuid("Invalid incident ID"),
+  id: z.string().uuid("Invalid incident ID"),
 });
 
 const updateIncidentSchema = createIncidentSchema.partial();

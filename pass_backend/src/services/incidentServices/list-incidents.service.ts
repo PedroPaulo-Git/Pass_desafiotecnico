@@ -2,24 +2,26 @@ import { Prisma } from ".prisma/client/default";
 import { prisma } from "@/lib/prisma";
 import { AppError } from "@/utils/AppError";
 
-interface ListFuelingParams {
+interface ListIncidentParams {
   page: number;
   limit: number;
-  where: Prisma.FuelingWhereInput;
-  orderBy?: Prisma.FuelingOrderByWithRelationInput | Prisma.FuelingOrderByWithRelationInput[];
+  where: Prisma.IncidentWhereInput;
+  orderBy?:
+    | Prisma.IncidentOrderByWithRelationInput
+    | Prisma.IncidentOrderByWithRelationInput[];
 }
 
-export const listFuelingService = async ({
+export const listIncidentService = async ({
   page,
   limit,
   where,
   orderBy,
-}: ListFuelingParams) => {
+}: ListIncidentParams) => {
   const skip = (page - 1) * limit;
 
   const [total, items] = await Promise.all([
-    prisma.fueling.count({ where }),
-    prisma.fueling.findMany({
+    prisma.incident.count({ where }),
+    prisma.incident.findMany({
       where,
       skip,
       take: limit,
@@ -38,29 +40,29 @@ export const listFuelingService = async ({
   return result;
 };
 
-export const listFuelingById = async (fuelingId: string) => {
-  const fueling = await prisma.fueling.findUnique({
+export const listIncidentById = async (incidentId: string) => {
+  const incident = await prisma.incident.findUnique({
     where: {
-      id: fuelingId,
+      id: incidentId,
     },
   });
-  if (!fueling) {
-    throw new AppError("Fueling not found", 404, "FUELING_NOT_FOUND", {
-      fuelingId,
+  if (!incident) {
+    throw new AppError("Incident not found", 404, "INCIDENT_NOT_FOUND", {
+      incidentId,
     });
   }
-  return fueling;
+  return incident;
 };
 
-export const listFuelingServiceByVehicleId = async (vehicleId: string) => {
-  const result = await prisma.fueling.findMany({
+export const listIncidentServiceByVehicleId = async (vehicleId: string) => {
+  const result = await prisma.incident.findMany({
     where: {
       vehicleId,
     },
   });
 
   if (result.length === 0) {
-    throw new AppError("Fuelings not found", 404, "FUELINGS_NOT_FOUND", {
+    throw new AppError("Incident not found", 404, "INCIDENT_NOT_FOUND", {
       vehicleId,
     });
   }
