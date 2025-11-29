@@ -11,6 +11,7 @@ import { AppError } from "./utils/AppError";
 
 import { vehicleRoutes } from "./http/routes/vehicle.routes";
 import { fuelingRoutes } from "./http/routes/fueling.routes";
+import { incidentRoutes } from "./http/routes/incident.routes";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -66,6 +67,7 @@ app.get("/health", async () => {
 // Registrar rotas aqui quando forem criadas
 app.register(vehicleRoutes, { prefix: "/vehicles" });
 app.register(fuelingRoutes, { prefix: "/fuelings" });
+app.register(incidentRoutes, { prefix: "/incidents" });
 
 // Iniciar servidor
 const start = async () => {

@@ -35,8 +35,8 @@ export class FuelingController {
     };
 
     if (sortField === "date") {
-      orderBy = [{date:sortOrder}, { createdAt: "desc" }];
-    }else{
+      orderBy = [{ date: sortOrder }, { createdAt: "desc" }];
+    } else {
       orderBy = [{ [sortField]: sortOrder }];
     }
 
@@ -97,6 +97,21 @@ export class FuelingController {
     // Logic to list fuelings by vehicle ID
   }
 
+  //create fueling
+  async createFueling(
+    request: FastifyRequest<{
+      Body: CreateFuelingInput;
+      Params: VehicleIdParam;
+    }>,
+    reply: FastifyReply
+  ) {
+    const vehicleId = request.params;
+    const validateFueling = createFuelingSchema.parse(request.body);
+
+    const result = await createFuelingService(vehicleId, validateFueling);
+    return reply.status(201).send(result);
+  }
+
   //update fueling
   async updateFueling(
     request: FastifyRequest<{
@@ -110,20 +125,6 @@ export class FuelingController {
 
     const result = await updateFuelingService(fuelingId, fuelingData);
     return reply.status(200).send(result);
-  }
-  //create fueling
-  async createFueling(
-    request: FastifyRequest<{
-      Body: CreateFuelingInput;
-      Params: VehicleIdParam;
-    }>,
-    reply: FastifyReply
-  ) {
-    const vehicleId = request.params;
-    const fuelingData = createFuelingSchema.parse(request.body);
-
-    const result = await createFuelingService(vehicleId, fuelingData);
-    return reply.status(201).send(result);
   }
 
   //delete fueling
