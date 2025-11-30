@@ -27,6 +27,9 @@ Controller → Service → Prisma
 ├── prisma.config.ts
 ├── README.md
 ├── tsconfig.json
+├── docs/
+│   ├── FILTERS.md
+│   └── FleetManager.postman_collection.json
 ├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
@@ -41,19 +44,22 @@ Controller → Service → Prisma
   │   ├── controllers/
   │   │   ├── vehicleController.ts
   │   │   ├── fuelingController.ts
-  │   │   └── incidentController.ts
+  │   │   ├── incidentController.ts
+  │   │   └── vehicleImageController.ts
   │   └── routes/
   │       ├── vehicle.routes.ts
   │       ├── fueling.routes.ts
-  │       └── incident.routes.ts
-  │       └── vehicleDocument.routes.ts
+  │       ├── incident.routes.ts
+  │       ├── vehicleDocument.routes.ts
+  │       └── vehicleImage.routes.ts
   ├── lib/
   │   └── prisma.ts
   ├── schemas/           # Zod schemas (create, update, query)
   │   ├── vehicleSchema.ts
   │   ├── fuelingSchema.ts
-  │   └── incidentSchema.ts
-  │   └── vehicleDocumentSchema.ts
+  │   ├── incidentSchema.ts
+  │   ├── vehicleDocumentSchema.ts
+  │   └── vehicleImageSchema.ts
   ├── services/
   │   ├── vehicleServices/
   │   │   ├── create-vehicles.service.ts
@@ -75,7 +81,13 @@ Controller → Service → Prisma
   │   │   ├── delete-documents.service.ts
   │   │   ├── list-documents.service.ts
   │   │   └── update-documents.service.ts
+  │   ├── vehicleImageServices/
+  │   │   ├── create-images.service.ts
+  │   │   ├── delete-images.service.ts
+  │   │   ├── list-images.service.ts
+  │   │   └── update-images.service.ts
   │   ├── vehicleDocumentServices.ts
+  │   ├── vehicleImageServices.ts
   │   ├── vehicleServices.ts
   │   ├── fuelingServices.ts
   │   ├── incidentService.ts
@@ -149,9 +161,11 @@ Controller → Service → Prisma
   - Expiry date cannot be in the past
   - Alert logic: expiringWithinDays combines future window + activeAlert=true
 
-### ❌ VehicleImage (Not Started)
-- Schema: url, vehicleId
-- Rules: metadata only (no file storage yet)
+### ✅ VehicleImage (Complete)
+- **CRUD:** create (nested by vehicle), list (top-level and by vehicle), get by id, update, delete
+- **Validations:** Zod schemas for create/update/query (url required, vehicleId via nested route)
+- **Filters:** vehicleId, url, pagination; sorting by `id` or `url` with `sortOrder`
+- **Notes:** Metadata only (no file storage), stable default sorting `id desc`
 
 ---
 
@@ -173,11 +187,11 @@ Controller → Service → Prisma
 - [x] Alert logic: filter docs expiring within alertDays / expiringWithinDays
 
 ### VehicleImage Module
-- [ ] Create `vehicleImageSchema.ts`
-- [ ] Create `vehicleImageServices/`
-- [ ] Create `vehicleImageController.ts`
-- [ ] Create `vehicleImage.routes.ts`
-- [ ] Metadata CRUD (no file upload yet)
+- [x] Create `vehicleImageSchema.ts`
+- [x] Create `vehicleImageServices/`
+- [x] Create `vehicleImageController.ts`
+- [x] Create `vehicleImage.routes.ts`
+- [x] Metadata CRUD (no file upload yet)
 
 ### Refinements
 - [ ] Vehicle update: conditional unique check (only if field changed)
