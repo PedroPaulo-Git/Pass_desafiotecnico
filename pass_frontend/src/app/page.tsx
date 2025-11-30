@@ -6,13 +6,12 @@ export default function Home() {
       <section className="relative">
         <div>
           <img
-          src="/assets/WallpaperHome.jpg"
-          className="absolute w-screen h-screen object-cover brightness-75"
-          alt=""
-        />
+            src="/assets/WallpaperHome.jpg"
+            className="absolute w-screen h-screen object-cover brightness-75"
+            alt=""
+          />
         </div>
         <HeaderHome />
-        
       </section>
     </main>
   );

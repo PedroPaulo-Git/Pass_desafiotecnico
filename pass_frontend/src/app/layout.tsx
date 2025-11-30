@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 const plus = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['300','400','600','700'], display: 'swap' })
+import { AppShell } from '@/components/layout/AppShell'
 
 export const metadata: Metadata = {
   title: 'PASS - Sistema de Gestão de Frota',
@@ -16,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={plus.className}>
-          {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   )
