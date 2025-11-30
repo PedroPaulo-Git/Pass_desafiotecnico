@@ -71,14 +71,158 @@ Under `src/types/`:
 - Loading/empty states: standardized components.
 - Date handling: ensure timezone consistency for date filters and forms.
 
-## Proposed Frontend Tree (additions)
-- `src/types/*`
-- `src/services/vehicles.ts | fuelings.ts | incidents.ts | documents.ts | images.ts`
-- `src/hooks/queries/vehicles.ts | fuelings.ts | incidents.ts | documents.ts | images.ts`
-- `src/schemas/vehicle.schema.ts | fueling.schema.ts | incident.schema.ts | document.schema.ts | image.schema.ts`
-- `src/components/ui/*` shared components
-- `src/components/features/vehicles/*` and nested module components
-- `src/app/vehicles/*` and `src/app/*` module index pages
+## Complete Frontend Structure
+```
+pass_frontend/
+├── .env.local
+├── .gitignore
+├── components.json
+├── next.config.js
+├── package.json
+├── postcss.config.js
+├── README.md
+├── tailwind.config.ts
+├── tsconfig.json
+└── src/
+    ├── app/
+    │   ├── globals.css
+    │   ├── layout.tsx
+    │   ├── page.tsx                         # Dashboard/Home
+    │   ├── vehicles/
+    │   │   ├── page.tsx                     # Vehicle list (filters, table, pagination)
+    │   │   ├── new/
+    │   │   │   └── page.tsx                 # Create vehicle form
+    │   │   └── [id]/
+    │   │       ├── page.tsx                 # Vehicle detail (tabs)
+    │   │       ├── edit/
+    │   │       │   └── page.tsx             # Update vehicle form
+    │   │       ├── fuelings/
+    │   │       │   ├── page.tsx             # Vehicle fuelings list
+    │   │       │   └── new/
+    │   │       │       └── page.tsx         # Add fueling to vehicle
+    │   │       ├── incidents/
+    │   │       │   ├── page.tsx             # Vehicle incidents list
+    │   │       │   └── new/
+    │   │       │       └── page.tsx         # Add incident to vehicle
+    │   │       ├── documents/
+    │   │       │   ├── page.tsx             # Vehicle documents list
+    │   │       │   └── new/
+    │   │       │       └── page.tsx         # Add document to vehicle
+    │   │       └── images/
+    │   │           ├── page.tsx             # Vehicle images gallery
+    │   │           └── new/
+    │   │               └── page.tsx         # Add image to vehicle
+    │   ├── fuelings/
+    │   │   ├── page.tsx                     # All fuelings list (filters)
+    │   │   └── [id]/
+    │   │       ├── page.tsx                 # Fueling detail
+    │   │       └── edit/
+    │   │           └── page.tsx             # Update fueling
+    │   ├── incidents/
+    │   │   ├── page.tsx                     # All incidents list (filters)
+    │   │   └── [id]/
+    │   │       ├── page.tsx                 # Incident detail
+    │   │       └── edit/
+    │   │           └── page.tsx             # Update incident
+    │   ├── documents/
+    │   │   ├── page.tsx                     # All documents list (filters, alerts)
+    │   │   └── [id]/
+    │   │       ├── page.tsx                 # Document detail
+    │   │       └── edit/
+    │   │           └── page.tsx             # Update document
+    │   └── images/
+    │       ├── page.tsx                     # All images list
+    │       └── [id]/
+    │           ├── page.tsx                 # Image detail
+    │           └── edit/
+    │               └── page.tsx             # Update image
+    ├── components/
+    │   ├── ui/                              # Shadcn/ui components
+    │   │   ├── button.tsx
+    │   │   ├── input.tsx
+    │   │   ├── select.tsx
+    │   │   ├── form.tsx
+    │   │   ├── label.tsx
+    │   │   ├── card.tsx
+    │   │   ├── table.tsx
+    │   │   ├── dialog.tsx
+    │   │   ├── alert.tsx
+    │   │   ├── badge.tsx
+    │   │   ├── tabs.tsx
+    │   │   ├── skeleton.tsx
+    │   │   └── ...                          # Other shadcn components as needed
+    │   └── features/                        # Feature-specific components
+    │       ├── vehicles/
+    │       │   ├── VehicleList.tsx
+    │       │   ├── VehicleCard.tsx
+    │       │   ├── VehicleForm.tsx
+    │       │   ├── VehicleDetail.tsx
+    │       │   ├── VehicleFilters.tsx
+    │       │   └── VehicleTabs.tsx          # Tabs for nested modules
+    │       ├── fuelings/
+    │       │   ├── FuelingList.tsx
+    │       │   ├── FuelingCard.tsx
+    │       │   ├── FuelingForm.tsx
+    │       │   ├── FuelingDetail.tsx
+    │       │   └── FuelingFilters.tsx
+    │       ├── incidents/
+    │       │   ├── IncidentList.tsx
+    │       │   ├── IncidentCard.tsx
+    │       │   ├── IncidentForm.tsx
+    │       │   ├── IncidentDetail.tsx
+    │       │   └── IncidentFilters.tsx
+    │       ├── documents/
+    │       │   ├── DocumentList.tsx
+    │       │   ├── DocumentCard.tsx
+    │       │   ├── DocumentForm.tsx
+    │       │   ├── DocumentDetail.tsx
+    │       │   ├── DocumentFilters.tsx
+    │       │   └── DocumentAlerts.tsx       # Alert indicator for expiring docs
+    │       ├── images/
+    │       │   ├── ImageGallery.tsx
+    │       │   ├── ImageCard.tsx
+    │       │   ├── ImageForm.tsx
+    │       │   └── ImageFilters.tsx
+    │       └── shared/
+    │           ├── DataTable.tsx            # Reusable table with sorting/pagination
+    │           ├── Pagination.tsx
+    │           ├── FilterBar.tsx
+    │           ├── ErrorAlert.tsx
+    │           ├── LoadingSpinner.tsx
+    │           └── EmptyState.tsx
+    ├── hooks/
+    │   └── queries/
+    │       ├── vehicles.ts                  # useVehicles, useVehicle, mutations
+    │       ├── fuelings.ts                  # useFuelings, useFueling, mutations
+    │       ├── incidents.ts                 # useIncidents, useIncident, mutations
+    │       ├── documents.ts                 # useDocuments, useDocument, mutations
+    │       └── images.ts                    # useImages, useImage, mutations
+    ├── lib/
+    │   ├── api.ts                           # Axios instance with interceptors
+    │   └── utils.ts                         # cn() and other utilities
+    ├── providers/
+    │   └── ReactQueryProvider.tsx           # TanStack Query provider
+    ├── schemas/                             # Zod schemas for forms
+    │   ├── vehicle.schema.ts
+    │   ├── fueling.schema.ts
+    │   ├── incident.schema.ts
+    │   ├── document.schema.ts
+    │   └── image.schema.ts
+    ├── services/                            # API service functions
+    │   ├── vehicles.ts                      # listVehicles, getVehicle, create, update, delete
+    │   ├── fuelings.ts                      # listFuelings, getFueling, create, update, delete
+    │   ├── incidents.ts                     # listIncidents, getIncident, create, update, delete
+    │   ├── documents.ts                     # listDocuments, getDocument, create, update, delete
+    │   └── images.ts                        # listImages, getImage, create, update, delete
+    └── types/
+        ├── vehicle.ts                       # Vehicle type and enums
+        ├── fueling.ts                       # Fueling type and enums
+        ├── incident.ts                      # Incident type and enums
+        ├── document.ts                      # VehicleDocument type
+        ├── image.ts                         # VehicleImage type
+        ├── pagination.ts                    # PaginatedResponse<T> type
+        └── errors.ts                        # ApiError type
+```
 
 ## Phased Plan
 1. Foundations: env, Axios, React Query provider, shared types/utils.

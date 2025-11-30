@@ -148,6 +148,11 @@ Controller → Service → Prisma
   - Date must be after 1886
   - Severity must be a valid enum value (BAIXA, MEDIA, ALTA, GRAVE)
   - VehicleId must reference an existing vehicle
+
+### ❌ VehicleDocument (Not Started)
+- Schema: name, expiryDate, alertDays, activeAlert
+- Rules: alert logic based on days before expiry
+
 ### ✅ VehicleDocument (Complete)
 - **CRUD:** create, read (by id), list (paginated + filtered), update, delete
 - **Validations:** Zod schemas for create/update/query (expiryDate future, alertDays >= 0, activeAlert)
