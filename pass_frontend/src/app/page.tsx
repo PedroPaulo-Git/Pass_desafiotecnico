@@ -1,7 +1,14 @@
+import { HeaderHome } from "@/components/layout/HeaderHome";
+
 export default function Home() {
   return (
     <main className="min-h-screen">
-      {/* Página inicial limpa - pronta para desenvolvimento */}
+     <HeaderHome />
+      <img
+        src="/assets/WallpaperHome.jpg"
+        className="w-screen h-screen object-cover  "
+        alt=""
+      />
     </main>
-  )
+  );
 }

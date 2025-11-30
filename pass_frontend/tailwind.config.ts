@@ -2,10 +2,10 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -17,6 +17,18 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: [
+          '"Plus Jakarta Sans"',
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+        ],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -51,6 +63,16 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Design system tokens prefixed with 'pass-'
+        "pass-blue": "#93C5FD", // blue-300
+        "pass-blue-200": "#BFDBFE",
+        "pass-primary": "#0EA5E9",
+        "pass-accent": "#60A5FA",
+        "pass-gray-200": "#E5E7EB",
+        "pass-gray-300": "#D1D5DB",
+        "pass-gray-400": "#9CA3AF",
+        "pass-gray-600": "#4B5563",
+        "pass-gray-800": "#1F2937",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -74,4 +96,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
