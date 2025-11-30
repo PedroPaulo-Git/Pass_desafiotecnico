@@ -8,7 +8,7 @@ export default function Home() {
           <img
             src="/assets/WallpaperHome.jpg"
             className="absolute w-screen h-screen object-cover brightness-75"
-            alt=""
+            alt="Wallpaper Home"
           />
         </div>
         <HeaderHome />

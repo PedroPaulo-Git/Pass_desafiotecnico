@@ -28,7 +28,7 @@ export function HeaderHome() {
           <div className="opacity-1">
             <div className="opacity-1">
               <a
-              href="/vehicles"
+              href="/dashboard"
                 className="inline-flex  
        hover:backdrop-blur-sm hover:scale-[101%] ease-in-out duration-3000 transition-transform
       items-center justify-center gap-2 whitespace-nowrap rounded-full 

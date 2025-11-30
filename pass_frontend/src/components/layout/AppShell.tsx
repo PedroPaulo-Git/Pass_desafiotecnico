@@ -7,7 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "/";
-  const showSidebar = pathname.startsWith("/modules");
+  const showSidebar = pathname !== "/";
 
   return (
     <div className="min-h-screen">
