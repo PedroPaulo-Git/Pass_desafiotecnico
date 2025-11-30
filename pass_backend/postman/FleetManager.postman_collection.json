@@ -10,7 +10,8 @@
     { "key": "vehicleId", "value": "00000000-0000-0000-0000-000000000000" },
     { "key": "fuelingId", "value": "00000000-0000-0000-0000-000000000000" },
     { "key": "incidentId", "value": "00000000-0000-0000-0000-000000000000" },
-    { "key": "documentId", "value": "00000000-0000-0000-0000-000000000000" }
+    { "key": "documentId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "imageId", "value": "00000000-0000-0000-0000-000000000000" }
   ],
   "item": [
     {
@@ -83,6 +84,20 @@
             "url": "{{baseUrl}}/vehicles/{{vehicleId}}/documents"
           }
         }
+        ,
+        { "name": "List Images by Vehicle", "request": { "method": "GET", "url": "{{baseUrl}}/vehicles/{{vehicleId}}/images" } },
+        {
+          "name": "Create Vehicle Image",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://example.com/image.jpg\"\n}"
+            },
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}/images"
+          }
+        }
       ]
     },
     {
@@ -134,6 +149,23 @@
           }
         },
         { "name": "Delete Document", "request": { "method": "DELETE", "url": "{{baseUrl}}/documents/{{documentId}}" } }
+      ]
+    },
+      {
+      "name": "Vehicle Images",
+      "item": [
+        { "name": "List Images", "request": { "method": "GET", "url": "{{baseUrl}}/images" } },
+        { "name": "Get Image By ID", "request": { "method": "GET", "url": "{{baseUrl}}/images/{{imageId}}" } },
+        {
+          "name": "Update Image",
+          "request": {
+            "method": "PUT",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"url\": \"https://example.com/new-image.jpg\"\n}" },
+            "url": "{{baseUrl}}/images/{{imageId}}"
+          }
+        },
+        { "name": "Delete Image", "request": { "method": "DELETE", "url": "{{baseUrl}}/images/{{imageId}}" } }
       ]
     }
   ]

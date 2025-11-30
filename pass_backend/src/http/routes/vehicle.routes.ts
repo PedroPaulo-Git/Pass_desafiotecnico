@@ -13,12 +13,15 @@ import { CreateIncidentInput } from "@/schemas/incidentSchema";
 import { CreateVehicleDocumentInput } from "@/schemas/vehicleDocumentSchema";
 import { IncidentController } from "../controllers/incidentController";
 import { VehicleDocumentController } from "../controllers/vehicleDocumentController";
+import { VehicleImageController } from "../controllers/vehicleImageController";
+import { CreateVehicleImageInput } from "../../schemas/vehicleImageSchema";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
   const controllerVehicle = new VehicleController();
   const controllerFueling = new FuelingController();
   const controllerIncident = new IncidentController();
   const controllerVehicleDocument = new VehicleDocumentController();
+    const imageController = new VehicleImageController();
 
   // get all vehicles
   app.get("/", controllerVehicle.listVehicles);
@@ -66,5 +69,8 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
     "/:id/documents",
     controllerVehicleDocument.createDocument
   );
+
+    app.get<{ Params: VehicleIdParam }>("/:id/images", imageController.listImageByVehicleId.bind(imageController));
+    app.post<{ Body: CreateVehicleImageInput; Params: VehicleIdParam }>("/:id/images", imageController.createImage.bind(imageController));
 
 };

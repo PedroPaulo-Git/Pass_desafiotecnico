@@ -13,6 +13,7 @@ import { vehicleRoutes } from "./http/routes/vehicle.routes";
 import { fuelingRoutes } from "./http/routes/fueling.routes";
 import { incidentRoutes } from "./http/routes/incident.routes";
 import { vehicleDocumentRoutes } from "./http/routes/vehicleDocument.routes";
+import { vehicleImageRoutes } from "./http/routes/vehicleImage.routes";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -70,6 +71,7 @@ app.register(vehicleRoutes, { prefix: "/vehicles" });
 app.register(fuelingRoutes, { prefix: "/fuelings" });
 app.register(incidentRoutes, { prefix: "/incidents" });
 app.register(vehicleDocumentRoutes, { prefix: "/documents" });
+app.register(vehicleImageRoutes, { prefix: "/images" });
 
 // Iniciar servidor
 const start = async () => {
