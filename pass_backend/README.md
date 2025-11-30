@@ -10,19 +10,6 @@ API REST para Sistema de Gestão de Frota usando Fastify, TypeScript e Prisma.
 - **Zod** - Validação de schemas
 - **PostgreSQL** - Banco de dados
 
-## Estrutura de Pastas
-
-```
-src/
-├── http/
-│   ├── controllers/  # Recebem request/response, validam e chamam services
-│   └── routes/       # Definição das rotas do Fastify
-├── services/         # Regras de negócio e acesso ao Prisma
-├── lib/              # Configurações de terceiros (Prisma, etc)
-├── utils/            # Funções auxiliares
-└── schemas/          # Schemas Zod reutilizáveis
-```
-
 ## Configuração
 
 1. Copie o arquivo `.env.example` para `.env` e configure as variáveis:

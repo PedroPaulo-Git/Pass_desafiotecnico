@@ -1,3 +1,38 @@
+# FUNCTIONAL SPECIFICATION: FLEET MANAGER (English)
+
+## 1. Product Overview
+Fleet Manager is a SaaS platform to manage vehicle fleets (heavy/light). It centralizes vehicle records, controls variable costs (fuelings), tracks incidents, and ensures compliance (documents and expirations). The system comprises four interconnected modules with Vehicle as the core entity.
+
+## 2. Modules and Business Rules
+### 2.1 Vehicles (Core)
+- Identification: Each vehicle has two unique identifiers: `plate` (legal) and `internalId` (organizational).
+- Categorization: Types (Bus, Van, Car) and classifications (Premium, Basic) for reporting.
+- Operational Status: Lifecycle: `LIBERADO`, `EM_MANUTENCAO`, `INDISPONIVEL`.
+- Gallery: Multiple photos for visual inspection.
+
+### 2.2 Fueling (Costs)
+- Link: Every fueling belongs to a vehicle.
+- Consumption: Record `odometer (km)` at fueling time to compute future `km/l` averages.
+- Audit: Upload receipt photo to avoid fraud.
+- Financials: Record liters and total value.
+
+### 2.3 Incident (Safety)
+- Classification: Incidents have severity (LOW to HIGH) to prioritize resolution.
+- Evidence: Detailed text and file uploads (damage photos, fine PDFs).
+- History: Lifetime log of vehicle health.
+
+### 2.4 Documentation (Compliance)
+- Monitoring: Register recurring documents (Tachograph, Licensing, Insurance).
+- Alert System: `alertDays` defines how many days before expiry to notify.
+- Status: Alerts can be enabled/disabled manually.
+
+## 3. Data Flows
+1) Registration: User creates vehicle.
+2) Operation: User records fuelings and incidents over time.
+3) Automatic Update (suggestion): When a fueling with KM 50,000 is logged, update vehicle `currentKm` accordingly.
+
+---
+
 # ESPECIFICAÇÃO FUNCIONAL: SISTEMA DE GESTÃO DE FROTAS (FLEET MANAGER)
 
 ## 1. Visão Geral do Produto

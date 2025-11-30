@@ -1,3 +1,86 @@
+# Fleet Manager Backend - Context Document (English)
+
+## Stack
+- Runtime: Node.js + Fastify
+- Language: TypeScript
+- ORM: Prisma (PostgreSQL)
+- Validation: Zod
+- Error Handling: Custom AppError + global error handler
+
+## Architecture Pattern
+Controller → Service → Prisma, with Zod validation at boundaries.
+
+## Repository Structure
+```
+.
+├── CONTEXT.md
+├── Explain.md
+├── package.json
+├── prisma.config.ts
+├── README.md
+├── tsconfig.json
+├── docs/
+│   ├── FILTERS.md
+│   └── FleetManager.postman_collection.json
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+└── src/
+  ├── server.ts
+  ├── http/
+  │   ├── controllers/
+  │   │   ├── vehicleController.ts
+  │   │   ├── fuelingController.ts
+  │   │   ├── incidentController.ts
+  │   │   └── vehicleImageController.ts
+  │   └── routes/
+  │       ├── vehicle.routes.ts
+  │       ├── fueling.routes.ts
+  │       ├── incident.routes.ts
+  │       ├── vehicleDocument.routes.ts
+  │       └── vehicleImage.routes.ts
+  ├── lib/prisma.ts
+  ├── schemas/
+  │   ├── vehicleSchema.ts
+  │   ├── fuelingSchema.ts
+  │   ├── incidentSchema.ts
+  │   ├── vehicleDocumentSchema.ts
+  │   └── vehicleImageSchema.ts
+  └── services/
+    ├── vehicleServices/*
+    ├── fuelingServices/*
+    ├── incidentServices/*
+    ├── vehicleDocumentServices/*
+    ├── vehicleImageServices/*
+    ├── vehicleDocumentServices.ts
+    ├── vehicleImageServices.ts
+    ├── vehicleServices.ts
+    ├── fuelingServices.ts
+    └── incidentService.ts
+```
+
+## Implemented Patterns
+- Error handling: ZodError → 400; AppError structured; unknown → 500
+- Pagination: `page`, `limit` → `{ items, page, limit, total, totalPages }`
+- Filtering: dynamic `where` based on validated query params; ranges use `gte`/`lte`
+- Sorting: `sortBy`, `sortOrder`; tie-breakers for stable ordering when applicable
+
+## Modules Status
+- Vehicle: complete (CRUD, filters, sorting)
+- Fueling: complete (CRUD, filters, sorting, business rules, transaction updating `currentKm`)
+- Incident: complete (CRUD, filters, sorting, validations)
+- VehicleDocument: complete (CRUD, filters, alert logic, sorting)
+- VehicleImage: complete (CRUD, filters, sorting by `id`/`url`)
+
+## Key Prisma Models
+- Vehicle: core entity with relations to images, fuelings, incidents, documents
+- Fueling: linked to vehicle; financial data; date/odometer rules
+- Incident: linked to vehicle; severity classification
+- VehicleDocument: linked to vehicle; alert system based on expiry
+
+## Enums
+- VehicleStatus, FuelType, VehicleCategory, VehicleClassification, SeverityLevel
+
 # Fleet Manager Backend - Context Document
 
 ## Stack
@@ -148,11 +231,6 @@ Controller → Service → Prisma
   - Date must be after 1886
   - Severity must be a valid enum value (BAIXA, MEDIA, ALTA, GRAVE)
   - VehicleId must reference an existing vehicle
-
-### ❌ VehicleDocument (Not Started)
-- Schema: name, expiryDate, alertDays, activeAlert
-- Rules: alert logic based on days before expiry
-
 ### ✅ VehicleDocument (Complete)
 - **CRUD:** create, read (by id), list (paginated + filtered), update, delete
 - **Validations:** Zod schemas for create/update/query (expiryDate future, alertDays >= 0, activeAlert)

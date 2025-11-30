@@ -1,3 +1,66 @@
+# Fleet Manager - Filters and Sorting Guide (English)
+
+This section describes filters (query params), pagination, and sorting for each backend listing endpoint.
+
+## General Conventions
+- Pagination: `page` (>=1), `limit` (1–100) → `{ items, page, limit, total, totalPages }`.
+- Sorting: `sortBy` + `sortOrder` (`asc|desc`). Use tie-breakers where applicable for stability.
+- Date ranges: `...From` and `...To` must satisfy `From ≤ To`.
+- Numeric ranges: `minX` / `maxX` must satisfy `minX ≤ maxX`.
+- All filters are optional; omitted fields are not included in `where`.
+
+## 1. Vehicle (`GET /vehicles`)
+### Query Params
+`page`, `limit`, `plate`, `brand`, `status`, `category`, `classification`, `state`, `sortBy`, `sortOrder`.
+### Sorting
+Default: `sortBy=createdAt&sortOrder=desc`. If `sortBy=createdAt`: `[{ createdAt: desc }, { id: desc }]` for stability.
+### Example
+`GET /vehicles?page=1&limit=10&brand=Volvo&status=LIBERADO&sortBy=brand&sortOrder=asc`
+
+## 2. Fueling (`GET /fuelings`)
+### Query Params
+`page`, `limit`, `provider`, `fuelType`, `dateFrom`, `dateTo`, `minOdometer`, `maxOdometer`, `minLiters`, `maxLiters`, `minUnitPrice`, `maxUnitPrice`, `totalValue`, `sortBy`, `sortOrder`.
+### Sorting
+Default: `date desc`. If `sortBy=date`: `[{ date: desc }, { createdAt: desc }]`.
+### Example
+`GET /fuelings?page=1&minOdometer=50000&maxOdometer=60000&fuelType=DIESEL&sortBy=odometer&sortOrder=asc`
+
+## 3. Incident (`GET /incidents`)
+### Query Params
+`page`, `limit`, `severity`, `classification`, `vehicleId`, `dateFrom`, `dateTo`, `sortBy`, `sortOrder`.
+### Sorting
+Similar to fueling; use tie-breakers when sorting by `date`.
+### Example
+`GET /incidents?severity=MEDIA&classification=MULTA&dateFrom=2025-01-01&dateTo=2025-01-31&sortBy=date`
+
+## 4. VehicleDocument (`GET /documents`)
+### Query Params
+`page`, `limit`, `name`, `vehicleId`, `activeAlert`, `expiryDateFrom`, `expiryDateTo`, `expiringWithinDays`, `sortBy`, `sortOrder`.
+### Alert Logic (`expiringWithinDays`)
+Compute `limit = today + expiringWithinDays`; filter `expiryDate <= limit` and `expiryDate >= today`; apply `activeAlert=true` if provided.
+### Sorting
+Default: `expiryDate asc`.
+### Example
+`GET /documents?expiringWithinDays=15&activeAlert=true&sortBy=expiryDate&sortOrder=asc`
+
+## 5. VehicleImage (`GET /images`)
+### Query Params
+`page`, `limit`, `vehicleId`, `url`, `sortBy`, `sortOrder`.
+### Sorting
+Default: `id desc` (model has no `createdAt`).
+### Example
+`GET /images?vehicleId=...&sortBy=url&sortOrder=asc`
+
+## Internal Best Practices
+- Build `where` incrementally; add only provided fields.
+- Avoid spreads on Prisma unions; construct filter objects explicitly.
+- Use arrays in `orderBy` for multi-field stability.
+- Validate ranges via Zod `superRefine`.
+
+
+----------------------------------------------------
+
+
 # Fleet Manager - Guia de Filtros e Ordenação
 
 Este documento descreve detalhadamente todos os filtros (query params), paginação e ordenação disponíveis nos endpoints de listagem de cada módulo do backend.
