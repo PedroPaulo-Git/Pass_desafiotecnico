@@ -71,6 +71,7 @@ module.exports = {
         "pass-gray-200": "#E5E7EB",
         "pass-gray-300": "#D1D5DB",
         "pass-gray-400": "#9CA3AF",
+        "pass-gray-500": "#6B7280",
         "pass-gray-600": "#4B5563",
         "pass-gray-800": "#1F2937",
       },
