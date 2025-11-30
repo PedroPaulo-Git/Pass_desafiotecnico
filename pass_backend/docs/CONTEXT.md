@@ -28,8 +28,11 @@ Controller → Service → Prisma
 ├── README.md
 ├── tsconfig.json
 ├── docs/
+│   ├── CONTEXT.md
+│   ├── EXPLAIN.md
 │   ├── FILTERS.md
-│   └── FleetManager.postman_collection.json
+│   ├── FleetManager.postman_collection.json
+│   └── FRONTEND_INTEGRATION.md
 ├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
