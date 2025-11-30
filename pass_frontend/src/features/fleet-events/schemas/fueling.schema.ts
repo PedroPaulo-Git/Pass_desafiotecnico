@@ -1,0 +1,1 @@
+// Zod Schema para Abastecimento

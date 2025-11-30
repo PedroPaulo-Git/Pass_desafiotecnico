@@ -1,8 +1,0 @@
-# Types
-
-Tipagem global ou espelhada do Prisma.
-
-Exemplo:
-- `vehicle.ts` - tipos relacionados a veículos
-- `driver.ts` - tipos relacionados a motoristas
-- `api.ts` - tipos de respostas da API

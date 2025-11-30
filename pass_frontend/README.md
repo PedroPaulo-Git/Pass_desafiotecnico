@@ -16,16 +16,45 @@ Frontend do Sistema de Gestão de Frota usando Next.js 14 (App Router).
 
 ```
 src/
-├── app/                  # Páginas do Next.js (App Router)
+├── app/
+│   ├── layout.tsx                   ✅
+│   ├── page.tsx                     ✅
+│   └── (modules)/
+│       └── vehicles/
+│           ├── page.tsx             ✅
+│           └── layout.tsx           ✅
+│
 ├── components/
-│   ├── ui/              # Componentes Shadcn (não alterar lógica)
-│   └── features/        # Componentes de negócio
-├── hooks/
-│   └── queries/         # Custom hooks do React Query
-├── services/            # Funções de chamada ao Axios
-├── lib/                 # Utilitários (api.ts, utils.ts)
-├── types/               # Tipagem global
-└── providers/           # Context Providers
+│   ├── ui/                          ✅ (para Shadcn UI)
+│   ├── layout/                      ✅ (Sidebar, Topbar, PageHeader)
+│   └── shared/                      ✅ (DataTable, StatusBadge)
+│
+├── features/
+│   ├── vehicles/                    ✅
+│   │   ├── components/
+│   │   │   ├── VehicleList/         ✅ (columns.tsx, VehicleTable.tsx)
+│   │   │   ├── VehicleDetails/      ✅ (VehicleSheet, VehicleInfo, VehicleTabs)
+│   │   │   │   └── sections/        ✅ (FuelingList, IncidentList, DocumentList)
+│   │   │   └── forms/               ✅ (VehicleFormModal)
+│   │   ├── hooks/                   ✅ (useVehicles, useVehicleDetails)
+│   │   └── types/                   ✅
+│   │
+│   └── fleet-events/                ✅
+│       ├── components/
+│       │   ├── Fueling/             ✅ (FuelingModal)
+│       │   ├── Incident/            ✅ (IncidentModal)
+│       │   └── Documents/           ✅ (DocumentModal)
+│       ├── hooks/                   ✅ (useCreateFueling, useCreateIncident)
+│       └── schemas/                 ✅ (fueling.schema, incident.schema)
+│
+├── lib/                             ✅
+│   ├── api.ts                       ✅
+│   ├── axios.ts                     ✅
+│   ├── query-client.ts              ✅
+│   └── utils.ts                     ✅
+│
+└── store/                           ✅
+    └── use-modal-store.ts           ✅
 ```
 
 ## Configuração

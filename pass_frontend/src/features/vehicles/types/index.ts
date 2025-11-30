@@ -1,0 +1,1 @@
+// Tipagem específica de veículos

@@ -31,7 +31,7 @@ Fleet Manager is a SaaS platform to manage vehicle fleets (heavy/light). It cent
 2) Operation: User records fuelings and incidents over time.
 3) Automatic Update (suggestion): When a fueling with KM 50,000 is logged, update vehicle `currentKm` accordingly.
 
----
+------------------------------------------------------------------------------------------------------------------
 
 # ESPECIFICAÇÃO FUNCIONAL: SISTEMA DE GESTÃO DE FROTAS (FLEET MANAGER)
 

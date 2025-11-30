@@ -126,27 +126,50 @@ pass_desafiotecnico/
 │       └── utils/                    # AppError
 ├── pass_frontend/                     # Interface Web (Next.js 15)
 │   └── src/
-│       ├── app/                      # App Router
-│       │   ├── vehicles/             # CRUD + rotas aninhadas
-│       │   ├── fuelings/
-│       │   ├── incidents/
-│       │   ├── documents/
-│       │   └── images/
-│       ├── components/
-│       │   ├── ui/                   # Shadcn/ui
-│       │   └── features/             # Componentes por módulo
-│       ├── hooks/
-│       │   └── queries/              # React Query hooks
-│       ├── services/                 # Axios services
-│       ├── schemas/                  # Zod schemas para forms
-│       ├── types/                    # Tipos TypeScript
-│       ├── lib/                      # api.ts (Axios), utils
-│       └── providers/                # ReactQueryProvider
+│        ├── app/
+│        │   ├── layout.tsx                   ✅
+│        │   ├── page.tsx                     ✅
+│        │   └── (modules)/
+│        │       └── vehicles/
+│        │           ├── page.tsx             ✅
+│        │           └── layout.tsx           ✅
+│        │
+│        ├── components/
+│        │   ├── ui/                          ✅ (para Shadcn UI)
+│        │   ├── layout/                      ✅ (Sidebar, Topbar, PageHeader)
+│        │   └── shared/                      ✅ (DataTable, StatusBadge)
+│        │
+│        ├── features/
+│        │   ├── vehicles/                    ✅
+│        │   │   ├── components/
+│        │   │   │   ├── VehicleList/         ✅ (columns.tsx, VehicleTable.tsx)
+│        │   │   │   ├── VehicleDetails/      ✅ (VehicleSheet, VehicleInfo, VehicleTabs)
+│        │   │   │   │   └── sections/        ✅ (FuelingList, IncidentList, DocumentList)
+│        │   │   │   └── forms/               ✅ (VehicleFormModal)
+│        │   │   ├── hooks/                   ✅ (useVehicles, useVehicleDetails)
+│        │   │   └── types/                   ✅
+│        │   │
+│        │   └── fleet-events/                ✅
+│        │       ├── components/
+│        │       │   ├── Fueling/             ✅ (FuelingModal)
+│        │       │   ├── Incident/            ✅ (IncidentModal)
+│        │       │   └── Documents/           ✅ (DocumentModal)
+│        │       ├── hooks/                   ✅ (useCreateFueling, useCreateIncident)
+│        │       └── schemas/                 ✅ (fueling.schema, incident.schema)
+│        │
+│        ├── lib/                             ✅
+│        │   ├── api.ts                       ✅
+│        │   ├── axios.ts                     ✅
+│        │   ├── query-client.ts              ✅
+│        │   └── utils.ts                     ✅
+│        │
+│        └── store/                           ✅
+│            ├── layout/                      ✅ (Sidebar, Topbar, PageHeader)
+│            └── use-modal-store.ts           ✅
 ├── CONTEXT.md                        # 📖 Contexto do projeto
 ├── README.md                         # Este arquivo
 └── docker-compose.yml                # PostgreSQL + MinIO
 ```
-
 ## 📝 Variáveis de Ambiente
 
 ### Backend (.env)

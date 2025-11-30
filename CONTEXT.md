@@ -32,30 +32,49 @@
   - `FleetManager.postman_collection.json` - Collection para testes
 
 ### 2. Frontend (`pass_frontend/src`)
-- **`/app`**: Páginas do Next.js (App Router).
-  - `vehicles/` - Lista, criação, edição e detalhes de veículos
-    - `[id]/fuelings/`, `[id]/incidents/`, `[id]/documents/`, `[id]/images/` - Módulos aninhados
-  - `fuelings/`, `incidents/`, `documents/`, `images/` - Listas globais de cada módulo
-- **`/components/ui`**: Componentes bases do Shadcn (Button, Input, Table, Form, etc). NÃO alterar a lógica deles, apenas estilo se necessário.
-- **`/components/features`**: Componentes complexos de negócio organizados por módulo.
-  - `vehicles/` - VehicleList, VehicleForm, VehicleDetail, VehicleFilters, VehicleTabs
-  - `fuelings/` - FuelingList, FuelingForm, FuelingDetail, FuelingFilters
-  - `incidents/` - IncidentList, IncidentForm, IncidentDetail, IncidentFilters
-  - `documents/` - DocumentList, DocumentForm, DocumentDetail, DocumentAlerts
-  - `images/` - ImageGallery, ImageCard, ImageForm
-  - `shared/` - DataTable, Pagination, FilterBar, ErrorAlert, LoadingSpinner, EmptyState
-- **`/lib`**: Utilitários e configurações.
-  - `api.ts` - Instância do Axios configurada com interceptors
-  - `utils.ts` - Funções auxiliares do Tailwind (cn)
-- **`/hooks/queries`**: Custom hooks do React Query por módulo (ex: `useVehicles`, `useCreateVehicle`). NENHUM fetch deve ser feito direto no componente, sempre via hook.
-  - `vehicles.ts`, `fuelings.ts`, `incidents.ts`, `documents.ts`, `images.ts`
-- **`/services`**: Funções que fazem a chamada direta ao Axios.
-  - `vehicles.ts`, `fuelings.ts`, `incidents.ts`, `documents.ts`, `images.ts`
-- **`/schemas`**: Schemas Zod para validação de formulários.
-  - `vehicle.schema.ts`, `fueling.schema.ts`, `incident.schema.ts`, `document.schema.ts`, `image.schema.ts`
-- **`/types`**: Tipagem global.
-  - `vehicle.ts`, `fueling.ts`, `incident.ts`, `document.ts`, `image.ts`, `pagination.ts`, `errors.ts`
-- **`/providers`**: Providers do React (ex: ReactQueryProvider)
+Arquitetura orientada a features (Feature-First) com separação clara entre camadas visuais genéricas, componentes específicos de domínio e infraestrutura:
+
+- **`/app`**: Estrutura de rotas Next.js (App Router). `layout.tsx` define o layout global (futuro Sidebar/Header). `page.tsx` é o Dashboard inicial. O diretório `(modules)` agrupa rotas por contexto sem afetar a URL (ex: `(modules)/vehicles`).
+- **`/app/(modules)/vehicles`**: Página principal de veículos (`page.tsx`) e `layout.tsx` opcional para escopar UI específica (ex: filtros persistentes).
+- **`/components/ui`**: Componentes base (Shadcn/ui) sem regra de negócio. Sempre desacoplados de dados.
+- **`/components/layout`**: Estruturas visuais globais reutilizáveis (Sidebar, Topbar, PageHeader) que compõem o shell da aplicação.
+- **`/components/shared`**: Abstrações reutilizáveis entre features (ex: `DataTable`, `StatusBadge`, `ModalContainer`).
+- **`/features/vehicles`**: Tudo de domínio de veículos. Contém subpastas por finalidade:
+  - `components/VehicleList` (tabela e definição de colunas)
+  - `components/VehicleDetails` (sheet lateral com tabs e seções: abastecimentos, ocorrências, documentos)
+  - `components/forms` (formulários modais de criação/edição)
+  - `hooks` (React Query hooks: `useVehicles`, `useVehicleDetails`)
+  - `types` (tipagens específicas do domínio de veículos)
+- **`/features/fleet-events`**: Feature transversal que centraliza criação de abastecimentos, ocorrências e documentos. Reutilizada em múltiplos contextos:
+  - `components/Fueling`, `components/Incident`, `components/Documents` (modais especializados)
+  - `hooks` (ex: `useCreateFueling`, `useCreateIncident`)
+  - `schemas` (Zod schemas para validações client-side)
+- **`/lib`**: Infraestrutura global compartilhada:
+  - `axios.ts` (instância configurada de Axios, interceptors futuros)
+  - `query-client.ts` (configuração do TanStack Query Client)
+  - `utils.ts` (funções utilitárias: `cn`, formatadores de data/moeda)
+- **`/store`**: Estado global leve via Zustand. Ex: `use-modal-store.ts` para orquestrar qual modal/sheet está aberto.
+
+#### Fluxo de Dados (Frontend)
+1. Componente da feature dispara hook (React Query) para buscar/mutar dados.
+2. Hook chama camada HTTP (Axios) configurada em `lib`.
+3. Backend aplica regras de negócio e retorna dados normalizados.
+4. Componentes exibem estado derivado (loading, error, sucesso) sem lógica de domínio.
+
+#### Regras de Implementação (Frontend)
+1. Formulários sempre com React Hook Form + Zod.
+2. Nenhum fetch direto dentro de componentes visuais (usar hooks em `features/*/hooks`).
+3. Código em inglês (variáveis, funções); textos visíveis em português.
+4. Componentes em `components/ui` e `components/shared` não conhecem Axios/Query.
+5. Somente hooks em `features/*/hooks` interagem com Query Client.
+6. Evitar prop drilling excessivo usando pequenas stores em `store/` quando necessário.
+
+#### Integração com Backend
+- Query params e filtros seguem guia de `FILTERS.md` (validação replicada via Zod no frontend para UX imediata).
+- Erros mapeados de `AppError` no backend para mensagens amigáveis em modais/toasts.
+- Paginação mantém formato `{ items, page, limit, total, totalPages }` para facilitar composição em DataTable.
+
+Essa estrutura facilita a evolução incremental: novas entidades adicionam uma nova pasta em `features`, mantendo o núcleo estável.
 
 ## MÓDULOS IMPLEMENTADOS
 
