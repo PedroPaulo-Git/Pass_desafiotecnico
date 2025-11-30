@@ -6,7 +6,7 @@ interface ListVehicleParams {
   page: number;
   limit: number;
   where: Prisma.VehicleWhereInput;
-  orderBy?: Prisma.VehicleOrderByWithRelationInput;
+  orderBy?: Prisma.VehicleOrderByWithRelationInput | Prisma.VehicleOrderByWithRelationInput[];
 }
 
 export const listVehicleService = async ({
@@ -23,7 +23,7 @@ export const listVehicleService = async ({
       where,
       skip,
       take: limit,
-      orderBy: orderBy ?? { createdAt: "desc" },
+      orderBy: orderBy ?? [{ createdAt: "desc" }],
     }),
   ]);
 

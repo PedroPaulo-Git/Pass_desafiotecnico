@@ -49,6 +49,19 @@ const vehicleSchemaQuery = z.object({
   category: z.enum(["ONIBUS", "VAN", "CARRO", "CAMINHAO"]).optional(),
   classification: z.enum(["PREMIUM", "BASIC", "EXECUTIVO"]).optional(),
   state: z.string().length(2, "State must be exactly 2 characters").optional(),
+  sortBy: z
+    .enum([
+      "createdAt",
+      "brand",
+      "plate",
+      "model",
+      "year",
+      "status",
+      "currentKm"
+    ])
+    .default("createdAt")
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
 });
 
 const updateVehicleSchema = createVehicleSchema.partial();

@@ -35,7 +35,19 @@ export class VehicleController {
     if (queryValidated.brand) where.brand = queryValidated.brand;
     if (queryValidated.state) where.state = queryValidated.state;
 
-    const result = await listVehicleService({ page, limit, where });
+    const sortField = queryValidated.sortBy ?? "createdAt";
+    const sortOrder = queryValidated.sortOrder ?? "desc";
+    let orderBy: Prisma.VehicleOrderByWithRelationInput[] = [
+      { [sortField]: sortOrder } as Prisma.VehicleOrderByWithRelationInput,
+    ];
+    if (sortField === "createdAt") {
+      orderBy = [
+        { createdAt: sortOrder },
+        { id: "desc" },
+      ];
+    }
+
+    const result = await listVehicleService({ page, limit, where, orderBy });
 
     return reply.status(200).send(result);
   }
