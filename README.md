@@ -99,23 +99,52 @@ npx prisma studio
 
 ```
 pass_desafiotecnico/
-├── pass_backend/          # API REST
-│   ├── src/
-│   │   ├── http/
-│   │   │   ├── controllers/
-│   │   │   └── routes/
-│   │   ├── services/
-│   │   ├── lib/
-│   │   └── schemas/
-│   └── prisma/
-├── pass_frontend/         # Interface Web
+├── pass_backend/                      # API REST
+│   ├── docs/                         # 📚 Documentação
+│   │   ├── CONTEXT.md                # Contexto técnico e arquitetura
+│   │   ├── EXPLAIN.md                # Especificação funcional
+│   │   ├── FILTERS.md                # Guia de filtros e ordenação
+│   │   ├── FRONTEND_INTEGRATION.md   # Guia de integração frontend
+│   │   └── FleetManager.postman_collection.json
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── migrations/
 │   └── src/
-│       ├── app/
+│       ├── server.ts
+│       ├── http/
+│       │   ├── controllers/          # Vehicle, Fueling, Incident, Document, Image
+│       │   └── routes/               # Rotas Fastify (top-level + nested)
+│       ├── services/                 # Lógica de negócio + Prisma
+│       │   ├── vehicleServices/
+│       │   ├── fuelingServices/
+│       │   ├── incidentServices/
+│       │   ├── vehicleDocumentServices/
+│       │   └── vehicleImageServices/
+│       ├── schemas/                  # Validação Zod
+│       ├── lib/                      # Prisma client
+│       ├── type/                     # Tipos TypeScript
+│       └── utils/                    # AppError
+├── pass_frontend/                     # Interface Web (Next.js 15)
+│   └── src/
+│       ├── app/                      # App Router
+│       │   ├── vehicles/             # CRUD + rotas aninhadas
+│       │   ├── fuelings/
+│       │   ├── incidents/
+│       │   ├── documents/
+│       │   └── images/
 │       ├── components/
+│       │   ├── ui/                   # Shadcn/ui
+│       │   └── features/             # Componentes por módulo
 │       ├── hooks/
-│       ├── services/
-│       └── lib/
-└── docker-compose.yml     # PostgreSQL + MinIO
+│       │   └── queries/              # React Query hooks
+│       ├── services/                 # Axios services
+│       ├── schemas/                  # Zod schemas para forms
+│       ├── types/                    # Tipos TypeScript
+│       ├── lib/                      # api.ts (Axios), utils
+│       └── providers/                # ReactQueryProvider
+├── CONTEXT.md                        # 📖 Contexto do projeto
+├── README.md                         # Este arquivo
+└── docker-compose.yml                # PostgreSQL + MinIO
 ```
 
 ## 📝 Variáveis de Ambiente
@@ -144,6 +173,33 @@ NEXT_PUBLIC_API_URL=http://localhost:3333
 
 ## 📚 Documentação
 
-- [Backend README](./pass_backend/README.md)
-- [Frontend README](./pass_frontend/README.md)
-- [Contexto do Projeto](./contextStructure.md)
+### Documentação Geral
+- [Contexto do Projeto](./CONTEXT.md) - Visão geral da stack e estrutura
+- [Backend README](./pass_backend/README.md) - Guia específico do backend
+- [Frontend README](./pass_frontend/README.md) - Guia específico do frontend
+
+### Documentação Técnica do Backend (`pass_backend/docs/`)
+- [CONTEXT.md](./pass_backend/docs/CONTEXT.md) - Contexto técnico, arquitetura e status dos módulos
+- [EXPLAIN.md](./pass_backend/docs/EXPLAIN.md) - Especificação funcional e regras de negócio
+- [FILTERS.md](./pass_backend/docs/FILTERS.md) - Guia completo de filtros, ordenação e paginação
+- [FRONTEND_INTEGRATION.md](./pass_backend/docs/FRONTEND_INTEGRATION.md) - Guia de integração com Next.js
+- [FleetManager.postman_collection.json](./pass_backend/docs/FleetManager.postman_collection.json) - Collection para testes de API
+
+## 🎯 Funcionalidades Implementadas
+
+### Backend (API REST)
+- ✅ **Veículos**: CRUD completo com filtros (status, categoria, marca, placa) e validações de unicidade
+- ✅ **Abastecimentos**: CRUD com regras de negócio (odômetro crescente, tipo combustível) e atualização automática do km do veículo
+- ✅ **Ocorrências**: CRUD com filtros de severidade e classificação
+- ✅ **Documentos**: CRUD com sistema de alertas de vencimento e filtros avançados
+- ✅ **Imagens**: CRUD de metadados (rotas top-level e aninhadas)
+- ✅ **Paginação**: Suporte a `page` e `limit` em todas as listagens
+- ✅ **Ordenação**: `sortBy` e `sortOrder` com tie-breakers para estabilidade
+- ✅ **Tratamento de Erros**: AppError customizado + handler global
+
+### Frontend (em planejamento)
+- 📋 Estrutura completa definida em `FRONTEND_INTEGRATION.md`
+- 📋 Componentes Shadcn/ui configurados
+- 📋 Hooks React Query por módulo
+- 📋 Páginas do App Router (veículos + módulos aninhados)
+- 📋 Formulários com React Hook Form + Zod

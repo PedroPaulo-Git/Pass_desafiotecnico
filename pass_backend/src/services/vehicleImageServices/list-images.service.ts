@@ -19,7 +19,7 @@ export const listVehicleImageService = async ({
 
   const [total, items] = await Promise.all([
     prisma.vehicleImage.count({ where }),
-    prisma.vehicleImage.findMany({ where, skip, take: limit, orderBy: orderBy ?? [{ createdAt: "desc" }] }),
+    prisma.vehicleImage.findMany({ where, skip, take: limit, orderBy }),
   ]);
 
   const totalPages = Math.ceil(total / limit);
