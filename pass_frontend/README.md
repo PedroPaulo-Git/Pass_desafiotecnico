@@ -69,13 +69,6 @@ src/
    npm install
    ```
 
-3. Instale componentes Shadcn conforme necessário:
-   ```bash
-   npx shadcn-ui@latest add button
-   npx shadcn-ui@latest add input
-   npx shadcn-ui@latest add form
-   ```
-
 ## Desenvolvimento
 
 ```bash
@@ -90,11 +83,3 @@ O aplicativo irá rodar em `http://localhost:3000`
 - `npm run build` - Build de produção
 - `npm start` - Inicia o servidor em produção
 - `npm run lint` - Executa o linter
-
-## Regras de Desenvolvimento
-
-1. ✅ **SEMPRE** use TypeScript estrito
-2. ✅ **SEMPRE** use React Hook Form para formulários
-3. ✅ **NUNCA** faça fetch direto no componente - use hooks do React Query
-4. ✅ Código em **inglês**, textos de UI em **português**
-5. ✅ Não altere a lógica dos componentes Shadcn/ui

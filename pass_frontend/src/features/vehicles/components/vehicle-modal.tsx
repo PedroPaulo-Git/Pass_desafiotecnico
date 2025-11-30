@@ -1,0 +1,586 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { Bus, X, Info, ChevronDown, ChevronUp, ImagePlus, Trash2, MoreVertical, FileText } from "lucide-react"
+import { format } from "date-fns"
+import { useI18n } from "@/lib/i18n/i18n-context"
+import { useModalStore } from "@/store/use-modal-store"
+import { useUpdateVehicle } from "../hooks/use-vehicles"
+import { FuelingsSection } from "./fuelings-section"
+import { IncidentsSection } from "./incidents-section"
+import { DocumentsSection } from "./documents-section"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import type { Vehicle, VehicleStatus, VehicleCategory, VehicleClassification, FuelType } from "@/types/vehicle"
+
+interface VehicleModalProps {
+  isCreate?: boolean
+}
+
+const vehicleSchema = z.object({
+  internalId: z.string().optional(),
+  plate: z.string().min(1, "Placa é obrigatória"),
+  renavam: z.string().optional(),
+  chassis: z.string().optional(),
+  model: z.string().min(1, "Modelo é obrigatório"),
+  brand: z.string().min(1, "Marca é obrigatória"),
+  year: z.number().min(1900).max(2100),
+  color: z.string().optional(),
+  category: z.enum(["ONIBUS", "VAN", "CARRO", "CAMINHAO"]),
+  classification: z.enum(["PREMIUM", "BASIC", "EXECUTIVO"]),
+  capacity: z.number().min(1),
+  doors: z.number().min(1),
+  fuelType: z.enum(["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]),
+  state: z.string().optional(),
+  currentKm: z.number().min(0),
+  status: z.enum(["LIBERADO", "EM_MANUTENCAO", "INDISPONIVEL", "VENDIDO"]),
+  companyName: z.string().optional(),
+  description: z.string().optional(),
+})
+
+type VehicleFormData = z.infer<typeof vehicleSchema>
+
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+}
+
+const modalVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
+  exit: { opacity: 0, scale: 0.95, y: 20 },
+}
+
+export function VehicleModal({ isCreate = false }: VehicleModalProps) {
+  const { t } = useI18n()
+  const { data, closeModal, isOpen } = useModalStore()
+  const vehicle = data.vehicle as Vehicle | undefined
+  const updateVehicle = useUpdateVehicle()
+
+  const [generalOpen, setGeneralOpen] = useState(true)
+  const [descriptionOpen, setDescriptionOpen] = useState(true)
+  const [imagesOpen, setImagesOpen] = useState(true)
+  const [characteristicsOpen, setCharacteristicsOpen] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<VehicleFormData>({
+    resolver: zodResolver(vehicleSchema),
+    defaultValues: {
+      status: "LIBERADO",
+      category: "ONIBUS",
+      classification: "BASIC",
+      fuelType: "DIESEL",
+      doors: 1,
+      capacity: 46,
+      currentKm: 0,
+      year: new Date().getFullYear(),
+    },
+  })
+
+  useEffect(() => {
+    if (vehicle) {
+      reset({
+        internalId: vehicle.internalId || "",
+        plate: vehicle.plate,
+        renavam: vehicle.renavam || "",
+        chassis: vehicle.chassis || "",
+        model: vehicle.model,
+        brand: vehicle.brand,
+        year: vehicle.year,
+        color: vehicle.color || "",
+        category: vehicle.category,
+        classification: vehicle.classification,
+        capacity: vehicle.capacity,
+        doors: vehicle.doors,
+        fuelType: vehicle.fuelType,
+        state: vehicle.state || "",
+        currentKm: vehicle.currentKm,
+        status: vehicle.status,
+        companyName: vehicle.companyName || "",
+        description: vehicle.description || "",
+      })
+    }
+  }, [vehicle, reset])
+
+  const onSubmit = async (formData: VehicleFormData) => {
+    if (vehicle) {
+      await updateVehicle.mutateAsync({ id: vehicle.id, ...formData })
+      closeModal()
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "LIBERADO":
+        return "bg-green-500 hover:bg-green-500/80"
+      case "EM_MANUTENCAO":
+        return "bg-yellow-500 hover:bg-yellow-500/80"
+      case "INDISPONIVEL":
+        return "bg-red-500 hover:bg-red-500/80"
+      case "VENDIDO":
+        return "bg-gray-500 hover:bg-gray-500/80"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  const statuses: VehicleStatus[] = ["LIBERADO", "EM_MANUTENCAO", "INDISPONIVEL", "VENDIDO"]
+  const categories: VehicleCategory[] = ["ONIBUS", "VAN", "CARRO", "CAMINHAO"]
+  const classifications: VehicleClassification[] = ["PREMIUM", "BASIC", "EXECUTIVO"]
+  const fuelTypes: FuelType[] = ["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]
+
+  return (
+    <Dialog open={isOpen} onOpenChange={closeModal}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+        <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
+          {/* Header */}
+          <DialogHeader className="sticky top-0 z-10 bg-card px-6 py-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Bus className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg font-semibold">
+                    {isCreate ? "Novo Veículo" : t.vehicles.title}
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">{t.vehicles.subtitle}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon">
+                  <Info className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={closeModal}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-4">
+            {/* Dados Gerais */}
+            <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{t.vehicles.generalData}</span>
+                    </div>
+                    {generalOpen ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="p-4 pt-0 space-y-4"
+                  >
+                    {/* Row 1: ID, Created, Identifier, Company, Status */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div>
+                        <label className="text-xs text-muted-foreground">ID</label>
+                        <p className="text-sm font-medium">{vehicle?.id?.slice(0, 8) || "-"}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.createdAt}</label>
+                        <p className="text-sm">
+                          {vehicle ? format(new Date(vehicle.createdAt), "dd/MM/yyyy HH:mm") : "-"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.identifier}</label>
+                        <Input {...register("internalId")} placeholder="316" className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.company} <span className="text-muted-foreground">(#180461)</span>
+                        </label>
+                        <Select
+                          value={watch("companyName") || ""}
+                          onValueChange={(value) => setValue("companyName", value)}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Inbuzios Receptivo">Inbuzios Receptivo</SelectItem>
+                            <SelectItem value="Companhia A">Companhia A</SelectItem>
+                            <SelectItem value="Companhia B">Companhia B</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.status} <span className="text-muted-foreground">(#180451)</span>
+                        </label>
+                        <Select
+                          value={watch("status")}
+                          onValueChange={(value) => setValue("status", value as VehicleStatus)}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue>
+                              <Badge className={`${getStatusColor(watch("status"))} text-white border-0`}>
+                                {t.status[watch("status")]}
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statuses.map((status) => (
+                              <SelectItem key={status} value={status}>
+                                <Badge className={`${getStatusColor(status)} text-white border-0`}>
+                                  {t.status[status]}
+                                </Badge>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Row 2: Model, Year, Brand, Category, Classification */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.model}</label>
+                        <Input {...register("model")} className="h-8" />
+                        {errors.model && <span className="text-xs text-destructive">{errors.model.message}</span>}
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.year}</label>
+                        <Input type="number" {...register("year", { valueAsNumber: true })} className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.brand} <span className="text-muted-foreground">(#1034)</span>
+                        </label>
+                        <Select value={watch("brand")} onValueChange={(value) => setValue("brand", value)}>
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Scania">Scania</SelectItem>
+                            <SelectItem value="Mercedes">Mercedes</SelectItem>
+                            <SelectItem value="Volvo">Volvo</SelectItem>
+                            <SelectItem value="Ford">Ford</SelectItem>
+                            <SelectItem value="Agrale">Agrale</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.category} <span className="text-muted-foreground">(#1106)</span>
+                        </label>
+                        <Select
+                          value={watch("category")}
+                          onValueChange={(value) => setValue("category", value as VehicleCategory)}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat} value={cat}>
+                                {t.categories[cat]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.classification} <span className="text-muted-foreground">(#1105)</span>
+                        </label>
+                        <Select
+                          value={watch("classification")}
+                          onValueChange={(value) => setValue("classification", value as VehicleClassification)}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {classifications.map((cls) => (
+                              <SelectItem key={cls} value={cls}>
+                                {t.classifications[cls]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.capacity}</label>
+                        <Input type="number" {...register("capacity", { valueAsNumber: true })} className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.doors}</label>
+                        <Input type="number" {...register("doors", { valueAsNumber: true })} className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.searchState}</label>
+                        <Input placeholder="Buscar estado" className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.state}</label>
+                        <Input {...register("state")} placeholder="RJ" className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.plateType}</label>
+                        <Select defaultValue="mercosul">
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mercosul">Mercosul</SelectItem>
+                            <SelectItem value="antiga">Antiga</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.plate}</label>
+                        <Input {...register("plate")} className="h-8 font-mono" />
+                        {errors.plate && <span className="text-xs text-destructive">{errors.plate.message}</span>}
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.renavam}</label>
+                        <Input {...register("renavam")} className="h-8 font-mono" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.chassis}</label>
+                        <Input {...register("chassis")} className="h-8 font-mono" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">{t.vehicles.currentKm}</label>
+                        <Input type="number" {...register("currentKm", { valueAsNumber: true })} className="h-8" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.fuelType} <span className="text-muted-foreground">(#1337)</span>
+                        </label>
+                        <Select
+                          value={watch("fuelType")}
+                          onValueChange={(value) => setValue("fuelType", value as FuelType)}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {fuelTypes.map((fuel) => (
+                              <SelectItem key={fuel} value={fuel}>
+                                {t.fuelTypes[fuel]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </motion.div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+
+            {/* Características */}
+            <Collapsible open={characteristicsOpen} onOpenChange={setCharacteristicsOpen}>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">
+                        {t.vehicles.characteristics} <span className="text-muted-foreground">(#180471)</span>
+                      </span>
+                    </div>
+                    {characteristicsOpen ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 pt-0">
+                    <p className="text-sm text-muted-foreground">
+                      Características adicionais do veículo podem ser adicionadas aqui.
+                    </p>
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+
+            {/* Descrição */}
+            <Collapsible open={descriptionOpen} onOpenChange={setDescriptionOpen}>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{t.vehicles.description}</span>
+                    </div>
+                    {descriptionOpen ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 pt-0">
+                    <Textarea
+                      {...register("description")}
+                      placeholder="Descrição do veículo..."
+                      className="min-h-[100px] resize-none"
+                    />
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+
+            {/* Imagens do Veículo */}
+            <Collapsible open={imagesOpen} onOpenChange={setImagesOpen}>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{t.vehicles.images}</span>
+                    </div>
+                    {imagesOpen ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 pt-0">
+                    <div className="flex flex-wrap gap-3">
+                      {/* Upload Box */}
+                      <div className="w-24 h-24 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                        <ImagePlus className="h-6 w-6 text-muted-foreground mb-1" />
+                        <span className="text-xs text-primary">{t.common.uploadFiles}</span>
+                      </div>
+                      {/* Existing Images */}
+                      {vehicle?.images?.map((image, index) => (
+                        <motion.div
+                          key={image.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="relative w-24 h-24 rounded-lg overflow-hidden group"
+                        >
+                          <img
+                            src={image.url || `/placeholder.svg?height=96&width=96&query=vehicle ${index + 1}`}
+                            alt={`Vehicle ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                      {/* Placeholder images if no images */}
+                      {(!vehicle?.images || vehicle.images.length === 0) && (
+                        <>
+                          <div className="w-24 h-24 rounded-lg overflow-hidden">
+                            <img
+                              src="/black-sedan-car.jpg"
+                              alt="Sample 1"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="w-24 h-24 rounded-lg overflow-hidden">
+                            <img
+                              src="/green-mercedes-suv.jpg"
+                              alt="Sample 2"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="w-24 h-24 rounded-lg overflow-hidden">
+                            <img
+                              src="/white-bmw-luxury.jpg"
+                              alt="Sample 3"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive mt-3 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {t.common.deleteAll}
+                    </button>
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+
+            {/* Abastecimentos */}
+            {vehicle && <FuelingsSection vehicleId={vehicle.id} fuelings={vehicle.fuelings || []} />}
+
+            {/* Documentação */}
+            {vehicle && <DocumentsSection vehicleId={vehicle.id} documents={vehicle.documents || []} />}
+
+            {/* Ocorrências */}
+            {vehicle && <IncidentsSection vehicleId={vehicle.id} incidents={vehicle.incidents || []} />}
+
+            {/* Footer Actions */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-border">
+              <Button type="button" variant="outline" onClick={closeModal}>
+                {t.common.close}
+              </Button>
+              <Button type="submit" disabled={updateVehicle.isPending}>
+                {updateVehicle.isPending ? t.common.loading : t.common.save}
+              </Button>
+            </div>
+          </form>
+        </motion.div>
+      </DialogContent>
+    </Dialog>
+  )
+}

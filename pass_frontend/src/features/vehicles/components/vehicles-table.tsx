@@ -1,0 +1,179 @@
+"use client"
+
+import { motion } from "framer-motion"
+import { MoreVertical } from "lucide-react"
+import { useI18n } from "@/lib/i18n/i18n-context"
+import { useModalStore } from "@/store/use-modal-store"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import type { Vehicle } from "@/types/vehicle"
+import { format } from "date-fns"
+
+interface VehiclesTableProps {
+  vehicles: Vehicle[]
+  pagination: {
+    page: number
+    totalPages: number
+    total: number
+  }
+  onPageChange: (page: number) => void
+}
+
+const rowVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.03, duration: 0.2 },
+  }),
+}
+
+export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTableProps) {
+  const { t } = useI18n()
+  const { openModal } = useModalStore()
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "LIBERADO":
+        return "bg-green-500 hover:bg-green-500/80"
+      case "EM_MANUTENCAO":
+        return "bg-yellow-500 hover:bg-yellow-500/80"
+      case "INDISPONIVEL":
+        return "bg-red-500 hover:bg-red-500/80"
+      case "VENDIDO":
+        return "bg-gray-500 hover:bg-gray-500/80"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "dd/MM/yyyy HH:mm:ss")
+    } catch {
+      return dateString
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-border overflow-hidden bg-card">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="font-semibold">{t.vehicles.identifier}</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.createdAt}</TableHead>
+            <TableHead className="font-semibold">Título</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.brand}</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.capacity}</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.plate}</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.company}</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.status}</TableHead>
+            <TableHead className="w-10"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {vehicles.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={9} className="text-center py-10 text-muted-foreground">
+                {t.common.noRecords}
+              </TableCell>
+            </TableRow>
+          ) : (
+            vehicles.map((vehicle, index) => (
+              <motion.tr
+                key={vehicle.id}
+                custom={index}
+                variants={rowVariants}
+                initial="hidden"
+                animate="visible"
+                whileHover={{ backgroundColor: "var(--accent)" }}
+                className="cursor-pointer border-b border-border transition-colors"
+                onClick={() => openModal("vehicle-details", { vehicle })}
+              >
+                <TableCell className="font-medium">{vehicle.internalId || "-"}</TableCell>
+                <TableCell className="text-muted-foreground">{formatDate(vehicle.createdAt)}</TableCell>
+                <TableCell>
+                  <div>
+                    <span className="font-medium">{vehicle.model}</span>
+                    <p className="text-sm text-muted-foreground">
+                      {t.categories[vehicle.category]} {t.classifications[vehicle.classification]}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell>{vehicle.brand}</TableCell>
+                <TableCell>{vehicle.capacity}</TableCell>
+                <TableCell className="font-mono">{vehicle.plate}</TableCell>
+                <TableCell>{vehicle.companyName || "-"}</TableCell>
+                <TableCell>
+                  <Badge className={`${getStatusColor(vehicle.status)} text-white border-0`}>
+                    {t.status[vehicle.status]}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openModal("vehicle-details", { vehicle })
+                        }}
+                      >
+                        {t.common.edit}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openModal("confirm-delete", {
+                            vehicleId: vehicle.id,
+                            title: t.common.deleteConfirm,
+                          })
+                        }}
+                        className="text-destructive"
+                      >
+                        {t.common.delete}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </motion.tr>
+            ))
+          )}
+        </TableBody>
+      </Table>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+          <span className="text-sm text-muted-foreground">
+            Página {pagination.page} de {pagination.totalPages} ({pagination.total} registros)
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages}
+            >
+              Próximo
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
