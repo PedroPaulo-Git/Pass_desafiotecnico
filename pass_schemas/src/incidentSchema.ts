@@ -9,10 +9,11 @@ const createIncidentSchema = z.object({
     // 2. Transforma a string para MAIÚSCULO.
     .transform((val) => val.toUpperCase())
     // 3. Valida se a string MAIÚSCULA transformada é um dos valores do enum.
-    .pipe(z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"], {
-        invalid_type_error: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
-        required_error: "Severity is required",
-    })),
+    .pipe(
+      z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"] as const, {
+        error: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
+      })
+    ),
   date: z.coerce.date(),
   attachmentUrl: z.string().url().optional(),
   description: z.string().optional(),
@@ -21,15 +22,17 @@ const createIncidentSchema = z.object({
 const incidentSchemaQuery = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),
   limit: z.coerce.number().int().positive().min(1).max(100).default(10),
-  severity: z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"]).transform((val) => val.toUpperCase()).pipe(z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"], {
-        invalid_type_error: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
-        required_error: "Severity is required",
-    })).optional(),
-  sortBy: z
-    .enum(["date", "severity"])
-    .default("date")
+  severity: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(
+      z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"] as const, {
+        error: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
+      })
+    )
     .optional(),
-  sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
+  sortBy: z.enum(["date", "severity"] as const).default("date").optional(),
+  sortOrder: z.enum(["asc", "desc"] as const).default("desc").optional(),
 });
 
 const incidentIdParam = z.object({

@@ -5,8 +5,11 @@
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
-    "module": "ESNext",
-    "target": "ES2022"
+    "module": "NodeNext",
+    "target": "ES2022",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }
