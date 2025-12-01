@@ -60,14 +60,14 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
     companies.find((c) => c.active)?.id ?? companies[0].id
   );
 
-  // Estrutura de navegação dividida em grupos
+  // Estrutura de navegação dividida em grupos (usar traduções em t.nav)
   const navGroups = [
     {
-      title: "Main",
+      title: t.nav.main || "Main",
       items: [
         {
           icon: LayoutDashboard,
-          label: t.nav.dashboard || "Dashboard", // Fallback caso a tradução falhe
+          label: t.nav.dashboard || "Dashboard",
           href: "/dashboard",
         },
         {
@@ -78,20 +78,20 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
       ],
     },
     {
-      title: "Panel",
+      title: t.nav.panel || "Panel",
       items: [
-        { icon: Activity, label: "Activity", href: "#activity" },
-        { icon: PieChart, label: "Analytics", href: "#analytics" },
-        { icon: CalendarDays, label: "Schedule", href: "#schedule" },
-        { icon: FileText, label: "Reports", href: "#reports" },
+        { icon: Activity, label: t.nav.activity || "Activity", href: "#activity" },
+        { icon: PieChart, label: t.nav.analytics || "Analytics", href: "#analytics" },
+        { icon: CalendarDays, label: t.nav.schedule || "Schedule", href: "#schedule" },
+        { icon: FileText, label: t.nav.reports || "Reports", href: "#reports" },
       ],
     },
     {
-      title: "System",
+      title: t.nav.system || "System",
       items: [
-        { icon: Users, label: "Team", href: "#team" },
-        { icon: Settings, label: "Settings", href: "#settings" },
-        { icon: LifeBuoy, label: "Help", href: "#help" },
+        { icon: Users, label: t.nav.team || "Team", href: "#team" },
+        { icon: Settings, label: t.nav.settings || "Settings", href: "#settings" },
+        { icon: LifeBuoy, label: t.nav.help || "Help", href: "#help" },
       ],
     },
   ];
@@ -145,7 +145,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                 sideOffset={10}
               >
                 <DropdownMenuLabel className="text-xs text-muted-foreground font-normal px-2 py-1.5">
-                  Empresas
+                  {t.nav.companies || "Empresas"}
                 </DropdownMenuLabel>
 
                 {companies.map((company) => (
@@ -181,7 +181,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
             <div key={groupIndex}>
               {/* Título do Grupo (Main, Panel, etc) */}
               {!isCollapsed && (
-                <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                <div className="mb-2 px-2 text-xs font-semibold tracking-wider text-muted-foreground/70">
                   {group.title}
                 </div>
               )}

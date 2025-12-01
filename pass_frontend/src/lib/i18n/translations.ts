@@ -30,10 +30,20 @@ export const translations = {
     },
     // Navigation
     nav: {
+      main: "Principal",
+      panel: "Painel",
+      system: "Sistema",
       dashboard: "Dashboard",
       vehicles: "Veículos",
       fleet: "Frota",
       settings: "Configurações",
+      activity: "Atividade",
+      analytics: "Análises",
+      schedule: "Agenda",
+      reports: "Relatórios",
+      team: "Equipe",
+      help: "Ajuda",
+      companies: "Empresas",
     },
     // Home
     home: {
@@ -55,6 +65,7 @@ export const translations = {
     // Vehicles
     vehicles: {
       title: "Veículos",
+      create: "Criar Veículo",
       subtitle: "Informações Gerais",
       identifier: "Identificador",
       createdAt: "Criado Em",
@@ -192,10 +203,20 @@ export const translations = {
     },
     // Navigation
     nav: {
+      main: "Main",
+      panel: "Panel",
+      system: "System",
       dashboard: "Dashboard",
       vehicles: "Vehicles",
       fleet: "Fleet",
       settings: "Settings",
+      activity: "Activity",
+      analytics: "Analytics",
+      schedule: "Schedule",
+      reports: "Reports",
+      team: "Team",
+      help: "Help",
+      companies: "Companies",
     },
     // Home
     home: {
@@ -217,6 +238,7 @@ export const translations = {
     // Vehicles
     vehicles: {
       title: "Vehicles",
+      create: "Create Vehicle",
       subtitle: "General Information",
       identifier: "Identifier",
       createdAt: "Created At",
@@ -354,10 +376,20 @@ export const translations = {
     },
     // Navigation
     nav: {
+      main: "Principal",
+      panel: "Panel",
+      system: "Sistema",
       dashboard: "Panel",
       vehicles: "Vehículos",
       fleet: "Flota",
       settings: "Configuración",
+      activity: "Actividad",
+      analytics: "Análisis",
+      schedule: "Agenda",
+      reports: "Informes",
+      team: "Equipo",
+      help: "Ayuda",
+      companies: "Empresas",
     },
     // Home
     home: {

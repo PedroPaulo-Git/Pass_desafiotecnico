@@ -5,7 +5,7 @@ import * as CollapsiblePrimitive from '@radix-ui/react-collapsible'
 function Collapsible({
   ...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} className='' />
+  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} className='bg-card dark:bg-card' />
 }
 
 function CollapsibleTrigger({
