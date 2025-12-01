@@ -12,7 +12,12 @@ const plus = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "PASS - Sistema de Gestão de Frota",
-  description: "Sistema de gerenciamento de frota de veículos",
+  description: "Repositório criado como desafio técnico: sistema de gerenciamento de frota de veículos (avaliação técnica).",
+  icons: {
+    icon: "/assets/favicon.ico",
+    shortcut: "/assets/favicon.ico",
+    apple: "/assets/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

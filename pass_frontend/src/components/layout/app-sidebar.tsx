@@ -1,17 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Bus,
   LayoutDashboard,
+  BusFront,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
   Building2,
   Check,
   Plus,
+  // Novos ícones adicionados para o estilo
+  PieChart,
+  CalendarDays,
+  Users,
+  Settings,
+  FileText,
+  Activity,
+  LifeBuoy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/i18n-context";
@@ -36,9 +45,9 @@ interface AppSidebarProps {
   onToggle: () => void;
 }
 
-// Mock de dados para as empresas (substitua pela sua lógica real depois)
+// Mock de dados para as empresas
 const companies = [
-  { name: "Pass", id: 1, active: true },
+  { name: "Pass Company", id: 1, active: true },
   { name: "Allinsys", id: 2, active: false },
   { name: "Google", id: 3, active: false },
 ];
@@ -47,16 +56,43 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
   const pathname = usePathname();
   const { t } = useI18n();
 
-  const menuItems = [
+  const [selectedCompanyId, setSelectedCompanyId] = useState(
+    companies.find((c) => c.active)?.id ?? companies[0].id
+  );
+
+  // Estrutura de navegação dividida em grupos
+  const navGroups = [
     {
-      icon: LayoutDashboard,
-      label: t.nav.dashboard,
-      href: "/dashboard",
+      title: "Main",
+      items: [
+        {
+          icon: LayoutDashboard,
+          label: t.nav.dashboard || "Dashboard", // Fallback caso a tradução falhe
+          href: "/dashboard",
+        },
+        {
+          icon: BusFront,
+          label: t.nav.vehicles || "Vehicles",
+          href: "/vehicles",
+        },
+      ],
     },
     {
-      icon: Bus,
-      label: t.nav.vehicles,
-      href: "/vehicles",
+      title: "Panel",
+      items: [
+        { icon: Activity, label: "Activity", href: "#activity" },
+        { icon: PieChart, label: "Analytics", href: "#analytics" },
+        { icon: CalendarDays, label: "Schedule", href: "#schedule" },
+        { icon: FileText, label: "Reports", href: "#reports" },
+      ],
+    },
+    {
+      title: "System",
+      items: [
+        { icon: Users, label: "Team", href: "#team" },
+        { icon: Settings, label: "Settings", href: "#settings" },
+        { icon: LifeBuoy, label: "Help", href: "#help" },
+      ],
     },
   ];
 
@@ -68,21 +104,19 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="left-0 top-0 z-40 h-screen bg-sidebar flex flex-col "
       >
-        {/* Header com Logo e Dropdown */}
-        <div className="flex h-[72px] items-center px-2 border-b border-sidebar-border">
-          {/* A Logo permanece fixa e clicável para home */}
+        {/* --- HEADER (LOGO & DROPDOWN) --- */}
+        <div className="flex h-[72px] items-center px-2 border-b border-sidebar-border shrink-0">
           <Link href="/dashboard" className="-mr-6 mt-1">
             <img
               src="/assets/Logo.png"
               className={cn(
-                "hover:scale-105 duration-500 object-cover ",
-                isCollapsed ? "w-14" : "w-16 "
+                "hover:scale-105 duration-500 object-cover",
+                isCollapsed ? "w-14" : "w-16"
               )}
               alt="Logo"
             />
           </Link>
 
-          {/* O Texto e o Chevron viram o DropdownTrigger */}
           {!isCollapsed && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -96,16 +130,14 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                     exit={{ opacity: 0 }}
                     className="flex flex-col items-start"
                   >
-                    <span className="text-sm font-semibold text-sidebar-foreground">
-                      Pass Enterprise
+                    <span className="text-sm font-semibold text-sidebar-foreground truncate max-w-[120px]">
+                      {companies.find((c) => c.id === selectedCompanyId)?.name ?? "Company"}
                     </span>
-                    {/* Opcional: subtítulo ou cargo */}
                   </motion.span>
                   <ChevronsUpDown className="w-4 h-4 text-muted-foreground group-hover:text-sidebar-foreground" />
                 </Button>
               </DropdownMenuTrigger>
 
-              {/* Conteúdo do Dropdown posicionado à direita */}
               <DropdownMenuContent
                 side="right"
                 align="start"
@@ -120,6 +152,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                   <DropdownMenuItem
                     key={company.id}
                     className="flex items-center justify-between cursor-pointer px-2 py-2"
+                    onClick={() => setSelectedCompanyId(company.id)}
                   >
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-background">
@@ -127,14 +160,12 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                       </div>
                       <span className="font-medium">{company.name}</span>
                     </div>
-                    {company.active && (
+                    {company.id === selectedCompanyId && (
                       <Check className="h-4 w-4 text-primary" />
                     )}
                   </DropdownMenuItem>
                 ))}
-
                 <DropdownMenuSeparator />
-
                 <DropdownMenuItem className="cursor-pointer gap-2 px-2 py-2 text-muted-foreground hover:text-foreground">
                   <Plus className="h-4 w-4" />
                   <span>Adicionar Organização</span>
@@ -144,53 +175,66 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
           )}
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-2 overflow-y-auto mt-2">
-          {menuItems.map((item) => {
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+        {/* --- NAVIGATION --- */}
+        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
+          {navGroups.map((group, groupIndex) => (
+            <div key={groupIndex}>
+              {/* Título do Grupo (Main, Panel, etc) */}
+              {!isCollapsed && (
+                <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  {group.title}
+                </div>
+              )}
 
-            return (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                    )}
-                  >
-                    <item.icon
-                      className={cn(
-                        "h-5 w-5 shrink-0",
-                        isActive && "text-sidebar-primary"
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                  return (
+                    <Tooltip key={item.href}>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
+                            // Estilização condicional baseada na seleção
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                          )}
+                        >
+                          <item.icon
+                            className={cn(
+                              "h-4 w-4 shrink-0", // Ícones levemente menores para elegância
+                              isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                            )}
+                          />
+                          {!isCollapsed && (
+                            <motion.span
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                            >
+                              {item.label}
+                            </motion.span>
+                          )}
+                        </Link>
+                      </TooltipTrigger>
+                      {isCollapsed && (
+                        <TooltipContent side="right" sideOffset={1} className="bg-foreground text-background">
+                          {item.label}
+                        </TooltipContent>
                       )}
-                    />
-                    {!isCollapsed && (
-                      <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </Link>
-                </TooltipTrigger>
-                {isCollapsed && (
-                  <TooltipContent side="right" sideOffset={10}>
-                    {item.label}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            );
-          })}
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* Collapse Button */}
-        <div className="border-t border-sidebar-border p-2">
+        {/* --- FOOTER (COLLAPSE BUTTON) --- */}
+        <div className="border-t border-sidebar-border p-2 mt-auto">
           <Button
             variant="ghost"
             size="sm"
