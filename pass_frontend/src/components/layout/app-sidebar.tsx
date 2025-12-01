@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Bus, LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Bus,
+  LayoutDashboard,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsUpDown,
+  Building2,
+  Check,
+  Plus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { Button } from "@/components/ui/button";
@@ -13,11 +22,26 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AppSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
 }
+
+// Mock de dados para as empresas (substitua pela sua lógica real depois)
+const companies = [
+  { name: "Pass", id: 1, active: true },
+  { name: "Allinsys", id: 2, active: false },
+  { name: "Google", id: 3, active: false },
+];
 
 export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
   const pathname = usePathname();
@@ -42,29 +66,86 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         initial={false}
         animate={{ width: isCollapsed ? 64 : 240 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="left-0 top-0 z-40 h-screen  bg-sidebar flex flex-col"
+        className="left-0 top-0 z-40 h-screen bg-sidebar flex flex-col "
       >
-        {/* Logo */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Bus className="h-5 w-5 text-primary-foreground" />
-            </div>
-            {!isCollapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="font-semibold text-sidebar-foreground"
-              >
-                Pass Fleet
-              </motion.span>
-            )}
+        {/* Header com Logo e Dropdown */}
+        <div className="flex h-[72px] items-center px-2 border-b border-sidebar-border">
+          {/* A Logo permanece fixa e clicável para home */}
+          <Link href="/dashboard" className="-mr-6 mt-1">
+            <img
+              src="/assets/Logo.png"
+              className={cn(
+                "hover:scale-105 duration-500 object-cover ",
+                isCollapsed ? "w-14" : "w-16 "
+              )}
+              alt="Logo"
+            />
           </Link>
+
+          {/* O Texto e o Chevron viram o DropdownTrigger */}
+          {!isCollapsed && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="ml-1 flex flex-1 items-center justify-between px-2 py-6 hover:bg-sidebar-accent/50 group"
+                >
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-start"
+                  >
+                    <span className="text-sm font-semibold text-sidebar-foreground">
+                      Pass Enterprise
+                    </span>
+                    {/* Opcional: subtítulo ou cargo */}
+                  </motion.span>
+                  <ChevronsUpDown className="w-4 h-4 text-muted-foreground group-hover:text-sidebar-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              {/* Conteúdo do Dropdown posicionado à direita */}
+              <DropdownMenuContent
+                side="right"
+                align="start"
+                className="w-56 ml-2"
+                sideOffset={10}
+              >
+                <DropdownMenuLabel className="text-xs text-muted-foreground font-normal px-2 py-1.5">
+                  Empresas
+                </DropdownMenuLabel>
+
+                {companies.map((company) => (
+                  <DropdownMenuItem
+                    key={company.id}
+                    className="flex items-center justify-between cursor-pointer px-2 py-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-background">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <span className="font-medium">{company.name}</span>
+                    </div>
+                    {company.active && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem className="cursor-pointer gap-2 px-2 py-2 text-muted-foreground hover:text-foreground">
+                  <Plus className="h-4 w-4" />
+                  <span>Adicionar Organização</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
+        <nav className="flex-1 space-y-1 p-2 overflow-y-auto mt-2">
           {menuItems.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);

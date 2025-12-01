@@ -57,7 +57,7 @@ export function AppHeader({
     languages.find((l) => l.value === language)?.label || "English";
 
   return (
-    <header className="sticky top-0 flex h-16 w-full items-center justify-between border-b border-border bg-background px-4">
+    <header className="sticky top-0 flex h-16 w-full items-center justify-between border-b border-border bg-background px-4 rounded-t-2xl">
       {/* --- LEFT SECTION: Sidebar Toggle & Breadcrumb --- */}
       <div className="flex items-center gap-4">
         {/* Mobile Menu */}
