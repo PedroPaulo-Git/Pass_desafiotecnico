@@ -57,7 +57,7 @@ export function AppHeader({
     languages.find((l) => l.value === language)?.label || "English";
 
   return (
-    <header className="sticky bg-white dark:bg-card top-0 flex h-16 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
+    <header className="sticky top-0 flex h-16 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
       {/* --- LEFT SECTION: Sidebar Toggle & Breadcrumb --- */}
       <div className="flex items-center gap-4">
         {/* Mobile Menu */}
@@ -159,7 +159,7 @@ export function AppHeader({
         </Button>
 
         {/* User Avatar */}
-        <Avatar className="h-8 w-8 cursor-pointer bg-black text-white dark:bg-white dark:text-black">
+        <Avatar className="h-8 w-8 cursor-pointer ">
           <AvatarImage src="" alt="JD" />
           <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
             PP
