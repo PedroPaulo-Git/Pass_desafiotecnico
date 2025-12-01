@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CreateFuelingInput,createFuelingSchema } from "@pass/schemas/fuelingSchema";
-import { Fuel, X, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
+import { Fuel, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -119,14 +119,6 @@ export function FuelingModal() {
                 <DialogTitle className="text-lg font-semibold">
                   {t.fueling.title}
                 </DialogTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Info className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={closeModal}>
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </DialogHeader>

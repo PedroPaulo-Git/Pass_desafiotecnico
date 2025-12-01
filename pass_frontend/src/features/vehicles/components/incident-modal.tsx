@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { CreateIncidentInput ,createIncidentSchema} from "@pass/schemas/incidentSchema"
-import { AlertTriangle, X, Info, ChevronDown, ChevronUp, Upload } from "lucide-react"
+import { AlertTriangle, Info, ChevronDown, ChevronUp, Upload } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -85,14 +85,6 @@ export function IncidentModal() {
                   <DialogTitle className="text-lg font-semibold">{t.incidents.title}</DialogTitle>
                   <p className="text-sm text-muted-foreground">{t.incidents.subtitle}</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Info className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={closeModal}>
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </DialogHeader>

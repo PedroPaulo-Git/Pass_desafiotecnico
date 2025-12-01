@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CreateVehicleInput,createVehicleSchema } from "@pass/schemas/vehicleSchema"
-import { Bus, X, Info, ChevronDown, ChevronUp, ImagePlus, Trash2, MoreVertical, FileText } from "lucide-react"
+import { Bus, X, Info, ChevronDown, ChevronUp, ImagePlus, Trash2, MoreVertical, FileText,CarFront  } from "lucide-react"
 import { format } from "date-fns"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"
@@ -122,15 +122,15 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const fuelTypes: FuelType[] = ["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+    <Dialog open={isOpen} onOpenChange={closeModal} >
+      <DialogContent fullWidth showInfo={false} showCloseButton={false} className="bg-gray-50 max-w-none md:w-[min(40vw,900px)] max-h-[90vh] overflow-y-auto p-0">
         <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
           {/* Header */}
-          <DialogHeader className="sticky top-0 z-10 bg-card px-6 py-4 border-b border-border">
+          <DialogHeader className="sticky backdrop-blur-lg bg-transparent top-0 px-6 py-4 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-muted rounded-lg">
-                  <Bus className="h-5 w-5 text-foreground" />
+                  <CarFront className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-semibold">
@@ -140,20 +140,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={() => {}}>
                   <Info className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={closeModal}>
-                  <X className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={closeModal} className="border border-gray-500 rounded-full top-4 right-4 p-1.5 hover:bg-gray-100 cursor-pointer">
+                  <X className="h-4 w-4 "  />
                 </Button>
               </div>
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="px-2 pb-4 space-y-4">
             {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
               <div className="border border-border rounded-lg overflow-hidden">
@@ -390,6 +390,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
             </Collapsible>
 
             {/* Características */}
+           
             <Collapsible open={characteristicsOpen} onOpenChange={setCharacteristicsOpen}>
               <div className="border border-border rounded-lg overflow-hidden">
                 <CollapsibleTrigger asChild>

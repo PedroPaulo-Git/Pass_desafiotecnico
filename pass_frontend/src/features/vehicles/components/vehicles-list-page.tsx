@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Filter, Settings2, MoreVertical, Sparkles } from "lucide-react"
+import { Search, Filter, Settings2, MoreVertical, Sparkles, Pin } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"
 import { useVehicles } from "../hooks/use-vehicles"
@@ -65,7 +65,7 @@ export function VehiclesListPage() {
           <div className="flex items-center gap-2">
             <Settings2 className="h-5 w-5 text-muted-foreground" />
             <h1 className="text-xl font-semibold">{t.vehicles.title}</h1>
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            <Pin className="h-5 w-5 text-muted-foreground" />
           </div>
           <span className="text-sm text-muted-foreground">{t.nav.fleet}</span>
         </motion.div>
@@ -147,7 +147,8 @@ export function VehiclesListPage() {
       </motion.div>
 
       {/* Modals */}
-      <AnimatePresence>
+      
+      <AnimatePresence >
         {modalType === "vehicle-details" && <VehicleModal />}
         {modalType === "vehicle-create" && <VehicleModal isCreate />}
         {modalType === "fueling-create" && <FuelingModal />}

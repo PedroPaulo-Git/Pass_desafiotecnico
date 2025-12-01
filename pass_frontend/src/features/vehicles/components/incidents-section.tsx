@@ -39,7 +39,7 @@ export function IncidentsSection({ vehicleId, incidents }: IncidentsSectionProps
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="border border-border rounded-lg overflow-hidden">
+      <div className="border border-border rounded-lg overflow-hidden max-w-full " >
         <CollapsibleTrigger asChild>
           <button
             type="button"

@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from 'react'
 import { motion } from "framer-motion"
 import { MoreVertical } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
@@ -33,6 +34,51 @@ const rowVariants = {
 export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTableProps) {
   const { t } = useI18n()
   const { openModal } = useModalStore()
+
+  function ActionsMenu({ vehicle }: { vehicle: Vehicle }) {
+    const [open, setOpen] = React.useState(false)
+    const pendingRef = React.useRef<null | (() => void)>(null)
+
+    return (
+      <DropdownMenu open={open} onOpenChange={(v) => {
+        setOpen(v)
+        if (!v && pendingRef.current) {
+          const action = pendingRef.current
+          pendingRef.current = null
+          action()
+        }
+      }}>
+        <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => {
+              pendingRef.current = () => openModal("vehicle-details", { vehicle })
+              setOpen(false)
+            }}
+          >
+            {t.common.edit}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              pendingRef.current = () =>
+                openModal("confirm-delete", {
+                  vehicleId: vehicle.id,
+                  title: t.common.deleteConfirm,
+                })
+              setOpen(false)
+            }}
+            className="text-destructive"
+          >
+            {t.common.delete}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -112,35 +158,7 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openModal("vehicle-details", { vehicle })
-                        }}
-                      >
-                        {t.common.edit}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openModal("confirm-delete", {
-                            vehicleId: vehicle.id,
-                            title: t.common.deleteConfirm,
-                          })
-                        }}
-                        className="text-destructive"
-                      >
-                        {t.common.delete}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <ActionsMenu vehicle={vehicle} />
                 </TableCell>
               </motion.tr>
             ))
