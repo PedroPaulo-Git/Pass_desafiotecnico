@@ -43,6 +43,7 @@ const vehicleSchemaQuery = z.object({
   limit: z.coerce.number().int().positive().min(1).max(100).default(10),
   plate: z.string().min(7, "Plate is required").optional(),
   brand: z.string().min(1, "Brand is required").optional(),
+  model: z.string().min(1, "Model is required").optional(),
   status: z
     .enum(["LIBERADO", "EM_MANUTENCAO", "VENDIDO", "INDISPONIVEL"])
     .optional(),

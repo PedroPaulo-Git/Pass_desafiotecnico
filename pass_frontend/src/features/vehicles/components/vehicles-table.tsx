@@ -113,7 +113,7 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
             <TableHead className="font-semibold">Título</TableHead>
             <TableHead className="font-semibold">{t.vehicles.brand}</TableHead>
             <TableHead className="font-semibold">{t.vehicles.capacity}</TableHead>
-            <TableHead className="font-semibold">{t.vehicles.plate}</TableHead>
+            <TableHead className="font-semibold">{t.vehicles.plate} - {t.vehicles.state}</TableHead>
             <TableHead className="font-semibold">{t.vehicles.company}</TableHead>
             <TableHead className="font-semibold">{t.vehicles.status}</TableHead>
             <TableHead className="w-10"></TableHead>
@@ -150,7 +150,7 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
                 </TableCell>
                 <TableCell>{vehicle.brand}</TableCell>
                 <TableCell>{vehicle.capacity}</TableCell>
-                <TableCell className="font-mono">{vehicle.plate}</TableCell>
+                <TableCell className="font-mono">{vehicle.plate} - {vehicle.state}</TableCell>
                 <TableCell>{vehicle.companyName || "-"}</TableCell>
                 <TableCell>
                   <Badge className={`${getStatusColor(vehicle.status)} text-white border-0`}>

@@ -45,8 +45,85 @@ export function VehiclesListPage() {
   const { type: modalType } = useModalStore()
 
   const handleSearch = (value: string) => {
+    const v = value.trim()
     setSearchTerm(value)
-    setFilters((prev) => ({ ...prev, plate: value || undefined, page: 1 }))
+
+    // normalize for plate detection (remove non-alnum and uppercase)
+    const normalized = v.toUpperCase().replace(/[^A-Z0-9]/g, "")
+
+    // plate regexes: old pattern AAA9999 and mercosul-like AAA9A99
+    const plateRegexes = [/^[A-Z]{3}\d{4}$/, /^[A-Z]{3}\d[A-Z]\d{2}$/]
+
+    // enums / known filters (uppercased)
+    const statuses = ["LIBERADO", "EM_MANUTENCAO", "INDISPONIVEL", "VENDIDO"]
+    const categories = ["ONIBUS", "VAN", "CARRO", "CAMINHAO"]
+    const classifications = ["PREMIUM", "BASIC", "EXECUTIVO"]
+
+    const upper = v.toUpperCase()
+
+    // base reset (go to first page)
+    const base: Partial<VehicleFilters> = { page: 1 }
+
+    // Helper to set exactly one textual filter at a time
+    const applySingle = (single: Partial<VehicleFilters>) => {
+      setFilters((prev) => ({
+        ...prev,
+        ...base,
+        // clear all known text filters first
+        plate: undefined,
+        brand: undefined,
+        status: undefined,
+        category: undefined,
+        classification: undefined,
+        state: undefined,
+        ...single,
+      }))
+    }
+
+    // empty -> clear text filters
+    if (!v) {
+      applySingle({})
+      return
+    }
+
+    // 1) Plate exact match
+    if (normalized && plateRegexes.some((r) => r.test(normalized))) {
+      applySingle({ plate: normalized })
+      return
+    }
+
+    // 2) Exact enum matches (status/category/classification)
+    if (statuses.includes(upper)) {
+      applySingle({ status: upper as any })
+      return
+    }
+
+    if (categories.includes(upper)) {
+      applySingle({ category: upper as any })
+      return
+    }
+
+    if (classifications.includes(upper)) {
+      applySingle({ classification: upper as any })
+      return
+    }
+
+    // 3) UF/state code (2 letters)
+    if (/^[A-Z]{2}$/.test(upper)) {
+      applySingle({ state: upper })
+      return
+    }
+
+    // 4) Fallback to brand if the input is mainly alphabetic (brand/model search)
+    const looksLikeAlphabet = /^[A-Za-zÀ-ÿ0-9 \-_.]{2,60}$/.test(v)
+    if (looksLikeAlphabet) {
+      // prefer brand filtering as backend supports it; keep original casing
+      applySingle({ brand: v })
+      return
+    }
+
+    // 5) Last resort: if nothing matched, send it as brand anyway (safer than relying on unsupported `search` param)
+    applySingle({ brand: v })
   }
 
   const handleFilterChange = (newFilters: Partial<VehicleFilters>) => {

@@ -31,9 +31,26 @@ export class VehicleController {
     if (queryValidated.category) where.category = queryValidated.category;
     if (queryValidated.classification)
       where.classification = queryValidated.classification;
-    if (queryValidated.plate) where.plate = queryValidated.plate;
-    if (queryValidated.brand) where.brand = queryValidated.brand;
+    if (queryValidated.plate) {
+      where.plate = {
+        contains: queryValidated.plate,
+        mode: "insensitive",
+      } as Prisma.StringFilter;
+    }
+    if (queryValidated.brand) {
+      where.brand = {
+        contains: queryValidated.brand,
+        mode: "insensitive",
+      } as Prisma.StringFilter;
+    }
+      if (queryValidated.model) {
+      where.model = {
+        contains: queryValidated.model,
+        mode: "insensitive",
+      } as Prisma.StringFilter;
+    }
     if (queryValidated.state) where.state = queryValidated.state;
+
 
     const sortField = queryValidated.sortBy ?? "createdAt";
     const sortOrder = queryValidated.sortOrder ?? "desc";

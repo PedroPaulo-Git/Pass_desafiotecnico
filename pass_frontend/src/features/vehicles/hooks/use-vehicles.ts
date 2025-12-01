@@ -18,6 +18,7 @@ export function useVehicles(filters: VehicleFilters = {}) {
       if (filters.state) params.append("state", filters.state)
       if (filters.sortBy) params.append("sortBy", filters.sortBy)
       if (filters.sortOrder) params.append("sortOrder", filters.sortOrder)
+      if ((filters as any).search) params.append("search", (filters as any).search)
 
       const { data } = await api.get<PaginatedResponse<Vehicle>>(`/vehicles?${params.toString()}`)
       return data
