@@ -247,7 +247,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       <div>
                         <label className="text-xs text-muted-foreground">{t.vehicles.model}</label>
                         <Input {...register("model")} className="h-8" />
-                        {errors.model && <span className="text-xs text-destructive">{errors.model.message}</span>}
+                        {errors.model?.message && <span className="text-xs text-destructive">{String(errors.model.message)}</span>}
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground">{t.vehicles.year}</label>
@@ -349,7 +349,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       <div>
                         <label className="text-xs text-muted-foreground">{t.vehicles.plate}</label>
                         <Input {...register("plate")} className="h-8 font-mono" />
-                        {errors.plate && <span className="text-xs text-destructive">{errors.plate.message}</span>}
+                        {errors.plate?.message && <span className="text-xs text-destructive">{String(errors.plate.message)}</span>}
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground">{t.vehicles.renavam}</label>

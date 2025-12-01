@@ -1,4 +1,4 @@
-import { z } from "zod";
+import {z} from "zod";
 
 // Create schema for vehicle document
 const createVehicleDocumentSchema = z.object({

@@ -173,11 +173,9 @@ export function FuelingModal() {
                         placeholder="Nome do posto"
                         className="h-9"
                       />
-                      {errors.provider && (
-                        <span className="text-xs text-destructive">
-                          {errors.provider.message}
-                        </span>
-                      )}
+                        {errors.provider?.message && (
+                          <span className="text-xs text-destructive">{String(errors.provider.message)}</span>
+                        )}
                     </div>
 
                     {/* Row 2: KM, KM Stop */}

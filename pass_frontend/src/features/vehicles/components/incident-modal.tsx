@@ -140,8 +140,8 @@ export function IncidentModal() {
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.classification && (
-                          <span className="text-xs text-destructive">{errors.classification.message}</span>
+                        {errors.classification?.message && (
+                          <span className="text-xs text-destructive">{String(errors.classification.message)}</span>
                         )}
                       </div>
                       <div>
@@ -171,7 +171,7 @@ export function IncidentModal() {
                       <div>
                         <label className="text-xs text-muted-foreground">{t.incidents.date}</label>
                         <Input type="date" {...register("date")} className="h-9" />
-                        {errors.date && <span className="text-xs text-destructive">{errors.date.message}</span>}
+                        {errors.date?.message && <span className="text-xs text-destructive">{String(errors.date.message)}</span>}
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground">{t.incidents.record}</label>

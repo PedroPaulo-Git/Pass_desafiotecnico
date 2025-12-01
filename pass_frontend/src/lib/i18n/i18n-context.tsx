@@ -21,7 +21,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const t = translations[language]
+  // translations[language] is a union of all languages; cast to TranslationKeys
+  const t = translations[language] as unknown as TranslationKeys
 
   return <I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
 }

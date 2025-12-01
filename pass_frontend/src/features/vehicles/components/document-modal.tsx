@@ -125,15 +125,15 @@ export function DocumentModal() {
                           <option key={type} value={type} />
                         ))}
                       </datalist>
-                      {errors.name && <span className="text-xs text-destructive">{errors.name.message}</span>}
+                      {errors.name?.message && <span className="text-xs text-destructive">{String(errors.name.message)}</span>}
                     </div>
 
                     {/* Expiry Date */}
                     <div>
                       <label className="text-xs text-muted-foreground">{t.documents.expiryDate}</label>
                       <Input type="date" {...register("expiryDate")} className="h-9" />
-                      {errors.expiryDate && (
-                        <span className="text-xs text-destructive">{errors.expiryDate.message}</span>
+                      {errors.expiryDate?.message && (
+                        <span className="text-xs text-destructive">{String(errors.expiryDate.message)}</span>
                       )}
                     </div>
 

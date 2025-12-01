@@ -25,8 +25,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@pass/schemas": ["../pass_schemas/src"],
-      "@pass/schemas/*": ["../pass_schemas/src/*"]
+      "@pass/schemas/*": ["../pass_schemas/dist/schemas/*"]
     }
     // "paths": {
     //   "@/*": [
@@ -37,14 +36,10 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-  ],
-  "references": [
-    { "path": "../pass_schemas" }
+    "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next"
   ]
 }
