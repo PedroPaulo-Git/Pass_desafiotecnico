@@ -123,10 +123,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal} >
-      <DialogContent fullWidth showInfo={false} showCloseButton={false} className="bg-gray-50 max-w-none md:w-[min(40vw,900px)] max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent fullWidth showInfo={false} showCloseButton={false} className="max-w-none md:w-[min(40vw,900px)] max-h-[90vh] overflow-y-auto p-0">
         <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
           {/* Header */}
-          <DialogHeader className="sticky backdrop-blur-lg bg-transparent top-0 px-6 py-4 ">
+          <DialogHeader className="sticky z-10 backdrop-blur-lg bg-transparent top-0 px-6 py-4 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-muted rounded-lg">

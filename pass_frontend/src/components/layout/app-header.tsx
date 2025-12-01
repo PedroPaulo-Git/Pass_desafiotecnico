@@ -57,7 +57,7 @@ export function AppHeader({
     languages.find((l) => l.value === language)?.label || "English";
 
   return (
-    <header className="sticky top-0 flex h-16 w-full items-center justify-between border-b border-border bg-background px-4 rounded-t-2xl">
+    <header className="sticky bg-white dark:bg-card top-0 flex h-16 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
       {/* --- LEFT SECTION: Sidebar Toggle & Breadcrumb --- */}
       <div className="flex items-center gap-4">
         {/* Mobile Menu */}
@@ -84,7 +84,7 @@ export function AppHeader({
         <Separator orientation="vertical" className="hidden h-6 lg:block" />
 
         {/* Page Title / Breadcrumb */}
-        <span className="text-sm font-medium">Availability</span>
+        {/* <span className="text-sm font-medium">Availability</span> */}
       </div>
 
       {/* --- CENTER SECTION: Search Bar --- */}
