@@ -42,6 +42,20 @@ Senha: minioadmin123
 
 Crie o bucket `pass-vehicles` no console do MinIO.
 
+## 🛠️ Desenvolvimento (PowerShell)
+
+Se você está desenvolvendo no Windows, existe um script de conveniência `run-dev.ps1` na raiz do repositório que inicia o backend e o frontend em modo de desenvolvimento.
+
+- `.\run-dev.ps1` — abre duas janelas PowerShell separadas e executa `npm run dev` em `pass_backend` e `pass_frontend`.
+- `.\run-dev.ps1 -NoNewWindow` — executa os dois comandos na janela atual (útil para debugging ou CI manual).
+
+Pré-requisitos:
+- PowerShell (Windows)
+- `node` e `npm` disponíveis no `PATH` para os ambientes `pass_backend` e `pass_frontend`.
+
+Observações:
+- O script executa os servidores no host, portanto `node_modules` serão instalados localmente em cada pacote quando você rodar `npm install` dentro das pastas. Se preferir que `node_modules` não apareçam no host, use a versão com containers (Docker) — posso adicionar instruções se quiser.
+
 ### 3. Configure o Backend
 
 ```bash
