@@ -9,14 +9,14 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import {
   createVehicleSchema,
   updateVehicleSchema,
-} from "@/schemas/vehicleSchema";
+} from "@pass/schemas/vehicleSchema";
 import {
   CreateVehicleInput,
   UpdateVehicleInput,
   VehicleIdParam,
-} from "@/schemas/vehicleSchema";
+} from "@pass/schemas/vehicleSchema";
 
-import { vehicleSchemaQuery } from "@/schemas/vehicleSchema";
+import { vehicleSchemaQuery } from "@pass/schemas/vehicleSchema";
 import { Prisma } from "@prisma/client";
 
 export class VehicleController {

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { VehicleDocumentController } from "../controllers/vehicleDocumentController";
-import { VehicleDocumentIdParam, UpdateVehicleDocumentInput } from "@/schemas/vehicleDocumentSchema";
+import { VehicleDocumentIdParam, UpdateVehicleDocumentInput } from "@pass/schemas/vehicleDocumentSchema";
 
 const controllerVehicleDocument = new VehicleDocumentController();
 

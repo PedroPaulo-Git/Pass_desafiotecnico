@@ -1,0 +1,13 @@
+{
+  "name": "@pass/schemas",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}

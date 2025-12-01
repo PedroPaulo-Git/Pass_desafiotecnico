@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { CreateIncidentInput } from "@/schemas/incidentSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+import { CreateIncidentInput } from "@pass/schemas/incidentSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 export const createIncidentService = async (

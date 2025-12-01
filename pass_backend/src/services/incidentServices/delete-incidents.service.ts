@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { IncidentIdParam } from "@/schemas/incidentSchema";
+import { IncidentIdParam } from "@pass/schemas/incidentSchema";
 import { AppError } from "@/utils/AppError";
 
 export const deleteIncidentService = async (incidentId: IncidentIdParam) => {

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { VehicleImageController } from "@/http/controllers/vehicleImageController";
-import { VehicleImageIdParam, UpdateVehicleImageInput } from "@/schemas/vehicleImageSchema";
+import { VehicleImageIdParam, UpdateVehicleImageInput } from "@pass/schemas/vehicleImageSchema";
 
 export async function vehicleImageRoutes(app: FastifyInstance) {
   const controller = new VehicleImageController();

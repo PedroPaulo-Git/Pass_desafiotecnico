@@ -4,12 +4,11 @@
     "module": "CommonJS",
     "lib": ["ES2022"],
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "..",
     "paths": {
-      // Aqui você mapeia o alias.
-      // Qualquer import que use "@/" será resolvido a partir do diretório "src".
-      "@/*": ["src/*"], 
-      // Se a pasta fosse "app", você usaria: "@/app/*": ["app/*"]
+      "@/*": ["src/*"],
+      "@pass/schemas": ["../pass_schemas/src"],
+      "@pass/schemas/*": ["../pass_schemas/src/*"]
     },
     "baseUrl": ".",
     "strict": true,
@@ -26,6 +25,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../pass_schemas/src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

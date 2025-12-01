@@ -8,8 +8,8 @@ import {
   CreateVehicleImageInput,
   UpdateVehicleImageInput,
   VehicleImageIdParam,
-} from "@/schemas/vehicleImageSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+} from "@pass/schemas/vehicleImageSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import {
   listVehicleImageService,
   listVehicleImageById,

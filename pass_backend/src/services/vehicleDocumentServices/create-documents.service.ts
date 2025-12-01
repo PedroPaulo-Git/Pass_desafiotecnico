@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { CreateVehicleDocumentInput } from "@/schemas/vehicleDocumentSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+import { CreateVehicleDocumentInput } from "@pass/schemas/vehicleDocumentSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 export const createVehicleDocumentService = async (

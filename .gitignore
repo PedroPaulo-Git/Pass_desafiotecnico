@@ -1,0 +1,5 @@
+node_modules/
+dist/
+pass_schemas/node_modules/
+pass_schemas/dist/
+pass_schemas/dist/**/*

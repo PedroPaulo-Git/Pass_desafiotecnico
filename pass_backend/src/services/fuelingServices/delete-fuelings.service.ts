@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { AppError } from "@/utils/AppError";
-import { FuelingIdParam } from "@/schemas/fuelingSchema";
+import { FuelingIdParam } from "@pass/schemas/fuelingSchema";
 
 export const deleteFuelingService = async (fuelingId: FuelingIdParam) => {
   if (!fuelingId || fuelingId === undefined || fuelingId === null) {

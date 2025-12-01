@@ -7,7 +7,7 @@ import {
   incidentSchemaQuery,
   UpdateIncidentInput,
   updateIncidentSchema,
-} from "@/schemas/incidentSchema";
+} from "@pass/schemas/incidentSchema";
 import {
   listIncidentService,
   listIncidentServiceByVehicleId,
@@ -16,7 +16,7 @@ import {
   updateIncidentService,
   deleteIncidentService,
 } from "@/services/incidentService";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 
 export class IncidentController {
   async listIncidents(request: FastifyRequest, reply: FastifyReply) {

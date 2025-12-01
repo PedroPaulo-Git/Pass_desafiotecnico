@@ -7,14 +7,14 @@ import {
   CreateVehicleInput,
   UpdateVehicleInput,
   VehicleIdParam,
-} from "@/schemas/vehicleSchema";
-import { CreateFuelingInput } from "@/schemas/fuelingSchema";
-import { CreateIncidentInput } from "@/schemas/incidentSchema";
-import { CreateVehicleDocumentInput } from "@/schemas/vehicleDocumentSchema";
+} from "@pass/schemas/vehicleSchema";
+import { CreateFuelingInput } from "@pass/schemas/fuelingSchema";
+import { CreateIncidentInput } from "@pass/schemas/incidentSchema";
+import { CreateVehicleDocumentInput } from "@pass/schemas/vehicleDocumentSchema";
 import { IncidentController } from "../controllers/incidentController";
 import { VehicleDocumentController } from "../controllers/vehicleDocumentController";
 import { VehicleImageController } from "../controllers/vehicleImageController";
-import { CreateVehicleImageInput } from "../../schemas/vehicleImageSchema";
+import { CreateVehicleImageInput } from "@pass/schemas/vehicleImageSchema";
 
 export const vehicleRoutes = async (app: FastifyInstance) => {
   const controllerVehicle = new VehicleController();

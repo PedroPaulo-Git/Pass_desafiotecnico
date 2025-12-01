@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { FuelingController } from "../controllers/fuelingController";
-import { FuelingIdParam, UpdateFuelingInput } from "@/schemas/fuelingSchema";
+import { FuelingIdParam, UpdateFuelingInput } from "@pass/schemas/fuelingSchema";
 const controllerFueling = new FuelingController();
 
 export const fuelingRoutes = async (app: FastifyInstance) => {

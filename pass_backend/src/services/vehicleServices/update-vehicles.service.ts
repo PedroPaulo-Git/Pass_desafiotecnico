@@ -1,6 +1,6 @@
 import { AppError } from "@/utils/AppError";
 import { prisma } from "../../lib/prisma";
-import { UpdateVehicleInput } from "@/schemas/vehicleSchema";
+import { UpdateVehicleInput } from "@pass/schemas/vehicleSchema";
 
 export const updateVehicleService = async (
   vehicleData: UpdateVehicleInput,

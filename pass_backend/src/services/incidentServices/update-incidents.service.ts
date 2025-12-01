@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { IncidentIdParam } from "@/schemas/incidentSchema";
+import { IncidentIdParam } from "@pass/schemas/incidentSchema";
 import { AppError } from "@/utils/AppError";
-import { UpdateIncidentInput } from "@/schemas/incidentSchema";
+import { UpdateIncidentInput } from "@pass/schemas/incidentSchema";
 
 export const updateIncidentService = async (
   incidentId: IncidentIdParam,

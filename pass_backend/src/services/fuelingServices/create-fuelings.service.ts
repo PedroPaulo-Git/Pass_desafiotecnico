@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { CreateFuelingInput } from "@/schemas/fuelingSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+import { CreateFuelingInput } from "@pass/schemas/fuelingSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 export const createFuelingService = async (

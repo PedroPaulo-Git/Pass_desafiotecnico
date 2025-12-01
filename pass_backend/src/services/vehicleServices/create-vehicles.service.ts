@@ -1,6 +1,6 @@
 import { AppError } from "@/utils/AppError";
 import { prisma } from "../../lib/prisma";
-import { CreateVehicleInput } from "@/schemas/vehicleSchema";
+import { CreateVehicleInput } from "@pass/schemas/vehicleSchema";
 
 export const createVehicleService = async (vehicleData: CreateVehicleInput) => {
   const uniqueConstraints = [

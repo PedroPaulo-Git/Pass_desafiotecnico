@@ -14,8 +14,8 @@ import {
   FuelingIdParam,
   updateFuelingSchema,
   fuelingSchemaQuery,
-} from "@/schemas/fuelingSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+} from "@pass/schemas/fuelingSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { Prisma } from "@prisma/client";
 export class FuelingController {
   //list all fuelings

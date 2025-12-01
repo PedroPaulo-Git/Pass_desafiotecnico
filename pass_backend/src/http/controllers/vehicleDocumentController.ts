@@ -8,8 +8,8 @@ import {
   CreateVehicleDocumentInput,
   UpdateVehicleDocumentInput,
   VehicleDocumentIdParam,
-} from "@/schemas/vehicleDocumentSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+} from "@pass/schemas/vehicleDocumentSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import {
   listVehicleDocumentService,
   listVehicleDocumentById,

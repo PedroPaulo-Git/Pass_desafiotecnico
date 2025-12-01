@@ -1,7 +1,7 @@
 import { Prisma } from ".prisma/client/default";
 import { prisma } from "@/lib/prisma";
-import { FuelingIdParam } from "@/schemas/fuelingSchema";
-import { VehicleIdParam } from "@/schemas/vehicleSchema";
+import { FuelingIdParam } from "@pass/schemas/fuelingSchema";
+import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 interface ListFuelingParams {
