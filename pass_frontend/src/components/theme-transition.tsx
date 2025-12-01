@@ -10,7 +10,7 @@ export function ThemeTransition() {
     <AnimatePresence>
       {isTransitioning && transitionOrigin && (
         <motion.div
-          className="fixed inset-0 z-[9999] pointer-events-none"
+          className="fixed inset-0 z-50 pointer-events-none"
           initial={{ clipPath: `circle(0% at ${transitionOrigin.x}px ${transitionOrigin.y}px)` }}
           animate={{ clipPath: `circle(150% at ${transitionOrigin.x}px ${transitionOrigin.y}px)` }}
           exit={{ opacity: 0 }}

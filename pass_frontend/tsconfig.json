@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ES2017",
     "lib": [
       "dom",
@@ -23,7 +24,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@pass/schemas": ["../pass_schemas/src"],
+      "@pass/schemas/*": ["../pass_schemas/src/*"]
     }
     // "paths": {
     //   "@/*": [
@@ -37,6 +40,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
+  ],
+  "references": [
+    { "path": "../pass_schemas" }
   ],
   "exclude": [
     "node_modules"

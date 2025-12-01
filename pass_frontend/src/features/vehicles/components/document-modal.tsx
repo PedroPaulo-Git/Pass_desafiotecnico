@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { CreateVehicleDocumentInput,createVehicleDocumentSchema } from "@pass/schemas/vehicleDocumentSchema";
 import { FileText, X, Info, ChevronDown, ChevronUp } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"
@@ -16,16 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-const documentSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  expiryDate: z.string().min(1, "Data de vencimento é obrigatória"),
-  alertDays: z.number().optional(),
-  activeAlert: z.boolean().default(true),
-})
-
-type DocumentFormData = z.infer<typeof documentSchema>
-
-const modalVariants = {
+const modalVariants:any = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
   visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
   exit: { opacity: 0, scale: 0.95, y: 20 },
@@ -45,8 +37,8 @@ export function DocumentModal() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<DocumentFormData>({
-    resolver: zodResolver(documentSchema),
+  } = useForm<CreateVehicleDocumentInput>({
+    resolver: zodResolver(createVehicleDocumentSchema),
     defaultValues: {
       activeAlert: true,
       alertDays: 30,
@@ -54,7 +46,7 @@ export function DocumentModal() {
   })
 
   const createDocument = useMutation({
-    mutationFn: async (formData: DocumentFormData) => {
+    mutationFn: async (formData: CreateVehicleDocumentInput) => {
       const { data } = await api.post("/documents", {
         ...formData,
         vehicleId,
@@ -69,7 +61,7 @@ export function DocumentModal() {
     },
   })
 
-  const onSubmit = async (formData: DocumentFormData) => {
+  const onSubmit = async (formData: CreateVehicleDocumentInput) => {
     await createDocument.mutateAsync(formData)
   }
 

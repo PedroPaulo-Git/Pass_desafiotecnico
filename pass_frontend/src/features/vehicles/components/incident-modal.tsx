@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { CreateIncidentInput ,createIncidentSchema} from "@pass/schemas/incidentSchema"
 import { AlertTriangle, X, Info, ChevronDown, ChevronUp, Upload } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"
@@ -18,17 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import type { SeverityLevel } from "@/types/vehicle"
 
-const incidentSchema = z.object({
-  classification: z.string().min(1, "Classificação é obrigatória"),
-  severity: z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"]),
-  date: z.string().min(1, "Data é obrigatória"),
-  title: z.string().optional(),
-  description: z.string().optional(),
-})
-
-type IncidentFormData = z.infer<typeof incidentSchema>
-
-const modalVariants = {
+const modalVariants:any= {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
   visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
   exit: { opacity: 0, scale: 0.95, y: 20 },
@@ -49,15 +40,15 @@ export function IncidentModal() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<IncidentFormData>({
-    resolver: zodResolver(incidentSchema),
+  } = useForm<CreateIncidentInput>({
+    resolver: zodResolver(createIncidentSchema),
     defaultValues: {
       severity: "MEDIA",
     },
   })
 
   const createIncident = useMutation({
-    mutationFn: async (formData: IncidentFormData) => {
+    mutationFn: async (formData: CreateIncidentInput) => {
       const { data } = await api.post("/incidents", {
         ...formData,
         vehicleId,
@@ -72,7 +63,7 @@ export function IncidentModal() {
     },
   })
 
-  const onSubmit = async (formData: IncidentFormData) => {
+  const onSubmit = async (formData: CreateIncidentInput) => {
     await createIncident.mutateAsync(formData)
   }
 
@@ -194,7 +185,7 @@ export function IncidentModal() {
                       <Textarea
                         {...register("description")}
                         placeholder="Descreva a ocorrência..."
-                        className="min-h-[80px] resize-none"
+                        className="min-h-20 resize-none"
                       />
                     </div>
                   </motion.div>

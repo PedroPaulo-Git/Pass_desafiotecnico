@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
+import { CreateVehicleInput,createVehicleSchema } from "@pass/schemas/vehicleSchema"
 import { Bus, X, Info, ChevronDown, ChevronUp, ImagePlus, Trash2, MoreVertical, FileText } from "lucide-react"
 import { format } from "date-fns"
 import { useI18n } from "@/lib/i18n/i18n-context"
@@ -26,35 +26,12 @@ interface VehicleModalProps {
   isCreate?: boolean
 }
 
-const vehicleSchema = z.object({
-  internalId: z.string().optional(),
-  plate: z.string().min(1, "Placa é obrigatória"),
-  renavam: z.string().optional(),
-  chassis: z.string().optional(),
-  model: z.string().min(1, "Modelo é obrigatório"),
-  brand: z.string().min(1, "Marca é obrigatória"),
-  year: z.number().min(1900).max(2100),
-  color: z.string().optional(),
-  category: z.enum(["ONIBUS", "VAN", "CARRO", "CAMINHAO"]),
-  classification: z.enum(["PREMIUM", "BASIC", "EXECUTIVO"]),
-  capacity: z.number().min(1),
-  doors: z.number().min(1),
-  fuelType: z.enum(["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]),
-  state: z.string().optional(),
-  currentKm: z.number().min(0),
-  status: z.enum(["LIBERADO", "EM_MANUTENCAO", "INDISPONIVEL", "VENDIDO"]),
-  companyName: z.string().optional(),
-  description: z.string().optional(),
-})
-
-type VehicleFormData = z.infer<typeof vehicleSchema>
-
 const overlayVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 }
 
-const modalVariants = {
+const modalVariants:any= {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
   visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
   exit: { opacity: 0, scale: 0.95, y: 20 },
@@ -78,8 +55,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     watch,
     reset,
     formState: { errors },
-  } = useForm<VehicleFormData>({
-    resolver: zodResolver(vehicleSchema),
+  } = useForm<CreateVehicleInput>({
+    resolver: zodResolver(createVehicleSchema),
     defaultValues: {
       status: "LIBERADO",
       category: "ONIBUS",
@@ -117,7 +94,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     }
   }, [vehicle, reset])
 
-  const onSubmit = async (formData: VehicleFormData) => {
+  const onSubmit = async (formData: CreateVehicleInput) => {
     if (vehicle) {
       await updateVehicle.mutateAsync({ id: vehicle.id, ...formData })
       closeModal()
@@ -247,8 +224,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         >
                           <SelectTrigger className="h-8">
                             <SelectValue>
-                              <Badge className={`${getStatusColor(watch("status"))} text-white border-0`}>
-                                {t.status[watch("status")]}
+                              <Badge className={`${getStatusColor(watch("status")) as VehicleStatus} text-white border-0`}>
+                                {t.status[watch("status") as keyof typeof t.status]}
                               </Badge>
                             </SelectValue>
                           </SelectTrigger>

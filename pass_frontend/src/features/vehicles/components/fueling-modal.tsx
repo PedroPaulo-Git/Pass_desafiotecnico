@@ -1,49 +1,59 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Fuel, X, Info, ChevronDown, ChevronUp, Upload } from "lucide-react"
-import { useI18n } from "@/lib/i18n/i18n-context"
-import { useModalStore } from "@/store/use-modal-store"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import type { FuelType } from "@/types/vehicle"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { CreateFuelingInput,createFuelingSchema } from "@pass/schemas/fuelingSchema";
+import { Fuel, X, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { useModalStore } from "@/store/use-modal-store";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import type { FuelType } from "@/types/vehicle";
 
-const fuelingSchema = z.object({
-  provider: z.string().min(1, "Posto é obrigatório"),
-  fuelType: z.enum(["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]),
-  liters: z.number().min(0.1, "Quantidade de litros é obrigatória"),
-  totalValue: z.number().min(0.01, "Valor total é obrigatório"),
-  unitPrice: z.number().min(0.01, "Preço unitário é obrigatório"),
-  odometer: z.number().min(0, "Odômetro é obrigatório"),
-  odometerStop: z.number().optional(),
-  date: z.string().min(1, "Data é obrigatória"),
-})
+type FuelingFormData = z.infer<typeof createFuelingSchema>;
 
-type FuelingFormData = z.infer<typeof fuelingSchema>
-
-const modalVariants = {
+const modalVariants:any = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", damping: 25, stiffness: 300 },
+  },
   exit: { opacity: 0, scale: 0.95, y: 20 },
-}
+};
 
 export function FuelingModal() {
-  const { t } = useI18n()
-  const { data, closeModal, isOpen } = useModalStore()
-  const vehicleId = data.vehicleId as string
-  const queryClient = useQueryClient()
+  const { t } = useI18n();
+  const { data, closeModal, isOpen } = useModalStore();
+  const vehicleId = data.vehicleId as string;
+  const queryClient = useQueryClient();
 
-  const [generalOpen, setGeneralOpen] = useState(true)
-  const [receiptOpen, setReceiptOpen] = useState(true)
+  const [generalOpen, setGeneralOpen] = useState(true);
+  const [receiptOpen, setReceiptOpen] = useState(true);
 
   const {
     register,
@@ -51,8 +61,8 @@ export function FuelingModal() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FuelingFormData>({
-    resolver: zodResolver(fuelingSchema),
+  } = useForm<CreateFuelingInput>({
+    resolver: zodResolver(createFuelingSchema),
     defaultValues: {
       fuelType: "DIESEL",
       odometer: 30000,
@@ -60,34 +70,45 @@ export function FuelingModal() {
       totalValue: 0,
       unitPrice: 0,
     },
-  })
+  });
 
   const createFueling = useMutation({
-    mutationFn: async (formData: FuelingFormData) => {
+    mutationFn: async (formData: CreateFuelingInput) => {
       const { data } = await api.post("/fuelings", {
         ...formData,
         vehicleId,
         date: new Date(formData.date).toISOString(),
-      })
-      return data
+      });
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vehicles"] })
-      queryClient.invalidateQueries({ queryKey: ["vehicle", vehicleId] })
-      closeModal()
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+      queryClient.invalidateQueries({ queryKey: ["vehicle", vehicleId] });
+      closeModal();
     },
-  })
+  });
 
-  const onSubmit = async (formData: FuelingFormData) => {
-    await createFueling.mutateAsync(formData)
-  }
+  const onSubmit = async (formData: CreateFuelingInput) => {
+    await createFueling.mutateAsync(formData);
+  };
 
-  const fuelTypes: FuelType[] = ["DIESEL", "DIESEL_S10", "GASOLINA", "ETANOL", "ARLA32"]
+  const fuelTypes: FuelType[] = [
+    "DIESEL",
+    "DIESEL_S10",
+    "GASOLINA",
+    "ETANOL",
+    "ARLA32",
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-lg p-0">
-        <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
+        <motion.div
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           {/* Header */}
           <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
@@ -95,7 +116,9 @@ export function FuelingModal() {
                 <div className="p-2 bg-muted rounded-lg">
                   <Fuel className="h-5 w-5 text-foreground" />
                 </div>
-                <DialogTitle className="text-lg font-semibold">{t.fueling.title}</DialogTitle>
+                <DialogTitle className="text-lg font-semibold">
+                  {t.fueling.title}
+                </DialogTitle>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon">
@@ -108,7 +131,10 @@ export function FuelingModal() {
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="px-6 py-4 space-y-4"
+          >
             {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
               <div className="border border-border rounded-lg overflow-hidden">
@@ -119,7 +145,9 @@ export function FuelingModal() {
                   >
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.vehicles.generalData}</span>
+                      <span className="font-medium">
+                        {t.vehicles.generalData}
+                      </span>
                     </div>
                     {generalOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -129,25 +157,50 @@ export function FuelingModal() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 pt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 pt-0 space-y-4"
+                  >
                     {/* Row 1: Fuel Station */}
                     <div>
                       <label className="text-xs text-muted-foreground">
-                        {t.fueling.fuelStation} <span className="text-muted-foreground">(#18098)</span>
+                        {t.fueling.fuelStation}{" "}
+                        <span className="text-muted-foreground">(#18098)</span>
                       </label>
-                      <Input {...register("provider")} placeholder="Nome do posto" className="h-9" />
-                      {errors.provider && <span className="text-xs text-destructive">{errors.provider.message}</span>}
+                      <Input
+                        {...register("provider")}
+                        placeholder="Nome do posto"
+                        className="h-9"
+                      />
+                      {errors.provider && (
+                        <span className="text-xs text-destructive">
+                          {errors.provider.message}
+                        </span>
+                      )}
                     </div>
 
                     {/* Row 2: KM, KM Stop */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.odometer}</label>
-                        <Input type="number" {...register("odometer", { valueAsNumber: true })} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.odometer}
+                        </label>
+                        <Input
+                          type="number"
+                          {...register("odometer", { valueAsNumber: true })}
+                          className="h-9"
+                        />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.odometerStop}</label>
-                        <Input type="number" {...register("odometerStop", { valueAsNumber: true })} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.odometerStop}
+                        </label>
+                        <Input
+                          type="number"
+                          {...register("odometerStop", { valueAsNumber: true })}
+                          className="h-9"
+                        />
                       </div>
                     </div>
 
@@ -155,11 +208,14 @@ export function FuelingModal() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-xs text-muted-foreground">
-                          {t.fueling.fuelType} <span className="text-muted-foreground">(#1337)</span>
+                          {t.fueling.fuelType}{" "}
+                          <span className="text-muted-foreground">(#1337)</span>
                         </label>
                         <Select
                           value={watch("fuelType")}
-                          onValueChange={(value) => setValue("fuelType", value as FuelType)}
+                          onValueChange={(value) =>
+                            setValue("fuelType", value as FuelType)
+                          }
                         >
                           <SelectTrigger className="h-9">
                             <SelectValue />
@@ -174,7 +230,9 @@ export function FuelingModal() {
                         </Select>
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.quantity}</label>
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.quantity}
+                        </label>
                         <Input
                           type="number"
                           step="0.01"
@@ -187,11 +245,19 @@ export function FuelingModal() {
                     {/* Row 4: Date, Total Value */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.date}</label>
-                        <Input type="date" {...register("date")} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.date}
+                        </label>
+                        <Input
+                          type="date"
+                          {...register("date")}
+                          className="h-9"
+                        />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.totalValue}</label>
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.totalValue}
+                        </label>
                         <Input
                           type="number"
                           step="0.01"
@@ -202,7 +268,10 @@ export function FuelingModal() {
                     </div>
 
                     {/* Hidden: Unit Price (calculated) */}
-                    <input type="hidden" {...register("unitPrice", { valueAsNumber: true })} />
+                    <input
+                      type="hidden"
+                      {...register("unitPrice", { valueAsNumber: true })}
+                    />
                   </motion.div>
                 </CollapsibleContent>
               </div>
@@ -228,11 +297,19 @@ export function FuelingModal() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 pt-0">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 pt-0"
+                  >
                     <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
                       <Info className="h-6 w-6 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">{t.common.uploadFiles}</p>
-                      <p className="text-sm text-muted-foreground">{t.common.dragDrop}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.uploadFiles}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.dragDrop}
+                      </p>
                     </div>
                   </motion.div>
                 </CollapsibleContent>
@@ -252,5 +329,5 @@ export function FuelingModal() {
         </motion.div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

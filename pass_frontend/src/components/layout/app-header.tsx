@@ -24,7 +24,7 @@ export function AppHeader({ onMenuClick, showMenuButton }: AppHeaderProps) {
   ]
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4">
       <div className="flex items-center gap-4">
         {showMenuButton && (
           <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
