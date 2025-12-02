@@ -47,10 +47,6 @@ export function AppHeader({
     { value: "en", label: "English", flag: "🇺🇸" },
     { value: "es", label: "Español", flag: "🇪🇸" },
   ];
-  useEffect(() => {
-    console.log("isCollapsed", isCollapsed);
-    console.log("onToggle", onToggle);
-  }, [isCollapsed, onToggle]);
 
   // Encontra o label da linguagem atual para exibir no botão
   const currentLanguageLabel =
@@ -110,7 +106,6 @@ export function AppHeader({
           size="icon"
           onClick={toggleTheme}
           className="text-muted-foreground"
-          data-theme-toggle
         >
           <motion.div
             initial={false}

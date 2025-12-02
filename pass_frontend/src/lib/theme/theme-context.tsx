@@ -16,7 +16,7 @@ type Theme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme: () => void;
+  toggleTheme: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -106,13 +106,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.className = theme;
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (isTransitioning) return;
-    const button = document.querySelector("[data-theme-toggle]") as HTMLElement | null;
-    const rect = button?.getBoundingClientRect();
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    
     setTransitionOrigin({
-      x: rect ? rect.left + rect.width / 2 : window.innerWidth / 2,
-      y: rect ? rect.top + rect.height / 2 : window.innerHeight / 2,
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
     });
     setIsTransitioning(true);
   }, [isTransitioning]);
