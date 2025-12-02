@@ -176,7 +176,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         </div>
 
         {/* --- NAVIGATION --- */}
-        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
+        <nav className="flex-1 overflow-y-auto py-4 p-2 space-y-6">
           {navGroups.map((group, groupIndex) => (
             <div key={groupIndex}>
               {/* Título do Grupo (Main, Panel, etc) */}
@@ -205,8 +205,9 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                         >
                           <item.icon
                             className={cn(
-                              "h-4 w-4 shrink-0", // Ícones levemente menores para elegância
-                              isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                              "h-4 w-4 shrink-0 ", // Ícones levemente menores para elegância
+                              isActive ? "text-primary " : "text-muted-foreground group-hover:text-foreground",
+                              isCollapsed ? " mx-auto" : ""
                             )}
                           />
                           {!isCollapsed && (
