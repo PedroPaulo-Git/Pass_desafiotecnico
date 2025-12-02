@@ -252,8 +252,9 @@ export function VehiclesListPage() {
       {/* Modals */}
 
       <AnimatePresence>
-        {modalType === "vehicle-details" && <VehicleModal />}
-        {modalType === "vehicle-create" && <VehicleModal isCreate />}
+        {(modalType === "vehicle-details" || modalType === "vehicle-create") && (
+          <VehicleModal key={modalType ?? "vehicle-modal"} isCreate={modalType === "vehicle-create"} />
+        )}
         {modalType === "fueling-create" && <FuelingModal />}
         {modalType === "incident-create" && <IncidentModal />}
         {modalType === "document-create" && <DocumentModal />}

@@ -157,6 +157,16 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     }
   }, [vehicle, reset]);
 
+  // If the modal is opened in create mode, ensure the form is cleared.
+  // This handles the case where React may reuse the same component instance
+  // when switching between detail/create modal types — calling `reset()`
+  // without args restores defaultValues defined in useForm.
+  useEffect(() => {
+    if (isCreate && isOpen) {
+      reset();
+    }
+  }, [isCreate, isOpen, reset]);
+
   // clear description error when user types something
   const descriptionValue = watch("description");
   useEffect(() => {
