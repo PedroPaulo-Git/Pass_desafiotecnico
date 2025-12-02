@@ -1,16 +1,32 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CreateVehicleInput, createVehicleSchema } from "@pass/schemas/vehicleSchema"
-import { Bus, X, Info, ChevronDown, ChevronUp, ImagePlus, Trash2, MoreVertical, FileText, CarFront } from "lucide-react"
-import { format } from "date-fns"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CreateVehicleInput,
+  createVehicleSchema,
+} from "@pass/schemas/vehicleSchema";
+import {
+  Bus,
+  X,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  ImagePlus,
+  Trash2,
+  MoreVertical,
+  FileText,
+  CarFront,
+} from "lucide-react";
+import { format } from "date-fns";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useUpdateVehicle, useCreateVehicle } from "../hooks/use-vehicles";
+import { useVehicleSubmit } from "../hooks/use-vehicle-submit";
 import { toast as sonnerToast } from "sonner";
+import { makePreSubmitHandler } from "../hooks/make-pre-submit-handler";
 import { FuelingsSection } from "./fuelings-section";
 import { IncidentsSection } from "./incidents-section";
 import { DocumentsSection } from "./documents-section";
@@ -25,7 +41,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { FormInput } from "@/features/vehicles/components/fields/form-input";
-import { formatPlate, formatRenavam, formatChassis, formatUf, formatLetters } from "@/lib/formatters/vehicleFormatters";
+import {
+  formatPlate,
+  formatRenavam,
+  formatChassis,
+  formatUf,
+  formatLetters,
+} from "@/lib/formatters/vehicleFormatters";
 import {
   Select,
   SelectContent,
@@ -88,7 +110,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     setError,
     getValues,
     clearErrors,
-    formState: { errors }
+    formState: { errors },
   } = useForm<CreateVehicleInput>({
     resolver: zodResolver(createVehicleSchema),
     mode: "onChange",
@@ -142,82 +164,16 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     }
   }, [descriptionValue, clearErrors]);
 
-  const onSubmit = async (formData: CreateVehicleInput) => {
-    // client-side gate: ensure required fields on create are present
-    if (isCreating) {
-      let hasErrors = false;
-
-      // internalId is required on create
-      if (!formData.internalId || String(formData.internalId).trim().length === 0) {
-        setError("internalId", { type: "required", message: t.vehicles.validation.internalIdRequired });
-        hasErrors = true;
-      }
-
-      const plateClean = (formData.plate ?? "").toString().replace(/-/g, "").trim();
-      if (!plateClean) {
-        setError("plate", { type: "required", message: t.vehicles.validation.plateRequired });
-        hasErrors = true;
-      }
-
-      if (!formData.state || String(formData.state).trim().length === 0) {
-        setError("state", { type: "required", message: t.vehicles.validation.stateRequired });
-        hasErrors = true;
-      }
-
-      const ren = (formData.renavam ?? "").toString().replace(/\D/g, "");
-      if (!ren || ren.length !== 11) {
-        setError("renavam", { type: "required", message: t.vehicles.validation.renavamLength });
-        hasErrors = true;
-      }
-
-      const ch = (formData.chassis ?? "").toString().toUpperCase();
-      if (!ch || ch.length !== 17) {
-        setError("chassis", { type: "required", message: t.vehicles.validation.chassisLength });
-        hasErrors = true;
-      }
-
-      if (!formData.brand || String(formData.brand).trim().length === 0) {
-        setError("brand", { type: "required", message: t.vehicles.validation.brandRequired });
-        hasErrors = true;
-      }
-
-      if (!formData.description || String(formData.description).trim().length === 0) {
-        setError("description", { type: "required", message: t.vehicles.validation.descriptionRequired });
-        hasErrors = true;
-      }
-
-      if (hasErrors) {
-        sonnerToast.error(t.vehicles.messages.checkRequiredFields)
-        return
-      }
-    }
-
-    try {
-      // sanitize fields before sending
-      const payload = {
-        ...formData,
-        plate: (formData.plate ?? "").toString().replace(/-/g, ""),
-        renavam: (formData.renavam ?? "").toString().replace(/\D/g, ""),
-        chassis: (formData.chassis ?? "").toString().toUpperCase(),
-        state: (formData.state ?? "").toString().toUpperCase(),
-        brand: (formData.brand ?? "").toString().trim(),
-        description: (formData.description ?? "").toString().trim(),
-      } as CreateVehicleInput;
-
-      if (vehicle) {
-        await updateVehicle.mutateAsync({ id: vehicle.id, ...payload });
-        sonnerToast.success(t.vehicles.messages.updatedSuccess);
-        closeModal();
-        return;
-      }
-      await createVehicle.mutateAsync(payload);
-      sonnerToast.success(t.vehicles.messages.createdSuccess);
-      closeModal();
-    } catch (err: any) {
-      const message = err?.response?.data?.message ?? err?.message ?? t.vehicles.messages.saveError;
-      sonnerToast.error(String(message));
-    }
-  };
+  const onSubmit = useVehicleSubmit({
+    isCreating,
+    vehicle,
+    updateVehicle,
+    createVehicle,
+    closeModal,
+    t,
+    toast: sonnerToast,
+    setError,
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -304,56 +260,15 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           </DialogHeader>
 
           <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const values = getValues();
-              // pre-submit check (runs before resolver)
-              if (isCreating) {
-                let hasErrors = false;
-                const plateClean = (values.plate ?? "").toString().replace(/-/g, "").trim();
-                if (!plateClean) {
-                  setError("plate", { type: "required", message: t.vehicles.validation.plateRequired });
-                  hasErrors = true;
-                }
-                if (!values.state || String(values.state).trim().length === 0) {
-                  setError("state", { type: "required", message: t.vehicles.validation.stateRequired });
-                  hasErrors = true;
-                }
-                const ren = (values.renavam ?? "").toString().replace(/\D/g, "");
-                if (!ren || ren.length !== 11) {
-                  setError("renavam", { type: "required", message: t.vehicles.validation.renavamLength });
-                  hasErrors = true;
-                }
-                const ch = (values.chassis ?? "").toString().toUpperCase();
-                if (!ch || ch.length !== 17) {
-                  setError("chassis", { type: "required", message: t.vehicles.validation.chassisLength });
-                  hasErrors = true;
-                }
-                if (!values.brand || String(values.brand).trim().length === 0) {
-                  setError("brand", { type: "required", message: t.vehicles.validation.brandRequired });
-                  hasErrors = true;
-                }
-                 if (!values.model || String(values.model).trim().length === 0) {
-                  setError("model", { type: "required", message: t.vehicles.validation.modelRequired });
-                  hasErrors = true;
-                }
-                // internalId check
-                if (!values.internalId || String(values.internalId).trim().length === 0) {
-                  setError("internalId", { type: "required", message: t.vehicles.validation.internalIdRequired });
-                  hasErrors = true;
-                }
-                if (!values.description || String(values.description).trim().length === 0) {
-                  setError("description", { type: "required", message: t.vehicles.validation.descriptionRequired });
-                  hasErrors = true;
-                }
-                if (hasErrors) {
-                  sonnerToast.error(t.vehicles.messages.checkRequiredFields);
-                  return;
-                }
-              }
-              // run react-hook-form validation and then onSubmit
-              await handleSubmit(onSubmit)(e as any);
-            }}
+            onSubmit={makePreSubmitHandler({
+              isCreating,
+              getValues,
+              setError,
+              t,
+              toast: sonnerToast,
+              handleSubmit,
+              onSubmit,
+            })}
             className="px-2 pb-4 space-y-4"
           >
             {/* Dados Gerais */}
@@ -383,7 +298,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="p-4 pt-0 space-y-4"
-                  >
+                   >
                     {/* Row 1: ID, Created, Identifier, Company, Status */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div>
@@ -418,16 +333,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             required: "Identificador é obrigatório",
                             pattern: {
                               value: /^\d+$/,
-                              message: "Identificador deve conter apenas números",
+                              message:
+                                "Identificador deve conter apenas números",
                             },
                             maxLength: {
                               value: 10,
-                              message: "Identificador deve ter no máximo 10 dígitos",
+                              message:
+                                "Identificador deve ter no máximo 10 dígitos",
                             },
                           }}
                           placeholder="316"
                           className="h-8"
-                          formatter={(v: string) => (v || "").toString().replace(/\D/g, "").slice(0,10)}
+                          formatter={(v: string) =>
+                            (v || "").toString().replace(/\D/g, "").slice(0, 10)
+                          }
                           clearErrors={clearErrors}
                         />
                         {errors.internalId?.message && (
@@ -637,7 +556,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                   
+
                       <div>
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.state}
@@ -688,13 +607,19 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <FormInput
                           name="plate"
                           control={control}
-                          rules={isCreating ? {
-                            required: "Campo obrigatório",
-                            validate: (v: string) => {
-                              const clean = (v || "").replace(/-/g, "");
-                              return clean.length >= 6 || "Placa inválida";
-                            },
-                          } : {}}
+                          rules={
+                            isCreating
+                              ? {
+                                  required: "Campo obrigatório",
+                                  validate: (v: string) => {
+                                    const clean = (v || "").replace(/-/g, "");
+                                    return (
+                                      clean.length >= 6 || "Placa inválida"
+                                    );
+                                  },
+                                }
+                              : {}
+                          }
                           className="h-8 font-mono"
                           disabled={!isCreating}
                           formatter={formatPlate}
@@ -713,13 +638,17 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <FormInput
                           name="renavam"
                           control={control}
-                          rules={isCreating ? {
-                            required: "Campo obrigatório",
-                            pattern: {
-                              value: /^\d{11}$/,
-                              message: "Renavam deve ter 11 dígitos",
-                            },
-                          } : {}}
+                          rules={
+                            isCreating
+                              ? {
+                                  required: "Campo obrigatório",
+                                  pattern: {
+                                    value: /^\d{11}$/,
+                                    message: "Renavam deve ter 11 dígitos",
+                                  },
+                                }
+                              : {}
+                          }
                           className="h-8 font-mono"
                           inputMode="numeric"
                           disabled={!isCreating}
@@ -739,13 +668,18 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <FormInput
                           name="chassis"
                           control={control}
-                          rules={isCreating ? {
-                            required: "Campo obrigatório",
-                            pattern: {
-                              value: /^[A-Z0-9]{17}$/,
-                              message: "Chassi deve ter 17 caracteres alfanuméricos",
-                            },
-                          } : {}}
+                          rules={
+                            isCreating
+                              ? {
+                                  required: "Campo obrigatório",
+                                  pattern: {
+                                    value: /^[A-Z0-9]{17}$/,
+                                    message:
+                                      "Chassi deve ter 17 caracteres alfanuméricos",
+                                  },
+                                }
+                              : {}
+                          }
                           className="h-8 font-mono"
                           disabled={!isCreating}
                           formatter={formatChassis}
@@ -857,12 +791,16 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 <CollapsibleContent>
                   <div className="p-4 pt-0">
                     <Textarea
-                      {...register("description", { required: "Descrição é obrigatória" })}
+                      {...register("description", {
+                        required: "Descrição é obrigatória",
+                      })}
                       placeholder="Descrição do veículo..."
                       className="min-h-[100px] resize-none"
                     />
                     {errors.description?.message && (
-                      <span className="text-xs text-destructive">{String(errors.description.message)}</span>
+                      <span className="text-xs text-destructive">
+                        {String(errors.description.message)}
+                      </span>
                     )}
                   </div>
                 </CollapsibleContent>
