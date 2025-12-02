@@ -124,9 +124,46 @@ export function useVehicleSubmit({
       toast.success(t.vehicles.messages.createdSuccess);
       closeModal();
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message ?? err?.message ?? t.vehicles.messages.saveError;
-      toast.error(String(message));
+      const apiError = err?.response?.data;
+
+      // 1. Tenta pegar a mensagem principal do campo "error" da sua API
+      // Se não existir, tenta "message" (caso mude no futuro), ou usa um fallback genérico
+      let title =
+        apiError?.error || apiError?.message || t.vehicles.messages.saveError;
+
+      let description = "";
+
+      // 2. Se houver detalhes específicos (como no erro 409)
+      if (apiError?.details) {
+        const { field, value } = apiError.details;
+        // Você pode formatar isso como preferir
+        if (field) {
+          // Ex: "Campo duplicado: internalId - Valor: 11"
+          description = `Conflito no campo: ${field} ${
+            value ? `(${value})` : ""
+          }`;
+        }
+      }
+      // Fallback: Se não tiver detalhes da API, mas tiver erro genérico do axios
+      else if (!apiError && err.message) {
+        description = err.message;
+      }
+
+      // 3. Dispara o toast do Sonner com Titulo e Descrição
+      toast.error(title, {
+        description: description,
+        duration: 5000, // Dá tempo do usuário ler
+      });
+
+      // Opcional: Se quiser setar erro no formulário automaticamente
+      if (apiError?.details?.field) {
+        // Tenta encontrar o campo no formulário e marcar como erro
+        // Ex: se o field for "internalId", ele deixa o input vermelho
+        setError(apiError.details.field, {
+          type: "manual",
+          message: title, // ou uma mensagem customizada "Este valor já existe"
+        });
+      }
     }
   };
 }
