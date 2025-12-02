@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { FormInput } from "@/features/vehicles/components/fields/form-input";
+import { formatPlate, formatRenavam, formatChassis, formatUf, formatLetters } from "@/lib/formatters/vehicleFormatters";
 import {
   Select,
   SelectContent,
@@ -78,6 +80,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
     watch,
@@ -88,6 +91,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     formState: { errors }
   } = useForm<CreateVehicleInput>({
     resolver: zodResolver(createVehicleSchema),
+    mode: "onChange",
     defaultValues: {
       status: "LIBERADO",
       category: "ONIBUS",
@@ -127,56 +131,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
   const isCreating = isCreate || !vehicle;
 
-  // helpers to keep inputs formatted while typing
-  const formatPlate = (value: string) => {
-    const cleaned = value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-    if (cleaned.length > 3) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 10)}`.slice(0, 8);
-    return cleaned;
-  };
-
-  const onPlateChange = (e: any) => {
-    const raw = e.target.value;
-    const v = formatPlate(raw);
-    setValue("plate", v);
-    const clean = v.replace(/-/g, "");
-    if (clean.length >= 6) clearErrors("plate");
-  };
-
-  const onRenavamChange = (e: any) => {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
-    setValue("renavam", digits);
-    if (digits.length === 11) clearErrors("renavam");
-  };
-
-  const onChassisChange = (e: any) => {
-    const alnum = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 17);
-    setValue("chassis", alnum);
-    if (alnum.length === 17) clearErrors("chassis");
-  };
-
-  const onUfChange = (e: any) => {
-    const letters = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 2);
-    setValue("state", letters);
-    if (letters.length === 2) clearErrors("state");
-  };
-
-  const onBrandChange = (e: any) => {
-    const letters = e.target.value.replace(/[^\p{L} \-\.]/gu, "");
-    setValue("brand", letters);
-    if (String(letters).trim().length > 0) clearErrors("brand");
-  };
-
-   const onModelChange = (e: any) => {
-    const letters = e.target.value.replace(/[^\p{L} \-\.]/gu, "");
-    setValue("model", letters);
-    if (String(letters).trim().length > 0) clearErrors("model");
-  };
-
-  const onInternalIdChange = (e: any) => {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
-    setValue("internalId", digits);
-    if (digits.length > 0 && digits.length <= 10) clearErrors("internalId");
-  };
+  // helpers moved to `src/lib/formatters/vehicleFormatters` and `FormInput` component
+  // NOTE: heavy format logic is handled in utilities; inputs below use Controller-based `FormInput` for smoother typing
 
   // clear description error when user types something
   const descriptionValue = watch("description");
@@ -191,41 +147,47 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     if (isCreating) {
       let hasErrors = false;
 
+      // internalId is required on create
+      if (!formData.internalId || String(formData.internalId).trim().length === 0) {
+        setError("internalId", { type: "required", message: t.vehicles.validation.internalIdRequired });
+        hasErrors = true;
+      }
+
       const plateClean = (formData.plate ?? "").toString().replace(/-/g, "").trim();
       if (!plateClean) {
-        setError("plate", { type: "required", message: "Placa é obrigatória" });
+        setError("plate", { type: "required", message: t.vehicles.validation.plateRequired });
         hasErrors = true;
       }
 
       if (!formData.state || String(formData.state).trim().length === 0) {
-        setError("state", { type: "required", message: "UF é obrigatória" });
+        setError("state", { type: "required", message: t.vehicles.validation.stateRequired });
         hasErrors = true;
       }
 
       const ren = (formData.renavam ?? "").toString().replace(/\D/g, "");
       if (!ren || ren.length !== 11) {
-        setError("renavam", { type: "required", message: "Renavam deve ter 11 dígitos" });
+        setError("renavam", { type: "required", message: t.vehicles.validation.renavamLength });
         hasErrors = true;
       }
 
       const ch = (formData.chassis ?? "").toString().toUpperCase();
       if (!ch || ch.length !== 17) {
-        setError("chassis", { type: "required", message: "Chassi deve ter 17 caracteres" });
+        setError("chassis", { type: "required", message: t.vehicles.validation.chassisLength });
         hasErrors = true;
       }
 
       if (!formData.brand || String(formData.brand).trim().length === 0) {
-        setError("brand", { type: "required", message: "Marca é obrigatória" });
+        setError("brand", { type: "required", message: t.vehicles.validation.brandRequired });
         hasErrors = true;
       }
 
       if (!formData.description || String(formData.description).trim().length === 0) {
-        setError("description", { type: "required", message: "Descrição é obrigatória" });
+        setError("description", { type: "required", message: t.vehicles.validation.descriptionRequired });
         hasErrors = true;
       }
 
       if (hasErrors) {
-        sonnerToast.error("Verifique os campos obrigatórios")
+        sonnerToast.error(t.vehicles.messages.checkRequiredFields)
         return
       }
     }
@@ -244,15 +206,15 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
       if (vehicle) {
         await updateVehicle.mutateAsync({ id: vehicle.id, ...payload });
-        sonnerToast.success("Veículo atualizado com sucesso");
+        sonnerToast.success(t.vehicles.messages.updatedSuccess);
         closeModal();
         return;
       }
       await createVehicle.mutateAsync(payload);
-      sonnerToast.success("Veículo criado com sucesso");
+      sonnerToast.success(t.vehicles.messages.createdSuccess);
       closeModal();
     } catch (err: any) {
-      const message = err?.response?.data?.message ?? err?.message ?? "Erro ao salvar veículo";
+      const message = err?.response?.data?.message ?? err?.message ?? t.vehicles.messages.saveError;
       sonnerToast.error(String(message));
     }
   };
@@ -315,7 +277,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-semibold">
-                    {isCreate ? "Novo Veículo" : t.vehicles.title}
+                    {isCreate ? t.vehicles.newTitle : t.vehicles.title}
                   </DialogTitle>
                   <p className="text-sm text-muted-foreground">
                     {t.vehicles.subtitle}
@@ -350,37 +312,42 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 let hasErrors = false;
                 const plateClean = (values.plate ?? "").toString().replace(/-/g, "").trim();
                 if (!plateClean) {
-                  setError("plate", { type: "required", message: "Placa é obrigatória" });
+                  setError("plate", { type: "required", message: t.vehicles.validation.plateRequired });
                   hasErrors = true;
                 }
                 if (!values.state || String(values.state).trim().length === 0) {
-                  setError("state", { type: "required", message: "UF é obrigatória" });
+                  setError("state", { type: "required", message: t.vehicles.validation.stateRequired });
                   hasErrors = true;
                 }
                 const ren = (values.renavam ?? "").toString().replace(/\D/g, "");
                 if (!ren || ren.length !== 11) {
-                  setError("renavam", { type: "required", message: "Renavam deve ter 11 dígitos" });
+                  setError("renavam", { type: "required", message: t.vehicles.validation.renavamLength });
                   hasErrors = true;
                 }
                 const ch = (values.chassis ?? "").toString().toUpperCase();
                 if (!ch || ch.length !== 17) {
-                  setError("chassis", { type: "required", message: "Chassi deve ter 17 caracteres" });
+                  setError("chassis", { type: "required", message: t.vehicles.validation.chassisLength });
                   hasErrors = true;
                 }
                 if (!values.brand || String(values.brand).trim().length === 0) {
-                  setError("brand", { type: "required", message: "Marca é obrigatória" });
+                  setError("brand", { type: "required", message: t.vehicles.validation.brandRequired });
                   hasErrors = true;
                 }
                  if (!values.model || String(values.model).trim().length === 0) {
-                  setError("model", { type: "required", message: "Marca é obrigatória" });
+                  setError("model", { type: "required", message: t.vehicles.validation.modelRequired });
+                  hasErrors = true;
+                }
+                // internalId check
+                if (!values.internalId || String(values.internalId).trim().length === 0) {
+                  setError("internalId", { type: "required", message: t.vehicles.validation.internalIdRequired });
                   hasErrors = true;
                 }
                 if (!values.description || String(values.description).trim().length === 0) {
-                  setError("description", { type: "required", message: "Descrição é obrigatória" });
+                  setError("description", { type: "required", message: t.vehicles.validation.descriptionRequired });
                   hasErrors = true;
                 }
                 if (hasErrors) {
-                  sonnerToast.error("Verifique os campos obrigatórios");
+                  sonnerToast.error(t.vehicles.messages.checkRequiredFields);
                   return;
                 }
               }
@@ -444,8 +411,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.identifier}
                         </label>
-                        <Input
-                          {...register("internalId", {
+                        <FormInput
+                          name="internalId"
+                          control={control}
+                          rules={{
                             required: "Identificador é obrigatório",
                             pattern: {
                               value: /^\d+$/,
@@ -455,10 +424,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                               value: 10,
                               message: "Identificador deve ter no máximo 10 dígitos",
                             },
-                          })}
+                          }}
                           placeholder="316"
                           className="h-8"
-                          onChange={onInternalIdChange}
+                          formatter={(v: string) => (v || "").toString().replace(/\D/g, "").slice(0,10)}
+                          clearErrors={clearErrors}
                         />
                         {errors.internalId?.message && (
                           <span className="text-xs text-destructive">
@@ -542,14 +512,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.model}
                         </label>
-                        <Input  {...register("model", {
+                        <FormInput
+                          name="model"
+                          control={control}
+                          rules={{
                             required: "Modelo é obrigatório",
                             pattern: {
                               value: /^[\p{L} \-\.]+$/u,
                               message: "Modelo não pode conter números",
                             },
-                          })}className="h-8"
-                          onChange={onModelChange} />
+                          }}
+                          className="h-8"
+                          formatter={formatLetters}
+                          clearErrors={clearErrors}
+                        />
                         {errors.model?.message && (
                           <span className="text-xs text-destructive">
                             {String(errors.model.message)}
@@ -570,16 +546,19 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.brand}
                         </label>
-                        <Input
-                          {...register("brand", {
+                        <FormInput
+                          name="brand"
+                          control={control}
+                          rules={{
                             required: "Marca é obrigatória",
                             pattern: {
                               value: /^[\p{L} \-\.]+$/u,
                               message: "Marca não pode conter números",
                             },
-                          })}
+                          }}
                           className="h-8"
-                          onChange={onBrandChange}
+                          formatter={formatLetters}
+                          clearErrors={clearErrors}
                         />
                         {errors.brand?.message && (
                           <span className="text-xs text-destructive">
@@ -658,27 +637,25 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.vehicles.searchState}
-                        </label>
-                        <Input placeholder="Buscar estado" className="h-8" />
-                      </div>
+                   
                       <div>
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.state}
                         </label>
-                        <Input
-                          {...register("state", {
+                        <FormInput
+                          name="state"
+                          control={control}
+                          rules={{
                             required: "UF é obrigatória",
                             pattern: {
                               value: /^[A-Z]{2}$/,
                               message: "UF deve conter 2 letras",
                             },
-                          })}
+                          }}
                           placeholder="RJ"
                           className="h-8"
-                          onChange={onUfChange}
+                          formatter={formatUf}
+                          clearErrors={clearErrors}
                         />
                         {errors.state?.message && (
                           <span className="text-xs text-destructive">
@@ -708,20 +685,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.plate}
                         </label>
-                        <Input
-                          {...(isCreating
-                            ? register("plate", {
-                                required: "Campo obrigatório",
-                                validate: (v: string) => {
-                                  const clean = (v || "").replace(/-/g, "");
-                                  return clean.length >= 6 || "Placa inválida";
-                                },
-                              })
-                            : register("plate"))}
+                        <FormInput
+                          name="plate"
+                          control={control}
+                          rules={isCreating ? {
+                            required: "Campo obrigatório",
+                            validate: (v: string) => {
+                              const clean = (v || "").replace(/-/g, "");
+                              return clean.length >= 6 || "Placa inválida";
+                            },
+                          } : {}}
                           className="h-8 font-mono"
-                          // required={isCreating}
                           disabled={!isCreating}
-                          onChange={onPlateChange}
+                          formatter={formatPlate}
+                          clearErrors={clearErrors}
                         />
                         {errors.plate?.message && (
                           <span className="text-xs text-destructive">
@@ -733,20 +710,21 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.renavam}
                         </label>
-                        <Input
-                          inputMode="numeric"
-                          {...(isCreating
-                            ? register("renavam", {
-                                required: "Campo obrigatório",
-                                pattern: {
-                                  value: /^\d{11}$/,
-                                  message: "Renavam deve ter 11 dígitos",
-                                },
-                              })
-                            : register("renavam"))}
+                        <FormInput
+                          name="renavam"
+                          control={control}
+                          rules={isCreating ? {
+                            required: "Campo obrigatório",
+                            pattern: {
+                              value: /^\d{11}$/,
+                              message: "Renavam deve ter 11 dígitos",
+                            },
+                          } : {}}
                           className="h-8 font-mono"
+                          inputMode="numeric"
                           disabled={!isCreating}
-                          onChange={onRenavamChange}
+                          formatter={formatRenavam}
+                          clearErrors={clearErrors}
                         />
                         {errors.renavam?.message && (
                           <span className="text-xs text-destructive">
@@ -758,19 +736,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.chassis}
                         </label>
-                        <Input
-                          {...(isCreating
-                            ? register("chassis", {
-                                required: "Campo obrigatório",
-                                pattern: {
-                                  value: /^[A-Z0-9]{17}$/,
-                                  message: "Chassi deve ter 17 caracteres alfanuméricos",
-                                },
-                              })
-                            : register("chassis"))}
+                        <FormInput
+                          name="chassis"
+                          control={control}
+                          rules={isCreating ? {
+                            required: "Campo obrigatório",
+                            pattern: {
+                              value: /^[A-Z0-9]{17}$/,
+                              message: "Chassi deve ter 17 caracteres alfanuméricos",
+                            },
+                          } : {}}
                           className="h-8 font-mono"
                           disabled={!isCreating}
-                          onChange={onChassisChange}
+                          formatter={formatChassis}
+                          clearErrors={clearErrors}
                         />
                         {errors.chassis?.message && (
                           <span className="text-xs text-destructive">

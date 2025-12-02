@@ -66,6 +66,7 @@ export const translations = {
     vehicles: {
       title: "Veículos",
       create: "Criar Veículo",
+      newTitle: "Novo Veículo",
       subtitle: "Informações Gerais",
       identifier: "Identificador",
       createdAt: "Criado Em",
@@ -91,6 +92,25 @@ export const translations = {
       plateType: "Tipo de Placa",
       searchState: "Buscar Estado",
       generalData: "Dados Gerais",
+      messages: {
+        createdSuccess: "Veículo criado com sucesso",
+        updatedSuccess: "Veículo atualizado com sucesso",
+        saveError: "Erro ao salvar veículo",
+        checkRequiredFields: "Verifique os campos obrigatórios",
+      },
+      validation: {
+        plateRequired: "Placa é obrigatória",
+        plateInvalid: "Placa inválida",
+        renavamRequired: "Renavam é obrigatório",
+        renavamLength: "Renavam deve ter 11 dígitos",
+        chassisRequired: "Chassi é obrigatório",
+        chassisLength: "Chassi deve ter 17 caracteres",
+        internalIdRequired: "Identificador é obrigatório",
+        modelRequired: "Modelo é obrigatório",
+        stateRequired: "UF é obrigatória",
+        brandRequired: "Marca é obrigatória",
+        descriptionRequired: "Descrição é obrigatória",
+      },
     },
     // Status
     status: {
@@ -239,6 +259,7 @@ export const translations = {
     vehicles: {
       title: "Vehicles",
       create: "Create Vehicle",
+      newTitle: "New Vehicle",
       subtitle: "General Information",
       identifier: "Identifier",
       createdAt: "Created At",
@@ -264,6 +285,25 @@ export const translations = {
       plateType: "Plate Type",
       searchState: "Search State",
       generalData: "General Data",
+      messages: {
+        createdSuccess: "Vehicle created successfully",
+        updatedSuccess: "Vehicle updated successfully",
+        saveError: "Error saving vehicle",
+        checkRequiredFields: "Please check required fields",
+      },
+      validation: {
+        plateRequired: "Plate is required",
+        plateInvalid: "Invalid plate",
+        renavamRequired: "Renavam is required",
+        renavamLength: "Renavam must be 11 digits",
+        chassisRequired: "Chassis is required",
+        chassisLength: "Chassis must be 17 characters",
+        internalIdRequired: "Identifier is required",
+        modelRequired: "Model is required",
+        stateRequired: "State is required",
+        brandRequired: "Brand is required",
+        descriptionRequired: "Description is required",
+      },
     },
     // Status
     status: {
@@ -412,6 +452,7 @@ export const translations = {
     vehicles: {
       title: "Vehículos",
       subtitle: "Información General",
+      newTitle: "Nuevo Vehículo",
       identifier: "Identificador",
       createdAt: "Creado En",
       model: "Modelo",
@@ -436,6 +477,25 @@ export const translations = {
       plateType: "Tipo de Placa",
       searchState: "Buscar Estado",
       generalData: "Datos Generales",
+      messages: {
+        createdSuccess: "Vehículo creado con éxito",
+        updatedSuccess: "Vehículo actualizado con éxito",
+        saveError: "Error al guardar vehículo",
+        checkRequiredFields: "Verifique los campos obligatorios",
+      },
+      validation: {
+        plateRequired: "La placa es obligatoria",
+        plateInvalid: "Placa inválida",
+        renavamRequired: "Renavam es obligatorio",
+        renavamLength: "Renavam debe tener 11 dígitos",
+        chassisRequired: "Chasis es obligatorio",
+        chassisLength: "Chasis debe tener 17 caracteres",
+        internalIdRequired: "El identificador es obligatorio",
+        modelRequired: "El modelo es obligatorio",
+        stateRequired: "El estado es obligatorio",
+        brandRequired: "Marca es obligatoria",
+        descriptionRequired: "La descripción es obligatoria",
+      },
     },
     // Status
     status: {

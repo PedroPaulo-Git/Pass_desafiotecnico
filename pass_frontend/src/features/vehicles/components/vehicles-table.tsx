@@ -150,7 +150,7 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
                 </TableCell>
                 <TableCell>{vehicle.brand}</TableCell>
                 <TableCell>{vehicle.capacity}</TableCell>
-                <TableCell className="font-mono">{vehicle.plate} - {vehicle.state}</TableCell>
+                <TableCell>{vehicle.plate} - {vehicle.state}</TableCell>
                 <TableCell>{vehicle.companyName || "-"}</TableCell>
                 <TableCell>
                   <Badge className={`${getStatusColor(vehicle.status)} text-white border-0`}>
