@@ -1,23 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/axios"
-
-type PaginatedResponse<T> = { items: T[]; page: number; limit: number; total: number; totalPages: number }
-
-type Incident = any
-
-export type IncidentFilters = {
-  page?: number
-  limit?: number
-  severity?: string
-  classification?: string
-  vehicleId?: string
-  dateFrom?: string
-  dateTo?: string
-  sortBy?: string
-  sortOrder?: string
-  search?: string
-}
-
+import type { PaginatedResponse, Incident } from "@/types/vehicle"
+import type { IncidentFilters } from "./types"
 export function useIncidents(filters: IncidentFilters = {}) {
   return useQuery({
     queryKey: ["incidents", filters],

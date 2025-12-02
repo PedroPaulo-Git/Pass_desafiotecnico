@@ -1,8 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Bus, Fuel, FileWarning, FileText, TrendingUp, AlertTriangle } from "lucide-react"
+import { Bus, Fuel, FileWarning, FileText, TrendingUp, AlertTriangle, Truck } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { useVehicles } from "@/features/vehicles/hooks/use-vehicles"
 import { useFuelings } from "@/features/fleet-events/hooks/use-fuelings"
 import { useIncidents } from "@/features/fleet-events/hooks/use-incidents"
@@ -78,9 +80,20 @@ export default function DashboardPage() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={itemVariants}>
-        <h1 className="text-2xl font-bold tracking-tight">{t.nav.dashboard}</h1>
-        <p className="text-muted-foreground">{t.home.description}</p>
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{t.nav.dashboard}</h1>
+          <p className="text-muted-foreground">{t.home.description}</p>
+        </div>
+
+        <div>
+          <Link href="/vehicles">
+            <Button className="flex items-center gap-2" aria-label={t.vehicles?.manageFleet ?? "Manage fleet"}>
+              <Truck className="h-4 w-4" />
+              {t.vehicles?.manageFleet ?? "Gerenciar frota"}
+            </Button>
+          </Link>
+        </div>
       </motion.div>
 
       <motion.div variants={containerVariants} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

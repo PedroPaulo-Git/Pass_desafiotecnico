@@ -1,29 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/axios"
-
-type PaginatedResponse<T> = { items: T[]; page: number; limit: number; total: number; totalPages: number }
-
-type Fueling = any
-
-export type FuelingFilters = {
-  page?: number
-  limit?: number
-  provider?: string
-  fuelType?: string
-  dateFrom?: string
-  dateTo?: string
-  minOdometer?: number
-  maxOdometer?: number
-  minLiters?: number
-  maxLiters?: number
-  minUnitPrice?: number
-  maxUnitPrice?: number
-  totalValue?: number
-  sortBy?: string
-  sortOrder?: string
-  search?: string
-}
-
+import type { PaginatedResponse, Fueling } from "@/types/vehicle"
+import type { FuelingFilters } from "./types"
 export function useFuelings(filters: FuelingFilters = {}) {
   return useQuery({
     queryKey: ["fuelings", filters],

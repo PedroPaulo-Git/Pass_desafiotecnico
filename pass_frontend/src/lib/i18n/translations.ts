@@ -65,6 +65,7 @@ export const translations = {
     // Vehicles
     vehicles: {
       title: "Veículos",
+      manageFleet: "Gerenciar frota",
       create: "Criar Veículo",
       newTitle: "Novo Veículo",
       subtitle: "Informações Gerais",
@@ -260,6 +261,7 @@ export const translations = {
     // Vehicles
     vehicles: {
       title: "Vehicles",
+      manageFleet: "Manage fleet",
       create: "Create Vehicle",
       newTitle: "New Vehicle",
       subtitle: "General Information",
@@ -455,6 +457,7 @@ export const translations = {
     // Vehicles
     vehicles: {
       title: "Vehículos",
+      manageFleet: "Gestionar flota",
       subtitle: "Información General",
       newTitle: "Nuevo Vehículo",
       identifier: "Identificador",
