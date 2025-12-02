@@ -3,6 +3,10 @@
 import { motion } from "framer-motion"
 import { Bus, Fuel, FileWarning, FileText, TrendingUp, AlertTriangle } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
+import { useVehicles } from "@/features/vehicles/hooks/use-vehicles"
+import { useFuelings } from "@/features/fleet-events/hooks/use-fuelings"
+import { useIncidents } from "@/features/fleet-events/hooks/use-incidents"
+import { useVehicleDocuments } from "@/features/fleet-events/hooks/use-vehicle-documents"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const containerVariants = {
@@ -31,35 +35,41 @@ const itemVariants: any = {
 export default function DashboardPage() {
   const { t } = useI18n()
 
+  // fetch small paginated responses and read the `total` count
+  const { data: vehiclesData } = useVehicles({ page: 1, limit: 1 })
+  const { data: fuelingsData } = useFuelings({ page: 1, limit: 1 })
+  const { data: incidentsData } = useIncidents({ page: 1, limit: 1 })
+  const { data: documentsData } = useVehicleDocuments({ page: 1, limit: 1 })
+
   const stats = [
     {
       title: t.nav.vehicles,
-      value: "24",
-      change: "+2",
+      value: String(vehiclesData?.total ?? 0),
+      change: "+0",
       icon: Bus,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },
     {
       title: t.fueling.title,
-      value: "156",
-      change: "+12",
+      value: String(fuelingsData?.total ?? 0),
+      change: "+0",
       icon: Fuel,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
     },
     {
       title: t.incidents.title,
-      value: "8",
-      change: "-3",
+      value: String(incidentsData?.total ?? 0),
+      change: "+0",
       icon: FileWarning,
       color: "text-orange-500",
       bgColor: "bg-orange-500/10",
     },
     {
       title: t.documents.title,
-      value: "45",
-      change: "+5",
+      value: String(documentsData?.total ?? 0),
+      change: "+0",
       icon: FileText,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
