@@ -1,12 +1,15 @@
 import { z } from "zod";
 
+const BRAZIL_PLATE_REGEX = /^(?:[A-Z]{3}\d{4}|[A-Z]{3}\d[A-Z]\d{2})$/;
+
 const createVehicleSchema = z.object({
   internalId: z.string().min(1, "Internal ID").optional(),
   plate: z
     .string()
-    .transform((val) => val.replace(/-/g, "").toUpperCase())
-    .refine((v) => v.length === 7, {
-      message: "Plate must be exactly 7 characters, (Ex: ABC1C23).",
+    .transform((val) => val.replace(/[-\s]/g, "").toUpperCase())
+    .refine((v) => BRAZIL_PLATE_REGEX.test(v), {
+      message:
+        "Plate must be a valid Brazilian plate (examples: ABC1234 or ABC1C23).",
     }),
   chassis: z
     .string()
@@ -41,7 +44,14 @@ const createVehicleSchema = z.object({
 const vehicleSchemaQuery = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),
   limit: z.coerce.number().int().positive().min(1).max(100).default(10),
-  plate: z.string().min(7, "Plate is required").optional(),
+  plate: z
+    .string()
+    .optional()
+    .transform((v) => (v ? v.replace(/[-\s]/g, "").toUpperCase() : v))
+    .refine((v) => !v || BRAZIL_PLATE_REGEX.test(v), {
+      message:
+        "Plate must be a valid Brazilian plate when provided (examples: ABC1234 or ABC1C23).",
+    }),
   brand: z.string().min(1, "Brand is required").optional(),
   model: z.string().min(1, "Model is required").optional(),
   status: z

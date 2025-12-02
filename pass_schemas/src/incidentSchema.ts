@@ -11,7 +11,7 @@ const createIncidentSchema = z.object({
     // 3. Valida se a string MAIÚSCULA transformada é um dos valores do enum.
     .pipe(
       z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"] as const, {
-        error: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
+        message: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
       })
     ),
   date: z.coerce.date(),
@@ -27,7 +27,7 @@ const incidentSchemaQuery = z.object({
     .transform((val) => val.toUpperCase())
     .pipe(
       z.enum(["BAIXA", "MEDIA", "ALTA", "GRAVE"] as const, {
-        error: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
+        message: "Severity must be one of: BAIXA, MEDIA, ALTA, GRAVE",
       })
     )
     .optional(),
