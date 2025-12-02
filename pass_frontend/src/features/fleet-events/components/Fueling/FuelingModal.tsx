@@ -88,14 +88,10 @@ export function FuelingModal() {
       setValue("odometer", Number(km));
     }
     const previousOdometer = getFuelings?.data?.items?.[0]?.odometer;
-    console.log(getFuelings?.data);
-    console.log({previousOdometer});
     setOdometer(previousOdometer);
   }, [vehicleQuery?.data?.currentKm, getFuelings?.data, setValue]);
 
   const onSubmit = async (formData: CreateFuelingInput) => {
-    console.log(formData);
-
     // Simple client-side validations
     if (!formData.totalValue || Number(formData.totalValue) < 1) {
       sonnerToast.error(
@@ -112,10 +108,7 @@ export function FuelingModal() {
       // compute odometer value to send:
       // Treat `odometerStop` as an absolute KM (replacement). It must not be smaller than vehicle.currentKm.
       const odometerStop = Number(formData.odometer) || 0;
-      console.log(odometerStop);
       const currentKm = vehicleQuery?.data?.currentKm;
-      console.log(currentKm);
-
       if (currentKm !== undefined && odometerStop < currentKm) {
         sonnerToast.error(
           "KM de parada não pode ser menor que o KM atual do veículo"
