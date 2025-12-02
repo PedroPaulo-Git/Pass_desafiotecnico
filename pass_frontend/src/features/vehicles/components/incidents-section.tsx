@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { Incident } from "@/types/vehicle"
+import { useIncidents } from "@/features/fleet-events/hooks/use-incidents"
 
 interface IncidentsSectionProps {
   vehicleId: string
@@ -21,6 +22,9 @@ export function IncidentsSection({ vehicleId, incidents }: IncidentsSectionProps
   const { t } = useI18n()
   const { openModal } = useModalStore()
   const [isOpen, setIsOpen] = useState(true)
+    const { data: incidentsData } = useIncidents({ vehicleId })
+    const currentIncidents = incidentsData?.items || incidents
+    console.log(currentIncidents)
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -67,7 +71,7 @@ export function IncidentsSection({ vehicleId, incidents }: IncidentsSectionProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {incidents.length === 0 ? (
+                {currentIncidents.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={3} className="text-center py-6">
                       <div className="flex items-center justify-center gap-2 text-muted-foreground">
@@ -77,7 +81,7 @@ export function IncidentsSection({ vehicleId, incidents }: IncidentsSectionProps
                     </TableCell>
                   </TableRow>
                 ) : (
-                  incidents.map((incident) => (
+                  currentIncidents.map((incident:Incident) => (
                     <TableRow key={incident.id}>
                       <TableCell>{format(new Date(incident.date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>{incident.classification}</TableCell>

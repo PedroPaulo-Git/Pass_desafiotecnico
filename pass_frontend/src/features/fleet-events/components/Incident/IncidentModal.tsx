@@ -1,35 +1,65 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CreateIncidentInput ,createIncidentSchema} from "@pass/schemas/incidentSchema"
-import { AlertTriangle, Info, ChevronDown, ChevronUp, Upload } from "lucide-react"
-import { useI18n } from "@/lib/i18n/i18n-context"
-import { useModalStore } from "@/store/use-modal-store"
-import { useCreateIncident } from "@/features/fleet-events/hooks/use-incidents"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import type { SeverityLevel } from "@/types/vehicle"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CreateIncidentInput,
+  createIncidentSchema,
+} from "@pass/schemas/incidentSchema";
+import {
+  AlertTriangle,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  Upload,
+} from "lucide-react";
+import { toast as sonnerToast } from "sonner";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { useModalStore } from "@/store/use-modal-store";
+import { useCreateIncident } from "@/features/fleet-events/hooks/use-incidents";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import type { SeverityLevel } from "@/types/vehicle";
 
-const modalVariants:any= {
+const modalVariants: any = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", damping: 25, stiffness: 300 },
+  },
   exit: { opacity: 0, scale: 0.95, y: 20 },
-}
+};
 
 export function IncidentModal() {
-  const { t } = useI18n()
-  const { data, closeModal, isOpen } = useModalStore()
-  const vehicleId = data.vehicleId as string
+  const { t } = useI18n();
+  const { data, closeModal, isOpen } = useModalStore();
+  const vehicleId = data.vehicleId as string;
 
-  const [generalOpen, setGeneralOpen] = useState(true)
-  const [attachmentOpen, setAttachmentOpen] = useState(true)
+  const [generalOpen, setGeneralOpen] = useState(true);
+  const [attachmentOpen, setAttachmentOpen] = useState(true);
 
   const {
     register,
@@ -42,28 +72,54 @@ export function IncidentModal() {
     defaultValues: {
       severity: "MEDIA",
     },
-  })
+  });
 
-  const createIncident = useCreateIncident()
+  const createIncident = useCreateIncident();
 
   const onSubmit = async (formData: CreateIncidentInput) => {
-    await createIncident.mutateAsync({ ...formData, vehicleId })
-    closeModal()
-  }
+    try {
+      await createIncident.mutateAsync({ ...formData, vehicleId });
+
+      sonnerToast.success(
+        t.incidents.messages.createdSuccess ||
+          t.common.success ||
+          "Registro criado com sucesso"
+      );
+      closeModal();
+    } catch (err: any) {
+      const apiData = err?.response?.data;
+      if (apiData) {
+        const message =
+          apiData.message || apiData.error || JSON.stringify(apiData);
+        sonnerToast.error(
+          message || (t.incidents.messages.saveError ?? "Erro ao salvar")
+        );
+      } else {
+        const message =
+          err?.message ?? t.incidents.messages.saveError ?? "Erro ao salvar";
+        sonnerToast.error(message);
+      }
+    }
+  };
 
   // handle react-query state differences across versions
   const isCreatingIncident =
     typeof (createIncident as any).isPending !== "undefined"
       ? (createIncident as any).isPending
-      : Boolean((createIncident as any).isLoading)
+      : Boolean((createIncident as any).isLoading);
 
-  const severityLevels: SeverityLevel[] = ["BAIXA", "MEDIA", "ALTA", "GRAVE"]
-  const classifications = ["MULTA", "ACIDENTE", "AVARIA", "ROUBO", "OUTROS"]
+  const severityLevels: SeverityLevel[] = ["BAIXA", "MEDIA", "ALTA", "GRAVE"];
+  const classifications = ["MULTA", "ACIDENTE", "AVARIA", "ROUBO", "OUTROS"];
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-lg p-0">
-        <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
+        <motion.div
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           {/* Header */}
           <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
@@ -72,14 +128,21 @@ export function IncidentModal() {
                   <AlertTriangle className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
-                  <DialogTitle className="text-lg font-semibold">{t.incidents.title}</DialogTitle>
-                  <p className="text-sm text-muted-foreground">{t.incidents.subtitle}</p>
+                  <DialogTitle className="text-lg font-semibold">
+                    {t.incidents.title}
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {t.incidents.subtitle}
+                  </p>
                 </div>
               </div>
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="px-6 py-4 space-y-4"
+          >
             {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
               <div className="border border-border rounded-lg overflow-hidden">
@@ -90,7 +153,9 @@ export function IncidentModal() {
                   >
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.vehicles.generalData}</span>
+                      <span className="font-medium">
+                        {t.vehicles.generalData}
+                      </span>
                     </div>
                     {generalOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -100,16 +165,23 @@ export function IncidentModal() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 pt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 pt-0 space-y-4"
+                  >
                     {/* Row 1: Classification, Severity */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-xs text-muted-foreground">
-                          {t.incidents.classification} <span className="text-muted-foreground">(#1104)</span>
+                          {t.incidents.classification}{" "}
+                          <span className="text-muted-foreground">(#1104)</span>
                         </label>
                         <Select
                           value={watch("classification")}
-                          onValueChange={(value) => setValue("classification", value)}
+                          onValueChange={(value) =>
+                            setValue("classification", value)
+                          }
                         >
                           <SelectTrigger className="h-9">
                             <SelectValue placeholder="Selecione" />
@@ -123,16 +195,21 @@ export function IncidentModal() {
                           </SelectContent>
                         </Select>
                         {errors.classification?.message && (
-                          <span className="text-xs text-destructive">{String(errors.classification.message)}</span>
+                          <span className="text-xs text-destructive">
+                            {String(errors.classification.message)}
+                          </span>
                         )}
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground">
-                          {t.incidents.severity} <span className="text-muted-foreground">(#1103)</span>
+                          {t.incidents.severity}{" "}
+                          <span className="text-muted-foreground">(#1103)</span>
                         </label>
                         <Select
                           value={watch("severity")}
-                          onValueChange={(value) => setValue("severity", value as SeverityLevel)}
+                          onValueChange={(value) =>
+                            setValue("severity", value as SeverityLevel)
+                          }
                         >
                           <SelectTrigger className="h-9">
                             <SelectValue />
@@ -151,19 +228,37 @@ export function IncidentModal() {
                     {/* Row 2: Date, Record */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.incidents.date}</label>
-                        <Input type="date" {...register("date")} className="h-9" />
-                        {errors.date?.message && <span className="text-xs text-destructive">{String(errors.date.message)}</span>}
+                        <label className="text-xs text-muted-foreground">
+                          {t.incidents.date}
+                        </label>
+                        <Input
+                          type="date"
+                          {...register("date")}
+                          className="h-9"
+                        />
+                        {errors.date?.message && (
+                          <span className="text-xs text-destructive">
+                            {String(errors.date.message)}
+                          </span>
+                        )}
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.incidents.record}</label>
-                        <Input {...register("title")} placeholder="Título da ocorrência" className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.incidents.record}
+                        </label>
+                        <Input
+                          {...register("title")}
+                          placeholder="Título da ocorrência"
+                          className="h-9"
+                        />
                       </div>
                     </div>
 
                     {/* Description */}
                     <div>
-                      <label className="text-xs text-muted-foreground">{t.incidents.description}</label>
+                      <label className="text-xs text-muted-foreground">
+                        {t.incidents.description}
+                      </label>
                       <Textarea
                         {...register("description")}
                         placeholder="Descreva a ocorrência..."
@@ -185,7 +280,9 @@ export function IncidentModal() {
                   >
                     <div className="flex items-center gap-2">
                       <Upload className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.incidents.attachment}</span>
+                      <span className="font-medium">
+                        {t.incidents.attachment}
+                      </span>
                     </div>
                     {attachmentOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -195,11 +292,19 @@ export function IncidentModal() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 pt-0">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 pt-0"
+                  >
                     <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
                       <Info className="h-6 w-6 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">{t.common.uploadFiles}</p>
-                      <p className="text-sm text-muted-foreground">{t.common.dragDrop}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.uploadFiles}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.dragDrop}
+                      </p>
                     </div>
                   </motion.div>
                 </CollapsibleContent>
@@ -219,7 +324,7 @@ export function IncidentModal() {
         </motion.div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default IncidentModal
+export default IncidentModal;

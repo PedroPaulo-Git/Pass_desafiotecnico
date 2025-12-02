@@ -6,6 +6,20 @@ export function useIncidents(filters: IncidentFilters = {}) {
   return useQuery({
     queryKey: ["incidents", filters],
     queryFn: async () => {
+      const vehicleId = (filters as any)?.vehicleId;
+      if (vehicleId) {
+        const { data } = await api.get<Incident[]>(
+          `/vehicles/${vehicleId}/incidents`
+        );
+        const items = data || [];
+        return {
+          items,
+          page: 1,
+          limit: items.length,
+          total: items.length,
+          totalPages: 1,
+        } as PaginatedResponse<Incident>;
+      }
       const params = new URLSearchParams();
 
       if (filters.page) params.append("page", String(filters.page));
@@ -45,7 +59,14 @@ export function useCreateIncident() {
 
   return useMutation({
     mutationFn: async (payload: any) => {
-      const { data } = await api.post<Incident>(`/incidents`, payload);
+      const vehicleId = (payload as any)?.vehicleId;
+      if (!vehicleId) {
+        throw new Error("vehicleId is required to create fueling");
+      }
+      const { data } = await api.post<Incident>(
+        `/vehicles/${vehicleId}/incidents`,
+        payload
+      );
       return data;
     },
     onSuccess: (data) => {

@@ -185,6 +185,10 @@ export const translations = {
       description: "Descrição",
       record: "Registro de Ocorrência",
       attachment: "Anexo",
+      messages: {
+        createdSuccess: "Ocorrência registrada com sucesso",
+        saveError: "Erro ao salvar ocorrência",
+      },
     },
     // Documents
     documents: {
@@ -390,6 +394,10 @@ export const translations = {
       description: "Description",
       record: "Incident Record",
       attachment: "Attachment",
+      messages: {
+        createdSuccess: "Incident recorded successfully",
+        saveError: "Error saving incident",
+      },
     },
     // Documents
     documents: {
@@ -594,6 +602,10 @@ export const translations = {
       description: "Descripción",
       record: "Registro de Incidente",
       attachment: "Anexo",
+      messages: {
+        createdSuccess: "Incidente registrado con éxito",
+        saveError: "Error al guardar el incidente",
+      },
     },
     // Documents
     documents: {
