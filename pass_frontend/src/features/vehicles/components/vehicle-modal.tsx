@@ -906,21 +906,21 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <>
                           <div className="w-24 h-24 rounded-lg overflow-hidden">
                             <img
-                              // src="/black-sedan-car.jpg"
+                              src="assets/black-sedan-car.jpg"
                               alt="Sample 1"
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="w-24 h-24 rounded-lg overflow-hidden">
                             <img
-                              // src="/green-mercedes-suv.jpg"
+                              src="assets/green-mercedes-suv.jpg"
                               alt="Sample 2"
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="w-24 h-24 rounded-lg overflow-hidden">
                             <img
-                              // src="/white-bmw-luxury.jpg"
+                              src="assets/white-bmw-luxury.jpg"
                               alt="Sample 3"
                               className="w-full h-full object-cover"
                             />

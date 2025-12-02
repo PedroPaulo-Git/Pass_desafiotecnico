@@ -1,27 +1,39 @@
-"use client"
+"use client";
 
-import * as React from 'react'
-import { motion } from "framer-motion"
-import { MoreVertical } from "lucide-react"
-import { useI18n } from "@/lib/i18n/i18n-context"
-import { useModalStore } from "@/store/use-modal-store"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { Vehicle } from "@/types/vehicle"
-import { format } from "date-fns"
+import * as React from "react";
+import { motion } from "framer-motion";
+import { MoreVertical } from "lucide-react";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { useModalStore } from "@/store/use-modal-store";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { Vehicle } from "@/types/vehicle";
+import { format } from "date-fns";
 
 // No global flags: detect clicks originating from the action menu instead.
 
 interface VehiclesTableProps {
-  vehicles: Vehicle[]
+  vehicles: Vehicle[];
   pagination: {
-    page: number
-    totalPages: number
-    total: number
-  }
-  onPageChange: (page: number) => void
+    page: number;
+    totalPages: number;
+    total: number;
+  };
+  onPageChange: (page: number) => void;
 }
 
 const rowVariants = {
@@ -31,27 +43,34 @@ const rowVariants = {
     x: 0,
     transition: { delay: i * 0.03, duration: 0.2 },
   }),
-}
+};
 
-export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTableProps) {
-  const { t } = useI18n()
-  const { openModal } = useModalStore()
+export function VehiclesTable({
+  vehicles,
+  pagination,
+  onPageChange,
+}: VehiclesTableProps) {
+  const { t } = useI18n();
+  const { openModal } = useModalStore();
 
   function ActionsMenu({ vehicle }: { vehicle: Vehicle }) {
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(false);
 
     // helper to defensively stop propagation on Radix events
     const stopRadixEvent = (e?: Event) => {
-      if (!e) return
+      if (!e) return;
       try {
-        e.stopPropagation()
-        e.preventDefault()
+        e.stopPropagation();
+        e.preventDefault();
       } catch {}
-    }
+    };
 
     return (
       <DropdownMenu open={open} onOpenChange={(v) => setOpen(v)}>
-        <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+        <DropdownMenuTrigger
+          asChild
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreVertical className="h-4 w-4" />
           </Button>
@@ -61,9 +80,9 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
         <DropdownMenuContent align="end" data-vehicle-action-menu>
           <DropdownMenuItem
             onSelect={(e?: Event) => {
-              stopRadixEvent(e)
-              openModal("vehicle-details", { vehicle })
-              setOpen(false)
+              stopRadixEvent(e);
+              openModal("vehicle-details", { vehicle });
+              setOpen(false);
             }}
           >
             {t.common.edit}
@@ -71,12 +90,12 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
 
           <DropdownMenuItem
             onSelect={(e?: Event) => {
-              stopRadixEvent(e)
+              stopRadixEvent(e);
               openModal("confirm-delete", {
                 vehicleId: vehicle.id,
                 title: t.common.deleteConfirm,
-              })
-              setOpen(false)
+              });
+              setOpen(false);
             }}
             className="text-destructive"
           >
@@ -84,44 +103,54 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    )
+    );
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "LIBERADO":
-        return "bg-green-500 hover:bg-green-500/80"
+        return "bg-green-500 hover:bg-green-500/80";
       case "EM_MANUTENCAO":
-        return "bg-yellow-500 hover:bg-yellow-500/80"
+        return "bg-yellow-500 hover:bg-yellow-500/80";
       case "INDISPONIVEL":
-        return "bg-red-500 hover:bg-red-500/80"
+        return "bg-red-500 hover:bg-red-500/80";
       case "VENDIDO":
-        return "bg-gray-500 hover:bg-gray-500/80"
+        return "bg-gray-500 hover:bg-gray-500/80";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), "dd/MM/yyyy HH:mm:ss")
+      return format(new Date(dateString), "dd/MM/yyyy HH:mm:ss");
     } catch {
-      return dateString
+      return dateString;
     }
-  }
+  };
 
   return (
     <div className="rounded-lg border border-border overflow-hidden bg-card">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="font-semibold">{t.vehicles.identifier}</TableHead>
-            <TableHead className="font-semibold">{t.vehicles.createdAt}</TableHead>
+            <TableHead className="font-semibold">
+              {t.vehicles.identifier}
+            </TableHead>
+            <TableHead className="font-semibold">
+              {t.vehicles.createdAt}
+            </TableHead>
             <TableHead className="font-semibold">Título</TableHead>
             <TableHead className="font-semibold">{t.vehicles.brand}</TableHead>
-            <TableHead className="font-semibold">{t.vehicles.capacity}</TableHead>
-            <TableHead className="font-semibold">{t.vehicles.plate} - {t.vehicles.state}</TableHead>
-            <TableHead className="font-semibold">{t.vehicles.company}</TableHead>
+            <TableHead className="font-semibold">
+              {t.vehicles.capacity}
+            </TableHead>
+            <TableHead className="font-semibold">
+              {t.vehicles.plate} - {t.vehicles.state}
+            </TableHead>
+            <TableHead className="font-semibold">
+              {t.vehicles.company}
+            </TableHead>
             <TableHead className="font-semibold">{t.vehicles.status}</TableHead>
             <TableHead className="w-10"></TableHead>
           </TableRow>
@@ -129,7 +158,10 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
         <TableBody>
           {vehicles.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-10 text-muted-foreground">
+              <TableCell
+                colSpan={9}
+                className="text-center py-10 text-muted-foreground"
+              >
                 {t.common.noRecords}
               </TableCell>
             </TableRow>
@@ -149,35 +181,46 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
                   // If the click started inside the action menu or on an interactive element, ignore.
                   if (
                     target &&
-                    (target.closest('[data-vehicle-action-menu]') ||
-                      target.closest('button') ||
-                      target.closest('a') ||
-                      target.closest('input') ||
-                      target.closest('textarea') ||
-                      target.closest('select'))
+                    (target.closest("[data-vehicle-action-menu]") ||
+                      target.closest("button") ||
+                      target.closest("a") ||
+                      target.closest("input") ||
+                      target.closest("textarea") ||
+                      target.closest("select"))
                   ) {
-                    return
+                    return;
                   }
 
-                  openModal("vehicle-details", { vehicle })
+                  openModal("vehicle-details", { vehicle });
                 }}
               >
-                <TableCell className="font-medium">{vehicle.internalId || "-"}</TableCell>
-                <TableCell className="text-muted-foreground">{formatDate(vehicle.createdAt)}</TableCell>
+                <TableCell className="font-medium">
+                  {vehicle.internalId || "-"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {formatDate(vehicle.createdAt)}
+                </TableCell>
                 <TableCell>
                   <div>
                     <span className="font-medium">{vehicle.model}</span>
                     <p className="text-sm text-muted-foreground">
-                      {t.categories[vehicle.category]} {t.classifications[vehicle.classification]}
+                      {t.categories[vehicle.category]}{" "}
+                      {t.classifications[vehicle.classification]}
                     </p>
                   </div>
                 </TableCell>
                 <TableCell>{vehicle.brand}</TableCell>
                 <TableCell>{vehicle.capacity}</TableCell>
-                <TableCell>{vehicle.plate} - {vehicle.state}</TableCell>
+                <TableCell>
+                  {vehicle.plate} - {vehicle.state}
+                </TableCell>
                 <TableCell>{vehicle.companyName || "-"}</TableCell>
                 <TableCell>
-                  <Badge className={`${getStatusColor(vehicle.status)} text-white border-0`}>
+                  <Badge
+                    className={`${getStatusColor(
+                      vehicle.status
+                    )} text-white border-0`}
+                  >
                     {t.status[vehicle.status]}
                   </Badge>
                 </TableCell>
@@ -194,7 +237,8 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <span className="text-sm text-muted-foreground">
-            Página {pagination.page} de {pagination.totalPages} ({pagination.total} registros)
+            Página {pagination.page} de {pagination.totalPages} (
+            {pagination.total} registros)
           </span>
           <div className="flex gap-2">
             <Button
@@ -217,5 +261,5 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -46,7 +46,7 @@ export function VehiclesListPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<VehicleFilters>({
     page: 1,
-    limit: 20,
+    limit: 10,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
@@ -212,7 +212,7 @@ export function VehiclesListPage() {
                 onClear={() => {
                   setFilters({
                     page: 1,
-                    limit: 20,
+                    limit: 10,
                     sortBy: "createdAt",
                     sortOrder: "desc",
                   });
