@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/axios"
 import type { Vehicle, PaginatedResponse, VehicleFilters } from "@/types/vehicle"
 
+// Hooks that encapsulate vehicles API calls with react-query.
+// Each hook returns the mutation/query object from react-query so
+// callers can interact with `isLoading`, `mutateAsync`, etc.
+
 export function useVehicles(filters: VehicleFilters = {}) {
   return useQuery({
     queryKey: ["vehicles", filters],
@@ -18,7 +22,10 @@ export function useVehicles(filters: VehicleFilters = {}) {
       if (filters.state) params.append("state", filters.state)
       if (filters.sortBy) params.append("sortBy", filters.sortBy)
       if (filters.sortOrder) params.append("sortOrder", filters.sortOrder)
-      if ((filters as any).search) params.append("search", (filters as any).search)
+      // `search` may be provided in filters but is not part of the strict type.
+      // Read it defensively and append when present.
+      const search = (filters as unknown as { search?: string }).search
+      if (search) params.append("search", search)
 
       const { data } = await api.get<PaginatedResponse<Vehicle>>(`/vehicles?${params.toString()}`)
       return data

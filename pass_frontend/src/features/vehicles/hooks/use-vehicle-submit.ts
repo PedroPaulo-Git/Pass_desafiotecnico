@@ -1,17 +1,48 @@
-import { CreateVehicleInput } from "@pass/schemas/vehicleSchema";
+import type { CreateVehicleInput } from "@pass/schemas/vehicleSchema";
 import type { Vehicle } from "@/types/vehicle";
+import type { UseFormSetError, Path } from "react-hook-form";
+
+/**
+ * Minimal toast shape used by hooks in this module.
+ * We accept only the methods we actually call to keep typing strict.
+ */
+type Toast = {
+  success: (message: string) => void;
+  error: (message: string, opts?: { description?: string; duration?: number }) => void;
+};
+
+/**
+ * Types for the mutation hooks returned by `use-vehicles`.
+ * We import types via `import()` and `ReturnType` to avoid circular runtime imports.
+ */
+type CreateVehicleHook = ReturnType<typeof import("./use-vehicles").useCreateVehicle>;
+type UpdateVehicleHook = ReturnType<typeof import("./use-vehicles").useUpdateVehicle>;
 
 interface UseVehicleSubmitParams {
   isCreating: boolean;
   vehicle?: Vehicle;
-  updateVehicle: any;
-  createVehicle: any;
+  updateVehicle: UpdateVehicleHook;
+  createVehicle: CreateVehicleHook;
   closeModal: () => void;
-  t: any;
-  toast: any;
-  setError: (name: string, error: any) => void;
+  // minimal translation shape used by this logic
+  t: {
+    vehicles: {
+      validation: Record<string, string>;
+      messages: Record<string, string>;
+    };
+    common: Record<string, string>;
+  };
+  toast: Toast;
+  setError: UseFormSetError<CreateVehicleInput>;
 }
 
+/**
+ * useVehicleSubmit: returns a submit handler used by vehicle form.
+ * - performs light client-side checks on required fields when creating
+ * - sanitizes fields (plate, renavam, chassis, state)
+ * - calls create or update mutation and shows localized toasts
+ * - maps structured API `issues` into form errors when present
+ */
 export function useVehicleSubmit({
   isCreating,
   vehicle,
@@ -23,77 +54,38 @@ export function useVehicleSubmit({
   setError,
 }: UseVehicleSubmitParams) {
   return async (formData: CreateVehicleInput) => {
-    // client-side gate: ensure required fields on create are present
+    // --- Client-side pre-checks for create mode ---
     if (isCreating) {
       let hasErrors = false;
 
-      // internalId is required on create
-      if (
-        !formData.internalId ||
-        String(formData.internalId).trim().length === 0
-      ) {
-        setError("internalId", {
-          type: "required",
-          message: t.vehicles.validation.internalIdRequired,
-        });
-        hasErrors = true;
+        const mark = (field: Path<CreateVehicleInput>, message: string) => {
+          setError(field, { type: "required", message });
+          hasErrors = true;
+        };
+
+      if (!formData.internalId || String(formData.internalId).trim().length === 0) {
+        mark("internalId", t.vehicles.validation.internalIdRequired);
       }
 
-      const plateClean = (formData.plate ?? "")
-        .toString()
-        .replace(/-/g, "")
-        .trim();
-      if (!plateClean) {
-        setError("plate", {
-          type: "required",
-          message: t.vehicles.validation.plateRequired,
-        });
-        hasErrors = true;
-      }
+      const plateClean = (formData.plate ?? "").toString().replace(/-/g, "").trim();
+      if (!plateClean) mark("plate", t.vehicles.validation.plateRequired);
 
       if (!formData.state || String(formData.state).trim().length === 0) {
-        setError("state", {
-          type: "required",
-          message: t.vehicles.validation.stateRequired,
-        });
-        hasErrors = true;
+        mark("state", t.vehicles.validation.stateRequired);
       }
 
       const ren = (formData.renavam ?? "").toString().replace(/\D/g, "");
-      if (!ren || ren.length !== 11) {
-        setError("renavam", {
-          type: "required",
-          message: t.vehicles.validation.renavamLength,
-        });
-        hasErrors = true;
-      }
+      if (!ren || ren.length !== 11) mark("renavam", t.vehicles.validation.renavamLength);
 
       const ch = (formData.chassis ?? "").toString().toUpperCase();
-      if (!ch || ch.length !== 17) {
-        setError("chassis", {
-          type: "required",
-          message: t.vehicles.validation.chassisLength,
-        });
-        hasErrors = true;
-      }
+      if (!ch || ch.length !== 17) mark("chassis", t.vehicles.validation.chassisLength);
 
       if (!formData.brand || String(formData.brand).trim().length === 0) {
-        setError("brand", {
-          type: "required",
-          message: t.vehicles.validation.brandRequired,
-        });
-        hasErrors = true;
+        mark("brand", t.vehicles.validation.brandRequired);
       }
 
-      if (
-        !formData.description ||
-        String(formData.description).trim().length === 0
-      ) {
-        setError("description", {
-          type: "required",
-          message: t.vehicles.validation.descriptionRequired,
-        });
-        hasErrors = true;
+      if (!formData.description || String(formData.description).trim().length === 0) {
+        mark("description", t.vehicles.validation.descriptionRequired);
       }
 
       if (hasErrors) {
@@ -102,9 +94,9 @@ export function useVehicleSubmit({
       }
     }
 
+    // --- Prepare payload and call API ---
     try {
-      // sanitize fields before sending
-      const payload = {
+      const payload: CreateVehicleInput = {
         ...formData,
         plate: (formData.plate ?? "").toString().replace(/-/g, ""),
         renavam: (formData.renavam ?? "").toString().replace(/\D/g, ""),
@@ -112,7 +104,7 @@ export function useVehicleSubmit({
         state: (formData.state ?? "").toString().toUpperCase(),
         brand: (formData.brand ?? "").toString().trim(),
         description: (formData.description ?? "").toString().trim(),
-      } as CreateVehicleInput;
+      };
 
       if (vehicle) {
         await updateVehicle.mutateAsync({ id: vehicle.id, ...payload });
@@ -120,50 +112,51 @@ export function useVehicleSubmit({
         closeModal();
         return;
       }
+
       await createVehicle.mutateAsync(payload);
       toast.success(t.vehicles.messages.createdSuccess);
       closeModal();
-    } catch (err: any) {
-      const apiError = err?.response?.data;
+    } catch (err) {
+      // err is unknown (could be AxiosError), try to read common shapes safely
+      const apiError = (err as any)?.response?.data ?? (err as any);
 
-      // 1. Tenta pegar a mensagem principal do campo "error" da sua API
-      // Se não existir, tenta "message" (caso mude no futuro), ou usa um fallback genérico
-      let title =
-        apiError?.error || apiError?.message || t.vehicles.messages.saveError;
+      const title = apiError?.message || apiError?.error || t.vehicles.messages.saveError;
 
-      let description = "";
+      // If server returned an `issues` object with field-level messages, map them
+      if (apiError && typeof apiError === "object" && apiError.issues && typeof apiError.issues === "object") {
+        const issues = apiError.issues as Record<string, unknown>;
 
-      // 2. Se houver detalhes específicos (como no erro 409)
-      if (apiError?.details) {
-        const { field, value } = apiError.details;
-        // Você pode formatar isso como preferir
-        if (field) {
-          // Ex: "Campo duplicado: internalId - Valor: 11"
-          description = `Conflito no campo: ${field} ${
-            value ? `(${value})` : ""
-          }`;
-        }
-      }
-      // Fallback: Se não tiver detalhes da API, mas tiver erro genérico do axios
-      else if (!apiError && err.message) {
-        description = err.message;
-      }
-
-      // 3. Dispara o toast do Sonner com Titulo e Descrição
-      toast.error(title, {
-        description: description,
-        duration: 5000, // Dá tempo do usuário ler
-      });
-
-      // Opcional: Se quiser setar erro no formulário automaticamente
-      if (apiError?.details?.field) {
-        // Tenta encontrar o campo no formulário e marcar como erro
-        // Ex: se o field for "internalId", ele deixa o input vermelho
-        setError(apiError.details.field, {
-          type: "manual",
-          message: title, // ou uma mensagem customizada "Este valor já existe"
+        Object.entries(issues).forEach(([field, value]) => {
+          if (field === "general") return;
+          const message = Array.isArray(value) ? String((value as unknown[])[0] ?? "") : String(value ?? "");
+          if (message) setError(field as Path<CreateVehicleInput>, { type: "server", message });
         });
+
+        const description = issues.general
+          ? String(issues.general)
+          : Object.values(issues)
+              .map((v) => (Array.isArray(v) ? String((v as unknown[])[0] ?? "") : String(v ?? "")))
+              .filter(Boolean)
+              .slice(0, 3)
+              .join("; ");
+
+        toast.error(title, { description: description || undefined, duration: 5000 });
+        return;
       }
+
+      // Field conflict fallback
+      if (apiError && typeof apiError === "object" && apiError.details) {
+        const { field, value } = (apiError.details as any) || {};
+          if (field) {
+            setError(field as Path<CreateVehicleInput>, { type: "manual", message: String(title) });
+            toast.error(String(title), { description: `Conflict on field: ${field} ${value ? `(${value})` : ""}`, duration: 5000 });
+            return;
+          }
+      }
+
+      // Generic fallback
+      const fallbackMessage = (apiError && (apiError.message || apiError.error)) || (err as Error).message || title;
+      toast.error(String(fallbackMessage), { duration: 5000 });
     }
   };
 }

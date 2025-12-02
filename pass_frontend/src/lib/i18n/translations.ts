@@ -96,6 +96,8 @@ export const translations = {
         createdSuccess: "Veículo criado com sucesso",
         updatedSuccess: "Veículo atualizado com sucesso",
         saveError: "Erro ao salvar veículo",
+        deletedSuccess: "Veículo excluído com sucesso",
+        deleteError: "Erro ao excluir veículo",
         checkRequiredFields: "Verifique os campos obrigatórios",
       },
       validation: {
@@ -289,6 +291,8 @@ export const translations = {
         createdSuccess: "Vehicle created successfully",
         updatedSuccess: "Vehicle updated successfully",
         saveError: "Error saving vehicle",
+        deletedSuccess: "Vehicle deleted successfully",
+        deleteError: "Error deleting vehicle",
         checkRequiredFields: "Please check required fields",
       },
       validation: {
@@ -481,6 +485,8 @@ export const translations = {
         createdSuccess: "Vehículo creado con éxito",
         updatedSuccess: "Vehículo actualizado con éxito",
         saveError: "Error al guardar vehículo",
+        deletedSuccess: "Vehículo eliminado con éxito",
+        deleteError: "Error al eliminar vehículo",
         checkRequiredFields: "Verifique los campos obligatorios",
       },
       validation: {

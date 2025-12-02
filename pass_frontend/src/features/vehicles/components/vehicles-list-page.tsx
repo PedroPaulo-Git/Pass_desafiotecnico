@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { VehicleFilters } from "@/types/vehicle";
 
+import { ConfirmDeleteVehicleModal } from "./vehicle-delete-modal";
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -254,6 +256,7 @@ export function VehiclesListPage() {
         {modalType === "fueling-create" && <FuelingModal />}
         {modalType === "incident-create" && <IncidentModal />}
         {modalType === "document-create" && <DocumentModal />}
+        {modalType === "confirm-delete" && <ConfirmDeleteVehicleModal />}
       </AnimatePresence>
     </>
   );

@@ -12,6 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { Vehicle } from "@/types/vehicle"
 import { format } from "date-fns"
 
+// No global flags: detect clicks originating from the action menu instead.
+
 interface VehiclesTableProps {
   vehicles: Vehicle[]
   pagination: {
@@ -37,38 +39,43 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
 
   function ActionsMenu({ vehicle }: { vehicle: Vehicle }) {
     const [open, setOpen] = React.useState(false)
-    const pendingRef = React.useRef<null | (() => void)>(null)
+
+    // helper to defensively stop propagation on Radix events
+    const stopRadixEvent = (e?: Event) => {
+      if (!e) return
+      try {
+        e.stopPropagation()
+        e.preventDefault()
+      } catch {}
+    }
 
     return (
-      <DropdownMenu open={open} onOpenChange={(v) => {
-        setOpen(v)
-        if (!v && pendingRef.current) {
-          const action = pendingRef.current
-          pendingRef.current = null
-          action()
-        }
-      }}>
+      <DropdownMenu open={open} onOpenChange={(v) => setOpen(v)}>
         <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+
+        {/* mark content so row clicks can detect the origin */}
+        <DropdownMenuContent align="end" data-vehicle-action-menu>
           <DropdownMenuItem
-            onClick={() => {
-              pendingRef.current = () => openModal("vehicle-details", { vehicle })
+            onSelect={(e?: Event) => {
+              stopRadixEvent(e)
+              openModal("vehicle-details", { vehicle })
               setOpen(false)
             }}
           >
             {t.common.edit}
           </DropdownMenuItem>
+
           <DropdownMenuItem
-            onClick={() => {
-              pendingRef.current = () =>
-                openModal("confirm-delete", {
-                  vehicleId: vehicle.id,
-                  title: t.common.deleteConfirm,
-                })
+            onSelect={(e?: Event) => {
+              stopRadixEvent(e)
+              openModal("confirm-delete", {
+                vehicleId: vehicle.id,
+                title: t.common.deleteConfirm,
+              })
               setOpen(false)
             }}
             className="text-destructive"
@@ -136,7 +143,24 @@ export function VehiclesTable({ vehicles, pagination, onPageChange }: VehiclesTa
                 animate="visible"
                 whileHover={{ backgroundColor: "var(--accent)" }}
                 className="cursor-pointer border-b border-border transition-colors"
-                onClick={() => openModal("vehicle-details", { vehicle })}
+                onClick={(e: React.MouseEvent) => {
+                  const target = e.target as HTMLElement | null;
+
+                  // If the click started inside the action menu or on an interactive element, ignore.
+                  if (
+                    target &&
+                    (target.closest('[data-vehicle-action-menu]') ||
+                      target.closest('button') ||
+                      target.closest('a') ||
+                      target.closest('input') ||
+                      target.closest('textarea') ||
+                      target.closest('select'))
+                  ) {
+                    return
+                  }
+
+                  openModal("vehicle-details", { vehicle })
+                }}
               >
                 <TableCell className="font-medium">{vehicle.internalId || "-"}</TableCell>
                 <TableCell className="text-muted-foreground">{formatDate(vehicle.createdAt)}</TableCell>

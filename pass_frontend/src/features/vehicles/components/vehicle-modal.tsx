@@ -95,6 +95,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const updateVehicle = useUpdateVehicle();
   const createVehicle = useCreateVehicle();
 
+  // determine whether we are in creating mode early so the resolver can use it
+  const isCreating = isCreate || !vehicle;
+
   const [generalOpen, setGeneralOpen] = useState(true);
   const [descriptionOpen, setDescriptionOpen] = useState(true);
   const [imagesOpen, setImagesOpen] = useState(true);
@@ -112,8 +115,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     clearErrors,
     formState: { errors },
   } = useForm<CreateVehicleInput>({
-    resolver: zodResolver(createVehicleSchema),
-    mode: "onChange",
+    resolver: zodResolver(
+      isCreate ? createVehicleSchema : createVehicleSchema.partial()
+    ),
+    mode: "onSubmit",
     defaultValues: {
       status: "LIBERADO",
       category: "ONIBUS",
@@ -123,6 +128,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       capacity: 46,
       currentKm: 0,
       year: new Date().getFullYear(),
+      color: "",
     },
   });
 
@@ -150,11 +156,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       });
     }
   }, [vehicle, reset]);
-
-  const isCreating = isCreate || !vehicle;
-
-  // helpers moved to `src/lib/formatters/vehicleFormatters` and `FormInput` component
-  // NOTE: heavy format logic is handled in utilities; inputs below use Controller-based `FormInput` for smoother typing
 
   // clear description error when user types something
   const descriptionValue = watch("description");
@@ -298,7 +299,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="p-4 pt-0 space-y-4"
-                   >
+                  >
                     {/* Row 1: ID, Created, Identifier, Company, Status */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div>
@@ -579,6 +580,30 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         {errors.state?.message && (
                           <span className="text-xs text-destructive">
                             {String(errors.state.message)}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.color ?? "Cor"}
+                        </label>
+                        <FormInput
+                          name="color"
+                          control={control}
+                          rules={{
+                            required: false,
+                            pattern: {
+                              value: /^[\p{L}0-9 #\-\.,]+$/u,
+                              message: "Cor contém caracteres inválidos",
+                            },
+                          }}
+                          placeholder="Ex: Branco, Preto, Azul"
+                          className="h-8"
+                          clearErrors={clearErrors}
+                        />
+                        {errors.color?.message && (
+                          <span className="text-xs text-destructive">
+                            {String(errors.color.message)}
                           </span>
                         )}
                       </div>
