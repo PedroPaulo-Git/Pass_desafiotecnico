@@ -54,7 +54,11 @@ export const createFuelingService = async (
     );
   }
 
-  const totalValue = fuelingData.liters * fuelingData.unitPrice;
+  // Prefer explicit totalValue sent by client. If not provided, fall back to liters * unitPrice for backward compatibility.
+  const totalValue =
+    fuelingData.totalValue !== undefined && fuelingData.totalValue !== null
+      ? fuelingData.totalValue
+      : (fuelingData.liters || 0) * (fuelingData.unitPrice || 0);
 
   const result = await prisma.$transaction(async (tx) => {
     const newFueling = await tx.fueling.create({

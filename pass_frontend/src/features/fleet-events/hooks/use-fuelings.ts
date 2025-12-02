@@ -6,6 +6,23 @@ export function useFuelings(filters: FuelingFilters = {}) {
   return useQuery({
     queryKey: ["fuelings", filters],
     queryFn: async () => {
+      // If a vehicleId is provided, backend exposes a REST route that returns
+      // the fuelings array for that vehicle under
+      // GET /vehicles/{vehicleId}/fuelings. Use that endpoint and adapt the
+      // response to our PaginatedResponse shape so callers keep working.
+      const vehicleId = (filters as any)?.vehicleId
+      if (vehicleId) {
+        const { data } = await api.get<Fueling[]>(`/vehicles/${vehicleId}/fuelings?sortBy=odometer&sortOrder=desc`)
+        const items = data || []
+        return {
+          items,
+          page: 1,
+          limit: items.length,
+          total: items.length,
+          totalPages: 1,
+        } as PaginatedResponse<Fueling>
+      }
+
       const params = new URLSearchParams()
 
       if (filters.page) params.append("page", String(filters.page))
@@ -47,7 +64,11 @@ export function useCreateFueling() {
 
   return useMutation({
     mutationFn: async (payload: any) => {
-      const { data } = await api.post<Fueling>(`/fuelings`, payload)
+      const vehicleId = (payload as any)?.vehicleId
+      if (!vehicleId) {
+        throw new Error('vehicleId is required to create fueling')
+      }
+      const { data } = await api.post<Fueling>(`/vehicles/${vehicleId}/fuelings`, payload)
       return data
     },
     onSuccess: (data) => {

@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateFuelingInput, createFuelingSchema } from "@pass/schemas/fuelingSchema";
+import {
+  CreateFuelingInput,
+  createFuelingSchema,
+} from "@pass/schemas/fuelingSchema";
 import { Fuel, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
-import { useCreateFueling } from "@/features/fleet-events/hooks/use-fuelings";
+import { useCreateFueling, useFuelings } from "@/features/fleet-events/hooks/use-fuelings";
+import { useVehicle } from "@/features/vehicles/hooks/use-vehicles";
+import { toast as sonnerToast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +35,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { FuelType } from "@/types/vehicle";
+import { get } from "http";
 
 type FuelingFormData = CreateFuelingInput;
 
@@ -51,6 +57,7 @@ export function FuelingModal() {
 
   const [generalOpen, setGeneralOpen] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(true);
+  const [odometer,setOdometer] = useState<number|undefined>(undefined);
 
   const {
     register,
@@ -62,7 +69,8 @@ export function FuelingModal() {
     resolver: zodResolver(createFuelingSchema),
     defaultValues: {
       fuelType: "DIESEL",
-      odometer: 30000,
+      // `odometer` default will be set from vehicle.currentKm when available
+      odometer: undefined as unknown as number,
       liters: 0,
       totalValue: 0,
       unitPrice: 0,
@@ -70,11 +78,79 @@ export function FuelingModal() {
   });
 
   const createFueling = useCreateFueling();
+  const vehicleQuery = useVehicle(vehicleId);
+  const getFuelings = useFuelings({ vehicleId });
+
+  // When vehicle data loads, set default odometer to vehicle.currentKm (last odometer)
+  useEffect(() => {
+    const km = vehicleQuery?.data?.currentKm;
+    if (km !== undefined && km !== null) {
+      setValue("odometer", Number(km));
+    }
+    const previousOdometer = getFuelings?.data?.items?.[0]?.odometer;
+    console.log(getFuelings?.data);
+    console.log({previousOdometer});
+    setOdometer(previousOdometer);
+  }, [vehicleQuery?.data?.currentKm, getFuelings?.data, setValue]);
 
   const onSubmit = async (formData: CreateFuelingInput) => {
-    await createFueling.mutateAsync({ ...formData, vehicleId });
-    closeModal();
+    console.log(formData);
+
+    // Simple client-side validations
+    if (!formData.totalValue || Number(formData.totalValue) < 1) {
+      sonnerToast.error(
+        t.fueling.messages.totalValueMin || "Valor total inválido"
+      );
+      return;
+    }
+    if (!formData.liters || Number(formData.liters) < 1) {
+      sonnerToast.error(t.fueling.messages.litersMin || "Litros inválidos");
+      return;
+    }
+
+    try {
+      // compute odometer value to send:
+      // Treat `odometerStop` as an absolute KM (replacement). It must not be smaller than vehicle.currentKm.
+      const odometerStop = Number(formData.odometer) || 0;
+      console.log(odometerStop);
+      const currentKm = vehicleQuery?.data?.currentKm;
+      console.log(currentKm);
+
+      if (currentKm !== undefined && odometerStop < currentKm) {
+        sonnerToast.error(
+          "KM de parada não pode ser menor que o KM atual do veículo"
+        );
+        return;
+      }
+
+      let payload: any = { ...formData, vehicleId, odometer: odometerStop };
+
+      await createFueling.mutateAsync(payload);
+
+      sonnerToast.success(
+        t.fueling.messages.createdSuccess ||
+          t.common.success ||
+          "Registro criado com sucesso"
+      );
+      closeModal();
+    } catch (err: any) {
+      // Better error extraction: API may return structured error
+      const apiData = err?.response?.data;
+      if (apiData) {
+        const message =
+          apiData.message || apiData.error || JSON.stringify(apiData);
+        sonnerToast.error(
+          message || (t.fueling.messages.saveError ?? "Erro ao salvar")
+        );
+      } else {
+        const message =
+          err?.message ?? t.fueling.messages.saveError ?? "Erro ao salvar";
+        sonnerToast.error(message);
+      }
+    }
   };
+
+  // keep unitPrice in the form data for schema compatibility but don't expose it in the UI
 
   // handle react-query state differences across versions
   const isCreatingFueling =
@@ -127,7 +203,9 @@ export function FuelingModal() {
                   >
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.vehicles.generalData}</span>
+                      <span className="font-medium">
+                        {t.vehicles.generalData}
+                      </span>
                     </div>
                     {generalOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -145,7 +223,8 @@ export function FuelingModal() {
                     {/* Row 1: Fuel Station */}
                     <div>
                       <label className="text-xs text-muted-foreground">
-                        {t.fueling.fuelStation} <span className="text-muted-foreground">(#18098)</span>
+                        {t.fueling.fuelStation}{" "}
+                        <span className="text-muted-foreground">(#18098)</span>
                       </label>
                       <Input
                         {...register("provider")}
@@ -153,19 +232,44 @@ export function FuelingModal() {
                         className="h-9"
                       />
                       {errors.provider?.message && (
-                        <span className="text-xs text-destructive">{String(errors.provider.message)}</span>
+                        <span className="text-xs text-destructive">
+                          {String(errors.provider.message)}
+                        </span>
                       )}
                     </div>
-
+                    <div>
+                      <label className="text-xs text-muted-foreground">
+                        KM Atual do Veículo
+                      </label>
+                      <Input
+                        value={vehicleQuery?.data?.currentKm ?? ""}
+                        disabled
+                        className="h-9"
+                      />
+                    </div>
                     {/* Row 2: KM, KM Stop */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.odometer}</label>
-                        <Input type="number" {...register("odometer", { valueAsNumber: true })} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.odometer}
+                        </label>
+                        <Input
+                          type="number"
+                          placeholder=""
+                          value={odometer ?? ""}
+                          disabled
+                          className="h-9"
+                        />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.odometerStop}</label>
-                        <Input type="number" {...register("odometerStop", { valueAsNumber: true })} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.odometerStop}
+                        </label>
+                        <Input
+                          type="number"
+                          {...register("odometer", { valueAsNumber: true })}
+                          className="h-9"
+                        />
                       </div>
                     </div>
 
@@ -173,9 +277,15 @@ export function FuelingModal() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-xs text-muted-foreground">
-                          {t.fueling.fuelType} <span className="text-muted-foreground">(#1337)</span>
+                          {t.fueling.fuelType}{" "}
+                          <span className="text-muted-foreground">(#1337)</span>
                         </label>
-                        <Select value={watch("fuelType")} onValueChange={(value) => setValue("fuelType", value as FuelType)}>
+                        <Select
+                          value={watch("fuelType")}
+                          onValueChange={(value) =>
+                            setValue("fuelType", value as FuelType)
+                          }
+                        >
                           <SelectTrigger className="h-9">
                             <SelectValue />
                           </SelectTrigger>
@@ -189,25 +299,48 @@ export function FuelingModal() {
                         </Select>
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.quantity}</label>
-                        <Input type="number" step="0.01" {...register("liters", { valueAsNumber: true })} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.quantity}
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...register("liters", { valueAsNumber: true })}
+                          className="h-9"
+                        />
                       </div>
                     </div>
 
                     {/* Row 4: Date, Total Value */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.date}</label>
-                        <Input type="date" {...register("date")} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.date}
+                        </label>
+                        <Input
+                          type="date"
+                          {...register("date")}
+                          className="h-9"
+                        />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground">{t.fueling.totalValue}</label>
-                        <Input type="number" step="0.01" {...register("totalValue", { valueAsNumber: true })} className="h-9" />
+                        <label className="text-xs text-muted-foreground">
+                          {t.fueling.totalValue}
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...register("totalValue", { valueAsNumber: true })}
+                          className="h-9"
+                        />
                       </div>
                     </div>
 
-                    {/* Hidden: Unit Price (calculated) */}
-                    <input type="hidden" {...register("unitPrice", { valueAsNumber: true })} />
+                    {/* Unit Price (hidden) kept for schema compatibility */}
+                    <input
+                      type="hidden"
+                      {...register("unitPrice", { valueAsNumber: true })}
+                    />
                   </motion.div>
                 </CollapsibleContent>
               </div>
@@ -233,11 +366,19 @@ export function FuelingModal() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 pt-0">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 pt-0"
+                  >
                     <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
                       <Info className="h-6 w-6 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">{t.common.uploadFiles}</p>
-                      <p className="text-sm text-muted-foreground">{t.common.dragDrop}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.uploadFiles}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.dragDrop}
+                      </p>
                     </div>
                   </motion.div>
                 </CollapsibleContent>
@@ -260,4 +401,4 @@ export function FuelingModal() {
   );
 }
 
-export default FuelingModal
+export default FuelingModal;

@@ -6,6 +6,7 @@ import { Fuel, ChevronDown, ChevronUp, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"
+import { useFuelings } from "@/features/fleet-events/hooks/use-fuelings"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -21,7 +22,13 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
   const { openModal } = useModalStore()
   const [isOpen, setIsOpen] = useState(true)
 
-  const totalValue = fuelings.reduce((acc, f) => acc + f.totalValue, 0)
+  // Use the dedicated fuelings query so the section reacts to fuelings-specific
+  // invalidation/refetch. Fall back to the `fuelings` prop while loading.
+  const { data: fuelingsData } = useFuelings({ vehicleId })
+  const currentFuelings = fuelingsData?.items ?? fuelings
+
+  const totalValue = currentFuelings.reduce((acc, f) => acc + f.totalValue, 0)
+  console.log({ currentFuelings, totalValue })
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -62,7 +69,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {fuelings.length === 0 ? (
+                {currentFuelings.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">
                       <div className="flex items-center justify-center gap-2 text-muted-foreground">
@@ -72,7 +79,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  fuelings.map((fueling) => (
+                  currentFuelings.map((fueling) => (
                     <TableRow key={fueling.id}>
                       <TableCell>{format(new Date(fueling.date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>{fueling.provider}</TableCell>
@@ -86,7 +93,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
             </Table>
 
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-              <span className="text-sm text-muted-foreground">{fuelings.length}</span>
+              <span className="text-sm text-muted-foreground">{currentFuelings.length}</span>
               <div className="flex items-center gap-4">
                 <span className="text-sm">
                   {t.common.total} <span className="font-medium">{formatCurrency(totalValue)}</span>

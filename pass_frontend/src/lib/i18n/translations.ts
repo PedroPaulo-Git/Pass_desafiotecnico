@@ -165,6 +165,15 @@ export const translations = {
       odometer: "KM para Revisão",
       odometerStop: "KM de Parada",
       receipt: "Comprovante",
+      messages: {
+        createdSuccess: "Abastecimento registrado com sucesso",
+        saveError: "Erro ao salvar abastecimento",
+        checkRequiredFields: "Verifique os campos obrigatórios",
+        totalValueMin: "Valor total deve ser maior ou igual a 1",
+        litersMin: "Quantidade de litros deve ser maior ou igual a 1",
+        invalidDate: "Data inválida",
+        adjustedOdometer: "O odômetro foi ajustado para {value} para ficar igual ou maior ao KM atual do veículo",
+      },
     },
     // Incidents
     incidents: {
@@ -361,6 +370,15 @@ export const translations = {
       odometer: "Odometer for Review",
       odometerStop: "Stop Odometer",
       receipt: "Receipt",
+      messages: {
+        createdSuccess: "Fueling recorded successfully",
+        saveError: "Error saving fueling",
+        checkRequiredFields: "Please check required fields",
+        totalValueMin: "Total value must be greater than or equal to 1",
+        litersMin: "Quantity of liters must be greater than or equal to 1",
+        invalidDate: "Invalid date",
+        adjustedOdometer: "Odometer was adjusted to {value} to be equal or greater than vehicle's current KM",
+      },
     },
     // Incidents
     incidents: {
@@ -556,6 +574,15 @@ export const translations = {
       odometer: "Km para Revisión",
       odometerStop: "Km de Parada",
       receipt: "Comprobante",
+      messages: {
+        createdSuccess: "Abastecimiento registrado con éxito",
+        saveError: "Error al guardar abastecimiento",
+        checkRequiredFields: "Verifique los campos obligatorios",
+        totalValueMin: "El valor total debe ser mayor o igual a 1",
+        litersMin: "La cantidad de litros debe ser mayor o igual a 1",
+        invalidDate: "Fecha inválida",
+        adjustedOdometer: "El odómetro se ajustó a {value} para ser igual o mayor que el KM actual del vehículo",
+      },
     },
     // Incidents
     incidents: {

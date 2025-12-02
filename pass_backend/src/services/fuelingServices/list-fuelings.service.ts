@@ -54,11 +54,15 @@ export const listFuelingById = async (fuelingId: FuelingIdParam) => {
   return fueling;
 };
 
-export const listFuelingServiceByVehicleId = async (vehicleId: VehicleIdParam) => {
+export const listFuelingServiceByVehicleId = async (
+  vehicleId: VehicleIdParam,
+  orderBy?: Prisma.FuelingOrderByWithRelationInput | Prisma.FuelingOrderByWithRelationInput[]
+) => {
   const result = await prisma.fueling.findMany({
     where: {
       vehicleId: vehicleId.id,
     },
+    orderBy: orderBy ?? [{ odometer: "asc" }, { createdAt: "asc" }],
   });
 
   if (result.length === 0) {

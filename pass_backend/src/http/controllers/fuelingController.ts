@@ -36,23 +36,25 @@ export class FuelingController {
 
     if (sortField === "date") {
       orderBy = [{ date: sortOrder }, { createdAt: "desc" }];
+    } else if (sortField === "odometer") {
+      // When ordering by odometer, add a secondary tie-breaker to keep results deterministic
+      orderBy = [{ odometer: sortOrder }, { createdAt: "desc" }];
     } else {
       orderBy = [{ [sortField]: sortOrder }];
     }
 
     if (queryValidated.provider) where.provider = queryValidated.provider;
     if (queryValidated.fuelType) where.fuelType = queryValidated.fuelType;
-
     if (queryValidated.dateFrom || queryValidated.dateTo) {
       where.date = {
         ...(queryValidated.dateFrom && { gte: queryValidated.dateFrom }),
         ...(queryValidated.dateTo && { lte: queryValidated.dateTo }),
       };
     }
-    if (queryValidated.minOdometer || queryValidated.maxOdometer) {
+    if (queryValidated.minOdometer !== undefined || queryValidated.maxOdometer !== undefined) {
       where.odometer = {
-        ...(queryValidated.minOdometer && { gte: queryValidated.minOdometer }),
-        ...(queryValidated.maxOdometer && { lte: queryValidated.maxOdometer }),
+        ...(queryValidated.minOdometer !== undefined && { gte: queryValidated.minOdometer }),
+        ...(queryValidated.maxOdometer !== undefined && { lte: queryValidated.maxOdometer }),
       };
     }
     if (queryValidated.minLiters || queryValidated.maxLiters) {
@@ -93,7 +95,23 @@ export class FuelingController {
     reply: FastifyReply
   ) {
     const vehicleId = request.params;
-    const result = await listFuelingServiceByVehicleId(vehicleId);
+    // parse optional query params to support ordering (sortBy, sortOrder)
+    const queryValidated = fuelingSchemaQuery.parse(request.query || {});
+    const sortField = queryValidated.sortBy ?? "date";
+    const sortOrder = queryValidated.sortOrder ?? "desc";
+    let orderBy:
+      | Prisma.FuelingOrderByWithRelationInput
+      | Prisma.FuelingOrderByWithRelationInput[];
+
+    if (sortField === "date") {
+      orderBy = [{ date: sortOrder }, { createdAt: "desc" }];
+    } else if (sortField === "odometer") {
+      orderBy = [{ odometer: sortOrder }, { createdAt: "desc" }];
+    } else {
+      orderBy = [{ [sortField]: sortOrder }];
+    }
+
+    const result = await listFuelingServiceByVehicleId(vehicleId, orderBy);
     return reply.status(200).send(result);
     // Logic to list fuelings by vehicle ID
   }

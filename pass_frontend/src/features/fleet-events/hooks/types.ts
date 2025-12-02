@@ -3,6 +3,7 @@ export type FuelingFilters = {
   page?: number
   limit?: number
   provider?: string
+  vehicleId?: string
   fuelType?: string
   dateFrom?: string
   dateTo?: string
