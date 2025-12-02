@@ -1,41 +1,68 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { FileText, ChevronDown, ChevronUp, AlertCircle, Copy, X, AlertTriangle } from "lucide-react"
-import { format } from "date-fns"
-import { useI18n } from "@/lib/i18n/i18n-context"
-import { useModalStore } from "@/store/use-modal-store"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { VehicleDocument } from "@/types/vehicle"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  Copy,
+  X,
+  AlertTriangle,
+} from "lucide-react";
+import { format } from "date-fns";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { useModalStore } from "@/store/use-modal-store";
+import { useVehicleDocuments } from "@/features/fleet-events/hooks/use-vehicle-documents";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { VehicleDocument } from "@/types/vehicle";
 
 interface DocumentsSectionProps {
-  vehicleId: string
-  documents: VehicleDocument[]
+  vehicleId: string;
+  documents: VehicleDocument[];
 }
 
-export function DocumentsSection({ vehicleId, documents }: DocumentsSectionProps) {
-  const { t } = useI18n()
-  const { openModal } = useModalStore()
-  const [isOpen, setIsOpen] = useState(true)
+export function DocumentsSection({
+  vehicleId,
+  documents,
+}: DocumentsSectionProps) {
+  const { t } = useI18n();
+  const { openModal } = useModalStore();
+  const [isOpen, setIsOpen] = useState(true);
 
-  const getDocumentIcon = (name: string) => {
-    if (name.toLowerCase().includes("tacógrafo") || name.toLowerCase().includes("tacografo")) {
+  const { data: documentsData } = useVehicleDocuments({ vehicleId });
+  const currentDocuments = documentsData?.items ?? documents;
+
+  const getDocumentIcon = (name?: string) => {
+    const lower = (name ?? "").toLowerCase();
+    if (lower.includes("tacógrafo") || lower.includes("tacografo")) {
       return (
         <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
           <AlertTriangle className="h-5 w-5 text-red-500" />
         </div>
-      )
+      );
     }
     return (
       <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
         <FileText className="h-5 w-5 text-blue-500" />
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -57,12 +84,16 @@ export function DocumentsSection({ vehicleId, documents }: DocumentsSectionProps
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 pt-0">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="p-4 pt-0"
+          >
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t.documents.name}</TableHead>
-                  <TableHead>{t.documents.type}</TableHead>
                   <TableHead>{t.documents.expiryDate}</TableHead>
                   <TableHead>{t.documents.anticipation}</TableHead>
                   <TableHead>{t.documents.days}</TableHead>
@@ -70,7 +101,7 @@ export function DocumentsSection({ vehicleId, documents }: DocumentsSectionProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {documents.length === 0 ? (
+                {currentDocuments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-6">
                       <div className="flex items-center justify-center gap-2 text-muted-foreground">
@@ -80,28 +111,39 @@ export function DocumentsSection({ vehicleId, documents }: DocumentsSectionProps
                     </TableCell>
                   </TableRow>
                 ) : (
-                  documents.map((doc) => (
+                  currentDocuments.map((doc) => (
                     <TableRow key={doc.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {getDocumentIcon(doc.name)}
-                          <span>{doc.name}</span>
+                          <span>{doc.name ?? "-"}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">-</TableCell>
-                      <TableCell>{format(new Date(doc.expiryDate), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>
+                        {format(new Date(doc.expiryDate), "dd/MM/yyyy")}
+                      </TableCell>
                       <TableCell>
                         <Switch checked={doc.activeAlert} />
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {doc.alertDays ? `${doc.alertDays} dias` : "Dias de An..."}
+                        {doc.alertDays
+                          ? `${doc.alertDays} dias`
+                          : "Dias de An..."}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
                             <Copy className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                          >
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -126,5 +168,5 @@ export function DocumentsSection({ vehicleId, documents }: DocumentsSectionProps
         </CollapsibleContent>
       </div>
     </Collapsible>
-  )
+  );
 }

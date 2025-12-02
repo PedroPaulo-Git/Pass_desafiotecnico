@@ -33,14 +33,21 @@ export function useVehicleDocuments(filters: DocumentFilters = {}) {
   });
 }
 
-export function useVehicleDocument(id: string) {
+export function useVehicleDocument(vehicleId: string) {
   return useQuery({
-    queryKey: ["document", id],
+    queryKey: ["document", vehicleId],
+
     queryFn: async () => {
-      const { data } = await api.get<VehicleDocument>(`/documents/${id}`);
+      const id = (vehicleId as any)?.vehicleId ?? vehicleId;
+      if (!id) {
+        throw new Error("vehicleId is required to create fueling");
+      }
+      const { data } = await api.get<VehicleDocument>(
+        `/vehicles/${id}/documents`
+      );
       return data;
     },
-    enabled: !!id,
+    enabled: !!vehicleId,
   });
 }
 
