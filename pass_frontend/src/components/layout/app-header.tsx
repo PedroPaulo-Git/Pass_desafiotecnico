@@ -110,6 +110,7 @@ export function AppHeader({
           size="icon"
           onClick={toggleTheme}
           className="text-muted-foreground"
+          data-theme-toggle
         >
           <motion.div
             initial={false}
