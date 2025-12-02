@@ -10,15 +10,16 @@ import {
   Sparkles,
   Pin,
 } from "lucide-react";
+import FuelingModal from "@/features/fleet-events/components/Fueling/FuelingModal";
+import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
+import DocumentModal from "@/features/fleet-events/components/Documents/DocumentModal";
+
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useVehicles } from "../hooks/use-vehicles";
 import { VehiclesTable } from "./vehicles-table";
 import { VehiclesFilters } from "./vehicles-filters";
 import { VehicleModal } from "./vehicle-modal";
-import { FuelingModal } from "./fueling-modal";
-import { IncidentModal } from "./incident-modal";
-import { DocumentModal } from "./document-modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
