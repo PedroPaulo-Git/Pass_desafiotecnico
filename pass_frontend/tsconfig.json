@@ -26,29 +26,22 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@pass/schemas": [
-        "../pass_schemas/dist/index.d.ts"
-      ],
-      "@pass/schemas/*": [
-        "../pass_schemas/dist/*"
       ]
     }
-    // "paths": {
-    //   "@/*": [
-    //     "./*"
-    //   ]
-    // }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "../pass_schemas/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".next"
+  ],
+  "references": [
+    { "path": "../pass_schemas" }
   ]
 }

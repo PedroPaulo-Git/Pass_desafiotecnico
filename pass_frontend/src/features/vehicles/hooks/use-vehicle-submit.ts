@@ -1,4 +1,4 @@
-import type { CreateVehicleInput } from "@pass/schemas/vehicleSchema";
+import type { CreateVehicleInput } from "@pass/schemas";
 import type { Vehicle } from "@/types/vehicle";
 import type { UseFormSetError, Path } from "react-hook-form";
 

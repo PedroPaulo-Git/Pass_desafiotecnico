@@ -6,7 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateVehicleInput,
+  UpdateVehicleInput,
   createVehicleSchema,
+  updateVehicleSchema,
 } from "@pass/schemas";
 import {
   Bus,
@@ -116,8 +118,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     formState: { errors },
   } = useForm<CreateVehicleInput>({
     resolver: zodResolver(
-      isCreate ? createVehicleSchema : createVehicleSchema.partial()
-    ),
+      isCreate ? createVehicleSchema : updateVehicleSchema
+    ) as any,
     mode: "onSubmit",
     defaultValues: {
       status: "LIBERADO",
