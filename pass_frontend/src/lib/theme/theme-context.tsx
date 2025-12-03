@@ -17,6 +17,8 @@ type Theme = "light" | "dark";
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: (event: React.MouseEvent<HTMLElement>) => void;
+  isTransitioning: boolean;
+  transitionOrigin: { x: number; y: number } | null;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -125,7 +127,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setIsTransitioning(false);
   };
 
-  const contextValue = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
+  const contextValue = useMemo(
+    () => ({ theme, toggleTheme, isTransitioning, transitionOrigin }),
+    [theme, toggleTheme, isTransitioning, transitionOrigin]
+  );
   const topLayerTheme = theme === "light" ? "dark" : "light";
 
   return (

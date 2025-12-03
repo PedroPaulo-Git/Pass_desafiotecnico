@@ -4,12 +4,7 @@ import { useTheme } from "@/lib/theme/theme-context"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function ThemeTransition() {
-  // Cast to a relaxed shape to satisfy type-check in build environments
-  const { isTransitioning, transitionOrigin, theme } = useTheme() as {
-    isTransitioning?: boolean
-    transitionOrigin?: { x: number; y: number } | null
-    theme?: "light" | "dark" | string
-  }
+  const { isTransitioning, transitionOrigin, theme } = useTheme()
 
   return (
     <AnimatePresence>
