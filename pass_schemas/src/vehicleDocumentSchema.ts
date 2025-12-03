@@ -40,14 +40,14 @@ const vehicleDocumentQuerySchema = z
     }
   });
 
-export type CreateVehicleDocumentInput = z.infer<typeof createVehicleDocumentSchema>;
-export type UpdateVehicleDocumentInput = z.infer<typeof updateVehicleDocumentSchema>;
-export type VehicleDocumentIdParam = z.infer<typeof vehicleDocumentIdParamSchema>;
-export type VehicleDocumentQueryInput = z.infer<typeof vehicleDocumentQuerySchema>;
-
 export {
   createVehicleDocumentSchema,
   updateVehicleDocumentSchema,
   vehicleDocumentIdParamSchema,
   vehicleDocumentQuerySchema,
 };
+
+export type CreateVehicleDocumentInput = z.infer<typeof createVehicleDocumentSchema>;
+export type UpdateVehicleDocumentInput = z.infer<typeof updateVehicleDocumentSchema>;
+export type VehicleDocumentIdParam = z.infer<typeof vehicleDocumentIdParamSchema>;
+export type VehicleDocumentQueryInput = z.infer<typeof vehicleDocumentQuerySchema>;
