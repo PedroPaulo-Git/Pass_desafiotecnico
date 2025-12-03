@@ -1,0 +1,35 @@
+# Backend Development Dockerfile
+FROM node:24-alpine
+
+# Install dependencies for development
+RUN apk add --no-cache libc6-compat
+
+# Copy and build schemas first (outside /app to match relative path)
+COPY pass_schemas /pass_schemas
+WORKDIR /pass_schemas
+RUN npm install && npm run build
+
+# Switch to backend directory
+WORKDIR /app
+
+# Copy backend package files
+COPY pass_backend/package*.json ./
+
+# Install backend dependencies (will link @pass/schemas from ../pass_schemas)
+RUN npm install
+
+# Copy prisma schema
+COPY pass_backend/prisma ./prisma
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Copy backend source code
+COPY pass_backend/src ./src
+COPY pass_backend/tsconfig.json ./
+
+# Expose port
+EXPOSE 3333
+
+# Development command with hot reload
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
