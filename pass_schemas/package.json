@@ -4,8 +4,19 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "private": true,
+  "exports": {
+    ".": "./dist/index.js",
+    "./vehicleSchema": "./dist/vehicleSchema.js",
+    "./fuelingSchema": "./dist/fuelingSchema.js",
+    "./incidentSchema": "./dist/incidentSchema.js",
+    "./vehicleDocumentSchema": "./dist/vehicleDocumentSchema.js",
+    "./vehicleImageSchema": "./dist/vehicleImageSchema.js"
+  },
   "dependencies": {
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
