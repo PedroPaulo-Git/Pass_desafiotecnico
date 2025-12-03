@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CreateVehicleDocumentInput,createVehicleDocumentSchema } from "@pass/schemas/vehicleDocumentSchema";
+import { CreateVehicleDocumentInput,createVehicleDocumentSchema } from "@pass/schemas";
 import { FileText, Info, ChevronDown, ChevronUp } from "lucide-react"
 import { useI18n } from "@/lib/i18n/i18n-context"
 import { useModalStore } from "@/store/use-modal-store"

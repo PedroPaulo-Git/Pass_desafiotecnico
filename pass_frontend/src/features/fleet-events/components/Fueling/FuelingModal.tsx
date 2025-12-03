@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateFuelingInput,
   createFuelingSchema,
-} from "@pass/schemas/fuelingSchema";
+} from "@pass/schemas";
 import { Fuel, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";

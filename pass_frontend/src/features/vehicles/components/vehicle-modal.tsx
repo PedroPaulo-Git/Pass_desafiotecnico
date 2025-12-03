@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateVehicleInput,
   createVehicleSchema,
-} from "@pass/schemas/vehicleSchema";
+} from "@pass/schemas";
 import {
   Bus,
   X,

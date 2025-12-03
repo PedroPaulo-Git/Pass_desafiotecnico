@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateIncidentInput,
   createIncidentSchema,
-} from "@pass/schemas/incidentSchema";
+} from "@pass/schemas";
 import {
   AlertTriangle,
   Info,

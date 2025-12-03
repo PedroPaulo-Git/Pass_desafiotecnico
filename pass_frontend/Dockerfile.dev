@@ -1,0 +1,34 @@
+# Frontend Development Dockerfile
+FROM node:24-alpine
+
+# Install dependencies for development
+RUN apk add --no-cache libc6-compat
+
+# Copy and build schemas first (outside /app to match relative path)
+COPY pass_schemas /pass_schemas
+WORKDIR /pass_schemas
+RUN npm install && npm run build
+
+# Switch to frontend directory
+WORKDIR /app
+
+# Copy frontend package files
+COPY pass_frontend/package*.json ./
+
+# Install frontend dependencies (will link @pass/schemas from ../pass_schemas)
+RUN npm install
+
+# Copy frontend source code
+COPY pass_frontend/src ./src
+COPY pass_frontend/public ./public
+COPY pass_frontend/next.config.js ./
+COPY pass_frontend/tailwind.config.ts ./
+COPY pass_frontend/postcss.config.js ./
+COPY pass_frontend/tsconfig.json ./
+COPY pass_frontend/components.json ./
+
+# Expose port
+EXPOSE 3000
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"]
