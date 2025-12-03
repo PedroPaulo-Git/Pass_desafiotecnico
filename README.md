@@ -2,6 +2,53 @@
 
 Monorepo contendo backend (Fastify + Prisma) e frontend (Next.js) para gerenciamento de frota de veículos.
 
+## ⚡ Início Rápido no Windows (Sem Docker)
+
+**Para usuários Windows que preferem rodar localmente sem Docker:**
+
+### Passo 1: Certifique-se que PostgreSQL está rodando
+
+**Opção A - PostgreSQL local (nativo):**
+```powershell
+# Se você tem PostgreSQL instalado no Windows, certifique-se que está rodando
+# Verifique em Services ou abra pgAdmin
+```
+
+**Opção B - Apenas infraestrutura no Docker:**
+```powershell
+# Use Docker apenas para PostgreSQL e MinIO (infraestrutura)
+docker compose up postgres minio -d
+```
+
+### Passo 2: Execute o script de automação
+
+```powershell
+.\run-dev.ps1
+```
+
+**🎯 O script `run-dev.ps1` automatiza TUDO:**
+- ✅ Instala dependências (`npm install`) nos 3 pacotes (schemas, backend, frontend)
+- ✅ Compila o `pass_schemas` (TypeScript → dist/)
+- ✅ Copia arquivos `.env.example` → `.env` (se não existirem)
+- ✅ Executa `prisma generate` + `prisma migrate dev`
+- ✅ Inicia **backend** (porta 3333) e **frontend** (porta 3000) em janelas separadas
+
+**💡 Sem precisar entrar em cada pasta e rodar `npm install` manualmente!**
+
+**Parâmetros disponíveis:**
+```powershell
+.\run-dev.ps1              # Setup completo + iniciar dev servers
+.\run-dev.ps1 -SkipSetup   # Pular verificações (reruns rápidos)
+.\run-dev.ps1 -NoNewWindow # Rodar tudo na mesma janela
+```
+
+⚠️ **Pré-requisitos:**
+- ✅ Node.js 24+ instalado
+- ✅ PostgreSQL rodando em `localhost:5432` (nativo OU via Docker)
+- ✅ MinIO rodando em `localhost:9000` (nativo OU via Docker: `docker compose up minio -d`)
+
+---
+
 ## 🚀 Stack Tecnológica
 
 ### Backend (`pass_backend/`)
