@@ -281,6 +281,91 @@ NEXT_PUBLIC_API_URL=http://localhost:3333
 - 🔗 [FRONTEND_INTEGRATION.md](./pass_backend/docs/FRONTEND_INTEGRATION.md) - Integração frontend
 - 📮 [Postman Collection](./pass_backend/docs/FleetManager.postman_collection.json) - Testes de API
 
+## 🚀 Deploy na Vercel (Frontend)
+
+### Configuração Automática
+
+O projeto está configurado como **monorepo npm workspaces** para deploy na Vercel:
+
+1. **Importe o repositório** na Vercel
+2. **Configuração será detectada automaticamente** via `vercel.json`
+3. **Adicione variável de ambiente**:
+   ```env
+   NEXT_PUBLIC_API_URL=https://seu-backend.com
+   ```
+
+### Configuração Manual (se necessário)
+
+Se a Vercel não detectar automaticamente, configure:
+
+- **Framework Preset**: Next.js
+- **Root Directory**: *(deixe vazio - usa raiz do monorepo)*
+- **Build Command**: `npm run build`
+- **Output Directory**: `pass_frontend/.next`
+- **Install Command**: `npm install`
+
+### Como Funciona o Build na Vercel
+
+O monorepo está configurado com **npm workspaces**:
+
+1. ✅ `npm install` na raiz instala `pass_frontend` e `pass_schemas`
+2. ✅ `pass_schemas` é linkado automaticamente (via `file:../pass_schemas`)
+3. ✅ Build command executa:
+   - Primeiro: `npm run build --workspace=pass_schemas` (compila TypeScript → `dist/`)
+   - Depois: `npm run build --workspace=pass_frontend` (Next.js build)
+4. ✅ Frontend importa schemas via `import { vehicleSchema } from '@pass/schemas'`
+
+**💡 Funciona local e na Vercel:**
+- **Local**: `file:../pass_schemas` resolve para pasta local
+- **Docker**: Copia todo o monorepo, resolve normalmente
+- **Vercel**: `npm install` na raiz resolve workspaces automaticamente
+
+### Arquivos de Configuração
+
+- **`package.json`** (raiz) - Define workspaces npm (apenas frontend + schemas)
+- **`vercel.json`** - Configuração de build otimizada
+- **`.npmrc`** - Configuração de hoisting para workspaces
+
+### Deploy via CLI
+
+```bash
+# Instalar Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy preview
+vercel
+
+# Deploy produção
+vercel --prod
+```
+
+### Troubleshooting Vercel
+
+**❌ Erro: "Cannot find module '@pass/schemas'"**
+
+Verifique:
+1. `pass_schemas/package.json` tem `"main": "dist/index.js"`
+2. `pass_schemas` tem script `"build": "tsc"`
+3. `pass_frontend/package.json` tem `"@pass/schemas": "file:../pass_schemas"`
+4. Build command está executando schemas primeiro: `npm run build`
+
+**❌ Build lento**
+
+Normal. Vercel compila TypeScript do zero. Cache é gerenciado automaticamente.
+
+**❌ Deploy triggering em mudanças no backend**
+
+Não deve acontecer. `vercel.json` tem `ignoreCommand` configurado para ignorar mudanças em `pass_backend/`.
+
+### Após o Deploy
+
+✅ Frontend estará acessível em `https://seu-projeto.vercel.app`  
+✅ Schemas compilados automaticamente durante build  
+✅ Hot reload funciona em desenvolvimento local (`npm run dev`)
+
 ## 🎯 Funcionalidades
 
 ### Backend (API REST) ✅
