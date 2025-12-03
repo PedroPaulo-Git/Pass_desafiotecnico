@@ -186,7 +186,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     setError,
   });
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case "LIBERADO":
         return "bg-green-500 hover:bg-green-500/80";
@@ -358,7 +358,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           formatter={(v: string) =>
                             (v || "").toString().replace(/\D/g, "").slice(0, 10)
                           }
-                          clearErrors={clearErrors}
+                          clearErrors={() => clearErrors("internalId")}
                         />
                         {errors.internalId?.message && (
                           <span className="text-xs text-destructive">
@@ -454,7 +454,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           className="h-8"
                           formatter={formatLetters}
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.model?.message && (
                           <span className="text-xs text-destructive">
@@ -488,7 +488,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           className="h-8"
                           formatter={formatLetters}
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.brand?.message && (
                           <span className="text-xs text-destructive">
@@ -585,7 +585,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           placeholder="RJ"
                           className="h-8"
                           formatter={formatUf}
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.state?.message && (
                           <span className="text-xs text-destructive">
@@ -609,7 +609,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           placeholder="Ex: Branco, Preto, Azul"
                           className="h-8"
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.color?.message && (
                           <span className="text-xs text-destructive">
@@ -658,7 +658,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8 font-mono"
                           disabled={!isCreating}
                           formatter={formatPlate}
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.plate?.message && (
                           <span className="text-xs text-destructive">
@@ -688,7 +688,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           inputMode="numeric"
                           disabled={!isCreating}
                           formatter={formatRenavam}
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.renavam?.message && (
                           <span className="text-xs text-destructive">
@@ -718,7 +718,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8 font-mono"
                           disabled={!isCreating}
                           formatter={formatChassis}
-                          clearErrors={clearErrors}
+                          clearErrors={clearErrors as (name?: string | string[]) => void}
                         />
                         {errors.chassis?.message && (
                           <span className="text-xs text-destructive">

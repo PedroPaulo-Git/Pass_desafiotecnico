@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+// Schema for input (before transformation)
+const createIncidentInputSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  classification: z.string().min(1, "Classification is required"),
+  severity: z.string().min(1, "Severity is required"),
+  date: z.coerce.date(),
+  attachmentUrl: z.string().url().optional(),
+  description: z.string().optional(),
+});
+
+// Schema with transformation for backend processing
 const createIncidentSchema = z.object({
   title: z.string().min(1, "Title is required"),
   classification: z.string().min(1, "Classification is required"),
@@ -41,8 +52,8 @@ const incidentIdParam = z.object({
 
 const updateIncidentSchema = createIncidentSchema.partial();
 
-export type CreateIncidentInput = z.infer<typeof createIncidentSchema>;
+export type CreateIncidentInput = z.infer<typeof createIncidentInputSchema>;
 export type UpdateIncidentInput = z.infer<typeof updateIncidentSchema>;
 export type IncidentIdParam = z.infer<typeof incidentIdParam>;
 
-export { createIncidentSchema, incidentSchemaQuery, updateIncidentSchema, incidentIdParam };
+export { createIncidentSchema, createIncidentInputSchema, incidentSchemaQuery, updateIncidentSchema, incidentIdParam };

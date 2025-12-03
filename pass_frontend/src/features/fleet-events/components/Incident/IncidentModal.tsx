@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateIncidentInput,
-  createIncidentSchema,
+  createIncidentInputSchema,
 } from "@pass/schemas";
 import {
   AlertTriangle,
@@ -68,7 +68,7 @@ export function IncidentModal() {
     watch,
     formState: { errors },
   } = useForm<CreateIncidentInput>({
-    resolver: zodResolver(createIncidentSchema),
+    resolver: zodResolver(createIncidentInputSchema),
     defaultValues: {
       severity: "MEDIA",
     },
