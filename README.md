@@ -1,4 +1,4 @@
-# Pass - Sistema de Gestão de Frota
+# Pass - Sistema de Gestão de Frota 🚗
 
 Monorepo contendo backend (Fastify + Prisma) e frontend (Next.js) para gerenciamento de frota de veículos.
 
@@ -19,44 +19,70 @@ Monorepo contendo backend (Fastify + Prisma) e frontend (Next.js) para gerenciam
 - React Hook Form + Zod
 - Axios
 
-## 🐳 Iniciando com Docker
+## 🐳 Início Rápido com Docker (RECOMENDADO)
 
-### 1. Inicie os serviços (PostgreSQL + MinIO)
+### Sistema Completo em 1 Comando 🎯
 
 ```bash
-docker-compose up -d
+# Iniciar TUDO (Postgres + MinIO + Backend + Frontend)
+./start-dev.sh
+
+# Pronto! Acesse:
+# 🌐 Frontend: http://localhost:3000
+# 🔌 Backend API: http://localhost:3333
+# 📦 MinIO Console: http://localhost:9001 (minioadmin/minioadmin123)
 ```
 
-Isso irá iniciar:
-- **PostgreSQL** na porta `5432`
-- **MinIO API** na porta `9000`
-- **MinIO Console** na porta `9001`
+**Isso inicia automaticamente:**
+- ✅ PostgreSQL com migrations aplicadas
+- ✅ MinIO para storage de arquivos
+- ✅ Backend API com hot reload
+- ✅ Frontend Next.js com hot reload
 
-### 2. Acesse o MinIO Console
+**Comandos úteis:**
+```bash
+# Ver logs de todos os serviços
+docker compose logs -f
 
+# Ver logs apenas do backend
+docker compose logs -f backend
+
+# Ver logs apenas do frontend
+docker compose logs -f frontend
+
+# Parar todos os serviços
+./stop.sh
+# ou
+docker compose down
+
+# Limpar volumes (apaga dados)
+docker compose down -v
 ```
-URL: http://localhost:9001
-Usuário: minioadmin
-Senha: minioadmin123
+
+📖 **[Ver documentação completa do Docker →](./DOCKER.md)**
+
+### Modo Produção
+
+```bash
+# Build otimizado para produção
+./start-prod.sh
+
+# ou manualmente
+docker compose -f docker-compose.prod.yml up --build
 ```
 
-Crie o bucket `pass-vehicles` no console do MinIO.
+## 🛠️ Desenvolvimento Manual (Alternativa)
 
-## 🛠️ Desenvolvimento (PowerShell)
+Se preferir rodar backend/frontend localmente (útil para debugging):
 
-Se você está desenvolvendo no Windows, existe um script de conveniência `run-dev.ps1` na raiz do repositório que inicia o backend e o frontend em modo de desenvolvimento.
+### 1. Inicie apenas a infraestrutura
 
-- `.\run-dev.ps1` — abre duas janelas PowerShell separadas e executa `npm run dev` em `pass_backend` e `pass_frontend`.
-- `.\run-dev.ps1 -NoNewWindow` — executa os dois comandos na janela atual (útil para debugging ou CI manual).
+```bash
+# Apenas PostgreSQL + MinIO
+docker compose up postgres minio -d
+```
 
-Pré-requisitos:
-- PowerShell (Windows)
-- `node` e `npm` disponíveis no `PATH` para os ambientes `pass_backend` e `pass_frontend`.
-
-Observações:
-- O script executa os servidores no host, portanto `node_modules` serão instalados localmente em cada pacote quando você rodar `npm install` dentro das pastas. Se preferir que `node_modules` não apareçam no host, use a versão com containers (Docker) — posso adicionar instruções se quiser.
-
-### 3. Configure o Backend
+### 2. Configure e rode o Backend
 
 ```bash
 cd pass_backend
@@ -69,7 +95,7 @@ npm run dev
 
 Backend rodando em: `http://localhost:3333`
 
-### 4. Configure o Frontend
+### 3. Configure e rode o Frontend
 
 ```bash
 cd pass_frontend
@@ -80,119 +106,116 @@ npm run dev
 
 Frontend rodando em: `http://localhost:3000`
 
-## 📦 Comandos Úteis
+### 4. Configure o MinIO (primeira vez)
 
-### Docker
+Acesse: http://localhost:9001
+- Usuário: `minioadmin`
+- Senha: `minioadmin123`
+- Crie o bucket: `pass-vehicles`
+
+## 📦 Comandos Docker Úteis
+
 ```bash
-# Iniciar serviços
-docker-compose up -d
+# Ver status dos containers
+docker compose ps
 
-# Ver logs
-docker-compose logs -f
+# Executar comando no backend
+docker compose exec backend npx prisma studio
 
-# Parar serviços
-docker-compose down
+# Executar migrations
+docker compose exec backend npx prisma migrate dev
 
-# Parar e remover volumes (limpa dados)
-docker-compose down -v
-```
+# Acessar shell do container
+docker compose exec backend sh
 
-### Prisma
-```bash
-# Gerar cliente
-npx prisma generate
+# Ver recursos (CPU, memória)
+docker stats
 
-# Criar migration
-npx prisma migrate dev --name nome_da_migration
-
-# Abrir Prisma Studio
-npx prisma studio
+# Rebuild completo
+docker compose up --build --force-recreate
 ```
 
 ## 🗂️ Estrutura do Projeto
 
 ```
 pass_desafiotecnico/
-├── pass_backend/                      # API REST
-│   ├── docs/                         # 📚 Documentação
-│   │   ├── CONTEXT.md                # Contexto técnico e arquitetura
-│   │   ├── EXPLAIN.md                # Especificação funcional
-│   │   ├── FILTERS.md                # Guia de filtros e ordenação
-│   │   ├── FRONTEND_INTEGRATION.md   # Guia de integração frontend
+├── 🐳 docker-compose.yml           # Desenvolvimento
+├── 🐳 docker-compose.prod.yml      # Produção
+├── 🚀 start-dev.sh                 # Script start dev
+├── 🚀 start-prod.sh                # Script start prod
+├── 🛑 stop.sh                      # Script stop all
+├── 📖 QUICKSTART.md                # Início rápido
+├── 📖 DOCKER.md                    # Guia Docker completo
+├── 📖 CONTEXT.md                   # Como funciona o sistema
+│
+├── pass_backend/                   # 🔌 API REST
+│   ├── Dockerfile                  # Build produção
+│   ├── Dockerfile.dev              # Build desenvolvimento
+│   ├── docs/                       # 📚 Documentação completa
+│   │   ├── CONTEXT.md
+│   │   ├── EXPLAIN.md
+│   │   ├── FILTERS.md
+│   │   ├── FRONTEND_INTEGRATION.md
 │   │   └── FleetManager.postman_collection.json
 │   ├── prisma/
-│   │   ├── schema.prisma
-│   │   └── migrations/
+│   │   └── schema.prisma
 │   └── src/
-│       ├── server.ts
 │       ├── http/
-│       │   ├── controllers/          # Vehicle, Fueling, Incident, Document, Image
-│       │   └── routes/               # Rotas Fastify (top-level + nested)
-│       ├── services/                 # Lógica de negócio + Prisma
+│       │   ├── controllers/        # Validação e HTTP
+│       │   └── routes/             # Rotas Fastify
+│       ├── services/               # Lógica de negócio
 │       │   ├── vehicleServices/
 │       │   ├── fuelingServices/
 │       │   ├── incidentServices/
 │       │   ├── vehicleDocumentServices/
 │       │   └── vehicleImageServices/
-│       ├── schemas/                  # Validação Zod
-│       ├── lib/                      # Prisma client
-│       ├── type/                     # Tipos TypeScript
-│       └── utils/                    # AppError
-├── pass_frontend/                     # Interface Web (Next.js 15)
+│       └── lib/                    # Prisma client
+│
+├── pass_frontend/                  # 🌐 Interface Web
+│   ├── Dockerfile
+│   ├── Dockerfile.dev
 │   └── src/
-│        ├── app/
-│        │   ├── layout.tsx                   ✅
-│        │   ├── page.tsx                     ✅
-│        │   └── (modules)/
-│        │       └── vehicles/
-│        │           ├── page.tsx             ✅
-│        │           └── layout.tsx           ✅
-│        │
-│        ├── components/
-│        │   ├── ui/                          ✅ (para Shadcn UI)
-│        │   ├── layout/                      ✅ (Sidebar, Topbar, PageHeader)
-│        │   └── shared/                      ✅ (DataTable, StatusBadge)
-│        │
-│        ├── features/
-│        │   ├── vehicles/                    ✅
-│        │   │   ├── components/
-│        │   │   │   ├── VehicleList/         ✅ (columns.tsx, VehicleTable.tsx)
-│        │   │   │   ├── VehicleDetails/      ✅ (VehicleSheet, VehicleInfo, VehicleTabs)
-│        │   │   │   │   └── sections/        ✅ (FuelingList, IncidentList, DocumentList)
-│        │   │   │   └── forms/               ✅ (VehicleFormModal)
-│        │   │   ├── hooks/                   ✅ (useVehicles, useVehicleDetails)
-│        │   │   └── types/                   ✅
-│        │   │
-│        │   └── fleet-events/                ✅
-│        │       ├── components/
-│        │       │   ├── Fueling/             ✅ (FuelingModal)
-│        │       │   ├── Incident/            ✅ (IncidentModal)
-│        │       │   └── Documents/           ✅ (DocumentModal)
-│        │       ├── hooks/                   ✅ (useCreateFueling, useCreateIncident)
-│        │       └── schemas/                 ✅ (fueling.schema, incident.schema)
-│        │
-│        ├── lib/                             ✅
-│        │   ├── api.ts                       ✅
-│        │   ├── axios.ts                     ✅
-│        │   ├── query-client.ts              ✅
-│        │   └── utils.ts                     ✅
-│        │
-│        └── store/                           ✅
-│            ├── layout/                      ✅ (Sidebar, Topbar, PageHeader)
-│            └── use-modal-store.ts           ✅
-├── CONTEXT.md                        # 📖 Contexto do projeto
-├── README.md                         # Este arquivo
-└── docker-compose.yml                # PostgreSQL + MinIO
+│       ├── app/                    # Next.js App Router
+│       │   ├── layout.tsx
+│       │   ├── page.tsx
+│       │   └── (modules)/
+│       │       └── vehicles/
+│       ├── components/
+│       │   ├── ui/                 # Shadcn UI
+│       │   └── layout/             # Sidebar, Header
+│       ├── features/               # Features por domínio
+│       │   ├── vehicles/
+│       │   └── fleet-events/
+│       └── lib/                    # Axios, React Query
+│
+└── pass_schemas/                   # 📋 Schemas compartilhados
+    └── src/
+        └── *.ts                    # Validações Zod
 ```
+
+## 🔒 Portas e Acessos
+
+| Serviço | Porta | URL | Credenciais |
+|---------|-------|-----|-------------|
+| Frontend | 3000 | http://localhost:3000 | - |
+| Backend API | 3333 | http://localhost:3333 | - |
+| PostgreSQL | 5432 | localhost:5432 | pass_user / pass_password |
+| MinIO API | 9000 | http://localhost:9000 | minioadmin / minioadmin123 |
+| MinIO Console | 9001 | http://localhost:9001 | minioadmin / minioadmin123 |
+
 ## 📝 Variáveis de Ambiente
 
 ### Backend (.env)
 ```env
 DATABASE_URL="postgresql://pass_user:pass_password@localhost:5432/pass_db?schema=public"
 PORT=3333
+NODE_ENV=development
 MINIO_ENDPOINT=localhost
+MINIO_PORT=9000
 MINIO_ACCESS_KEY=minioadmin
 MINIO_SECRET_KEY=minioadmin123
+MINIO_BUCKET=pass-vehicles
+MINIO_USE_SSL=false
 ```
 
 ### Frontend (.env.local)
@@ -200,43 +223,110 @@ MINIO_SECRET_KEY=minioadmin123
 NEXT_PUBLIC_API_URL=http://localhost:3333
 ```
 
-## 🔒 Portas Utilizadas
-
-- `3000` - Frontend (Next.js)
-- `3333` - Backend (Fastify)
-- `5432` - PostgreSQL
-- `9000` - MinIO API
-- `9001` - MinIO Console
-
 ## 📚 Documentação
 
-### Documentação Geral
-- [Contexto do Projeto](./CONTEXT.md) - Visão geral da stack e estrutura
-- [Backend README](./pass_backend/README.md) - Guia específico do backend
-- [Frontend README](./pass_frontend/README.md) - Guia específico do frontend
+- 📖 [QUICKSTART.md](./QUICKSTART.md) - Início em 2 minutos
+- 📖 [DOCKER.md](./DOCKER.md) - Guia Docker completo
+- 📖 [CONTEXT.md](./CONTEXT.md) - Como funciona o sistema
+- 📖 [Backend Docs](./pass_backend/docs/) - Documentação técnica da API
+- 📋 [EXPLAIN.md](./pass_backend/docs/EXPLAIN.md) - Regras de negócio
+- 🔍 [FILTERS.md](./pass_backend/docs/FILTERS.md) - Filtros e ordenação
+- 🔗 [FRONTEND_INTEGRATION.md](./pass_backend/docs/FRONTEND_INTEGRATION.md) - Integração frontend
+- 📮 [Postman Collection](./pass_backend/docs/FleetManager.postman_collection.json) - Testes de API
 
-### Documentação Técnica do Backend (`pass_backend/docs/`)
-- [CONTEXT.md](./pass_backend/docs/CONTEXT.md) - Contexto técnico, arquitetura e status dos módulos
-- [EXPLAIN.md](./pass_backend/docs/EXPLAIN.md) - Especificação funcional e regras de negócio
-- [FILTERS.md](./pass_backend/docs/FILTERS.md) - Guia completo de filtros, ordenação e paginação
-- [FRONTEND_INTEGRATION.md](./pass_backend/docs/FRONTEND_INTEGRATION.md) - Guia de integração com Next.js
-- [FleetManager.postman_collection.json](./pass_backend/docs/FleetManager.postman_collection.json) - Collection para testes de API
+## 🎯 Funcionalidades
 
-## 🎯 Funcionalidades Implementadas
+### Backend (API REST) ✅
+- ✅ **Veículos**: CRUD completo com filtros (status, categoria, marca, placa)
+- ✅ **Abastecimentos**: CRUD com validação de odômetro e atualização automática
+- ✅ **Ocorrências**: CRUD com filtros de severidade
+- ✅ **Documentos**: CRUD com sistema de alertas de vencimento
+- ✅ **Imagens**: CRUD de metadados (rotas aninhadas)
+- ✅ **Paginação**: `page` e `limit` em todas as listagens
+- ✅ **Ordenação**: `sortBy` e `sortOrder` com tie-breakers
+- ✅ **Tratamento de Erros**: AppError customizado
 
-### Backend (API REST)
-- ✅ **Veículos**: CRUD completo com filtros (status, categoria, marca, placa) e validações de unicidade
-- ✅ **Abastecimentos**: CRUD com regras de negócio (odômetro crescente, tipo combustível) e atualização automática do km do veículo
-- ✅ **Ocorrências**: CRUD com filtros de severidade e classificação
-- ✅ **Documentos**: CRUD com sistema de alertas de vencimento e filtros avançados
-- ✅ **Imagens**: CRUD de metadados (rotas top-level e aninhadas)
-- ✅ **Paginação**: Suporte a `page` e `limit` em todas as listagens
-- ✅ **Ordenação**: `sortBy` e `sortOrder` com tie-breakers para estabilidade
-- ✅ **Tratamento de Erros**: AppError customizado + handler global
-
-### Frontend (em planejamento)
-- 📋 Estrutura completa definida em `FRONTEND_INTEGRATION.md`
+### Frontend 📋
+- 📋 Estrutura de features definida
 - 📋 Componentes Shadcn/ui configurados
-- 📋 Hooks React Query por módulo
-- 📋 Páginas do App Router (veículos + módulos aninhados)
-- 📋 Formulários com React Hook Form + Zod
+- 📋 React Query hooks
+- 📋 Páginas App Router
+- 📋 Formulários com validação
+
+## 🐛 Troubleshooting
+
+### Porta já em uso
+```bash
+# Ver o que está usando a porta
+sudo lsof -i :3000
+sudo lsof -i :3333
+
+# Parar containers
+./stop.sh
+```
+
+### Limpar tudo e recomeçar
+```bash
+# Parar e limpar volumes
+docker compose down -v
+
+# Rebuild completo
+docker compose up --build --force-recreate
+```
+
+### Ver logs de erro
+```bash
+# Backend
+docker compose logs backend --tail=50
+
+# Frontend
+docker compose logs frontend --tail=50
+
+# Banco de dados
+docker compose logs postgres --tail=50
+```
+
+### Executar migrations manualmente
+```bash
+docker compose exec backend npx prisma migrate dev
+```
+
+## 🚀 Scripts Disponíveis
+
+| Script | Descrição |
+|--------|-----------|
+| `./start-dev.sh` | Inicia tudo em modo desenvolvimento |
+| `./start-prod.sh` | Inicia tudo em modo produção |
+| `./stop.sh` | Para todos os serviços |
+
+## 💡 Dicas de Performance
+
+```bash
+# Build paralelo (mais rápido)
+docker compose build --parallel
+
+# Apenas serviços específicos
+docker compose up postgres minio backend
+
+# Modo detached (background)
+docker compose up -d
+
+# Seguir logs em tempo real
+docker compose logs -f backend frontend
+```
+
+## 🆘 Suporte
+
+Em caso de problemas:
+1. Ver logs: `docker compose logs -f`
+2. Status: `docker compose ps`
+3. Reiniciar: `./stop.sh && ./start-dev.sh`
+4. Limpar: `docker compose down -v`
+
+## 📄 Licença
+
+MIT
+
+---
+
+**Desenvolvido com ❤️ usando Docker Compose + Fastify + Next.js**

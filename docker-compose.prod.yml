@@ -2,8 +2,8 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
-    container_name: pass-postgres
-    restart: unless-stopped
+    container_name: pass-postgres-prod
+    restart: always
     ports:
       - "5432:5432"
     environment:
@@ -23,8 +23,8 @@ services:
   # MinIO Storage
   minio:
     image: minio/minio:latest
-    container_name: pass-minio
-    restart: unless-stopped
+    container_name: pass-minio-prod
+    restart: always
     ports:
       - "9000:9000"  # API
       - "9001:9001"  # Console
@@ -42,29 +42,25 @@ services:
     networks:
       - pass-network
 
-  # Backend API (Development)
+  # Backend API (Production)
   backend:
     build:
       context: .
-      dockerfile: ./pass_backend/Dockerfile.dev
-    container_name: pass-backend
-    restart: unless-stopped
+      dockerfile: ./pass_backend/Dockerfile
+    container_name: pass-backend-prod
+    restart: always
     ports:
       - "3333:3333"
     environment:
       DATABASE_URL: "postgresql://pass_user:pass_password@postgres:5432/pass_db?schema=public"
       PORT: 3333
-      NODE_ENV: development
+      NODE_ENV: production
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin123
       MINIO_BUCKET: pass-vehicles
       MINIO_USE_SSL: false
-    volumes:
-      - ./pass_backend/src:/app/src
-      - ./pass_backend/prisma:/app/prisma
-      - ./pass_schemas:/schemas
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,21 +69,18 @@ services:
     networks:
       - pass-network
 
-  # Frontend (Development)
+  # Frontend (Production)
   frontend:
     build:
       context: .
-      dockerfile: ./pass_frontend/Dockerfile.dev
-    container_name: pass-frontend
-    restart: unless-stopped
+      dockerfile: ./pass_frontend/Dockerfile
+    container_name: pass-frontend-prod
+    restart: always
     ports:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3333
-      NODE_ENV: development
-    volumes:
-      - ./pass_frontend/src:/app/src
-      - ./pass_frontend/public:/app/public
+      NODE_ENV: production
     depends_on:
       - backend
     networks:
