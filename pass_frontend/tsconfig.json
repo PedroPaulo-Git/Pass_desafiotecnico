@@ -27,8 +27,11 @@
       "@/*": [
         "./src/*"
       ],
+      "@pass/schemas": [
+        "../pass_schemas/dist/index.d.ts"
+      ],
       "@pass/schemas/*": [
-        "../pass_schemas/dist/schemas/*"
+        "../pass_schemas/dist/*"
       ]
     }
     // "paths": {
