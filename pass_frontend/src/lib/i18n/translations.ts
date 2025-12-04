@@ -1,5 +1,12 @@
 export const translations = {
   pt: {
+    // Language selector
+    language: {
+      selector: "Idioma",
+      portuguese: "Português",
+      english: "English",
+      spanish: "Español",
+    },
     // Common
     common: {
       search: "Buscar",
@@ -51,6 +58,9 @@ export const translations = {
       subtitle: "Sistema de Gestão de Frotas",
       description: "Gerencie sua frota de veículos de forma inteligente e eficiente",
       getStarted: "Começar",
+      heroTitle1: "A Solução Completa",
+      heroTitle2: "para Frotas e Agências de Turismo e Fretamento",
+      ctaButton: "Seja Pass. Seja Livre",
       features: {
         vehicles: "Controle de Veículos",
         vehiclesDesc: "Cadastro completo de veículos com documentação",
@@ -209,6 +219,13 @@ export const translations = {
     },
   },
   en: {
+    // Language selector
+    language: {
+      selector: "Language",
+      portuguese: "Portuguese",
+      english: "English",
+      spanish: "Spanish",
+    },
     // Common
     common: {
       search: "Search",
@@ -260,13 +277,16 @@ export const translations = {
       subtitle: "Fleet Management System",
       description: "Manage your vehicle fleet smartly and efficiently",
       getStarted: "Get Started",
+      heroTitle1: "The Complete Solution",
+      heroTitle2: "for Fleets and Tourism and Charter Agencies",
+      ctaButton: "Be Pass. Be Free",
       features: {
         vehicles: "Vehicle Control",
         vehiclesDesc: "Complete vehicle registration with documentation",
         fueling: "Fueling",
         fuelingDesc: "Fueling history and costs",
         incidents: "Incidents",
-        incidentsDesc: "Ticket and incident registration",
+        incidentsDesc: "Fines and incidents records",
         documents: "Documentation",
         documentsDesc: "Document expiration alerts",
       },
@@ -418,6 +438,13 @@ export const translations = {
     },
   },
   es: {
+    // Language selector
+    language: {
+      selector: "Idioma",
+      portuguese: "Portugués",
+      english: "Inglés",
+      spanish: "Español",
+    },
     // Common
     common: {
       search: "Buscar",
@@ -467,13 +494,16 @@ export const translations = {
     home: {
       title: "Pass Fleet Manager",
       subtitle: "Sistema de Gestión de Flotas",
-      description: "Gestione su flota de vehículos de manera inteligente y eficiente",
-      getStarted: "Comenzar",
+      description: "Gestione su flota de vehículos de forma inteligente y eficiente",
+      getStarted: "Empezar",
+      heroTitle1: "La Solución Completa",
+      heroTitle2: "para Flotas y Agencias de Turismo y Fletamento",
+      ctaButton: "Sea Pass. Sea Libre",
       features: {
         vehicles: "Control de Vehículos",
         vehiclesDesc: "Registro completo de vehículos con documentación",
-        fueling: "Abastecimiento",
-        fuelingDesc: "Historial de abastecimientos y costos",
+        fueling: "Combustible",
+        fuelingDesc: "Historial de repostajes y costos",
         incidents: "Incidentes",
         incidentsDesc: "Registro de multas e incidentes",
         documents: "Documentación",

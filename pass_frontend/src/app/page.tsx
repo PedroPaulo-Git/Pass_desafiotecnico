@@ -1,9 +1,10 @@
 import { HeaderHome } from "@/components/layout/HeaderHome";
+import { FloatingSocialLinks } from "@/components/layout/FloatingSocialLinks";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <section className="relative">
+    <main className="max-h-screen">
+      <section className="relative h-screen ">
         <div>
           <img
             src="/assets/WallpaperHome.jpg"
@@ -11,9 +12,10 @@ export default function Home() {
             alt="Wallpaper Home"
           />
         </div>
-    
+
         <HeaderHome />
       </section>
+      <FloatingSocialLinks />
     </main>
   );
 }

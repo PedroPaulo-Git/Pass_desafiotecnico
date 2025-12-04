@@ -141,10 +141,10 @@ export function HeaderHome() {
           {/* Title */}
           <div className="text-3xl md:text-4xl lg:text-5xl font-bold lg:max-w-xl">
             <motion.h1 variants={itemVariants} className="text-white">
-              A Solução Completa
+              {t.home.heroTitle1}
             </motion.h1>
             <motion.h1 variants={itemVariants}  className="font-normal inline-flex bg-clip-text text-transparent bg-linear-to-r from-green-400 to-blue-300 ">
-              para Frotas e Agências de Turismo e Fretamento
+              {t.home.heroTitle2}
             </motion.h1>
           </div>
          
@@ -158,7 +158,7 @@ export function HeaderHome() {
       font-medium h-9 mt-6 md:mt-8 px-6 md:px-8 border-2
       border-white py-5 md:py-6 text-white text-base md:text-lg cursor-default"
             >
-              Seja Pass. Seja Livre
+              {t.home.ctaButton}
             </Link>
           </motion.div>
         </motion.div>
