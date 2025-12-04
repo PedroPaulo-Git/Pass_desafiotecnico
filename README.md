@@ -26,6 +26,32 @@ docker compose up postgres minio -d
 .\run-dev.ps1
 ```
 
+### Executar projeto compilado (Windows)
+
+Se você já compilou o backend e o frontend (build de produção) e quer executar os artefatos compilados localmente no Windows, use o script `run.ps1`. Esse script inicia o backend e o frontend em modo de produção executando `npm run start` em novas janelas do PowerShell.
+
+Exemplo de uso:
+
+```powershell
+# A partir da raiz do repositório: compile cada workspace primeiro
+cd pass_backend
+npm install
+npm run build
+
+cd ..\pass_frontend
+npm install
+npm run build
+
+# Volte para a raiz do repositório e execute os servidores compilados
+cd ..
+.\run.ps1
+```
+
+Observações:
+- O `run.ps1` destina-se a executar os servidores já compilados (produção) usando `npm run start`.
+- Para desenvolvimento com hot-reload, continue usando o `run-dev.ps1`.
+
+
 **🎯 O script `run-dev.ps1` automatiza TUDO:**
 - ✅ Instala dependências (`npm install`) nos 3 pacotes (schemas, backend, frontend)
 - ✅ Compila o `pass_schemas` (TypeScript → dist/)
