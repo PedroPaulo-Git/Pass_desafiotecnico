@@ -57,7 +57,8 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-2 sm:p-4 pt-0 max-[1300px]:w-96 max-[1000px]:w-96 max-[500px]:w-80 mx-auto  ">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+          className="p-2 sm:p-4 pt-0 max-[440px]:w-72 max-[550px]:w-92 mx-auto sm:w-full ">
             <Table>
               <TableHeader>
                 <TableRow>
