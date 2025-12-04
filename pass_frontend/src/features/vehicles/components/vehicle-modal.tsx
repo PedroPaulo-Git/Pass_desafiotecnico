@@ -27,6 +27,7 @@ import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useUpdateVehicle, useCreateVehicle } from "../hooks/use-vehicles";
 import { useVehicleSubmit } from "../hooks/use-vehicle-submit";
+import { useVehicleImages, useCreateVehicleImage, useDeleteVehicleImage } from "@/features/fleet-events/hooks/use-vehicle-images";
 import { toast as sonnerToast } from "sonner";
 import { makePreSubmitHandler } from "../hooks/make-pre-submit-handler";
 import { FuelingsSection } from "./fuelings-section";
@@ -104,6 +105,41 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const [descriptionOpen, setDescriptionOpen] = useState(true);
   const [imagesOpen, setImagesOpen] = useState(true);
   const [characteristicsOpen, setCharacteristicsOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { data: imagesData } = useVehicleImages(vehicle?.id || "");
+  const createImage = useCreateVehicleImage();
+  const deleteImage = useDeleteVehicleImage();
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !vehicle?.id) return;
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        await createImage.mutateAsync({ vehicleId: vehicle.id, url: base64 });
+        sonnerToast.success(t.common.success || "Image uploaded successfully");
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      sonnerToast.error(t.common.error || "Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: string) => {
+    if (!vehicle?.id) return;
+    try {
+      await deleteImage.mutateAsync({ imageId, vehicleId: vehicle.id });
+      sonnerToast.success(t.common.success || "Image deleted successfully");
+    } catch (error) {
+      sonnerToast.error(t.common.error || "Failed to delete image");
+    }
+  };
 
   const {
     register,
@@ -865,78 +901,55 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="p-4 pt-0">
-                    <div className="flex flex-wrap gap-3">
-                      {/* Upload Box */}
-                      <div className="w-24 h-24 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
-                        <ImagePlus className="h-6 w-6 text-muted-foreground mb-1" />
-                        <span className="text-xs text-primary">
-                          {t.common.uploadFiles}
-                        </span>
-                      </div>
-                      {/* Existing Images */}
-                      {vehicle?.images?.map((image, index) => (
-                        <motion.div
-                          key={image.id}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="relative w-24 h-24 rounded-lg overflow-hidden group"
-                        >
-                          <img
-                            src={
-                              image.url ||
-                              `/placeholder.svg?height=96&width=96&query=vehicle ${
-                                index + 1
-                              }`
-                            }
-                            alt={`Vehicle ${index + 1}`}
-                            className="w-full h-full object-cover"
+                    {vehicle ? (
+                      <div className="flex flex-wrap gap-3">
+                        {/* Upload Box */}
+                        <label className="w-24 h-24 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={isUploading}
+                            className="hidden"
                           />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-white hover:bg-white/20"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </motion.div>
-                      ))}
-                      {/* Placeholder images if no images */}
-                      {(!vehicle?.images || vehicle.images.length === 0) && (
-                        <>
-                          <div className="w-24 h-24 rounded-lg overflow-hidden">
+                          <ImagePlus className="h-6 w-6 text-muted-foreground mb-1" />
+                          <span className="text-xs text-primary">
+                            {isUploading ? "Uploading..." : t.common.uploadFiles}
+                          </span>
+                        </label>
+                        {/* Existing Images */}
+                        {imagesData?.map((image, index) => (
+                          <motion.div
+                            key={image.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="relative w-24 h-24 rounded-lg overflow-hidden group"
+                          >
                             <img
-                              src="assets/black-sedan-car.jpg"
-                              alt="Sample 1"
+                              src={image.url}
+                              alt={`Vehicle ${index + 1}`}
                               className="w-full h-full object-cover"
                             />
-                          </div>
-                          <div className="w-24 h-24 rounded-lg overflow-hidden">
-                            <img
-                              src="assets/green-mercedes-suv.jpg"
-                              alt="Sample 2"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="w-24 h-24 rounded-lg overflow-hidden">
-                            <img
-                              src="assets/white-bmw-luxury.jpg"
-                              alt="Sample 3"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive mt-3 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      {t.common.deleteAll}
-                    </button>
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="text-white hover:bg-white/20"
+                                onClick={() => handleDeleteImage(image.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {t.common.saveVehicleFirst || "Save vehicle first to upload images"}
+                      </p>
+                    )}
                   </div>
                 </CollapsibleContent>
               </div>
