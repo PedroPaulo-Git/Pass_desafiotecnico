@@ -114,6 +114,14 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !vehicle?.id) return;
+    // Validate file type (only images allowed)
+    if (file.type && !file.type.startsWith("image/")) {
+      // fallback message in Portuguese if translation missing
+      sonnerToast.error(
+        t.common.invalidFileType || "Arquivo inválido. Envie apenas imagens"
+      );
+      return;
+    }
 
     setIsUploading(true);
     try {

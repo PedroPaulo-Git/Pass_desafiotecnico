@@ -36,6 +36,7 @@ export const translations = {
       dragDrop: "ou arraste aqui",
       uploading: "Enviando...",
       saveVehicleFirst: "Salve o veículo primeiro para enviar imagens",
+      invalidFileType: "Arquivo inválido. Envie apenas imagens",
     },
     // Navigation
     nav: {
@@ -263,6 +264,7 @@ export const translations = {
       dragDrop: "or drag here",
       uploading: "Uploading...",
       saveVehicleFirst: "Save vehicle first to upload images",
+      invalidFileType: "Invalid file. Please upload images only",
     },
     // Navigation
     nav: {
@@ -490,6 +492,7 @@ export const translations = {
       dragDrop: "o arrastrar aquí",
       uploading: "Subiendo...",
       saveVehicleFirst: "Guarde el vehículo primero para subir imágenes",
+      invalidFileType: "Archivo inválido. Suba solo imágenes",
     },
     // Navigation
     nav: {
