@@ -88,7 +88,7 @@ export function DocumentsSection({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="p-2 sm:p-4 pt-0 max-[390px]:w-80 mx-auto sm:w-full "
+            className="p-2 sm:p-4 pt-0 max-[1000px]:w-80 mx-auto sm:w-full "
            >
             <Table>
               <TableHeader>

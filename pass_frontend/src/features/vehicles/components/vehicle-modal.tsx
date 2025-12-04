@@ -104,7 +104,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const [generalOpen, setGeneralOpen] = useState(true);
   const [descriptionOpen, setDescriptionOpen] = useState(true);
   const [imagesOpen, setImagesOpen] = useState(true);
-  const [characteristicsOpen, setCharacteristicsOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: imagesData } = useVehicleImages(vehicle?.id || "");
@@ -273,7 +272,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         fullWidth
         showInfo={false}
         showCloseButton={false}
-        className=" sm:w-[min(70vw,1200px)] lg:w-[min(60vw,600px)] max-h-[90vh] overflow-y-auto p-0"
+        className=" w-[min(100vw,1000px)] max-h-[90vh] overflow-y-auto p-0"
       >
         <motion.div
           variants={modalVariants}
@@ -809,42 +808,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 </CollapsibleContent>
               </div>
             </Collapsible>
-
-            {/* Características */}
-
-            <Collapsible
-              open={characteristicsOpen}
-              onOpenChange={setCharacteristicsOpen}
-            >
-              <div className="border border-border rounded-lg overflow-hidden">
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {t.vehicles.characteristics}
-                      </span>
-                    </div>
-                    {characteristicsOpen ? (
-                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="p-4 pt-0">
-                    <p className="text-sm text-muted-foreground">
-                      Características adicionais do veículo podem ser
-                      adicionadas aqui.
-                    </p>
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-
             {/* Descrição */}
             <Collapsible
               open={descriptionOpen}
