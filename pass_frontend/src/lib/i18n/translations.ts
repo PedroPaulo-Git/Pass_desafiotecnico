@@ -34,6 +34,8 @@ export const translations = {
       deleteAll: "Excluir todos arquivos",
       uploadFiles: "Envie arquivos",
       dragDrop: "ou arraste aqui",
+      uploading: "Enviando...",
+      saveVehicleFirst: "Salve o veículo primeiro para enviar imagens",
     },
     // Navigation
     nav: {
@@ -259,6 +261,8 @@ export const translations = {
       deleteAll: "Delete all files",
       uploadFiles: "Upload files",
       dragDrop: "or drag here",
+      uploading: "Uploading...",
+      saveVehicleFirst: "Save vehicle first to upload images",
     },
     // Navigation
     nav: {
@@ -484,6 +488,8 @@ export const translations = {
       deleteAll: "Eliminar todos los archivos",
       uploadFiles: "Subir archivos",
       dragDrop: "o arrastrar aquí",
+      uploading: "Subiendo...",
+      saveVehicleFirst: "Guarde el vehículo primero para subir imágenes",
     },
     // Navigation
     nav: {
