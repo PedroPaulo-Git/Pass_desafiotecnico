@@ -6,7 +6,9 @@ interface ListVehicleParams {
   page: number;
   limit: number;
   where: Prisma.VehicleWhereInput;
-  orderBy?: Prisma.VehicleOrderByWithRelationInput | Prisma.VehicleOrderByWithRelationInput[];
+  orderBy?:
+    | Prisma.VehicleOrderByWithRelationInput
+    | Prisma.VehicleOrderByWithRelationInput[];
 }
 
 export const listVehicleService = async ({

@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { FuelingController } from "../controllers/fuelingController";
-import { FuelingIdParam, UpdateFuelingInput } from "@pass/schemas/fuelingSchema";
+import {
+  FuelingIdParam,
+  UpdateFuelingInput,
+} from "@pass/schemas/fuelingSchema";
 const controllerFueling = new FuelingController();
 
 export const fuelingRoutes = async (app: FastifyInstance) => {
@@ -13,5 +16,8 @@ export const fuelingRoutes = async (app: FastifyInstance) => {
     controllerFueling.updateFueling
   );
 
-  app.delete<{ Params: FuelingIdParam }>("/:id", controllerFueling.deleteFueling);
+  app.delete<{ Params: FuelingIdParam }>(
+    "/:id",
+    controllerFueling.deleteFueling
+  );
 };

@@ -43,7 +43,7 @@ export class VehicleController {
         mode: "insensitive",
       } as Prisma.StringFilter;
     }
-      if (queryValidated.model) {
+    if (queryValidated.model) {
       where.model = {
         contains: queryValidated.model,
         mode: "insensitive",
@@ -51,17 +51,13 @@ export class VehicleController {
     }
     if (queryValidated.state) where.state = queryValidated.state;
 
-
     const sortField = queryValidated.sortBy ?? "createdAt";
     const sortOrder = queryValidated.sortOrder ?? "desc";
     let orderBy: Prisma.VehicleOrderByWithRelationInput[] = [
       { [sortField]: sortOrder } as Prisma.VehicleOrderByWithRelationInput,
     ];
     if (sortField === "createdAt") {
-      orderBy = [
-        { createdAt: sortOrder },
-        { id: "desc" },
-      ];
+      orderBy = [{ createdAt: sortOrder }, { id: "desc" }];
     }
 
     const result = await listVehicleService({ page, limit, where, orderBy });

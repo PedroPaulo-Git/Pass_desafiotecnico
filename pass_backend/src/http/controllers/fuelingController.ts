@@ -51,10 +51,17 @@ export class FuelingController {
         ...(queryValidated.dateTo && { lte: queryValidated.dateTo }),
       };
     }
-    if (queryValidated.minOdometer !== undefined || queryValidated.maxOdometer !== undefined) {
+    if (
+      queryValidated.minOdometer !== undefined ||
+      queryValidated.maxOdometer !== undefined
+    ) {
       where.odometer = {
-        ...(queryValidated.minOdometer !== undefined && { gte: queryValidated.minOdometer }),
-        ...(queryValidated.maxOdometer !== undefined && { lte: queryValidated.maxOdometer }),
+        ...(queryValidated.minOdometer !== undefined && {
+          gte: queryValidated.minOdometer,
+        }),
+        ...(queryValidated.maxOdometer !== undefined && {
+          lte: queryValidated.maxOdometer,
+        }),
       };
     }
     if (queryValidated.minLiters || queryValidated.maxLiters) {

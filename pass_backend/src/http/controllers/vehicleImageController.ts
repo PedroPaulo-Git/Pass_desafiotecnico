@@ -37,7 +37,12 @@ export class VehicleImageController {
     if (queryValidated.vehicleId) where.vehicleId = queryValidated.vehicleId;
     if (queryValidated.url) where.url = queryValidated.url;
 
-    const result = await listVehicleImageService({ page, limit, where, orderBy });
+    const result = await listVehicleImageService({
+      page,
+      limit,
+      where,
+      orderBy,
+    });
     return reply.status(200).send(result);
   }
 
@@ -59,7 +64,10 @@ export class VehicleImageController {
   }
 
   async createImage(
-    request: FastifyRequest<{ Body: CreateVehicleImageInput; Params: VehicleIdParam }>,
+    request: FastifyRequest<{
+      Body: CreateVehicleImageInput;
+      Params: VehicleIdParam;
+    }>,
     reply: FastifyReply
   ) {
     const vehicleId = request.params.id;
@@ -69,7 +77,10 @@ export class VehicleImageController {
   }
 
   async updateImage(
-    request: FastifyRequest<{ Body: UpdateVehicleImageInput; Params: VehicleImageIdParam }>,
+    request: FastifyRequest<{
+      Body: UpdateVehicleImageInput;
+      Params: VehicleImageIdParam;
+    }>,
     reply: FastifyReply
   ) {
     const imageId = vehicleImageIdParamSchema.parse(request.params);

@@ -1,4 +1,7 @@
-import { FuelingIdParam, UpdateFuelingInput } from "@pass/schemas/fuelingSchema";
+import {
+  FuelingIdParam,
+  UpdateFuelingInput,
+} from "@pass/schemas/fuelingSchema";
 import { AppError } from "@/utils/AppError";
 import { prisma } from "@/lib/prisma";
 

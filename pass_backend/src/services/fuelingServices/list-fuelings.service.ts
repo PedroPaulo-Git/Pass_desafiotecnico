@@ -7,7 +7,9 @@ interface ListFuelingParams {
   page: number;
   limit: number;
   where: Prisma.FuelingWhereInput;
-  orderBy?: Prisma.FuelingOrderByWithRelationInput | Prisma.FuelingOrderByWithRelationInput[];
+  orderBy?:
+    | Prisma.FuelingOrderByWithRelationInput
+    | Prisma.FuelingOrderByWithRelationInput[];
 }
 
 export const listFuelingService = async ({
@@ -55,7 +57,9 @@ export const listFuelingById = async (fuelingId: FuelingIdParam) => {
 
 export const listFuelingServiceByVehicleId = async (
   vehicleId: string,
-  orderBy?: Prisma.FuelingOrderByWithRelationInput | Prisma.FuelingOrderByWithRelationInput[]
+  orderBy?:
+    | Prisma.FuelingOrderByWithRelationInput
+    | Prisma.FuelingOrderByWithRelationInput[]
 ) => {
   const result = await prisma.fueling.findMany({
     where: {

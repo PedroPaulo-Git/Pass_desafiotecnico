@@ -8,12 +8,19 @@ export const createVehicleDocumentService = async (
 ) => {
   const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
   if (!vehicle) {
-    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", { vehicleId });
+    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", {
+      vehicleId,
+    });
   }
 
   // expiryDate must not be before today (basic domain rule)
   if (documentData.expiryDate < new Date()) {
-    throw new AppError("Expiry date cannot be in the past", 400, "INVALID_EXPIRY_DATE", { expiryDate: documentData.expiryDate });
+    throw new AppError(
+      "Expiry date cannot be in the past",
+      400,
+      "INVALID_EXPIRY_DATE",
+      { expiryDate: documentData.expiryDate }
+    );
   }
 
   const newDocument = await prisma.vehicleDocument.create({

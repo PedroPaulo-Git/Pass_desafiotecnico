@@ -6,7 +6,9 @@ interface ListVehicleDocumentParams {
   page: number;
   limit: number;
   where: Prisma.VehicleDocumentWhereInput;
-  orderBy?: Prisma.VehicleDocumentOrderByWithRelationInput | Prisma.VehicleDocumentOrderByWithRelationInput[];
+  orderBy?:
+    | Prisma.VehicleDocumentOrderByWithRelationInput
+    | Prisma.VehicleDocumentOrderByWithRelationInput[];
 }
 
 export const listVehicleDocumentService = async ({
@@ -19,7 +21,12 @@ export const listVehicleDocumentService = async ({
 
   const [total, items] = await Promise.all([
     prisma.vehicleDocument.count({ where }),
-    prisma.vehicleDocument.findMany({ where, skip, take: limit, orderBy: orderBy ?? [{ expiryDate: "desc" }, { createdAt: "desc" }] }),
+    prisma.vehicleDocument.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: orderBy ?? [{ expiryDate: "desc" }, { createdAt: "desc" }],
+    }),
   ]);
 
   const totalPages = Math.ceil(total / limit);
@@ -27,17 +34,33 @@ export const listVehicleDocumentService = async ({
 };
 
 export const listVehicleDocumentById = async (documentId: string) => {
-  const document = await prisma.vehicleDocument.findUnique({ where: { id: documentId } });
+  const document = await prisma.vehicleDocument.findUnique({
+    where: { id: documentId },
+  });
   if (!document) {
-    throw new AppError("Vehicle document not found", 404, "VEHICLE_DOCUMENT_NOT_FOUND", { documentId });
+    throw new AppError(
+      "Vehicle document not found",
+      404,
+      "VEHICLE_DOCUMENT_NOT_FOUND",
+      { documentId }
+    );
   }
   return document;
 };
 
-export const listVehicleDocumentServiceByVehicleId = async (vehicleId: string) => {
-  const documents = await prisma.vehicleDocument.findMany({ where: { vehicleId } });
+export const listVehicleDocumentServiceByVehicleId = async (
+  vehicleId: string
+) => {
+  const documents = await prisma.vehicleDocument.findMany({
+    where: { vehicleId },
+  });
   if (documents.length === 0) {
-    throw new AppError("Vehicle documents not found", 404, "VEHICLE_DOCUMENTS_NOT_FOUND", { vehicleId });
+    throw new AppError(
+      "Vehicle documents not found",
+      404,
+      "VEHICLE_DOCUMENTS_NOT_FOUND",
+      { vehicleId }
+    );
   }
   return documents;
 };

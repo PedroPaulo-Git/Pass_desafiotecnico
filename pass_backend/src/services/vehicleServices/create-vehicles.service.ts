@@ -5,7 +5,7 @@ import { CreateVehicleInput } from "@pass/schemas/vehicleSchema";
 export const createVehicleService = async (vehicleData: CreateVehicleInput) => {
   const uniqueConstraints = [
     { plate: vehicleData.plate },
-    { chassis: vehicleData.chassis }, 
+    { chassis: vehicleData.chassis },
     { renavam: vehicleData.renavam },
     { internalId: vehicleData.internalId },
   ];

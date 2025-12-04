@@ -21,7 +21,7 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
   const controllerFueling = new FuelingController();
   const controllerIncident = new IncidentController();
   const controllerVehicleDocument = new VehicleDocumentController();
-    const imageController = new VehicleImageController();
+  const imageController = new VehicleImageController();
 
   // get all vehicles
   app.get("/", controllerVehicle.listVehicles);
@@ -38,10 +38,12 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
     controllerVehicle.updateVehicle
   );
   //delete vehicle
-  app.delete<{ Params: VehicleIdParam }>("/:id", controllerVehicle.deleteVehicle);
+  app.delete<{ Params: VehicleIdParam }>(
+    "/:id",
+    controllerVehicle.deleteVehicle
+  );
 
   // Fueling routes related to vehicles
-
 
   // get a fueling for a vehicle
   app.get("/:id/fuelings", controllerFueling.listFuelingByVehicleId);
@@ -52,11 +54,10 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
     controllerFueling.createFueling
   );
 
-
   // Incident routes related to vehicles can be added here similarly
 
   app.get("/:id/incidents", controllerIncident.listIncidentByVehicleId);
-  
+
   app.post<{ Body: CreateIncidentInput; Params: VehicleIdParam }>(
     "/:id/incidents",
     controllerIncident.createIncident
@@ -70,7 +71,12 @@ export const vehicleRoutes = async (app: FastifyInstance) => {
     controllerVehicleDocument.createDocument
   );
 
-    app.get<{ Params: VehicleIdParam }>("/:id/images", imageController.listImageByVehicleId.bind(imageController));
-    app.post<{ Body: CreateVehicleImageInput; Params: VehicleIdParam }>("/:id/images", imageController.createImage.bind(imageController));
-
+  app.get<{ Params: VehicleIdParam }>(
+    "/:id/images",
+    imageController.listImageByVehicleId.bind(imageController)
+  );
+  app.post<{ Body: CreateVehicleImageInput; Params: VehicleIdParam }>(
+    "/:id/images",
+    imageController.createImage.bind(imageController)
+  );
 };

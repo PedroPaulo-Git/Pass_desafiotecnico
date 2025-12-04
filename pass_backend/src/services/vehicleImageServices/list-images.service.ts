@@ -6,7 +6,9 @@ interface ListVehicleImageParams {
   page: number;
   limit: number;
   where: Prisma.VehicleImageWhereInput;
-  orderBy?: Prisma.VehicleImageOrderByWithRelationInput | Prisma.VehicleImageOrderByWithRelationInput[];
+  orderBy?:
+    | Prisma.VehicleImageOrderByWithRelationInput
+    | Prisma.VehicleImageOrderByWithRelationInput[];
 }
 
 export const listVehicleImageService = async ({
@@ -27,9 +29,16 @@ export const listVehicleImageService = async ({
 };
 
 export const listVehicleImageById = async (imageId: string) => {
-  const image = await prisma.vehicleImage.findUnique({ where: { id: imageId } });
+  const image = await prisma.vehicleImage.findUnique({
+    where: { id: imageId },
+  });
   if (!image) {
-    throw new AppError("Vehicle image not found", 404, "VEHICLE_IMAGE_NOT_FOUND", { imageId });
+    throw new AppError(
+      "Vehicle image not found",
+      404,
+      "VEHICLE_IMAGE_NOT_FOUND",
+      { imageId }
+    );
   }
   return image;
 };
@@ -37,7 +46,12 @@ export const listVehicleImageById = async (imageId: string) => {
 export const listVehicleImageServiceByVehicleId = async (vehicleId: string) => {
   const images = await prisma.vehicleImage.findMany({ where: { vehicleId } });
   if (images.length === 0) {
-    throw new AppError("Vehicle images not found", 404, "VEHICLE_IMAGES_NOT_FOUND", { vehicleId });
+    throw new AppError(
+      "Vehicle images not found",
+      404,
+      "VEHICLE_IMAGES_NOT_FOUND",
+      { vehicleId }
+    );
   }
   return images;
 };

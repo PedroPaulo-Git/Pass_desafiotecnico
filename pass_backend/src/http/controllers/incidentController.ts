@@ -92,7 +92,7 @@ export class IncidentController {
     const result = await updateIncidentService(incidentId, validateIncident);
     reply.status(200).send(result);
   }
-  
+
   async deleteIncident(
     request: FastifyRequest<{ Params: IncidentIdParam }>,
     reply: FastifyReply

@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { IncidentController } from "../controllers/incidentController";
-import { IncidentIdParam, UpdateIncidentInput } from "@pass/schemas/incidentSchema";
+import {
+  IncidentIdParam,
+  UpdateIncidentInput,
+} from "@pass/schemas/incidentSchema";
 const controllerIncident = new IncidentController();
 
 export const incidentRoutes = async (app: FastifyInstance) => {

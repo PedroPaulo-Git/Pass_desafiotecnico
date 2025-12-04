@@ -8,7 +8,9 @@ export const createVehicleImageService = async (
 ) => {
   const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
   if (!vehicle) {
-    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", { vehicleId });
+    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", {
+      vehicleId,
+    });
   }
 
   const image = await prisma.vehicleImage.create({
