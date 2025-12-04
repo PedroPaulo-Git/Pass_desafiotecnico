@@ -89,7 +89,7 @@ export function DocumentsSection({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="p-2 sm:p-4 pt-0 max-[440px]:w-72 max-[550px]:w-92 mx-auto sm:w-full "
-           >
+          >
             <Table>
               <TableHeader>
                 <TableRow>
@@ -130,9 +130,7 @@ export function DocumentsSection({
                           ? `${doc.alertDays} dias`
                           : "Dias de An..."}
                       </TableCell>
-                      <TableCell>
-                       
-                      </TableCell>
+                      <TableCell></TableCell>
                     </TableRow>
                   ))
                 )}

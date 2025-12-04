@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CreateFuelingInput,
-  createFuelingSchema,
-} from "@pass/schemas";
+import { CreateFuelingInput, createFuelingSchema } from "@pass/schemas";
 import { Fuel, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
-import { useCreateFueling, useFuelings } from "@/features/fleet-events/hooks/use-fuelings";
+import {
+  useCreateFueling,
+  useFuelings,
+} from "@/features/fleet-events/hooks/use-fuelings";
 import { useVehicle } from "@/features/vehicles/hooks/use-vehicles";
 import { toast as sonnerToast } from "sonner";
 import {
@@ -57,7 +57,7 @@ export function FuelingModal() {
 
   const [generalOpen, setGeneralOpen] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(true);
-  const [odometer,setOdometer] = useState<number|undefined>(undefined);
+  const [odometer, setOdometer] = useState<number | undefined>(undefined);
 
   const {
     register,

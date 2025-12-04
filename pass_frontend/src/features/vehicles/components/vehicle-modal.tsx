@@ -27,7 +27,11 @@ import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useUpdateVehicle, useCreateVehicle } from "../hooks/use-vehicles";
 import { useVehicleSubmit } from "../hooks/use-vehicle-submit";
-import { useVehicleImages, useCreateVehicleImage, useDeleteVehicleImage } from "@/features/fleet-events/hooks/use-vehicle-images";
+import {
+  useVehicleImages,
+  useCreateVehicleImage,
+  useDeleteVehicleImage,
+} from "@/features/fleet-events/hooks/use-vehicle-images";
 import { toast as sonnerToast } from "sonner";
 import { makePreSubmitHandler } from "../hooks/make-pre-submit-handler";
 import { FuelingsSection } from "./fuelings-section";
@@ -113,20 +117,30 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !vehicle?.id) return;
-    
+
     // Validate file type (only images allowed) - check both MIME type and extension
-    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-    const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
-    
+    const validImageTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/svg+xml",
+    ];
+    const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+    const fileExtension = file.name
+      .toLowerCase()
+      .slice(file.name.lastIndexOf("."));
+
     const isValidMimeType = file.type && validImageTypes.includes(file.type);
     const isValidExtension = validExtensions.includes(fileExtension);
-    
+
     if (!isValidMimeType || !isValidExtension) {
       sonnerToast.error(
-        t.common.invalidFileType || "Arquivo inválido. Envie apenas imagens (JPG, PNG, GIF, WebP, SVG)"
+        t.common.invalidFileType ||
+          "Arquivo inválido. Envie apenas imagens (JPG, PNG, GIF, WebP, SVG)"
       );
-      e.target.value = ''; // Reset input
+      e.target.value = ""; // Reset input
       return;
     }
 
@@ -148,12 +162,14 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
   const handleDeleteImage = async (imageId: string) => {
     if (!vehicle?.id) return;
-    
+
     deleteImage.mutate(
       { imageId, vehicleId: vehicle.id },
       {
         onSuccess: () => {
-          sonnerToast.success(t.common.success || "Imagem removida com sucesso");
+          sonnerToast.success(
+            t.common.success || "Imagem removida com sucesso"
+          );
         },
         onError: () => {
           sonnerToast.error(t.common.error || "Erro ao remover imagem");
@@ -174,9 +190,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     clearErrors,
     formState: { errors },
   } = useForm<CreateVehicleInput | UpdateVehicleInput>({
-    resolver: zodResolver(
-      isCreate ? createVehicleSchema : updateVehicleSchema
-    ),
+    resolver: zodResolver(isCreate ? createVehicleSchema : updateVehicleSchema),
     mode: "onSubmit",
     defaultValues: {
       status: "LIBERADO",
@@ -513,7 +527,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           className="h-8"
                           formatter={formatLetters}
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.model?.message && (
                           <span className="text-xs text-destructive">
@@ -547,7 +563,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           className="h-8"
                           formatter={formatLetters}
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.brand?.message && (
                           <span className="text-xs text-destructive">
@@ -644,7 +662,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           placeholder="RJ"
                           className="h-8"
                           formatter={formatUf}
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.state?.message && (
                           <span className="text-xs text-destructive">
@@ -668,7 +688,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           placeholder="Ex: Branco, Preto, Azul"
                           className="h-8"
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.color?.message && (
                           <span className="text-xs text-destructive">
@@ -717,7 +739,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8 font-mono"
                           disabled={!isCreating}
                           formatter={formatPlate}
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.plate?.message && (
                           <span className="text-xs text-destructive">
@@ -747,7 +771,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           inputMode="numeric"
                           disabled={!isCreating}
                           formatter={formatRenavam}
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.renavam?.message && (
                           <span className="text-xs text-destructive">
@@ -777,7 +803,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8 font-mono"
                           disabled={!isCreating}
                           formatter={formatChassis}
-                          clearErrors={clearErrors as (name?: string | string[]) => void}
+                          clearErrors={
+                            clearErrors as (name?: string | string[]) => void
+                          }
                         />
                         {errors.chassis?.message && (
                           <span className="text-xs text-destructive">
@@ -899,7 +927,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           />
                           <ImagePlus className="h-6 w-6 text-muted-foreground mb-1" />
                           <span className="text-xs text-primary">
-                            {isUploading ? "Uploading..." : t.common.uploadFiles}
+                            {isUploading
+                              ? "Uploading..."
+                              : t.common.uploadFiles}
                           </span>
                         </label>
                         {/* Existing Images */}
@@ -932,7 +962,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
-                        {t.common.saveVehicleFirst || "Save vehicle first to upload images"}
+                        {t.common.saveVehicleFirst ||
+                          "Save vehicle first to upload images"}
                       </p>
                     )}
                   </div>

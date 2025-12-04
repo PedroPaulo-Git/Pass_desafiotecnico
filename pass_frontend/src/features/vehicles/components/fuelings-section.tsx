@@ -1,41 +1,52 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Fuel, ChevronDown, ChevronUp, AlertCircle } from "lucide-react"
-import { format } from "date-fns"
-import { useI18n } from "@/lib/i18n/i18n-context"
-import { useModalStore } from "@/store/use-modal-store"
-import { useFuelings } from "@/features/fleet-events/hooks/use-fuelings"
-import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { Fueling } from "@/types/vehicle"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Fuel, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { useModalStore } from "@/store/use-modal-store";
+import { useFuelings } from "@/features/fleet-events/hooks/use-fuelings";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { Fueling } from "@/types/vehicle";
 
 interface FuelingsSectionProps {
-  vehicleId: string
-  fuelings: Fueling[]
+  vehicleId: string;
+  fuelings: Fueling[];
 }
 
 export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
-  const { t } = useI18n()
-  const { openModal } = useModalStore()
-  const [isOpen, setIsOpen] = useState(true)
+  const { t } = useI18n();
+  const { openModal } = useModalStore();
+  const [isOpen, setIsOpen] = useState(true);
 
   // Use the dedicated fuelings query so the section reacts to fuelings-specific
   // invalidation/refetch. Fall back to the `fuelings` prop while loading.
-  const { data: fuelingsData } = useFuelings({ vehicleId })
-  const currentFuelings = fuelingsData?.items ?? fuelings
+  const { data: fuelingsData } = useFuelings({ vehicleId });
+  const currentFuelings = fuelingsData?.items ?? fuelings;
 
-  const totalValue = currentFuelings.reduce((acc, f) => acc + f.totalValue, 0)
-  console.log({ currentFuelings, totalValue })
+  const totalValue = currentFuelings.reduce((acc, f) => acc + f.totalValue, 0);
+  console.log({ currentFuelings, totalValue });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value)
-  }
+    }).format(value);
+  };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -57,12 +68,16 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-          className="p-2 sm:p-4 pt-0 max-[440px]:w-72 max-[550px]:w-92 mx-auto sm:w-full ">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="p-2 sm:p-4 pt-0 max-[440px]:w-72 max-[550px]:w-92 mx-auto sm:w-full "
+          >
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead >{t.fueling.date}</TableHead>
+                  <TableHead>{t.fueling.date}</TableHead>
                   <TableHead>{t.fueling.provider}</TableHead>
                   <TableHead>{t.fueling.fuelType}</TableHead>
                   <TableHead>{t.fueling.liters}</TableHead>
@@ -82,11 +97,15 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
                 ) : (
                   currentFuelings.map((fueling) => (
                     <TableRow key={fueling.id}>
-                      <TableCell>{format(new Date(fueling.date), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>
+                        {format(new Date(fueling.date), "dd/MM/yyyy")}
+                      </TableCell>
                       <TableCell>{fueling.provider}</TableCell>
                       <TableCell>{t.fuelTypes[fueling.fuelType]}</TableCell>
                       <TableCell>{fueling.liters}</TableCell>
-                      <TableCell>{formatCurrency(fueling.totalValue)}</TableCell>
+                      <TableCell>
+                        {formatCurrency(fueling.totalValue)}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -94,10 +113,15 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
             </Table>
 
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-              <span className="text-sm text-muted-foreground">{currentFuelings.length}</span>
+              <span className="text-sm text-muted-foreground">
+                {currentFuelings.length}
+              </span>
               <div className="flex items-center gap-4">
                 <span className="text-sm">
-                  {t.common.total} <span className="font-medium">{formatCurrency(totalValue)}</span>
+                  {t.common.total}{" "}
+                  <span className="font-medium">
+                    {formatCurrency(totalValue)}
+                  </span>
                 </span>
               </div>
             </div>
@@ -116,5 +140,5 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
         </CollapsibleContent>
       </div>
     </Collapsible>
-  )
+  );
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/providers"
-import { ThemeTransition } from "@/components/theme-transition"
+import { Providers } from "@/components/providers";
+import { ThemeTransition } from "@/components/theme-transition";
 
 const plus = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -12,7 +12,8 @@ const plus = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "PASS - Sistema de Gestão de Frota",
-  description: "Repositório criado como desafio técnico: sistema de gerenciamento de frota de veículos (avaliação técnica).",
+  description:
+    "Repositório criado como desafio técnico: sistema de gerenciamento de frota de veículos (avaliação técnica).",
   icons: {
     icon: "/assets/favicon.ico",
     shortcut: "/assets/favicon.ico",
@@ -27,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${plus.className} antialiased`} >
+      <body className={`${plus.className} antialiased`}>
         <Providers>
           <ThemeTransition />
           {children}

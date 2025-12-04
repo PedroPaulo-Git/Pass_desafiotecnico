@@ -5,13 +5,23 @@ import { Trash2, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useDeleteVehicle } from "../hooks/use-vehicles";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 
 const modalVariants: any = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", damping: 25, stiffness: 300 },
+  },
   exit: { opacity: 0, scale: 0.95, y: 20 },
 };
 
@@ -30,21 +40,32 @@ export function ConfirmDeleteVehicleModal() {
 
     try {
       await deleteVehicle.mutateAsync(vehicleId);
-      sonnerToast.success(t.vehicles.messages.deletedSuccess || t.common.success);
+      sonnerToast.success(
+        t.vehicles.messages.deletedSuccess || t.common.success
+      );
       if (typeof data.onConfirm === "function") {
-        try { data.onConfirm(); } catch {} // ignore
+        try {
+          data.onConfirm();
+        } catch {} // ignore
       }
       closeModal();
     } catch (err: any) {
       const apiMessage = err?.response?.data?.message ?? err?.message;
-      sonnerToast.error(String(apiMessage || t.vehicles.messages.deleteError || t.common.error));
+      sonnerToast.error(
+        String(apiMessage || t.vehicles.messages.deleteError || t.common.error)
+      );
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent showInfo={false} className="max-w-md p-0">
-        <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
+        <motion.div
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -55,12 +76,13 @@ export function ConfirmDeleteVehicleModal() {
                   {data.title ?? t.common.deleteConfirm}
                 </DialogTitle>
               </div>
-            
             </div>
           </DialogHeader>
 
           <div className="px-6 py-4">
-            <p className="text-sm text-muted-foreground">{data.description ?? t.common.deleteConfirm}</p>
+            <p className="text-sm text-muted-foreground">
+              {data.description ?? t.common.deleteConfirm}
+            </p>
           </div>
 
           <div className="px-6 pb-6 flex justify-end gap-3 border-t border-border">

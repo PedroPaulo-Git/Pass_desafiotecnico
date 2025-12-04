@@ -1,32 +1,49 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CreateVehicleDocumentInput,createVehicleDocumentSchema } from "@pass/schemas";
-import { FileText, Info, ChevronDown, ChevronUp } from "lucide-react"
-import { useI18n } from "@/lib/i18n/i18n-context"
-import { useModalStore } from "@/store/use-modal-store"
-import { useCreateVehicleDocument } from "@/features/fleet-events/hooks/use-vehicle-documents"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CreateVehicleDocumentInput,
+  createVehicleDocumentSchema,
+} from "@pass/schemas";
+import { FileText, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { useModalStore } from "@/store/use-modal-store";
+import { useCreateVehicleDocument } from "@/features/fleet-events/hooks/use-vehicle-documents";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-const modalVariants:any = {
+const modalVariants: any = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 25, stiffness: 300 } },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", damping: 25, stiffness: 300 },
+  },
   exit: { opacity: 0, scale: 0.95, y: 20 },
-}
+};
 
 export function DocumentModal() {
-  const { t } = useI18n()
-  const { data, closeModal, isOpen } = useModalStore()
-  const vehicleId = data.vehicleId as string
+  const { t } = useI18n();
+  const { data, closeModal, isOpen } = useModalStore();
+  const vehicleId = data.vehicleId as string;
 
-  const [generalOpen, setGeneralOpen] = useState(true)
+  const [generalOpen, setGeneralOpen] = useState(true);
 
   const {
     register,
@@ -40,27 +57,40 @@ export function DocumentModal() {
       activeAlert: true,
       alertDays: 30,
     },
-  })
+  });
 
-  const createDocument = useCreateVehicleDocument()
+  const createDocument = useCreateVehicleDocument();
 
   const onSubmit = async (formData: CreateVehicleDocumentInput) => {
-    await createDocument.mutateAsync({ ...formData, vehicleId })
-    closeModal()
-  }
+    await createDocument.mutateAsync({ ...formData, vehicleId });
+    closeModal();
+  };
 
   // react-query v4/v5 differences: prefer `isPending`, fall back to `isLoading` when present
   const isCreatingDocument =
     typeof (createDocument as any).isPending !== "undefined"
       ? (createDocument as any).isPending
-      : Boolean((createDocument as any).isLoading)
+      : Boolean((createDocument as any).isLoading);
 
-  const documentTypes = ["Tacógrafo", "Licenciamento", "IPVA", "Seguro", "CRLV", "Vistoria", "Outro"]
+  const documentTypes = [
+    "Tacógrafo",
+    "Licenciamento",
+    "IPVA",
+    "Seguro",
+    "CRLV",
+    "Vistoria",
+    "Outro",
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-lg p-0">
-        <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit">
+        <motion.div
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           {/* Header */}
           <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
@@ -69,14 +99,21 @@ export function DocumentModal() {
                   <FileText className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
-                  <DialogTitle className="text-lg font-semibold">{t.documents.title}</DialogTitle>
-                  <p className="text-sm text-muted-foreground">Novo documento</p>
+                  <DialogTitle className="text-lg font-semibold">
+                    {t.documents.title}
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Novo documento
+                  </p>
                 </div>
               </div>
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="px-6 py-4 space-y-4"
+          >
             {/* Dados do Documento */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
               <div className="border border-border rounded-lg overflow-hidden">
@@ -87,7 +124,9 @@ export function DocumentModal() {
                   >
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.vehicles.generalData}</span>
+                      <span className="font-medium">
+                        {t.vehicles.generalData}
+                      </span>
                     </div>
                     {generalOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -97,31 +136,56 @@ export function DocumentModal() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 pt-0 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 pt-0 space-y-4"
+                  >
                     {/* Document Name */}
                     <div>
-                      <label className="text-xs text-muted-foreground">{t.documents.name}</label>
-                      <Input {...register("name")} placeholder="Ex: Tacógrafo" className="h-9" list="document-types" />
+                      <label className="text-xs text-muted-foreground">
+                        {t.documents.name}
+                      </label>
+                      <Input
+                        {...register("name")}
+                        placeholder="Ex: Tacógrafo"
+                        className="h-9"
+                        list="document-types"
+                      />
                       <datalist id="document-types">
                         {documentTypes.map((type) => (
                           <option key={type} value={type} />
                         ))}
                       </datalist>
-                      {errors.name?.message && <span className="text-xs text-destructive">{String(errors.name.message)}</span>}
+                      {errors.name?.message && (
+                        <span className="text-xs text-destructive">
+                          {String(errors.name.message)}
+                        </span>
+                      )}
                     </div>
 
                     {/* Expiry Date */}
                     <div>
-                      <label className="text-xs text-muted-foreground">{t.documents.expiryDate}</label>
-                      <Input type="date" {...register("expiryDate")} className="h-9" />
+                      <label className="text-xs text-muted-foreground">
+                        {t.documents.expiryDate}
+                      </label>
+                      <Input
+                        type="date"
+                        {...register("expiryDate")}
+                        className="h-9"
+                      />
                       {errors.expiryDate?.message && (
-                        <span className="text-xs text-destructive">{String(errors.expiryDate.message)}</span>
+                        <span className="text-xs text-destructive">
+                          {String(errors.expiryDate.message)}
+                        </span>
                       )}
                     </div>
 
                     {/* Alert Days */}
                     <div>
-                      <label className="text-xs text-muted-foreground">{t.documents.alertDays}</label>
+                      <label className="text-xs text-muted-foreground">
+                        {t.documents.alertDays}
+                      </label>
                       <Input
                         type="number"
                         {...register("alertDays", { valueAsNumber: true })}
@@ -132,10 +196,14 @@ export function DocumentModal() {
 
                     {/* Active Alert */}
                     <div className="flex items-center justify-between">
-                      <label className="text-sm">{t.documents.activeAlert}</label>
+                      <label className="text-sm">
+                        {t.documents.activeAlert}
+                      </label>
                       <Switch
                         checked={watch("activeAlert")}
-                        onCheckedChange={(checked) => setValue("activeAlert", checked)}
+                        onCheckedChange={(checked) =>
+                          setValue("activeAlert", checked)
+                        }
                       />
                     </div>
                   </motion.div>
@@ -156,7 +224,7 @@ export function DocumentModal() {
         </motion.div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default DocumentModal
+export default DocumentModal;

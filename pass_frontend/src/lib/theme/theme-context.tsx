@@ -90,7 +90,6 @@ const darkThemeVars: CSSProperties = {
   "--success-foreground": "oklch(0.12 0 0)",
 } as CSSProperties;
 
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -108,17 +107,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.className = theme;
   }, [theme]);
 
-  const toggleTheme = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    if (isTransitioning) return;
-    
-    const rect = event.currentTarget.getBoundingClientRect();
-    
-    setTransitionOrigin({
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    });
-    setIsTransitioning(true);
-  }, [isTransitioning]);
+  const toggleTheme = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (isTransitioning) return;
+
+      const rect = event.currentTarget.getBoundingClientRect();
+
+      setTransitionOrigin({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+      setIsTransitioning(true);
+    },
+    [isTransitioning]
+  );
 
   const handleAnimationComplete = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -143,7 +145,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         {isTransitioning && transitionOrigin && (
           <motion.div
             className="absolute inset-0 bg-background text-foreground"
-            style={topLayerTheme === 'dark' ? darkThemeVars : lightThemeVars}
+            style={topLayerTheme === "dark" ? darkThemeVars : lightThemeVars}
             initial={{
               clipPath: `circle(0% at ${transitionOrigin.x}px ${transitionOrigin.y}px)`,
             }}

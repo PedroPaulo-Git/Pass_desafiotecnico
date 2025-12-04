@@ -59,7 +59,8 @@ export const translations = {
     home: {
       title: "Pass Fleet Manager",
       subtitle: "Sistema de Gestão de Frotas",
-      description: "Gerencie sua frota de veículos de forma inteligente e eficiente",
+      description:
+        "Gerencie sua frota de veículos de forma inteligente e eficiente",
       getStarted: "Começar",
       heroTitle1: "A Solução Completa",
       heroTitle2: "para Frotas e Agências de Turismo e Fretamento",
@@ -114,7 +115,8 @@ export const translations = {
         deleteError: "Erro ao excluir veículo",
         checkRequiredFields: "Verifique os campos obrigatórios",
         backendError: "Erro ao carregar veículos",
-        backendHibernating: "O backend está em modo gratuito e pode estar em hibernação. Por favor, aguarde até 2 minutos e tente novamente.",
+        backendHibernating:
+          "O backend está em modo gratuito e pode estar em hibernação. Por favor, aguarde até 2 minutos e tente novamente.",
         showTestVehicles: "Mostrar Veículos Teste",
         hideTestVehicles: "Ocultar Veículos Teste",
         usingTestData: "Usando dados de teste",
@@ -191,7 +193,8 @@ export const translations = {
         totalValueMin: "Valor total deve ser maior ou igual a 1",
         litersMin: "Quantidade de litros deve ser maior ou igual a 1",
         invalidDate: "Data inválida",
-        adjustedOdometer: "O odômetro foi ajustado para {value} para ficar igual ou maior ao KM atual do veículo",
+        adjustedOdometer:
+          "O odômetro foi ajustado para {value} para ficar igual ou maior ao KM atual do veículo",
       },
     },
     // Incidents
@@ -342,7 +345,8 @@ export const translations = {
         deleteError: "Error deleting vehicle",
         checkRequiredFields: "Check required fields",
         backendError: "Error loading vehicles",
-        backendHibernating: "The backend is in free tier and may be hibernating. Please wait up to 2 minutes and try again.",
+        backendHibernating:
+          "The backend is in free tier and may be hibernating. Please wait up to 2 minutes and try again.",
         showTestVehicles: "Show Test Vehicles",
         hideTestVehicles: "Hide Test Vehicles",
         usingTestData: "Using test data",
@@ -419,7 +423,8 @@ export const translations = {
         totalValueMin: "Total value must be greater than or equal to 1",
         litersMin: "Quantity of liters must be greater than or equal to 1",
         invalidDate: "Invalid date",
-        adjustedOdometer: "Odometer was adjusted to {value} to be equal or greater than vehicle's current KM",
+        adjustedOdometer:
+          "Odometer was adjusted to {value} to be equal or greater than vehicle's current KM",
       },
     },
     // Incidents
@@ -515,7 +520,8 @@ export const translations = {
     home: {
       title: "Pass Fleet Manager",
       subtitle: "Sistema de Gestión de Flotas",
-      description: "Gestione su flota de vehículos de forma inteligente y eficiente",
+      description:
+        "Gestione su flota de vehículos de forma inteligente y eficiente",
       getStarted: "Empezar",
       heroTitle1: "La Solución Completa",
       heroTitle2: "para Flotas y Agencias de Turismo y Fletamento",
@@ -569,7 +575,8 @@ export const translations = {
         deleteError: "Error al eliminar vehículo",
         checkRequiredFields: "Verifique los campos obligatorios",
         backendError: "Error al cargar vehículos",
-        backendHibernating: "El backend está en nivel gratuito y puede estar en hibernación. Por favor, espere hasta 2 minutos e intente nuevamente.",
+        backendHibernating:
+          "El backend está en nivel gratuito y puede estar en hibernación. Por favor, espere hasta 2 minutos e intente nuevamente.",
         showTestVehicles: "Mostrar Vehículos de Prueba",
         hideTestVehicles: "Ocultar Vehículos de Prueba",
         usingTestData: "Usando datos de prueba",
@@ -646,7 +653,8 @@ export const translations = {
         totalValueMin: "El valor total debe ser mayor o igual a 1",
         litersMin: "La cantidad de litros debe ser mayor o igual a 1",
         invalidDate: "Fecha inválida",
-        adjustedOdometer: "El odómetro se ajustó a {value} para ser igual o mayor que el KM actual del vehículo",
+        adjustedOdometer:
+          "El odómetro se ajustó a {value} para ser igual o mayor que el KM actual del vehículo",
       },
     },
     // Incidents
@@ -682,7 +690,7 @@ export const translations = {
       system: "Sistema",
     },
   },
-} as const
+} as const;
 
-export type Language = keyof typeof translations
-export type TranslationKeys = typeof translations.pt
+export type Language = keyof typeof translations;
+export type TranslationKeys = typeof translations.pt;

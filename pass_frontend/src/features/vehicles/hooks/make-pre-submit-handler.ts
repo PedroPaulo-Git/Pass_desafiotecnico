@@ -1,4 +1,9 @@
-import type { SubmitHandler, UseFormSetError, Path, FieldValues } from "react-hook-form";
+import type {
+  SubmitHandler,
+  UseFormSetError,
+  Path,
+  FieldValues,
+} from "react-hook-form";
 import type React from "react";
 
 /**
@@ -27,7 +32,9 @@ interface MakePreSubmitParams<T extends FieldValues> {
   toast: {
     error: (message: string) => void;
   };
-  handleSubmit: (onValid: SubmitHandler<T>) => (e?: React.BaseSyntheticEvent) => Promise<void>;
+  handleSubmit: (
+    onValid: SubmitHandler<T>
+  ) => (e?: React.BaseSyntheticEvent) => Promise<void>;
   onSubmit: SubmitHandler<T>;
 }
 
@@ -56,29 +63,41 @@ export function makePreSubmitHandler<T extends FieldValues>({
         hasErrors = true;
       };
 
-      const plateClean = String(v["plate"] ?? "").replace(/-/g, "").trim();
-      if (!plateClean) setFieldError("plate", t.vehicles.validation.plateRequired);
+      const plateClean = String(v["plate"] ?? "")
+        .replace(/-/g, "")
+        .trim();
+      if (!plateClean)
+        setFieldError("plate", t.vehicles.validation.plateRequired);
 
       const stateVal = String(v["state"] ?? "").trim();
-      if (!stateVal) setFieldError("state", t.vehicles.validation.stateRequired);
+      if (!stateVal)
+        setFieldError("state", t.vehicles.validation.stateRequired);
 
       const ren = String(v["renavam"] ?? "").replace(/\D/g, "");
-      if (!ren || ren.length !== 11) setFieldError("renavam", t.vehicles.validation.renavamLength);
+      if (!ren || ren.length !== 11)
+        setFieldError("renavam", t.vehicles.validation.renavamLength);
 
       const chassis = String(v["chassis"] ?? "").toUpperCase();
-      if (!chassis || chassis.length !== 17) setFieldError("chassis", t.vehicles.validation.chassisLength);
+      if (!chassis || chassis.length !== 17)
+        setFieldError("chassis", t.vehicles.validation.chassisLength);
 
       const brand = String(v["brand"] ?? "").trim();
       if (!brand) setFieldError("brand", t.vehicles.validation.brandRequired);
 
       const model = String(v["model"] ?? "").trim();
-      if (!model) setFieldError("model", t.vehicles.validation.modelRequired || "Required");
+      if (!model)
+        setFieldError(
+          "model",
+          t.vehicles.validation.modelRequired || "Required"
+        );
 
       const internalId = String(v["internalId"] ?? "").trim();
-      if (!internalId) setFieldError("internalId", t.vehicles.validation.internalIdRequired);
+      if (!internalId)
+        setFieldError("internalId", t.vehicles.validation.internalIdRequired);
 
       const description = String(v["description"] ?? "").trim();
-      if (!description) setFieldError("description", t.vehicles.validation.descriptionRequired);
+      if (!description)
+        setFieldError("description", t.vehicles.validation.descriptionRequired);
 
       if (hasErrors) {
         toast.error(t.vehicles.messages.checkRequiredFields);

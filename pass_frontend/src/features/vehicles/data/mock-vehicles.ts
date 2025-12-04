@@ -23,7 +23,8 @@ export const mockVehicles: Vehicle[] = [
     currentKm: 45000,
     status: "LIBERADO",
     companyName: "Inbuzios Receptivo",
-    description: "Ônibus executivo premium com ar-condicionado e poltronas reclináveis",
+    description:
+      "Ônibus executivo premium com ar-condicionado e poltronas reclináveis",
     createdAt: "2024-01-15T10:00:00Z",
     updatedAt: "2024-11-30T15:30:00Z",
     images: [],
@@ -50,7 +51,8 @@ export const mockVehicles: Vehicle[] = [
     currentKm: 28000,
     status: "LIBERADO",
     companyName: "Companhia A",
-    description: "Van executiva para transporte de pequenos grupos com conforto",
+    description:
+      "Van executiva para transporte de pequenos grupos com conforto",
     createdAt: "2024-03-20T14:00:00Z",
     updatedAt: "2024-12-01T09:15:00Z",
     images: [],

@@ -1,36 +1,50 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
-import { translations, type Language, type TranslationKeys } from "./translations"
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react";
+import {
+  translations,
+  type Language,
+  type TranslationKeys,
+} from "./translations";
 
 interface I18nContextType {
-  language: Language
-  setLanguage: (lang: Language) => void
-  t: TranslationKeys
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: TranslationKeys;
 }
 
-const I18nContext = createContext<I18nContextType | undefined>(undefined)
+const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("pt")
+  const [language, setLanguageState] = useState<Language>("pt");
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang)
+    setLanguageState(lang);
     if (typeof window !== "undefined") {
-      localStorage.setItem("language", lang)
+      localStorage.setItem("language", lang);
     }
-  }, [])
+  }, []);
 
   // translations[language] is a union of all languages; cast to TranslationKeys
-  const t = translations[language] as unknown as TranslationKeys
+  const t = translations[language] as unknown as TranslationKeys;
 
-  return <I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
+  return (
+    <I18nContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </I18nContext.Provider>
+  );
 }
 
 export function useI18n() {
-  const context = useContext(I18nContext)
+  const context = useContext(I18nContext);
   if (!context) {
-    throw new Error("useI18n must be used within an I18nProvider")
+    throw new Error("useI18n must be used within an I18nProvider");
   }
-  return context
+  return context;
 }
