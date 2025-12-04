@@ -5,10 +5,10 @@
   "types": "./src/index.ts",
   "private": true,
   "dependencies": {
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "@types/node": "^22.9.3"
   },
   "devDependencies": {
-    "@types/node": "^22.9.3",
     "typescript": "^5.7.2"
   },
   "scripts": {
