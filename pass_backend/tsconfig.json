@@ -5,9 +5,8 @@
     "lib": ["ES2022"],
     "types": ["node"],
     "outDir": "./dist",
-    "rootDir": "..",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@pass/schemas": ["../pass_schemas/src"],
       "@pass/schemas/*": ["../pass_schemas/src/*"]
     },
