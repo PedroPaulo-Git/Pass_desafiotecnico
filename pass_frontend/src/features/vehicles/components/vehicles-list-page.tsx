@@ -9,6 +9,8 @@ import {
   MoreVertical,
   Sparkles,
   Pin,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import FuelingModal from "@/features/fleet-events/components/Fueling/FuelingModal";
 import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
@@ -23,7 +25,9 @@ import { VehicleModal } from "./vehicle-modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { VehicleFilters } from "@/types/vehicle";
+import { getMockVehiclesPaginated } from "../data/mock-vehicles";
 
 import { ConfirmDeleteVehicleModal } from "./vehicle-delete-modal";
 
@@ -44,6 +48,7 @@ export function VehiclesListPage() {
   const { t } = useI18n();
   const { openModal } = useModalStore();
   const [showFilters, setShowFilters] = useState(false);
+  const [showMockData, setShowMockData] = useState(false);
   const [filters, setFilters] = useState<VehicleFilters>({
     page: 1,
     limit: 10,
@@ -52,7 +57,7 @@ export function VehiclesListPage() {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, isLoading, error } = useVehicles(filters);
+  const { data, isLoading, error, refetch } = useVehicles(filters);
   const { type: modalType } = useModalStore();
 
   const handleSearch = (value: string) => {
@@ -145,6 +150,20 @@ export function VehiclesListPage() {
     setFilters((prev) => ({ ...prev, page }));
   };
 
+  const handleRetryConnection = () => {
+    setShowMockData(false);
+    refetch();
+  };
+
+  const handleToggleMockData = () => {
+    setShowMockData(!showMockData);
+  };
+
+  // Determine which data to display
+  const displayData = showMockData
+    ? getMockVehiclesPaginated(filters.page || 1, filters.limit || 10)
+    : data;
+
   return (
     <>
       <motion.div
@@ -231,20 +250,63 @@ export function VehiclesListPage() {
                 <Skeleton key={i} className="h-14 w-full" />
               ))}
             </div>
-          ) : error ? (
-            <div className="text-center py-10 text-destructive">
-              {t.common.error}: Erro ao carregar veículos
+          ) : error && !showMockData ? (
+            <div className="space-y-4">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="ml-2">
+                  <div className="space-y-2">
+                    <p className="font-semibold">{t.vehicles.messages.backendError}</p>
+                    <p className="text-sm">{t.vehicles.messages.backendHibernating}</p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  onClick={handleRetryConnection}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {t.vehicles.messages.retryConnection}
+                </Button>
+                <Button
+                  onClick={handleToggleMockData}
+                  variant="default"
+                  className="gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {t.vehicles.messages.showTestVehicles}
+                </Button>
+              </div>
             </div>
           ) : (
-            <VehiclesTable
-              vehicles={data?.items || []}
-              pagination={{
-                page: data?.page || 1,
-                totalPages: data?.totalPages || 1,
-                total: data?.total || 0,
-              }}
-              onPageChange={handlePageChange}
-            />
+            <>
+              {showMockData && (
+                <div className="mb-4 bg-muted/50 border border-border rounded-lg p-3 flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {t.vehicles.messages.usingTestData}
+                  </p>
+                  <Button
+                    onClick={handleToggleMockData}
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {t.vehicles.messages.hideTestVehicles}
+                  </Button>
+                </div>
+              )}
+              <VehiclesTable
+                vehicles={displayData?.items || []}
+                pagination={{
+                  page: displayData?.page || 1,
+                  totalPages: displayData?.totalPages || 1,
+                  total: displayData?.total || 0,
+                }}
+                onPageChange={handlePageChange}
+              />
+            </>
           )}
         </motion.div>
       </motion.div>
