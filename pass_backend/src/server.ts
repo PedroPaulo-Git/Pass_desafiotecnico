@@ -138,12 +138,13 @@ app.register(vehicleImageRoutes, { prefix: "/images" });
 const start = async () => {
   try {
     const port = Number(process.env.PORT) || 3333;
-    const host = "0.0.0.0";
+    const host = process.env.HOST || "0.0.0.0";
 
     await app.listen({ port, host });
-    console.log(`🚀 Servidor rodando em http://localhost:${port}`);
-    console.log("DB URL:", process.env.DATABASE_URL);
+    console.log(`🚀 Servidor rodando em http://${host}:${port}`);
   } catch (err) {
+    // Ensure the error is visible in consoles used by tools like `tsx`
+    console.error("Erro ao iniciar servidor:", err);
     app.log.error(err);
     process.exit(1);
   }
