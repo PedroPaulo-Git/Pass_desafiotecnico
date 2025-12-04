@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -56,6 +56,8 @@ export function VehiclesListPage() {
     sortOrder: "desc",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [showQuickError, setShowQuickError] = useState(false);
+  const [retryLoading, setRetryLoading] = useState(false);
 
   const { data, isLoading, error, refetch } = useVehicles(filters);
   const { type: modalType } = useModalStore();
@@ -152,12 +154,27 @@ export function VehiclesListPage() {
 
   const handleRetryConnection = () => {
     setShowMockData(false);
-    refetch();
+    setRetryLoading(true);
+    setShowQuickError(false);
+    refetch().finally(() => setRetryLoading(false));
   };
 
   const handleToggleMockData = () => {
     setShowMockData(!showMockData);
   };
+
+  // Show the error UI earlier if loading hangs
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    if (isLoading) {
+      timer = setTimeout(() => setShowQuickError(true), 1000);
+    } else {
+      setShowQuickError(false);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isLoading]);
 
   // Determine which data to display
   const displayData = showMockData
@@ -200,7 +217,9 @@ export function VehiclesListPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-             <Button onClick={() => openModal("vehicle-create")}>{t.vehicles.create}</Button>
+            <Button onClick={() => openModal("vehicle-create")}>
+              {t.vehicles.create}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -244,20 +263,24 @@ export function VehiclesListPage() {
 
         {/* Table */}
         <motion.div variants={itemVariants}>
-          {isLoading ? (
+          {isLoading && !showQuickError ? (
             <div className="space-y-2">
               {Array.from({ length: 10 }).map((_, i) => (
                 <Skeleton key={i} className="h-14 w-full" />
               ))}
             </div>
-          ) : error && !showMockData ? (
+          ) : (error && !showMockData) || (showQuickError && !showMockData) ? (
             <div className="space-y-4">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="ml-2">
                   <div className="space-y-2">
-                    <p className="font-semibold">{t.vehicles.messages.backendError}</p>
-                    <p className="text-sm">{t.vehicles.messages.backendHibernating}</p>
+                    <p className="font-semibold">
+                      {t.vehicles.messages.backendError}
+                    </p>
+                    <p className="text-sm">
+                      {t.vehicles.messages.backendHibernating}
+                    </p>
                   </div>
                 </AlertDescription>
               </Alert>
@@ -267,7 +290,9 @@ export function VehiclesListPage() {
                   variant="outline"
                   className="gap-2"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw
+                    className={`h-4 w-4 ${retryLoading ? "animate-spin" : ""}`}
+                  />
                   {t.vehicles.messages.retryConnection}
                 </Button>
                 <Button
@@ -314,8 +339,12 @@ export function VehiclesListPage() {
       {/* Modals */}
 
       <AnimatePresence>
-        {(modalType === "vehicle-details" || modalType === "vehicle-create") && (
-          <VehicleModal key={modalType ?? "vehicle-modal"} isCreate={modalType === "vehicle-create"} />
+        {(modalType === "vehicle-details" ||
+          modalType === "vehicle-create") && (
+          <VehicleModal
+            key={modalType ?? "vehicle-modal"}
+            isCreate={modalType === "vehicle-create"}
+          />
         )}
         {modalType === "fueling-create" && <FuelingModal />}
         {modalType === "incident-create" && <IncidentModal />}
