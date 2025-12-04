@@ -43,10 +43,38 @@ export function useDeleteVehicleImage() {
       await api.delete(`/images/${imageId}`);
       return { imageId, vehicleId };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["vehicle-images", data.vehicleId] });
-      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
-      queryClient.invalidateQueries({ queryKey: ["vehicle", data.vehicleId] });
+    onMutate: async ({ imageId, vehicleId }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["vehicle-images", vehicleId] });
+      
+      // Snapshot the previous value
+      const previousImages = queryClient.getQueryData<VehicleImage[]>(["vehicle-images", vehicleId]);
+      
+      // Optimistically remove the image
+      if (previousImages) {
+        queryClient.setQueryData<VehicleImage[]>(
+          ["vehicle-images", vehicleId],
+          previousImages.filter(img => img.id !== imageId)
+        );
+      }
+      
+      return { previousImages };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousImages) {
+        queryClient.setQueryData(
+          ["vehicle-images", variables.vehicleId],
+          context.previousImages
+        );
+      }
+    },
+    onSettled: (data) => {
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: ["vehicle-images", data.vehicleId] });
+        queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+        queryClient.invalidateQueries({ queryKey: ["vehicle", data.vehicleId] });
+      }
     },
   });
 }

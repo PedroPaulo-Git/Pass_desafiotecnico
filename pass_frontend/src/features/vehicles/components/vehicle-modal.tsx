@@ -113,12 +113,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !vehicle?.id) return;
-    // Validate file type (only images allowed)
-    if (file.type && !file.type.startsWith("image/")) {
-      // fallback message in Portuguese if translation missing
+    
+    // Validate file type (only images allowed) - check both MIME type and extension
+    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    
+    const isValidMimeType = file.type && validImageTypes.includes(file.type);
+    const isValidExtension = validExtensions.includes(fileExtension);
+    
+    if (!isValidMimeType || !isValidExtension) {
       sonnerToast.error(
-        t.common.invalidFileType || "Arquivo inválido. Envie apenas imagens"
+        t.common.invalidFileType || "Arquivo inválido. Envie apenas imagens (JPG, PNG, GIF, WebP, SVG)"
       );
+      e.target.value = ''; // Reset input
       return;
     }
 
@@ -140,12 +148,18 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
   const handleDeleteImage = async (imageId: string) => {
     if (!vehicle?.id) return;
-    try {
-      await deleteImage.mutateAsync({ imageId, vehicleId: vehicle.id });
-      sonnerToast.success(t.common.success || "Image deleted successfully");
-    } catch (error) {
-      sonnerToast.error(t.common.error || "Failed to delete image");
-    }
+    
+    deleteImage.mutate(
+      { imageId, vehicleId: vehicle.id },
+      {
+        onSuccess: () => {
+          sonnerToast.success(t.common.success || "Imagem removida com sucesso");
+        },
+        onError: () => {
+          sonnerToast.error(t.common.error || "Erro ao remover imagem");
+        },
+      }
+    );
   };
 
   const {
