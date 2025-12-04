@@ -196,7 +196,7 @@ export function VehiclesListPage() {
         >
           <div className="flex items-center gap-2">
             <Settings2 className="h-5 w-5 text-muted-foreground" />
-            <h1 className="text-xl font-semibold">{t.vehicles.title}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{t.vehicles.title}</h1>
             <Pin className="h-5 w-5 text-muted-foreground" />
           </div>
           <span className="text-sm text-muted-foreground">{t.nav.fleet}</span>

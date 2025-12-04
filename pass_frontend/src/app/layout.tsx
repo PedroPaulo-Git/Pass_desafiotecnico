@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { ThemeTransition } from "@/components/theme-transition";
 
 const plus = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -30,7 +29,6 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${plus.className} antialiased`}>
         <Providers>
-          <ThemeTransition />
           {children}
         </Providers>
       </body>

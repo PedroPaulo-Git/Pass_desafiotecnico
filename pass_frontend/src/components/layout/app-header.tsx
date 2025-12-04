@@ -39,8 +39,11 @@ export function AppHeader({
   isCollapsed,
   onToggle,
 }: AppHeaderProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, pendingTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
+
+  // Usa o tema pendente (se existir) para o ícone mudar imediatamente
+  const displayTheme = pendingTheme || theme;
 
   const languages: { value: Language; label: string; flag: string }[] = [
     { value: "pt", label: "Português", flag: "🇧🇷" },
@@ -109,10 +112,10 @@ export function AppHeader({
         >
           <motion.div
             initial={false}
-            animate={{ rotate: theme === "dark" ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
+            animate={{ rotate: displayTheme === "dark" ? 180 : 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            {theme === "dark" ? (
+            {displayTheme === "dark" ? (
               <Moon className="h-5 w-5" />
             ) : (
               <Sun className="h-5 w-5" />
