@@ -1,15 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { CreateVehicleDocumentInput } from "@pass/schemas/vehicleDocumentSchema";
-import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 export const createVehicleDocumentService = async (
-  vehicleId: VehicleIdParam,
+  vehicleId: string,
   documentData: CreateVehicleDocumentInput
 ) => {
-  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId.id } });
+  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
   if (!vehicle) {
-    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", { vehicleId: vehicleId.id });
+    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", { vehicleId });
   }
 
   // expiryDate must not be before today (basic domain rule)

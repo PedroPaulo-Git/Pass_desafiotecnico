@@ -1,15 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { CreateIncidentInput } from "@pass/schemas/incidentSchema";
-import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
+import { SeverityLevel } from "@prisma/client";
 
 export const createIncidentService = async (
-  vehicleId: VehicleIdParam,
+  vehicleId: string,
   incidentData: CreateIncidentInput
 ) => {
   const vehicle = await prisma.vehicle.findUnique({
     where: {
-      id: vehicleId.id,
+      id: vehicleId,
     },
   });
 
@@ -35,6 +35,7 @@ export const createIncidentService = async (
     const newIncident = await tx.incident.create({
       data: {
         ...incidentData,
+        severity: incidentData.severity as SeverityLevel,
         vehicleId: vehicle.id,
       },
     });

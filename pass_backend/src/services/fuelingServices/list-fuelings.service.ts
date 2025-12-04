@@ -1,7 +1,6 @@
 import { Prisma } from ".prisma/client/default";
 import { prisma } from "@/lib/prisma";
 import { FuelingIdParam } from "@pass/schemas/fuelingSchema";
-import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 interface ListFuelingParams {
@@ -55,12 +54,12 @@ export const listFuelingById = async (fuelingId: FuelingIdParam) => {
 };
 
 export const listFuelingServiceByVehicleId = async (
-  vehicleId: VehicleIdParam,
+  vehicleId: string,
   orderBy?: Prisma.FuelingOrderByWithRelationInput | Prisma.FuelingOrderByWithRelationInput[]
 ) => {
   const result = await prisma.fueling.findMany({
     where: {
-      vehicleId: vehicleId.id,
+      vehicleId: vehicleId,
     },
     orderBy: orderBy ?? [{ odometer: "asc" }, { createdAt: "asc" }],
   });

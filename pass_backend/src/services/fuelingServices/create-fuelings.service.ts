@@ -1,15 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { CreateFuelingInput } from "@pass/schemas/fuelingSchema";
-import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 export const createFuelingService = async (
-  vehicleId: VehicleIdParam,
+  vehicleId: string,
   fuelingData: CreateFuelingInput
 ) => {
   const vehicle = await prisma.vehicle.findUnique({
     where: {
-      id: vehicleId.id,
+      id: vehicleId,
     },
   });
 

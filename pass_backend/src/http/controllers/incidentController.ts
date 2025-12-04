@@ -72,7 +72,7 @@ export class IncidentController {
     }>,
     reply: FastifyReply
   ) {
-    const vehicleId = request.params;
+    const vehicleId = request.params.id;
     const validateIncident = createIncidentSchema.parse(request.body);
 
     const result = await createIncidentService(vehicleId, validateIncident);

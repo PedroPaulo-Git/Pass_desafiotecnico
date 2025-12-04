@@ -93,8 +93,8 @@ export class VehicleDocumentController {
     request: FastifyRequest<{ Params: VehicleDocumentIdParam }>,
     reply: FastifyReply
   ) {
-    const documentId = request.params;
-    const result = await listVehicleDocumentById(documentId.id);
+    const documentId = request.params.id;
+    const result = await listVehicleDocumentById(documentId);
     return reply.status(200).send(result);
   }
 
@@ -115,7 +115,7 @@ export class VehicleDocumentController {
     }>,
     reply: FastifyReply
   ) {
-    const vehicleId = request.params;
+    const vehicleId = request.params.id;
     const documentData = createVehicleDocumentSchema.parse(request.body);
     const result = await createVehicleDocumentService(vehicleId, documentData);
     return reply.status(201).send(result);

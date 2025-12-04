@@ -111,7 +111,7 @@ export class FuelingController {
       orderBy = [{ [sortField]: sortOrder }];
     }
 
-    const result = await listFuelingServiceByVehicleId(vehicleId, orderBy);
+    const result = await listFuelingServiceByVehicleId(vehicleId.id, orderBy);
     return reply.status(200).send(result);
     // Logic to list fuelings by vehicle ID
   }
@@ -124,7 +124,7 @@ export class FuelingController {
     }>,
     reply: FastifyReply
   ) {
-    const vehicleId = request.params;
+    const vehicleId = request.params.id;
     const validateFueling = createFuelingSchema.parse(request.body);
 
     const result = await createFuelingService(vehicleId, validateFueling);

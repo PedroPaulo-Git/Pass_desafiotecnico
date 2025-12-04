@@ -8,7 +8,10 @@
     "target": "ES2022",
     "moduleResolution": "nodenext",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"]
 }

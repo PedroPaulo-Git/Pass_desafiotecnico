@@ -1,15 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { CreateVehicleImageInput } from "@pass/schemas/vehicleImageSchema";
-import { VehicleIdParam } from "@pass/schemas/vehicleSchema";
 import { AppError } from "@/utils/AppError";
 
 export const createVehicleImageService = async (
-  vehicleId: VehicleIdParam,
+  vehicleId: string,
   imageData: CreateVehicleImageInput
 ) => {
-  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId.id } });
+  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
   if (!vehicle) {
-    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", { vehicleId: vehicleId.id });
+    throw new AppError("Vehicle not found", 404, "VEHICLE_NOT_FOUND", { vehicleId });
   }
 
   const image = await prisma.vehicleImage.create({

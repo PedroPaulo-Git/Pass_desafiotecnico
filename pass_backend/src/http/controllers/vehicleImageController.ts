@@ -45,8 +45,8 @@ export class VehicleImageController {
     request: FastifyRequest<{ Params: VehicleImageIdParam }>,
     reply: FastifyReply
   ) {
-    const imageId = request.params;
-    const result = await listVehicleImageById(imageId.id);
+    const imageId = request.params.id;
+    const result = await listVehicleImageById(imageId);
     return reply.status(200).send(result);
   }
 
@@ -62,7 +62,7 @@ export class VehicleImageController {
     request: FastifyRequest<{ Body: CreateVehicleImageInput; Params: VehicleIdParam }>,
     reply: FastifyReply
   ) {
-    const vehicleId = request.params;
+    const vehicleId = request.params.id;
     const imageData = createVehicleImageSchema.parse(request.body);
     const result = await createVehicleImageService(vehicleId, imageData);
     return reply.status(201).send(result);
