@@ -229,7 +229,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         fullWidth
         showInfo={false}
         showCloseButton={false}
-        className="max-w-none md:w-[min(40vw,900px)] max-h-[90vh] overflow-y-auto p-0"
+        className=" sm:w-[min(70vw,1200px)] lg:w-[min(60vw,600px)] max-h-[90vh] overflow-y-auto p-0"
       >
         <motion.div
           variants={modalVariants}

@@ -65,7 +65,7 @@ export function DocumentsSection({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="">
       <div className="border border-border rounded-lg overflow-hidden">
         <CollapsibleTrigger asChild>
           <button
@@ -88,8 +88,8 @@ export function DocumentsSection({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="p-4 pt-0"
-          >
+            className="p-2 sm:p-4 pt-0 max-[390px]:w-80 mx-auto sm:w-full "
+           >
             <Table>
               <TableHeader>
                 <TableRow>
@@ -97,7 +97,7 @@ export function DocumentsSection({
                   <TableHead>{t.documents.expiryDate}</TableHead>
                   <TableHead>{t.documents.anticipation}</TableHead>
                   <TableHead>{t.documents.days}</TableHead>
-                  <TableHead className="w-20"></TableHead>
+                  {/* <TableHead className="w-20"></TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -131,7 +131,7 @@ export function DocumentsSection({
                           : "Dias de An..."}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
+                        {/* <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -146,7 +146,7 @@ export function DocumentsSection({
                           >
                             <X className="h-4 w-4" />
                           </Button>
-                        </div>
+                        </div> */}
                       </TableCell>
                     </TableRow>
                   ))

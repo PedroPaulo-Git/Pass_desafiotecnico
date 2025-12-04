@@ -33,7 +33,6 @@ export default function Home() {
             alt="Wallpaper Home"
           />
         </div>
-
         <HeaderHome />
       </section>
       <FloatingSocialLinks />
