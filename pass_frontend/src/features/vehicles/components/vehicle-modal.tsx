@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormSetError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateVehicleInput,
@@ -116,10 +116,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     getValues,
     clearErrors,
     formState: { errors },
-  } = useForm<CreateVehicleInput>({
+  } = useForm<CreateVehicleInput | UpdateVehicleInput>({
     resolver: zodResolver(
       isCreate ? createVehicleSchema : updateVehicleSchema
-    ) as any,
+    ),
     mode: "onSubmit",
     defaultValues: {
       status: "LIBERADO",
@@ -275,11 +275,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           <form
             onSubmit={makePreSubmitHandler({
               isCreating,
-              getValues,
-              setError,
+              getValues: getValues as () => CreateVehicleInput,
+              setError: setError as UseFormSetError<CreateVehicleInput>,
               t,
               toast: sonnerToast,
-              handleSubmit,
+              handleSubmit: handleSubmit as any,
               onSubmit,
             })}
             className="px-2 pb-4 space-y-4"
