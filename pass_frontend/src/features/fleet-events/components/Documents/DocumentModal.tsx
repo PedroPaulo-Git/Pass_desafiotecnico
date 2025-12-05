@@ -84,7 +84,7 @@ export function DocumentModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="max-w-lg p-0">
+      <DialogContent className="w-full max-w-3xl p-0">
         <motion.div
           variants={modalVariants}
           initial="hidden"

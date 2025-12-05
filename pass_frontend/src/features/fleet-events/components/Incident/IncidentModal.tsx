@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateIncidentInput, createIncidentInputSchema } from "@pass/schemas";
 import {
@@ -12,6 +12,8 @@ import {
   ChevronUp,
   Upload,
 } from "lucide-react";
+import { MdUploadFile } from "react-icons/md";
+import { RiAlertLine } from "react-icons/ri";
 import { toast as sonnerToast } from "sonner";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
@@ -63,12 +65,11 @@ export function IncidentModal() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<CreateIncidentInput>({
     resolver: zodResolver(createIncidentInputSchema),
-    defaultValues: {
-      severity: "MEDIA",
-    },
+    defaultValues: {},
   });
 
   const createIncident = useCreateIncident();
@@ -110,7 +111,7 @@ export function IncidentModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="max-w-lg p-0">
+      <DialogContent className="w-full max-w-xl p-0 pt-2">
         <motion.div
           variants={modalVariants}
           initial="hidden"
@@ -121,8 +122,8 @@ export function IncidentModal() {
           <DialogHeader className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/10 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <RiAlertLine className="h-5 w-5 text-muted-foreground " />
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-semibold">
@@ -138,7 +139,7 @@ export function IncidentModal() {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="px-6 py-4 space-y-4"
+            className="px-2 py-4 space-y-4"
           >
             {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
@@ -146,11 +147,11 @@ export function IncidentModal() {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 pt-8 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <Info className="h-4.5w-4.5" />
+                      <span className="font-semibold">
                         {t.vehicles.generalData}
                       </span>
                     </div>
@@ -169,11 +170,7 @@ export function IncidentModal() {
                   >
                     {/* Row 1: Classification, Severity */}
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.incidents.classification}{" "}
-                          <span className="text-muted-foreground">(#1104)</span>
-                        </label>
+                      <div className="mt-auto">
                         <Select
                           value={watch("classification")}
                           onValueChange={(value) =>
@@ -181,7 +178,13 @@ export function IncidentModal() {
                           }
                         >
                           <SelectTrigger className="h-9">
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue
+                              placeholder={
+                                t.incidents.classification +
+                                  "\u00A0\u00A0\u00A0" +
+                                  "(#1104)" || "Nome do posto"
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {classifications.map((cls) => (
@@ -197,11 +200,7 @@ export function IncidentModal() {
                           </span>
                         )}
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.incidents.severity}{" "}
-                          <span className="text-muted-foreground">(#1103)</span>
-                        </label>
+                      <div className="mt-auto">
                         <Select
                           value={watch("severity")}
                           onValueChange={(value) =>
@@ -209,7 +208,13 @@ export function IncidentModal() {
                           }
                         >
                           <SelectTrigger className="h-9">
-                            <SelectValue />
+                            <SelectValue
+                              placeholder={
+                                t.incidents.severity +
+                                  "\u00A0\u00A0\u00A0" +
+                                  "(#1103)" || "Nome do posto"
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {severityLevels.map((level) => (
@@ -224,28 +229,42 @@ export function IncidentModal() {
 
                     {/* Row 2: Date, Record */}
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.incidents.date}
-                        </label>
-                        <Input
-                          type="date"
-                          {...register("date")}
-                          className="h-9"
+                      <div className="mt-auto">
+                        <Controller
+                          control={control}
+                          name="date"
+                          render={({ field }) => {
+                            // Convert Date to string for input, and string to Date for form
+                            const stringValue =
+                              field.value instanceof Date
+                                ? field.value.toISOString().split("T")[0]
+                                : (field.value as string) ?? "";
+                            return (
+                              <Input
+                                type={stringValue ? "date" : "text"}
+                                placeholder={t.incidents.date || "Data"}
+                                value={stringValue}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  field.onChange(v ? new Date(v) : undefined);
+                                }}
+                                onFocus={(e) => (e.target.type = "date")}
+                                onBlur={(e) => {
+                                  if (!e.target.value) e.target.type = "text";
+                                  field.onBlur();
+                                }}
+                                className="h-9"
+                              />
+                            );
+                          }}
                         />
-                        {errors.date?.message && (
-                          <span className="text-xs text-destructive">
-                            {String(errors.date.message)}
-                          </span>
-                        )}
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.incidents.record}
-                        </label>
+                      <div className="mt-auto">
                         <Input
                           {...register("title")}
-                          placeholder="Título da ocorrência"
+                          placeholder={
+                            `${t.incidents.record}  ` || "Registro e Ocorrência"
+                          }
                           className="h-9"
                         />
                       </div>
@@ -253,13 +272,13 @@ export function IncidentModal() {
 
                     {/* Description */}
                     <div>
-                      <label className="text-xs text-muted-foreground">
-                        {t.incidents.description}
-                      </label>
                       <Textarea
+                        variant="underlined"
                         {...register("description")}
-                        placeholder="Descreva a ocorrência..."
-                        className="min-h-20 resize-none"
+                        placeholder={
+                          t.incidents.description || "Descreva a ocorrência..."
+                        }
+                        className="min-h-28"
                       />
                     </div>
                   </motion.div>
@@ -276,8 +295,8 @@ export function IncidentModal() {
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Upload className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <MdUploadFile className="h-5 w-5 " />
+                      <span className="font-semibold">
                         {t.incidents.attachment}
                       </span>
                     </div>
@@ -294,12 +313,11 @@ export function IncidentModal() {
                     animate={{ opacity: 1 }}
                     className="p-4 pt-0"
                   >
-                    <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
-                      <Info className="h-6 w-6 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
+                    <div className="border-2 border-dashed border-muted-foreground rounded-lg p-10 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                      <p className="text-md text-muted-foreground">
                         {t.common.uploadFiles}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-md text-muted-foreground">
                         {t.common.dragDrop}
                       </p>
                     </div>
@@ -309,11 +327,21 @@ export function IncidentModal() {
             </Collapsible>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={closeModal}>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button
+                variant="modal_white"
+                size="modal"
+                type="button"
+                onClick={closeModal}
+              >
                 {t.common.close}
               </Button>
-              <Button type="submit" disabled={isCreatingIncident}>
+              <Button
+                variant="modal"
+                size="modal"
+                type="submit"
+                disabled={isCreatingIncident}
+              >
                 {isCreatingIncident ? t.common.loading : t.common.register}
               </Button>
             </div>

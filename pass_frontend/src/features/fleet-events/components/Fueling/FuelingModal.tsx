@@ -88,7 +88,7 @@ export function FuelingModal() {
   useEffect(() => {
     const km = vehicleQuery?.data?.currentKm;
     if (km !== undefined && km !== null) {
-      // setValue("odometer", Number(km));
+      setValue("odometer", Number(km));
     }
     const previousOdometer = getFuelings?.data?.items?.[0]?.odometer;
     setOdometer(previousOdometer);

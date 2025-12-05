@@ -62,7 +62,7 @@ function DialogContent({
   onInfoClick?: () => void
 }) {
   const baseClass =
-    'bg-background scrollbar-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-4 shadow-lg duration-200 max-h-[90vh] overflow-auto'
+    'bg-background scrollbar-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl border p-4 shadow-lg duration-200 max-h-[90vh] overflow-auto'
 
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -79,15 +79,15 @@ function DialogContent({
             aria-label="Info"
             onClick={onInfoClick}
             data-slot="dialog-info"
-            className="absolute top-6 right-14 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
+            className="absolute top-7.5 right-14 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
           >
-            <InfoIcon className="size-4" />
+            <InfoIcon className="size-4.5" />
           </button>
         )}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background border border-gray-500 rounded-full top-4 right-4 p-1.5 hover:bg-gray-100 cursor-pointer focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="ring-offset-background border border-gray-500 rounded-full top-6 right-4 p-1.5 hover:bg-gray-100 cursor-pointer focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>
