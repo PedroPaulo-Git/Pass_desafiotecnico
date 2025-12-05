@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Fuel, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { BsFillFuelPumpFill } from "react-icons/bs";
 import { format } from "date-fns";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
@@ -57,8 +58,8 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
             className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <Fuel className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{t.fueling.title}</span>
+              <BsFillFuelPumpFill className="h-4 w-4 " />
+              <span className="font-semibold">{t.fueling.title}</span>
             </div>
             {isOpen ? (
               <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -73,10 +74,10 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="p-2 sm:p-4 pt-0 max-[440px]:w-72 max-[550px]:w-92 mx-auto sm:w-full "
-          >
-            <Table>
+           >
+            <Table className=" bg-muted/50 rounded-md">
               <TableHeader>
-                <TableRow>
+                <TableRow className="" >
                   <TableHead>{t.fueling.date}</TableHead>
                   <TableHead>{t.fueling.provider}</TableHead>
                   <TableHead>{t.fueling.fuelType}</TableHead>
@@ -88,7 +89,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
                 {currentFuelings.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">
-                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                      <div className="flex font-semibold items-center justify-start gap-2 text-muted-foreground">
                         <AlertCircle className="h-4 w-4" />
                         {t.common.noRecords}
                       </div>
@@ -112,25 +113,28 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
               </TableBody>
             </Table>
 
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+            <div className="flex bg-muted/50 items-center justify-between py-4 px-4 border-t border-border rounded-b-md">
               <span className="text-sm text-muted-foreground">
                 {currentFuelings.length}
               </span>
-              <div className="flex items-center gap-4">
-                <span className="text-sm">
+              <div className="flex items-center gap-4 ">
+                <span className="text-sm ">
                   {t.common.total}{" "}
-                  <span className="font-medium">
+                  <span className="font-medium ml-10">
                     {formatCurrency(totalValue)}
                   </span>
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex flex-col justify-center mt-44">
+              <span className="text-sm text-muted-foreground">
+                5016
+              </span>
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full bg-transparent"
+                className="rounded-full bg-transparent border-foreground w-1/6 mx-auto border-2 mt-12 mb-4"
                 onClick={() => openModal("fueling-create", { vehicleId })}
               >
                 {t.common.add}
