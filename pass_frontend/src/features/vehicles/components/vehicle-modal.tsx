@@ -451,7 +451,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             setValue("companyName", value)
                           }
                         >
-                          <SelectTrigger className="h-8 w-full">
+                          <SelectTrigger className="h-8 ">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent>
@@ -480,7 +480,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         >
                           <SelectTrigger
                             iconRight={true}
-                            className="h-8 w-full "
+                            className="h-8  "
                           >
                             <SelectValue>
                               <Badge
@@ -520,8 +520,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     </div>
 
                     {/* Row 2: Model, Year, Brand, Category, Classification */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div>
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                      <div className="col-span-4">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.model}
                         </label>
@@ -547,7 +547,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.year}
                         </label>
@@ -557,7 +557,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.brand}
                         </label>
@@ -583,7 +583,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.category}
                         </label>
@@ -593,7 +593,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             setValue("category", value as VehicleCategory)
                           }
                         >
-                          <SelectTrigger className="h-8">
+                          <SelectTrigger className="h-8 ">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -605,7 +605,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.classification}
                         </label>
@@ -618,7 +618,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             )
                           }
                         >
-                          <SelectTrigger className="h-8">
+                          <SelectTrigger className="h-8 ">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -633,8 +633,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     </div>
 
                     {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div>
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.capacity}
                         </label>
@@ -644,7 +644,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.doors}
                         </label>
@@ -655,7 +655,22 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         />
                       </div>
 
-                      <div>
+                      {/* State Search - placed after Doors for quick lookup */}
+                      <div className="col-span-4">
+                        <label className="text-xs text-muted-foreground">
+                          {t.vehicles.searchState}
+                        </label>
+                        <FormInput
+                          name="stateSearch"
+                          control={control}
+                          rules={{}}
+                          // placeholder={t.vehicles.searchState || 'Search'}
+                          className="h-8"
+                          clearErrors={() => {}}
+                        />
+                      </div>
+
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.state}
                         </label>
@@ -682,7 +697,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      {/* <div>
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.color ?? "Cor"}
                         </label>
@@ -707,13 +722,13 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             {String(errors.color.message)}
                           </span>
                         )}
-                      </div>
-                      <div>
+                      </div> */}
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.plateType}
                         </label>
                         <Select defaultValue="mercosul">
-                          <SelectTrigger className="h-8">
+                          <SelectTrigger className="h-8 ">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
