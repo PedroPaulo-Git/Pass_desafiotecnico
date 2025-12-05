@@ -212,14 +212,14 @@ export function VehiclesListPage() {
               </h1>
               <GoPin className="h-5 w-5 scale-x-[-1] text-muted-foreground " />
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-4 ">
               <div className="flex items-center justify-center sm:justify-center my-auto sm:space-x-1 h-6 w-6 sm:w-auto py-0 px-0.5 sm:px-3 bg-card rounded-full text-sm">
                 <FiCode className="w-3.5 h-3.5 sm:w-4 sm:h-4 " />
                 <span className="text-muted-foreground hidden sm:block text-center">
                   Desenvolvedor
                 </span>
               </div>
-              <div className="flex items-center gap-4 text-muted-foreground ">
+              <div className="flex items-center gap-4 text-muted-foreground sm:pr-5 ">
                 <Info
                   aria-label="info"
                   className="cursor-pointer w-3.5 h-3.5 sm:w-4 sm:h-4 "

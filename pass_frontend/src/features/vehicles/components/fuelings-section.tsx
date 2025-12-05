@@ -73,7 +73,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="p-2 sm:p-4 pt-0 w-full "
+            className="p-2 sm:p-4 pt-0 max-[440px]:w-80 max-[550px]:w-92 mx-auto sm:w-full "
            >
             <Table className=" bg-muted/50 rounded-md">
               <TableHeader>
@@ -134,7 +134,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full bg-transparent border-foreground w-32 md:w-1/6 mx-auto border-2 mt-12 mb-4"
+                className="rounded-full bg-transparent border-foreground md:w-1/6 mx-auto border-2 mt-12 mb-4"
                 onClick={() => openModal("fueling-create", { vehicleId })}
               >
                 {t.common.add}

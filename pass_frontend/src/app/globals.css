@@ -4,11 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
-*{
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
 @layer utilities {
   /* Ocultar a barra de rolagem */
   .scrollbar-hidden {

@@ -335,7 +335,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       <DialogContent
         showInfo={false}
         showCloseButton={false}
-        className="w-[95%] md:w-[min(100vw,900px)] md:max-h-[98vh] overflow-y-auto p-0  "
+        className="w-[min(100vw,900px)] max-h-[94vh] overflow-y-auto p-0"
       >
         <motion.div
           variants={modalVariants}
@@ -1083,12 +1083,19 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
             )}
 
             {/* Footer Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-border">
-              <Button type="button" variant="outline" onClick={closeModal}>
+            <div className="flex justify-center gap-3 pt-4 ">
+              <Button
+                type="button"
+                variant="modal_white"
+                size="modal"
+                onClick={closeModal}
+              >
                 {t.common.close}
               </Button>
               <Button
+                size="modal"
                 type="submit"
+                variant="modal"
                 disabled={updateVehicle.isPending || createVehicle.isPending}
               >
                 {updateVehicle.isPending || createVehicle.isPending
