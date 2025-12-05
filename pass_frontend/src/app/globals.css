@@ -4,6 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer utilities {
+  /* Ocultar a barra de rolagem */
+  .scrollbar-hidden {
+    /* Oculta no Firefox */
+    scrollbar-width: none;
+  }
+  
+  /* Oculta no Chrome, Safari, Edge (WebKit) */
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
 /* Theme transition layers */
 .theme-layer-base {
   position: relative;
@@ -102,7 +114,7 @@
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.93 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);

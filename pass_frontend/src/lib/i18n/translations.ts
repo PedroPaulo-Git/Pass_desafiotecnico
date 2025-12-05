@@ -84,7 +84,7 @@ export const translations = {
       newTitle: "Novo Veículo",
       subtitle: "Informações Gerais",
       identifier: "Identificador",
-      createdAt: "Criado Em",
+      createdAt: "Criado em",
       model: "Modelo",
       brand: "Marca",
       year: "Ano",

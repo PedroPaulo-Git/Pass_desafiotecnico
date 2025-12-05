@@ -22,6 +22,7 @@ import {
   FileText,
   CarFront,
 } from "lucide-react";
+import { FaCar } from "react-icons/fa6";
 import { format } from "date-fns";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
@@ -262,7 +263,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case "LIBERADO":
-        return "bg-green-500 hover:bg-green-500/80";
+        return "bg-[#0c9d3c] hover:bg-[#0c9d3c]/80";
       case "EM_MANUTENCAO":
         return "bg-yellow-500 hover:bg-yellow-500/80";
       case "INDISPONIVEL":
@@ -300,7 +301,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         fullWidth
         showInfo={false}
         showCloseButton={false}
-        className=" w-[min(100vw,1000px)] max-h-[90vh] overflow-y-auto p-0"
+        className="w-[min(100vw,900px)] max-h-[90vh] overflow-y-auto p-0  "
       >
         <motion.div
           variants={modalVariants}
@@ -309,11 +310,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           exit="exit"
         >
           {/* Header */}
-          <DialogHeader className="sticky z-10 backdrop-blur-lg bg-transparent top-0 px-6 py-4 ">
+          <DialogHeader className="sticky z-10 backdrop-blur-lg bg-transparent top-0 px-3 py-4 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <CarFront className="h-5 w-5 text-foreground" />
+                <div className="p-2.5 bg-muted rounded-lg">
+                  <FaCar className="h-4 w-4 text-foreground" />
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-semibold">
@@ -363,9 +364,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     type="button"
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <Info className="h-4 w-4 font-bold" />
+                      <span className="font-bold">
                         {t.vehicles.generalData}
                       </span>
                     </div>
@@ -384,20 +385,20 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     className="p-4 pt-0 space-y-4"
                   >
                     {/* Row 1: ID, Created, Identifier, Company, Status */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
                       <div>
                         <label className="text-xs text-muted-foreground">
                           ID
                         </label>
                         <p className="text-sm font-medium">
-                          {vehicle?.id?.slice(0, 8) || "-"}
+                          {vehicle?.id?.slice(4, 6) || "-"}
                         </p>
                       </div>
-                      <div>
+                      <div className="col-span-2 w-full ">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.createdAt}
                         </label>
-                        <p className="text-sm">
+                        <p className="text-sm whitespace-nowrap overflow-x-hidden">
                           {vehicle
                             ? format(
                                 new Date(vehicle.createdAt),
@@ -406,7 +407,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             : "-"}
                         </p>
                       </div>
-                      <div>
+                      <div className="col-span-2 w-full ">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.identifier}
                         </label>
@@ -439,9 +440,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="col-span-3 w-full ">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.company}
+                          <span className=" pl-2">(#180461)</span>
                         </label>
                         <Select
                           value={watch("companyName") || ""}
@@ -449,7 +451,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             setValue("companyName", value)
                           }
                         >
-                          <SelectTrigger className="h-8">
+                          <SelectTrigger className="h-8 w-full">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent>
@@ -465,9 +467,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
+                      <div className="col-span-3 ">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.status}
+                          <span className=" pl-2">(#180451)</span>
                         </label>
                         <Select
                           value={watch("status")}
@@ -475,14 +478,17 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             setValue("status", value as VehicleStatus)
                           }
                         >
-                          <SelectTrigger className="h-8">
+                          <SelectTrigger
+                            iconRight={true}
+                            className="h-8 w-full "
+                          >
                             <SelectValue>
                               <Badge
                                 className={`${
                                   getStatusColor(
                                     watch("status")
                                   ) as VehicleStatus
-                                } text-white border-0`}
+                                } text-white font-semibold border-0 px-18 py-2 rounded-2xl `}
                               >
                                 {
                                   t.status[
@@ -494,11 +500,15 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {statuses.map((status) => (
-                              <SelectItem key={status} value={status}>
+                              <SelectItem
+                                key={status}
+                                value={status}
+                                className=""
+                              >
                                 <Badge
                                   className={`${getStatusColor(
                                     status
-                                  )} text-white border-0`}
+                                  )} text-white font-semibold border-0 `}
                                 >
                                   {t.status[status]}
                                 </Badge>
