@@ -585,7 +585,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       </div>
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
-                          {t.vehicles.category}
+                          {t.vehicles.category}<span className=" pl-2">(#1106)</span>
                         </label>
                         <Select
                           value={watch("category")}
@@ -607,7 +607,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       </div>
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
-                          {t.vehicles.classification}
+                          {t.vehicles.classification}<span className=" pl-2">(#1105)</span>
                         </label>
                         <Select
                           value={watch("classification")}
@@ -740,8 +740,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     </div>
 
                     {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div>
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.plate}
                         </label>
@@ -774,7 +774,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.renavam}
                         </label>
@@ -806,7 +806,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="col-span-4">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.chassis}
                         </label>
@@ -838,7 +838,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.currentKm}
                         </label>
@@ -848,7 +848,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.fuelType}
                         </label>
