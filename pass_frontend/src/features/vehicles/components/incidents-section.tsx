@@ -130,13 +130,11 @@ export function IncidentsSection({
             </div>
 
             <div className="flex justify-center mt-4">
-                <span className="text-sm text-muted-foreground">
-                5001
-              </span>
+              <span className="text-sm text-muted-foreground">5001</span>
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full bg-transparent border-foreground w-1/6 mx-auto border-2 mt-12 mb-4"
+                className="rounded-full bg-transparent border-foreground md:w-1/6 mx-auto border-2 mt-12 mb-4"
                 onClick={() => openModal("incident-create", { vehicleId })}
               >
                 {t.common.add}

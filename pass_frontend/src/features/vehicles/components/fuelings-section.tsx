@@ -134,7 +134,7 @@ export function FuelingsSection({ vehicleId, fuelings }: FuelingsSectionProps) {
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full bg-transparent border-foreground w-1/6 mx-auto border-2 mt-12 mb-4"
+                className="rounded-full bg-transparent border-foreground md:w-1/6 mx-auto border-2 mt-12 mb-4"
                 onClick={() => openModal("fueling-create", { vehicleId })}
               >
                 {t.common.add}

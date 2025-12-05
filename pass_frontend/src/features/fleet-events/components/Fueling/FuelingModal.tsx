@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateFuelingInput, createFuelingSchema } from "@pass/schemas";
 import { Fuel, Info, ChevronDown, ChevronUp, Upload } from "lucide-react";
+import { FaRegListAlt } from "react-icons/fa";
+import { BsFillFuelPumpFill } from "react-icons/bs";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import {
@@ -64,6 +66,7 @@ export function FuelingModal() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<CreateFuelingInput>({
     resolver: zodResolver(createFuelingSchema),
@@ -71,8 +74,8 @@ export function FuelingModal() {
       fuelType: "DIESEL",
       // `odometer` default will be set from vehicle.currentKm when available
       odometer: undefined as unknown as number,
-      liters: 0,
-      totalValue: 0,
+      liters: undefined as unknown as number,
+      totalValue: undefined as unknown as number,
       unitPrice: 0,
     },
   });
@@ -85,7 +88,7 @@ export function FuelingModal() {
   useEffect(() => {
     const km = vehicleQuery?.data?.currentKm;
     if (km !== undefined && km !== null) {
-      setValue("odometer", Number(km));
+      // setValue("odometer", Number(km));
     }
     const previousOdometer = getFuelings?.data?.items?.[0]?.odometer;
     setOdometer(previousOdometer);
@@ -161,7 +164,7 @@ export function FuelingModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="max-w-lg p-0">
+      <DialogContent className="w-full max-w-3xl p-0">
         <motion.div
           variants={modalVariants}
           initial="hidden"
@@ -169,11 +172,11 @@ export function FuelingModal() {
           exit="exit"
         >
           {/* Header */}
-          <DialogHeader className="px-6 py-4 border-b border-border">
+          <DialogHeader className="px-6 pt-24 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Fuel className="h-5 w-5 text-foreground" />
+                <div className="p-3 bg-muted rounded-lg">
+                  <BsFillFuelPumpFill className="h-4 w-4 text-foreground" />
                 </div>
                 <DialogTitle className="text-lg font-semibold">
                   {t.fueling.title}
@@ -184,7 +187,7 @@ export function FuelingModal() {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="px-6 py-4 space-y-4"
+            className="px-2 py-4 space-y-4"
           >
             {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
@@ -195,8 +198,8 @@ export function FuelingModal() {
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <Info className="h-4 w-4 " />
+                      <span className="font-semibold">
                         {t.vehicles.generalData}
                       </span>
                     </div>
@@ -215,59 +218,78 @@ export function FuelingModal() {
                   >
                     {/* Row 1: Fuel Station */}
                     <div>
-                      <label className="text-xs text-muted-foreground">
-                        {t.fueling.fuelStation}{" "}
-                        <span className="text-muted-foreground">(#18098)</span>
-                      </label>
-                      <Input
-                        {...register("provider")}
-                        placeholder="Nome do posto"
-                        className="h-9"
-                      />
+                      <Select
+                        value={watch("provider") ?? ""}
+                        onValueChange={(value) => setValue("provider", value)}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue
+                            placeholder={
+                              t.fueling.fuelStation +
+                                "\u00A0\u00A0\u00A0" +
+                                "(#18098)" || "Nome do posto"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Posto Central (#18098)">
+                            Posto Central (#18098)
+                          </SelectItem>
+                          <SelectItem value="Posto Sul (#18099)">
+                            Posto Sul (#18099)
+                          </SelectItem>
+                          <SelectItem value="Posto Norte (#18100)">
+                            Posto Norte (#18100)
+                          </SelectItem>
+                          <SelectItem value="Posto Estação (#18097)">
+                            Posto Estação (#18097)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                       {errors.provider?.message && (
                         <span className="text-xs text-destructive">
                           {String(errors.provider.message)}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <label className="text-xs text-muted-foreground">
-                        KM Atual do Veículo
-                      </label>
-                      <Input
-                        value={vehicleQuery?.data?.currentKm ?? ""}
-                        disabled
-                        className="h-9"
-                      />
-                    </div>
+
                     {/* Row 2: KM, KM Stop */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                       <div>
                         <label className="text-xs text-muted-foreground">
                           {t.fueling.odometer}
                         </label>
                         <Input
                           type="number"
-                          placeholder=""
+                          placeholder="30.000"
                           value={odometer ?? ""}
                           disabled
                           className="h-9"
                         />
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.fueling.odometerStop}
-                        </label>
-                        <Input
-                          type="number"
-                          {...register("odometer", { valueAsNumber: true })}
-                          className="h-9"
+                      <div className="mt-auto">
+                        <Controller
+                          control={control}
+                          name="odometer"
+                          render={({ field }) => (
+                            <Input
+                              placeholder={
+                                t.fueling.odometerStop || "KM de Parada"
+                              }
+                              type="number"
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                field.onChange(
+                                  v === "" ? undefined : Number(v)
+                                );
+                              }}
+                              onBlur={field.onBlur}
+                              className="h-9"
+                            />
+                          )}
                         />
                       </div>
-                    </div>
-
-                    {/* Row 3: Fuel Type, Liters */}
-                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-xs text-muted-foreground">
                           {t.fueling.fuelType}{" "}
@@ -291,37 +313,66 @@ export function FuelingModal() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.fueling.quantity}
-                        </label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          {...register("liters", { valueAsNumber: true })}
-                          className="h-9"
+                      <div className="mt-auto">
+                        <Controller
+                          control={control}
+                          name="liters"
+                          render={({ field }) => (
+                            <Input
+                              placeholder={
+                                t.fueling.quantity || "Quantidade de Litros"
+                              }
+                              type="number"
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                field.onChange(
+                                  v === "" ? undefined : Number(v)
+                                );
+                              }}
+                              onBlur={field.onBlur}
+                              className="h-9"
+                            />
+                          )}
                         />
                       </div>
                     </div>
-
                     {/* Row 4: Date, Total Value */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.fueling.date}
-                        </label>
-                        <Input
-                          type="date"
-                          {...register("date")}
-                          className="h-9"
+                    <div className="grid grid-cols-2 gap-4 mt-10">
+                      <div className="mt-auto">
+                        <Controller
+                          control={control}
+                          name="date"
+                          render={({ field }) => {
+                            // Convert Date to string for input, and string to Date for form
+                            const stringValue =
+                              field.value instanceof Date
+                                ? field.value.toISOString().split("T")[0]
+                                : (field.value as string) ?? "";
+                            return (
+                              <Input
+                                type={stringValue ? "date" : "text"}
+                                placeholder={t.fueling.date || "Data"}
+                                value={stringValue}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  field.onChange(v ? new Date(v) : undefined);
+                                }}
+                                onFocus={(e) => (e.target.type = "date")}
+                                onBlur={(e) => {
+                                  if (!e.target.value) e.target.type = "text";
+                                  field.onBlur();
+                                }}
+                                className="h-9"
+                              />
+                            );
+                          }}
                         />
                       </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.fueling.totalValue}
-                        </label>
+                      <div className="mt-auto">
                         <Input
                           type="number"
+                          placeholder={` ${t.fueling.totalValue}`}
                           step="0.01"
                           {...register("totalValue", { valueAsNumber: true })}
                           className="h-9"
@@ -348,8 +399,8 @@ export function FuelingModal() {
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Upload className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.fueling.receipt}</span>
+                      <FaRegListAlt className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-semibold">{t.fueling.receipt}</span>
                     </div>
                     {receiptOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -364,12 +415,12 @@ export function FuelingModal() {
                     animate={{ opacity: 1 }}
                     className="p-4 pt-0"
                   >
-                    <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
-                      <Info className="h-6 w-6 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
+                    <div className="relative border-2 border-dashed border-muted-foreground rounded-sm p-10 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                      <Info className="h-4.5 w-4.5 text-muted-foreground mb-2 absolute top-3 right-3" />
+                      <p className="text-md text-muted-foreground">
                         {t.common.uploadFiles}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-md text-muted-foreground">
                         {t.common.dragDrop}
                       </p>
                     </div>
@@ -379,11 +430,11 @@ export function FuelingModal() {
             </Collapsible>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={closeModal}>
+            <div className="flex justify-center gap-3 pt-4 pb-4">
+              <Button type="button" variant="modal_white" size="modal" onClick={closeModal}>
                 {t.common.close}
               </Button>
-              <Button type="submit" disabled={isCreatingFueling}>
+              <Button type="submit" disabled={isCreatingFueling}  variant="modal" size="modal">
                 {isCreatingFueling ? t.common.loading : t.common.register}
               </Button>
             </div>
