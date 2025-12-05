@@ -216,7 +216,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         model: vehicle.model,
         brand: vehicle.brand,
         year: vehicle.year,
-        color: vehicle.color || "",
+        color: vehicle.color || "Preto",
         category: vehicle.category,
         classification: vehicle.classification,
         capacity: vehicle.capacity,
@@ -354,7 +354,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
               handleSubmit: handleSubmit as any,
               onSubmit,
             })}
-            className="px-2 pb-4 space-y-4"
+            className="px-2 pb-4 space-y-2"
           >
             {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
@@ -478,10 +478,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             setValue("status", value as VehicleStatus)
                           }
                         >
-                          <SelectTrigger
-                            iconRight={true}
-                            className="h-8  "
-                          >
+                          <SelectTrigger iconRight={true} className="h-8  ">
                             <SelectValue>
                               <Badge
                                 className={`${
@@ -537,6 +534,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           className="h-8"
                           formatter={formatLetters}
+                          placeholder="Busscar Buss Vissta 340"
                           clearErrors={
                             clearErrors as (name?: string | string[]) => void
                           }
@@ -573,6 +571,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           }}
                           className="h-8"
                           formatter={formatLetters}
+                          placeholder="Scania"
                           clearErrors={
                             clearErrors as (name?: string | string[]) => void
                           }
@@ -585,7 +584,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       </div>
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
-                          {t.vehicles.category}<span className=" pl-2">(#1106)</span>
+                          {t.vehicles.category}
+                          <span className=" pl-2">(#1106)</span>
                         </label>
                         <Select
                           value={watch("category")}
@@ -607,7 +607,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       </div>
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
-                          {t.vehicles.classification}<span className=" pl-2">(#1105)</span>
+                          {t.vehicles.classification}
+                          <span className=" pl-2">(#1105)</span>
                         </label>
                         <Select
                           value={watch("classification")}
@@ -697,32 +698,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      {/* <div>
-                        <label className="text-xs text-muted-foreground">
-                          {t.vehicles.color ?? "Cor"}
-                        </label>
-                        <FormInput
-                          name="color"
-                          control={control}
-                          rules={{
-                            required: false,
-                            pattern: {
-                              value: /^[\p{L}0-9 #\-\.,]+$/u,
-                              message: "Cor contém caracteres inválidos",
-                            },
-                          }}
-                          placeholder="Ex: Branco, Preto, Azul"
-                          className="h-8"
-                          clearErrors={
-                            clearErrors as (name?: string | string[]) => void
-                          }
-                        />
-                        {errors.color?.message && (
-                          <span className="text-xs text-destructive">
-                            {String(errors.color.message)}
-                          </span>
-                        )}
-                      </div> */}
+               
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.plateType}
@@ -761,9 +737,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                 }
                               : {}
                           }
-                          className="h-8 font-mono"
+                          className="h-8 "
                           disabled={!isCreating}
                           formatter={formatPlate}
+                          placeholder="SQX8A12"
                           clearErrors={
                             clearErrors as (name?: string | string[]) => void
                           }
@@ -792,9 +769,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                 }
                               : {}
                           }
-                          className="h-8 font-mono"
+                          className="h-8 "
                           inputMode="numeric"
                           disabled={!isCreating}
+                          placeholder="1365373352"
                           formatter={formatRenavam}
                           clearErrors={
                             clearErrors as (name?: string | string[]) => void
@@ -825,7 +803,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                 }
                               : {}
                           }
-                          className="h-8 font-mono"
+                          className="h-8 "
+                          placeholder="9BSK4X200P4018406"
                           disabled={!isCreating}
                           formatter={formatChassis}
                           clearErrors={
@@ -844,6 +823,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         </label>
                         <Input
                           type="number"
+                          placeholder=""
                           {...register("currentKm", { valueAsNumber: true })}
                           className="h-8"
                         />
@@ -851,6 +831,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.fuelType}
+                          <span className=" pl-2">(#1337)</span>
                         </label>
                         <Select
                           value={watch("fuelType")}
@@ -869,6 +850,34 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             ))}
                           </SelectContent>
                         </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 mt-10">
+                      <div className="col-span-2">
+                           <Select
+                        
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue
+                              placeholder={"Caracteristicas (#180471)"}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Branco">Branco</SelectItem>
+                            <SelectItem value="Preto">Preto</SelectItem>
+                            <SelectItem value="Cinza">Cinza</SelectItem>
+                            <SelectItem value="Azul">Azul</SelectItem>
+                            <SelectItem value="Vermelho">Vermelho</SelectItem>
+                            <SelectItem value="Verde">Verde</SelectItem>
+                            <SelectItem value="Amarelo">Amarelo</SelectItem>
+                            <SelectItem value="Prata">Prata</SelectItem>
+                            <SelectItem value="Marrom">Marrom</SelectItem>
+                            <SelectItem value="Laranja">Laranja</SelectItem>
+                          </SelectContent>
+                          
+                        </Select>
+              
                       </div>
                     </div>
                   </motion.div>
