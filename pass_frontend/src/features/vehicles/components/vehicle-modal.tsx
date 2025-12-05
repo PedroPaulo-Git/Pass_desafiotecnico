@@ -669,7 +669,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                     {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
                     <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                      <div className="col-span-2">
+
+                      
+                      <div className="col-span-1 sm:col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.capacity}
                         </label>
@@ -679,7 +681,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-3 sm:col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.doors}
                         </label>
@@ -851,7 +853,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-3 sm:col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.currentKm}
                         </label>
@@ -862,7 +864,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="h-8"
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-1 sm:col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.fuelType}
                           <span className=" pl-2">(#1337)</span>
