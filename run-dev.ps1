@@ -33,7 +33,6 @@ if (-not $SkipSetup) {
     Write-Host "[*] pass_schemas" -ForegroundColor Cyan
     Set-Location $schemas
     npm install --no-workspaces
-    npm run build
     Write-Host "[OK] Schemas pronto" -ForegroundColor Green
     Write-Host ""
 

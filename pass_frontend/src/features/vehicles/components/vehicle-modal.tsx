@@ -616,7 +616,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-3 sm:col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.category}
                           <span className=" pl-2">(#1106)</span>
@@ -639,7 +639,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-1 sm:col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.classification}
                           <span className=" pl-2">(#1105)</span>
