@@ -144,8 +144,8 @@ export function DocumentsSection({
               <TableBody className="border-b border-border">
                 {currentDocuments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6">
-                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center py-6">
+                      <div className="flex font-semibold items-center justify-start gap-2 text-muted-foreground">
                         <AlertCircle className="h-4 w-4" />
                         {t.common.noRecords}
                       </div>
