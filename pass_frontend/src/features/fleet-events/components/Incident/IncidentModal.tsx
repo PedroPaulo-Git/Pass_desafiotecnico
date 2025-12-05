@@ -119,7 +119,7 @@ export function IncidentModal() {
           exit="exit"
         >
           {/* Header */}
-          <DialogHeader className="px-6 py-4 border-b border-border">
+          <DialogHeader className="px-6 py-2 pb-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-muted rounded-lg">

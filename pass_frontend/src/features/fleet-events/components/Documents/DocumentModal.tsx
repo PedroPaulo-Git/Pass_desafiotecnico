@@ -92,7 +92,7 @@ export function DocumentModal() {
           exit="exit"
         >
           {/* Header */}
-          <DialogHeader className="px-6 py-4 border-b border-border">
+          <DialogHeader className="px-6 py-6 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-muted rounded-lg">
@@ -123,8 +123,8 @@ export function DocumentModal() {
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <Info className="h-4.5 w-4.5" />
+                      <span className="font-semibold">
                         {t.vehicles.generalData}
                       </span>
                     </div>
@@ -142,13 +142,11 @@ export function DocumentModal() {
                     className="p-4 pt-0 space-y-4"
                   >
                     {/* Document Name */}
-                    <div>
-                      <label className="text-xs text-muted-foreground">
-                        {t.documents.name}
-                      </label>
+                    <div className="mt-auto">
+                 
                       <Input
                         {...register("name")}
-                        placeholder="Ex: Tacógrafo"
+                        placeholder={` ${t.documents.name}` || "Documento"}
                         className="h-9"
                         list="document-types"
                       />
@@ -212,11 +210,11 @@ export function DocumentModal() {
             </Collapsible>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={closeModal}>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button type="button" variant="modal_white" size="modal" onClick={closeModal}>
                 {t.common.close}
               </Button>
-              <Button type="submit" disabled={isCreatingDocument}>
+              <Button type="submit" variant="modal" size="modal" disabled={isCreatingDocument}>
                 {isCreatingDocument ? t.common.loading : t.common.register}
               </Button>
             </div>

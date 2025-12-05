@@ -434,7 +434,7 @@ export function FuelingModal() {
               <Button type="button" variant="modal_white" size="modal" onClick={closeModal}>
                 {t.common.close}
               </Button>
-              <Button type="submit" disabled={isCreatingFueling}  variant="modal" size="modal">
+              <Button type="submit" variant="modal" size="modal" disabled={isCreatingFueling} >
                 {isCreatingFueling ? t.common.loading : t.common.register}
               </Button>
             </div>
