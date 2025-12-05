@@ -111,7 +111,7 @@ export function DocumentsSection({
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+            className="w-full flex items-center justify-between p-4 transition-colors"
           >
             <div className="flex items-center gap-2">
               <FaRegListAlt className="h-4 w-4" />
@@ -129,7 +129,7 @@ export function DocumentsSection({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="p-2 sm:p-4 pt-0 max-[440px]:w-72 max-[550px]:w-92 mx-auto sm:w-full "
+            className="p-2 sm:p-4 pt-0 max-[550px]:w-92 mx-auto sm:w-full "
           >
             <Table>
               <TableHeader>
@@ -191,7 +191,7 @@ export function DocumentsSection({
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full bg-transparent"
+                className="rounded-full bg-transparent w-32 md:w-1/6 mx-auto  mt-12 mb-4"
                 onClick={() => openModal("document-create", { vehicleId })}
               >
                 {t.common.add}

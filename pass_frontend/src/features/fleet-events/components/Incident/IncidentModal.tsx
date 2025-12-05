@@ -147,10 +147,10 @@ export function IncidentModal() {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 pt-8 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 pt-8 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Info className="h-4.5w-4.5" />
+                      <Info className="h-4.5 w-4.5" />
                       <span className="font-semibold">
                         {t.vehicles.generalData}
                       </span>
@@ -210,7 +210,8 @@ export function IncidentModal() {
                           <SelectTrigger className="h-9">
                             <SelectValue
                               placeholder={
-                                t.incidents.severity +
+                                "Nivel " +
+                                  t.incidents.severity +
                                   "\u00A0\u00A0\u00A0" +
                                   "(#1103)" || "Nome do posto"
                               }
@@ -292,7 +293,7 @@ export function IncidentModal() {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <MdUploadFile className="h-5 w-5 " />

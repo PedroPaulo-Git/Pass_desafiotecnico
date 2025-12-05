@@ -96,7 +96,7 @@ export function AppHeader({
             placeholder="Buscar..."
             className="h-9 w-full rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
           />
-          <kbd className="pointer-events-none absolute right-2.5 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="pointer-events-none absolute right-2.5 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">CTRL+K</span>
           </kbd>
         </div>

@@ -202,7 +202,7 @@ export function VehiclesListPage() {
           variants={itemVariants}
           className="flex flex-col items-start"
         >
-          <div className="flex justify-between w-full  gap-2">
+          <div className="flex justify-between w-full gap-2">
             <div className="flex gap-4 items-center">
               <div className="p-2 bg-muted rounded-lg">
                 <LuGitCommitHorizontal className="h-5 w-5 text-muted-foreground" />
@@ -213,23 +213,29 @@ export function VehiclesListPage() {
               <GoPin className="h-5 w-5 scale-x-[-1] text-muted-foreground " />
             </div>
             <div className="flex gap-4">
-              <div className="flex items-center space-x-1 py-1.5 px-3 bg-card rounded-full text-sm">
-                <FiCode className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Desenvolvedor</span>
+              <div className="flex items-center justify-center sm:justify-center my-auto sm:space-x-1 h-6 w-6 sm:w-auto py-0 px-0.5 sm:px-3 bg-card rounded-full text-sm">
+                <FiCode className="w-3.5 h-3.5 sm:w-4 sm:h-4 " />
+                <span className="text-muted-foreground hidden sm:block text-center">
+                  Desenvolvedor
+                </span>
               </div>
-              <div className="flex items-center gap-4">
-                <Info size={16} aria-label="info" className="cursor-pointer" />
+              <div className="flex items-center gap-4 text-muted-foreground ">
+                <Info
+                  aria-label="info"
+                  className="cursor-pointer w-3.5 h-3.5 sm:w-4 sm:h-4 "
+                />
                 <FiMinus
-                  size={16}
                   aria-label="minimize"
-                  className="cursor-pointer"
+                  className="cursor-pointer w-3.5 h-3.5 sm:w-4 sm:h-4 "
                 />
                 <MdContentCopy
-                  size={16}
                   aria-label="maximize"
-                  className="cursor-pointer"
+                  className="cursor-pointer w-3.5 h-3.5  sm:w-4 sm:h-4 "
                 />
-                <FiX size={16} aria-label="close" className="cursor-pointer" />
+                <FiX
+                  aria-label="close"
+                  className="cursor-pointer w-3.5 h-3.5  sm:w-4 sm:h-4 "
+                />
               </div>
             </div>
           </div>
@@ -253,7 +259,7 @@ export function VehiclesListPage() {
               className="pl-9"
             />
           </div>
-          <div className="flex items-center ">
+          <div className="flex ml-auto  sm:items-center ">
             <span className="mr-2 hidden sm:flex flex-col">
               <p className="text-muted-foreground font-semibold text-sm">
                 03/03/2012 - 20/07/2039

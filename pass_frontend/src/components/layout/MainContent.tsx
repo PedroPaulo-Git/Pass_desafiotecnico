@@ -21,7 +21,7 @@ export function MainContent({
   return (
     // Main Content
     <div
-      className="flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-card border border-border"
+      className="flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm border border-border"
     >
       {/* Desktop Header */}
       <div className="hidden lg:block rounded-tl-4xl">
@@ -34,7 +34,7 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 bg-muted/50">{children}</main>
+      <main className="flex-1 p-6">{children}</main>
     </div>  
   );
 }

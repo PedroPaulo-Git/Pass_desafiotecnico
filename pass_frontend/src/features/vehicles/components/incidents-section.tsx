@@ -67,7 +67,7 @@ export function IncidentsSection({
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+            className="w-full flex items-center justify-between p-4 transition-colors"
           >
             <div className="flex items-center gap-2">
               <RiAlertLine className="h-4 w-4 text-muted-foreground" />
@@ -134,7 +134,7 @@ export function IncidentsSection({
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full bg-transparent border-foreground md:w-1/6 mx-auto border-2 mt-12 mb-4"
+                className="rounded-full bg-transparent border-foreground w-32 md:w-1/6 mx-auto border-2 mt-12 mb-4"
                 onClick={() => openModal("incident-create", { vehicleId })}
               >
                 {t.common.add}

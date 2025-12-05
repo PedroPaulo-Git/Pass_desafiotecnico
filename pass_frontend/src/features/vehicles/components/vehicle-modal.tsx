@@ -25,7 +25,7 @@ import {
 import { FaCar } from "react-icons/fa6";
 import { FaRegListAlt } from "react-icons/fa";
 import { MdOutlineImageSearch, MdCamera } from "react-icons/md";
-import { PiTrashSimpleBold  } from "react-icons/pi";
+import { PiTrashSimpleBold } from "react-icons/pi";
 
 import { format } from "date-fns";
 import { useI18n } from "@/lib/i18n/i18n-context";
@@ -333,10 +333,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent
-        fullWidth
         showInfo={false}
         showCloseButton={false}
-        className="w-[min(100vw,900px)] max-h-[98vh] overflow-y-auto p-0  "
+        className="w-[95%] md:w-[min(100vw,900px)] md:max-h-[98vh] overflow-y-auto p-0  "
       >
         <motion.div
           variants={modalVariants}
@@ -397,7 +396,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <Info className="h-5 w-5 font-bold" />
@@ -934,7 +933,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <FaRegListAlt className="h-4 w-4 font-bold" />
@@ -974,7 +973,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex items-center gap-2 ">
                       <MdOutlineImageSearch className="h-5 w-5 font-bold" />
@@ -994,7 +993,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         {/* Upload Box */}
                         <label
                           className="w-24 h-24 px-2 border-2 border-dashed border-foreground
-                         rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                         rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
                         >
                           <input
                             type="file"
@@ -1038,7 +1037,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </motion.div>
                         ))}
                         <div className="w-full my-3 flex items-center">
-                          <PiTrashSimpleBold 
+                          <PiTrashSimpleBold
                             onClick={handleDeleteAllImages}
                             className="h-4 w-4 hover:text-red-500 cursor-pointer "
                           />

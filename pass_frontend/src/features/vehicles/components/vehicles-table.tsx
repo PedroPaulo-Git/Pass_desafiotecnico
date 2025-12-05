@@ -109,7 +109,7 @@ export function VehiclesTable({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "LIBERADO":
-        return "bg-green-500 hover:bg-green-500/80";
+        return "bg-[#0c9d3c] hover:bg-[#0c9d3c]/80";
       case "EM_MANUTENCAO":
         return "bg-yellow-500 hover:bg-yellow-500/80";
       case "INDISPONIVEL":
@@ -140,18 +140,24 @@ export function VehiclesTable({
             <TableHead className="font-semibold" variant="compact">
               {t.vehicles.createdAt}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact">Título</TableHead>
-            <TableHead className="font-semibold" variant="compact">{t.vehicles.brand}</TableHead>
             <TableHead className="font-semibold" variant="compact">
+              Título
+            </TableHead>
+            <TableHead className="font-semibold" variant="compact">
+              {t.vehicles.brand}
+            </TableHead>
+            <TableHead className="font-semibold" variant="compact" center>
               {t.vehicles.capacity}
             </TableHead>
             <TableHead className="font-semibold" variant="compact">
-              {t.vehicles.plate} - {t.vehicles.state}
+              {t.vehicles.plate}
             </TableHead>
             <TableHead className="font-semibold" variant="compact">
               {t.vehicles.company}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact">{t.vehicles.status}</TableHead>
+            <TableHead className="font-semibold" variant="compact" center>
+              {t.vehicles.status}
+            </TableHead>
             <TableHead className="w-10"></TableHead>
           </TableRow>
         </TableHeader>
@@ -193,7 +199,7 @@ export function VehiclesTable({
 
                   openModal("vehicle-details", { vehicle });
                 }}
-               >
+              >
                 <TableCell className="font-medium " variant="compact">
                   {vehicle.internalId || "-"}
                 </TableCell>
@@ -210,16 +216,20 @@ export function VehiclesTable({
                   </div>
                 </TableCell>
                 <TableCell variant="compact">{vehicle.brand}</TableCell>
-                <TableCell variant="compact">{vehicle.capacity}</TableCell>
+                <TableCell variant="compact" center>
+                  {vehicle.capacity}
+                </TableCell>
                 <TableCell variant="compact">
                   {vehicle.plate} - {vehicle.state}
                 </TableCell>
-                <TableCell variant="compact">{vehicle.companyName || "-"}</TableCell>
                 <TableCell variant="compact">
+                  {vehicle.companyName || "-"}
+                </TableCell>
+                <TableCell variant="compact" center>
                   <Badge
                     className={`${getStatusColor(
                       vehicle.status
-                    )} text-white border-0`}
+                    )} text-foreground font-semibold border-0 px-8 py-2 rounded-2xl`}
                   >
                     {t.status[vehicle.status]}
                   </Badge>

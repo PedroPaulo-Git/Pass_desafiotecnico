@@ -68,13 +68,14 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   )
 }
 
-function TableHead({ className, variant = 'default', ...props }: React.ComponentProps<'th'> & { variant?: 'default' | 'compact' }) {
+function TableHead({ className, variant = 'default', center = false, ...props }: React.ComponentProps<'th'> & { variant?: 'default' | 'compact', center?: boolean }) {
   return (
     <th
       data-slot="table-head"
       className={cn(
-        'text-foreground h-10 px-2 xl:px-0 xl:p-5 text-left align-middle font-bold whitespace-normal wrap-break-word first:pl-5 [&:has([role=checkbox])]:pr-0',
-        variant === 'compact' && 'py-2 px-2 xl:px-0 xl:p-2 xl:py-5 first:pl-4  ',
+        'text-foreground h-10 px-2 xl:px-0 xl:p-5 text-left align-middle first:pl-5 font-bold whitespace-normal wrap-break-word sm:first:pl-5 [&:has([role=checkbox])]:pr-0',
+        variant === 'compact' && 'py-2 px-2 xl:px-0 xl:p-2 xl:py-5 sm:first:pl-8 ',
+        center && 'text-center',
         className,
       )}
       {...props}
@@ -82,19 +83,20 @@ function TableHead({ className, variant = 'default', ...props }: React.Component
   )
 }
 
-function TableCell({ className, variant = 'default', ...props }: TableCellProps) {
+function TableCell({ className, variant = 'default', center = false, ...props }: TableCellProps & { center?: boolean }) {
   return (
     <td
       data-slot="table-cell"
       className={cn(
         // Estilos Base (Sempre aplicados)
-        'align-middle whitespace-normal wrap-break-word first:pl-4 [&:has([role=checkbox])]:pr-0',
+        'align-middle whitespace-normal wrap-break-word first:pl-5 sm:first:pl-8 [&:has([role=checkbox])]:pr-0',
         
         // Variante Default (O estilo original que você tinha)
         variant === 'default' && 'py-2 px-2 xl:px-0 xl:p-5',
 
         // Variante Compact (Com o xl:p-2 que você pediu)
         variant === 'compact' && 'py-2 px-2 xl:px-0 xl:p-2',
+        center && 'text-center',
 
         className,
       )}

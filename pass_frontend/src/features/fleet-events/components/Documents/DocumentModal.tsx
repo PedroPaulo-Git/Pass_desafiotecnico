@@ -120,7 +120,7 @@ export function DocumentModal() {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <Info className="h-4.5 w-4.5" />
@@ -143,7 +143,6 @@ export function DocumentModal() {
                   >
                     {/* Document Name */}
                     <div className="mt-auto">
-                 
                       <Input
                         {...register("name")}
                         placeholder={` ${t.documents.name}` || "Documento"}
@@ -211,10 +210,20 @@ export function DocumentModal() {
 
             {/* Footer */}
             <div className="flex justify-center gap-3 pt-4">
-              <Button type="button" variant="modal_white" size="modal" onClick={closeModal}>
+              <Button
+                type="button"
+                variant="modal_white"
+                size="modal"
+                onClick={closeModal}
+              >
                 {t.common.close}
               </Button>
-              <Button type="submit" variant="modal" size="modal" disabled={isCreatingDocument}>
+              <Button
+                type="submit"
+                variant="modal"
+                size="modal"
+                disabled={isCreatingDocument}
+              >
                 {isCreatingDocument ? t.common.loading : t.common.register}
               </Button>
             </div>

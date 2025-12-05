@@ -195,7 +195,7 @@ export function FuelingModal() {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4  transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 " />
@@ -396,7 +396,7 @@ export function FuelingModal() {
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between p-4  transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <FaRegListAlt className="h-4 w-4 text-muted-foreground" />
@@ -415,7 +415,7 @@ export function FuelingModal() {
                     animate={{ opacity: 1 }}
                     className="p-4 pt-0"
                   >
-                    <div className="relative border-2 border-dashed border-muted-foreground rounded-sm p-10 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                    <div className="relative border-2 border-dashed border-muted-foreground rounded-sm p-10 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
                       <Info className="h-4.5 w-4.5 text-muted-foreground mb-2 absolute top-3 right-3" />
                       <p className="text-md text-muted-foreground">
                         {t.common.uploadFiles}
@@ -431,10 +431,20 @@ export function FuelingModal() {
 
             {/* Footer */}
             <div className="flex justify-center gap-3 pt-4 pb-4">
-              <Button type="button" variant="modal_white" size="modal" onClick={closeModal}>
+              <Button
+                type="button"
+                variant="modal_white"
+                size="modal"
+                onClick={closeModal}
+              >
                 {t.common.close}
               </Button>
-              <Button type="submit" variant="modal" size="modal" disabled={isCreatingFueling} >
+              <Button
+                type="submit"
+                variant="modal"
+                size="modal"
+                disabled={isCreatingFueling}
+              >
                 {isCreatingFueling ? t.common.loading : t.common.register}
               </Button>
             </div>
