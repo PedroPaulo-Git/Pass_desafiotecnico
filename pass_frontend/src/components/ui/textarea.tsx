@@ -1,14 +1,35 @@
-import * as React from 'react'
+// Textarea.tsx
 
+import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
+interface TextareaProps extends React.ComponentProps<'textarea'> {
+  variant?: 'default' | 'underlined'
+}
+
+function Textarea({ className, variant = 'default', ...props }: TextareaProps) {
   return (
     <textarea
       data-slot="textarea"
       className={cn(
-        'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-        className,
+        // --- ESTILOS BASE (Comuns a ambos) ---
+        'flex field-sizing-content min-h-16 w-full bg-transparent text-base placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+        
+        // --- VARIANTE PADRÃO (Caixa fechada) ---
+        variant === 'default' && [
+          'border border-input rounded-md shadow-xs px-3 py-2',
+          'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive'
+        ],
+
+        // --- VARIANTE UNDERLINED (Com o detalhe do resize no canto) ---
+        variant === 'underlined' && [
+          'border-0 border-b border-input rounded-none px-0 py-2 shadow-none', // Mantém o estilo sublinhado
+          'focus-visible:ring-0 focus-visible:border-primary', // Foco apenas na linha
+          // NÃO ADICIONE 'resize-none' AQUI!
+        ],
+
+        className
       )}
       {...props}
     />

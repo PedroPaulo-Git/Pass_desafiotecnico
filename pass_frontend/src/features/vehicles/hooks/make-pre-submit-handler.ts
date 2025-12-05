@@ -53,7 +53,7 @@ export function makePreSubmitHandler<T extends FieldValues>({
 
     const values = getValues();
     const v = values as Record<string, unknown>;
-
+    console.log(values)
     if (isCreating) {
       let hasErrors = false;
 

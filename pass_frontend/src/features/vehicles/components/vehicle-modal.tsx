@@ -23,6 +23,10 @@ import {
   CarFront,
 } from "lucide-react";
 import { FaCar } from "react-icons/fa6";
+import { FaRegListAlt } from "react-icons/fa";
+import { MdOutlineImageSearch, MdCamera } from "react-icons/md";
+import { PiTrashSimpleBold  } from "react-icons/pi";
+
 import { format } from "date-fns";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
@@ -110,6 +114,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const [descriptionOpen, setDescriptionOpen] = useState(true);
   const [imagesOpen, setImagesOpen] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeletingImages, setIsDeletingImages] = useState(false);
 
   const { data: imagesData } = useVehicleImages(vehicle?.id || "");
   const createImage = useCreateVehicleImage();
@@ -179,6 +184,37 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     );
   };
 
+  const handleDeleteAllImages = async () => {
+    if (!vehicle?.id) {
+      sonnerToast.error(t.common.error || "Vehicle ID não disponível");
+      return;
+    }
+
+    const imgs = imagesData || [];
+    if (!imgs.length) {
+      sonnerToast.error(t.common.error || "Nenhuma imagem encontrada");
+      return;
+    }
+
+    setIsDeletingImages(true);
+    try {
+      await Promise.all(
+        imgs.map((img: any) =>
+          // use mutateAsync provided by react-query
+          // @ts-ignore
+          deleteImage.mutateAsync({ imageId: img.id, vehicleId: vehicle.id })
+        )
+      );
+      sonnerToast.success(
+        t.common.success || "Todas as imagens foram removidas"
+      );
+    } catch (err) {
+      sonnerToast.error(t.common.error || "Erro ao remover todas as imagens");
+    } finally {
+      setIsDeletingImages(false);
+    }
+  };
+
   const {
     register,
     control,
@@ -202,7 +238,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       capacity: 46,
       currentKm: 0,
       year: new Date().getFullYear(),
-      color: "",
     },
   });
 
@@ -216,7 +251,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         model: vehicle.model,
         brand: vehicle.brand,
         year: vehicle.year,
-        color: vehicle.color || "Preto",
+        color: vehicle.color || "",
         category: vehicle.category,
         classification: vehicle.classification,
         capacity: vehicle.capacity,
@@ -301,7 +336,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         fullWidth
         showInfo={false}
         showCloseButton={false}
-        className="w-[min(100vw,900px)] max-h-[90vh] overflow-y-auto p-0  "
+        className="w-[min(100vw,900px)] max-h-[94vh] overflow-y-auto p-0  "
       >
         <motion.div
           variants={modalVariants}
@@ -366,7 +401,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                   >
                     <div className="flex items-center gap-1.5">
                       <Info className="h-4 w-4 font-bold" />
-                      <span className="font-bold">
+                      <span className="font-semibold">
                         {t.vehicles.generalData}
                       </span>
                     </div>
@@ -698,7 +733,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </span>
                         )}
                       </div>
-               
+
                       <div className="col-span-2">
                         <label className="text-xs text-muted-foreground">
                           {t.vehicles.plateType}
@@ -849,14 +884,22 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                               </SelectItem>
                             ))}
                           </SelectContent>
+                          {errors.fuelType?.message && (
+                            <span className="text-xs text-destructive">
+                              {String(errors.fuelType.message)}
+                            </span>
+                          )}
                         </Select>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 mt-10">
                       <div className="col-span-2">
-                           <Select
-                        
+                        <Select
+                          value={watch("color")}
+                          onValueChange={(value) =>
+                            setValue("color", value as FuelType)
+                          }
                         >
                           <SelectTrigger className="h-8">
                             <SelectValue
@@ -875,9 +918,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             <SelectItem value="Marrom">Marrom</SelectItem>
                             <SelectItem value="Laranja">Laranja</SelectItem>
                           </SelectContent>
-                          
                         </Select>
-              
                       </div>
                     </div>
                   </motion.div>
@@ -895,9 +936,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     type="button"
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <FaRegListAlt className="h-4 w-4 font-bold" />
+                      <span className="font-semibold">
                         {t.vehicles.description}
                       </span>
                     </div>
@@ -911,11 +952,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 <CollapsibleContent>
                   <div className="p-4 pt-0">
                     <Textarea
+                      variant="underlined"
                       {...register("description", {
                         required: "Descrição é obrigatória",
                       })}
-                      placeholder="Descrição do veículo..."
-                      className="min-h-[100px] resize-none"
+                      placeholder="316"
                     />
                     {errors.description?.message && (
                       <span className="text-xs text-destructive">
@@ -935,9 +976,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     type="button"
                     className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <ImagePlus className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{t.vehicles.images}</span>
+                    <div className="flex items-center gap-2 ">
+                      <MdOutlineImageSearch className="h-4 w-4 font-bold" />
+                      <span className="font-semibold">{t.vehicles.images}</span>
                     </div>
                     {imagesOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -951,7 +992,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     {vehicle ? (
                       <div className="flex flex-wrap gap-3">
                         {/* Upload Box */}
-                        <label className="w-24 h-24 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
+                        <label
+                          className="w-24 h-24 px-2 border-2 border-dashed border-foreground
+                         rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                        >
                           <input
                             type="file"
                             accept="image/*"
@@ -959,8 +1003,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             disabled={isUploading}
                             className="hidden"
                           />
-                          <ImagePlus className="h-6 w-6 text-muted-foreground mb-1" />
-                          <span className="text-xs text-primary">
+                          <MdCamera className="h-8 w-8 mb-1" />
+                          <span className="text-xs text-center ">
                             {isUploading
                               ? "Uploading..."
                               : t.common.uploadFiles}
@@ -973,7 +1017,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.1 }}
-                            className="relative w-24 h-24 rounded-lg overflow-hidden group"
+                            className="relative w-44 h-24 rounded-md overflow-hidden group"
                           >
                             <img
                               src={image.url}
@@ -988,11 +1032,21 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                 className="text-white hover:bg-white/20"
                                 onClick={() => handleDeleteImage(image.id)}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4 font-bold" />
                               </Button>
                             </div>
                           </motion.div>
                         ))}
+                        <div className="w-full my-3 flex items-center">
+                          <PiTrashSimpleBold 
+                            onClick={handleDeleteAllImages}
+                            className="h-4 w-4 hover:text-red-500 cursor-pointer "
+                          />
+
+                          <p className="text-xs ml-2 font-normal">
+                            Excluir todos arquivos
+                          </p>
+                        </div>
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
