@@ -130,28 +130,28 @@ export function VehiclesTable({
   };
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden bg-card">
+    <div className="rounded-lg  overflow-hidden bg-card">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="font-semibold">
+          <TableRow className="hover:bg-card">
+            <TableHead className="font-semibold" variant="compact">
               {t.vehicles.identifier}
             </TableHead>
-            <TableHead className="font-semibold">
+            <TableHead className="font-semibold" variant="compact">
               {t.vehicles.createdAt}
             </TableHead>
-            <TableHead className="font-semibold">Título</TableHead>
-            <TableHead className="font-semibold">{t.vehicles.brand}</TableHead>
-            <TableHead className="font-semibold">
+            <TableHead className="font-semibold" variant="compact">Título</TableHead>
+            <TableHead className="font-semibold" variant="compact">{t.vehicles.brand}</TableHead>
+            <TableHead className="font-semibold" variant="compact">
               {t.vehicles.capacity}
             </TableHead>
-            <TableHead className="font-semibold">
+            <TableHead className="font-semibold" variant="compact">
               {t.vehicles.plate} - {t.vehicles.state}
             </TableHead>
-            <TableHead className="font-semibold">
+            <TableHead className="font-semibold" variant="compact">
               {t.vehicles.company}
             </TableHead>
-            <TableHead className="font-semibold">{t.vehicles.status}</TableHead>
+            <TableHead className="font-semibold" variant="compact">{t.vehicles.status}</TableHead>
             <TableHead className="w-10"></TableHead>
           </TableRow>
         </TableHeader>
@@ -174,7 +174,7 @@ export function VehiclesTable({
                 initial="hidden"
                 animate="visible"
                 whileHover={{ backgroundColor: "var(--accent)" }}
-                className="cursor-pointer border-b border-border transition-colors"
+                className="cursor-pointer border-b border-border transition-colors "
                 onClick={(e: React.MouseEvent) => {
                   const target = e.target as HTMLElement | null;
 
@@ -193,14 +193,14 @@ export function VehiclesTable({
 
                   openModal("vehicle-details", { vehicle });
                 }}
-              >
-                <TableCell className="font-medium">
+               >
+                <TableCell className="font-medium " variant="compact">
                   {vehicle.internalId || "-"}
                 </TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-muted-foreground" variant="compact">
                   {formatDate(vehicle.createdAt)}
                 </TableCell>
-                <TableCell>
+                <TableCell variant="compact">
                   <div>
                     <span className="font-medium">{vehicle.model}</span>
                     <p className="text-sm text-muted-foreground">
@@ -209,13 +209,13 @@ export function VehiclesTable({
                     </p>
                   </div>
                 </TableCell>
-                <TableCell>{vehicle.brand}</TableCell>
-                <TableCell>{vehicle.capacity}</TableCell>
-                <TableCell>
+                <TableCell variant="compact">{vehicle.brand}</TableCell>
+                <TableCell variant="compact">{vehicle.capacity}</TableCell>
+                <TableCell variant="compact">
                   {vehicle.plate} - {vehicle.state}
                 </TableCell>
-                <TableCell>{vehicle.companyName || "-"}</TableCell>
-                <TableCell>
+                <TableCell variant="compact">{vehicle.companyName || "-"}</TableCell>
+                <TableCell variant="compact">
                   <Badge
                     className={`${getStatusColor(
                       vehicle.status
@@ -224,7 +224,7 @@ export function VehiclesTable({
                     {t.status[vehicle.status]}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell variant="compact">
                   <ActionsMenu vehicle={vehicle} />
                 </TableCell>
               </motion.tr>

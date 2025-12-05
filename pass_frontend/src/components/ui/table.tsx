@@ -3,6 +3,9 @@
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
+interface TableCellProps extends React.ComponentProps<'td'> {
+  variant?: 'default' | 'compact'
+}
 
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
@@ -23,7 +26,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('[&_tr]:border-b', className)}
+      className={cn('', className)}
       {...props}
     />
   )
@@ -57,7 +60,7 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
     <tr
       data-slot="table-row"
       className={cn(
-        'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors',
+        'hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors',
         className
       )}
       {...props}
@@ -65,12 +68,13 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   )
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
+function TableHead({ className, variant = 'default', ...props }: React.ComponentProps<'th'> & { variant?: 'default' | 'compact' }) {
   return (
     <th
       data-slot="table-head"
       className={cn(
         'text-foreground h-10 px-2 xl:px-0 xl:p-5 text-left align-middle font-bold whitespace-normal wrap-break-word first:pl-5 [&:has([role=checkbox])]:pr-0',
+        variant === 'compact' && 'py-2 px-2 xl:px-0 xl:p-2 xl:py-5 first:pl-4  ',
         className,
       )}
       {...props}
@@ -78,12 +82,20 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
   )
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
+function TableCell({ className, variant = 'default', ...props }: TableCellProps) {
   return (
     <td
       data-slot="table-cell"
       className={cn(
-        'py-2 px-2 xl:px-0 xl:p-5 align-middle whitespace-normal wrap-break-word first:pl-4 [&:has([role=checkbox])]:pr-0',
+        // Estilos Base (Sempre aplicados)
+        'align-middle whitespace-normal wrap-break-word first:pl-4 [&:has([role=checkbox])]:pr-0',
+        
+        // Variante Default (O estilo original que você tinha)
+        variant === 'default' && 'py-2 px-2 xl:px-0 xl:p-5',
+
+        // Variante Compact (Com o xl:p-2 que você pediu)
+        variant === 'compact' && 'py-2 px-2 xl:px-0 xl:p-2',
+
         className,
       )}
       {...props}

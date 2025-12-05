@@ -91,9 +91,10 @@ export function AppHeader({
         <div className="relative w-full max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
+            variant="search"
             type="search"
             placeholder="Buscar..."
-            className="h-9 w-full rounded-md bg-muted/50 pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
+            className="h-9 w-full rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
           />
           <kbd className="pointer-events-none absolute right-2.5 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">CTRL+K</span>

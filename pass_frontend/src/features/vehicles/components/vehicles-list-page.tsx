@@ -9,9 +9,14 @@ import {
   MoreVertical,
   Sparkles,
   Pin,
+  Info,
+  Plus,
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
+import { LuGitCommitHorizontal } from "react-icons/lu";
+import { GoPin } from "react-icons/go";
+import { IoFilterOutline } from "react-icons/io5";
 import FuelingModal from "@/features/fleet-events/components/Fueling/FuelingModal";
 import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
 import DocumentModal from "@/features/fleet-events/components/Documents/DocumentModal";
@@ -30,6 +35,9 @@ import type { VehicleFilters } from "@/types/vehicle";
 import { getMockVehiclesPaginated } from "../data/mock-vehicles";
 
 import { ConfirmDeleteVehicleModal } from "./vehicle-delete-modal";
+import { MdContentCopy } from "react-icons/md";
+import { FiAperture, FiCode } from "react-icons/fi";
+import { FiMinus, FiSquare, FiX } from "react-icons/fi";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -192,41 +200,83 @@ export function VehiclesListPage() {
         {/* Header */}
         <motion.div
           variants={itemVariants}
-          className="flex items-center justify-between"
+          className="flex flex-col items-start"
         >
-          <div className="flex items-center gap-2">
-            <Settings2 className="h-5 w-5 text-muted-foreground" />
-            <h1 className="text-xl font-semibold text-foreground">{t.vehicles.title}</h1>
-            <Pin className="h-5 w-5 text-muted-foreground" />
+          <div className="flex justify-between w-full  gap-2">
+            <div className="flex gap-4 items-center">
+              <div className="p-2 bg-muted rounded-lg">
+                <LuGitCommitHorizontal className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <h1 className="text-lg font-semibold text-foreground">
+                {t.vehicles.title}
+              </h1>
+              <GoPin className="h-5 w-5 scale-x-[-1] text-muted-foreground " />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex items-center space-x-1 py-1.5 px-3 bg-card rounded-full text-sm">
+                <FiCode className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Desenvolvedor</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Info size={16} aria-label="info" className="cursor-pointer" />
+                <FiMinus
+                  size={16}
+                  aria-label="minimize"
+                  className="cursor-pointer"
+                />
+                <MdContentCopy
+                  size={16}
+                  aria-label="maximize"
+                  className="cursor-pointer"
+                />
+                <FiX size={16} aria-label="close" className="cursor-pointer" />
+              </div>
+            </div>
           </div>
-          <span className="text-sm text-muted-foreground">{t.nav.fleet}</span>
+          <span className="text-sm text-muted-foreground mt-2">
+            {t.nav.fleet}
+          </span>
         </motion.div>
 
         {/* Search and Filters Bar */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-card p-4 rounded-lg border border-border"
+          className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-card p-3 rounded-lg "
         >
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              variant="search"
               placeholder={t.common.search}
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-9"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={() => openModal("vehicle-create")}>
-              {t.vehicles.create}
+          <div className="flex items-center ">
+            <span className="mr-2 hidden sm:flex flex-col">
+              <p className="text-muted-foreground font-semibold text-sm">
+                03/03/2012 - 20/07/2039
+              </p>
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer"
+              onClick={() => openModal("vehicle-create")}
+            >
+              <Plus className="w-4 h-4 cursor-pointer">
+                {t.vehicles.create}
+              </Plus>
             </Button>
+
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowFilters(!showFilters)}
               className={showFilters ? "bg-accent" : ""}
             >
-              <Filter className="h-4 w-4" />
+              <IoFilterOutline className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon">
               <MoreVertical className="h-4 w-4" />
@@ -308,7 +358,7 @@ export function VehiclesListPage() {
           ) : (
             <>
               {showMockData && (
-                <div className="mb-4 bg-muted/50 border border-border rounded-lg p-3 flex items-center justify-between">
+                <div className="mb-4 bg-muted/50  rounded-lg p-3 flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
                     {t.vehicles.messages.usingTestData}
                   </p>

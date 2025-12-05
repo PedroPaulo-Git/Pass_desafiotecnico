@@ -34,7 +34,7 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-6 bg-muted/50">{children}</main>
     </div>  
   );
 }
