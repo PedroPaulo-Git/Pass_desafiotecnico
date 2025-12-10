@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { AppHeader } from "./app-header";
+import { usePageTitle } from "@/lib/contexts/page-title-context";
 
 interface MainContentProps {
   children: ReactNode;
@@ -18,19 +19,31 @@ export function MainContent({
   isCollapsed,
   onToggle,
 }: MainContentProps) {
+  const { title } = usePageTitle();
+
   return (
     // Main Content
     <div
-      className="flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm border border-border bg-card"
+      className="flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background"
     >
       {/* Desktop Header */}
       <div className="hidden lg:block rounded-tl-4xl">
-        <AppHeader isCollapsed={isCollapsed} onToggle={onToggle} />
+        <AppHeader 
+          isCollapsed={isCollapsed} 
+          onToggle={onToggle} 
+          currentPageTitle={title}
+        />
       </div>
 
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <AppHeader showMenuButton onMenuClick={onOpenMobileMenu} isCollapsed={isCollapsed} onToggle={onToggle} />
+        <AppHeader 
+          showMenuButton 
+          onMenuClick={onOpenMobileMenu} 
+          isCollapsed={isCollapsed} 
+          onToggle={onToggle} 
+          currentPageTitle={title}
+        />
       </div>
 
       {/* Main Content Area */}

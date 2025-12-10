@@ -27,11 +27,13 @@ function SelectValue({
 function SelectTrigger({
   className,
   size = 'default',
+  variant = 'default',
   children,
   iconRight = false,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: 'sm' | 'default'
+  variant?: 'default' | 'pagination'
   iconRight?: boolean
 }) {
   return (
@@ -41,6 +43,7 @@ function SelectTrigger({
       className={cn(
         "border-b-2  w-full relative data-placeholder:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:-destructive dark:bg-input/30 dark:hover:bg-input/50 flex items-center justify-between gap-2  bg-transparent text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
+        variant === 'pagination' && "h-8 w-[110px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
       )}
       {...props}
     >
@@ -49,7 +52,7 @@ function SelectTrigger({
         <ChevronDownIcon
           className={cn(
             'size-4 opacity-50 absolute',
-            iconRight ? 'right-2' : 'right-0'
+            iconRight ? 'right-2' : 'right-3'
           )}
         />
       </SelectPrimitive.Icon>
@@ -83,6 +86,7 @@ function SelectContent({
             position === 'popper' &&
               'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1',
           )}
+          
         >
           {children}
         </SelectPrimitive.Viewport>

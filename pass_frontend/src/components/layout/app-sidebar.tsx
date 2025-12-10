@@ -12,6 +12,21 @@ import {
   Check,
   Plus,
   Star,
+  BusFront,
+  Activity,
+  BedDouble, 
+  CalendarDays, 
+  Camera, 
+  DollarSign, 
+  FileText, 
+  LayoutDashboard, 
+  Map, 
+  MapPin, 
+  Package, 
+  Puzzle, 
+  Settings, 
+  Ticket
+
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/i18n-context";
@@ -65,41 +80,41 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
     {
       title: "Main",
       items: [
-        { icon: BsGrid, label: "Panel", href: "/dashboard" },
-        { icon: TbActivity, label: "Activity", href: "#activity" },
+        { icon: LayoutDashboard, label: "Panel", href: "/dashboard" },
+        { icon: Activity, label: "Activity", href: "#activity" },
       ],
     },
     {
       title: "Services",
       items: [
-        { icon: RiBusLine, label: "Transfer", href: "/vehicles" },
-        { icon: RiCompassLine, label: "Combo", href: "#combo" },
-        { icon: RiHotelLine, label: "Accommodation", href: "#accommodation" },
-        { icon: RiTicketLine, label: "Ticket", href: "#ticket" },
-        { icon: MdOutlineTour, label: "Tour", href: "#tour" },
+        { icon: BusFront, label: "Transfer", href: "/vehicles" },
+        { icon: Package, label: "Combo", href: "#combo" },
+        { icon: BedDouble, label: "Accommodation", href: "#accommodation" },
+        { icon: Ticket, label: "Ticket", href: "#ticket" },
+        { icon: Camera, label: "Tour", href: "#tour" },
         { icon: Star, label: "Experience", href: "#experience" },
-        { icon: IoGitBranchOutline, label: "Circuit", href: "#circuit" },
+        { icon: Map, label: "Circuit", href: "#circuit" },
       ],
     },
     {
       title: "Commercial",
       items: [
-        { icon: FiDollarSign, label: "Tariff", href: "#tariff" },
-        { icon: LuCalendarDays, label: "Availability", href: "#availability" },
+        { icon: DollarSign, label: "Tariff", href: "#tariff" },
+        { icon: CalendarDays, label: "Availability", href: "#availability" },
       ],
     },
     {
       title: "Complements",
       items: [
-        { icon: PiFlowArrow, label: "Slots", href: "#slots" },
-        { icon: PiMapPinArea, label: "Perimeters", href: "#perimeters" },
+        { icon: Puzzle, label: "Slots", href: "#slots" },
+        { icon: MapPin, label: "Perimeters", href: "#perimeters" },
         { icon: LuFileText, label: "Guidelines", href: "#guidelines" },
       ],
     },
     {
       title: "Organization",
       items: [
-        { icon: RiSettings4Line, label: "Settings", href: "#settings" },
+        { icon: Settings, label: "Settings", href: "#settings" },
       ],
     },
   ];
@@ -184,7 +199,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         </div>
 
         {/* --- NAVIGATION --- */}
-        <nav className="flex-1 overflow-y-auto py-3 px-4 space-y-5 scrollbar-hidden">
+        <nav className="flex-1 overflow-y-auto py-3 px-4 space-y-10 scrollbar-hidden">
           {navGroups.map((group, groupIndex) => (
             <div key={groupIndex}>
               {/* Título do Grupo */}
@@ -194,7 +209,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                 </div>
               )}
 
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -204,10 +219,10 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-2.5 rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors duration-150",
+                            "flex items-center gap-2.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-150",
                             isActive
                               ? "bg-sidebar-accent text-sidebar-accent-foreground font-bold "
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                              : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                           )}
                         >
                           <item.icon
@@ -229,11 +244,11 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                           )}
                         </Link>
                       </TooltipTrigger>
-                      {isCollapsed && (
+                      {/* {isCollapsed && (
                         <TooltipContent side="right" sideOffset={8} className="bg-foreground text-background text-xs">
                           {item.label}
                         </TooltipContent>
-                      )}
+                      )} */}
                     </Tooltip>
                   );
                 })}

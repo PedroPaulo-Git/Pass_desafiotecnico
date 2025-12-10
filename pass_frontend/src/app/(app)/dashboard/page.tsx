@@ -11,6 +11,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
+import { useActiveNavTitle } from "@/hooks/use-active-nav-title";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useVehicles } from "@/features/vehicles/hooks/use-vehicles";
@@ -44,6 +45,9 @@ const itemVariants: any = {
 
 export default function DashboardPage() {
   const { t } = useI18n();
+  
+  // Define automaticamente o título da página baseado na rota
+  const { currentTitle } = useActiveNavTitle();
 
   // fetch small paginated responses and read the `total` count
   const { data: vehiclesData } = useVehicles({ page: 1, limit: 1 });

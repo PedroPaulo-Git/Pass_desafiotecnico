@@ -5,7 +5,6 @@ import {
   Moon,
   Sun,
   Globe,
-  Menu,
   PanelLeft,
   Search,
   ChevronDown,
@@ -41,13 +40,13 @@ interface AppHeaderProps {
   showMenuButton?: boolean;
   isCollapsed: boolean;
   onToggle: () => void;
+  currentPageTitle?: string;
 }
 
 export function AppHeader({
   onMenuClick,
-  showMenuButton,
-  isCollapsed,
   onToggle,
+  currentPageTitle,
 }: AppHeaderProps) {
   const { theme, toggleTheme, pendingTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
@@ -76,7 +75,7 @@ export function AppHeader({
           onClick={onMenuClick}
           className="lg:hidden"
         >
-          <Menu className="h-5 w-5" />
+          <PanelLeft className="h-5 w-5" />
         </Button>
 
         {/* Desktop Sidebar Toggle (Visual match for image) */}
@@ -90,22 +89,31 @@ export function AppHeader({
         </Button>
 
         {/* Separator */}
-        <Separator orientation="vertical" className="hidden h-6 lg:block" />
+        <div className="flex h-4 items-center">
+          <Separator
+            orientation="vertical"
+            className="bg-muted w-2 h-10 z-40"
+          />
+        </div>
 
         {/* Page Title / Breadcrumb */}
-        {/* <span className="text-sm font-medium">Availability</span> */}
+        {currentPageTitle && (
+          <span className="text-sm font-medium text-foreground">
+            {currentPageTitle}
+          </span>
+        )}
       </div>
 
       {/* --- CENTER SECTION: Search Bar --- */}
-      <div className="hidden flex-1 items-center justify-center px-4 md:flex">
+      <div className="hidden flex-1 items-center justify-center px-4 lg:flex">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            type="search"
+            variant="dark"
             placeholder="Buscar..."
-            className="h-9 w-full rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
+            className="h-9 w-1/2 rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
           />
-          <kbd className="pointer-events-none absolute right-2.5 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="pointer-events-none absolute right-58 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded bg-card px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">CTRL+K</span>
           </kbd>
         </div>
@@ -113,6 +121,8 @@ export function AppHeader({
 
       {/* --- RIGHT SECTION: Actions & Profile --- */}
       <div className="flex items-center gap-1">
+        <Search className=" flex lg:hidden h-4 w-4 text-muted-foreground mr-3" />
+
         {/* Theme Toggle */}
         <Button
           variant="ghost"
@@ -122,7 +132,7 @@ export function AppHeader({
         >
           <motion.div
             initial={false}
-            animate={{ rotate: displayTheme === "dark" ? 180 : 0 }}
+            // animate={{ rotate: displayTheme === "dark" ? 0 : 180 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             {displayTheme === "dark" ? (
@@ -165,21 +175,57 @@ export function AppHeader({
         {/* App Grid Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground"
+            >
               <BsGrid3X3Gap className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64 p-3">
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: BsPeople, label: "Workspace", color: "text-muted-foreground" },
-                { icon: RiBusLine, label: "Transfer", color: "text-muted-foreground" },
-                { icon: RiStore2Line, label: "Marketplace", color: "text-muted-foreground" },
-                { icon: PiFlowArrow, label: "Flow", color: "text-muted-foreground" },
-                { icon: TbChartBar, label: "Balance", color: "text-muted-foreground" },
-                { icon: HiOutlineOfficeBuilding, label: "Office", color: "text-muted-foreground" },
-                { icon: HiOutlineSignal, label: "Channel", color: "text-muted-foreground" },
-                { icon: LuLink2, label: "Connect", color: "text-muted-foreground" },
+                {
+                  icon: BsPeople,
+                  label: "Workspace",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: RiBusLine,
+                  label: "Transfer",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: RiStore2Line,
+                  label: "Marketplace",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: PiFlowArrow,
+                  label: "Flow",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: TbChartBar,
+                  label: "Balance",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: HiOutlineOfficeBuilding,
+                  label: "Office",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: HiOutlineSignal,
+                  label: "Channel",
+                  color: "text-muted-foreground",
+                },
+                {
+                  icon: LuLink2,
+                  label: "Connect",
+                  color: "text-muted-foreground",
+                },
               ].map((app, idx) => (
                 <button
                   key={idx}
@@ -188,7 +234,9 @@ export function AppHeader({
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                     <app.icon className={`h-5 w-5 ${app.color}`} />
                   </div>
-                  <span className="text-xs text-muted-foreground">{app.label}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {app.label}
+                  </span>
                 </button>
               ))}
             </div>
@@ -214,7 +262,9 @@ export function AppHeader({
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-sm font-medium">Jonathan Doe</span>
-                <span className="text-xs text-muted-foreground">jondoe@example.com</span>
+                <span className="text-xs text-muted-foreground">
+                  jondoe@example.com
+                </span>
               </div>
             </div>
             <DropdownMenuSeparator />

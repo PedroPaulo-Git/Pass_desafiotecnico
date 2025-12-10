@@ -21,11 +21,13 @@ import {
   MoreVertical,
   FileText,
   CarFront,
+  Fuel,
 } from "lucide-react";
 import { FaCar } from "react-icons/fa6";
 import { FaRegListAlt } from "react-icons/fa";
 import { MdOutlineImageSearch, MdCamera } from "react-icons/md";
 import { PiTrashSimpleBold } from "react-icons/pi";
+import { RiAlertLine, RiFileTextLine } from "react-icons/ri";
 
 import { format } from "date-fns";
 import { useI18n } from "@/lib/i18n/i18n-context";
@@ -72,6 +74,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import type {
   Vehicle,
   VehicleStatus,
@@ -110,6 +118,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   // determine whether we are in creating mode early so the resolver can use it
   const isCreating = isCreate || !vehicle;
 
+  const [activeTab, setActiveTab] = useState("general");
   const [generalOpen, setGeneralOpen] = useState(true);
   const [descriptionOpen, setDescriptionOpen] = useState(true);
   const [imagesOpen, setImagesOpen] = useState(true);
@@ -378,19 +387,58 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
             </div>
           </DialogHeader>
 
-          <form
-            onSubmit={makePreSubmitHandler({
-              isCreating,
-              getValues: getValues as () => CreateVehicleInput,
-              setError: setError as UseFormSetError<CreateVehicleInput>,
-              t,
-              toast: sonnerToast,
-              handleSubmit: handleSubmit as any,
-              onSubmit,
-            })}
-            className="px-2 pb-4 space-y-2"
-          >
-            {/* Dados Gerais */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            {/* Tabs Navigation */}
+            <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0 h-auto">
+              <TabsTrigger
+                value="general"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3"
+              >
+                <Info className="h-4 w-4 mr-2" />
+                {t.vehicles.generalData}
+              </TabsTrigger>
+              {vehicle && (
+                <>
+                  <TabsTrigger
+                    value="fuelings"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3"
+                  >
+                    <Fuel className="h-4 w-4 mr-2" />
+                    {t.fueling.title}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="documents"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3"
+                  >
+                    <RiFileTextLine className="h-4 w-4 mr-2" />
+                    {t.documents.title}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="incidents"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3"
+                  >
+                    <RiAlertLine className="h-4 w-4 mr-2" />
+                    {t.incidents.title}
+                  </TabsTrigger>
+                </>
+              )}
+            </TabsList>
+
+            <form
+              onSubmit={makePreSubmitHandler({
+                isCreating,
+                getValues: getValues as () => CreateVehicleInput,
+                setError: setError as UseFormSetError<CreateVehicleInput>,
+                t,
+                toast: sonnerToast,
+                handleSubmit: handleSubmit as any,
+                onSubmit,
+              })}
+              className="px-2 pb-4"
+            >
+              {/* Tab: Dados Gerais */}
+              <TabsContent value="general" className="mt-4 space-y-2">
+                {/* Dados Gerais */}
             <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
               <div className="border border-border rounded-lg overflow-hidden">
                 <CollapsibleTrigger asChild>
@@ -1058,52 +1106,60 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
               </div>
             </Collapsible>
 
-            {/* Abastecimentos */}
-            {vehicle && (
-              <FuelingsSection
-                vehicleId={vehicle.id}
-                fuelings={vehicle.fuelings || []}
-              />
-            )}
+                {/* Footer Actions - Dentro da tab Geral */}
+                <div className="flex justify-center gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="modal_white"
+                    size="modal"
+                    onClick={closeModal}
+                  >
+                    {t.common.close}
+                  </Button>
+                  <Button
+                    size="modal"
+                    type="submit"
+                    variant="modal"
+                    disabled={updateVehicle.isPending || createVehicle.isPending}
+                  >
+                    {updateVehicle.isPending || createVehicle.isPending
+                      ? t.common.loading
+                      : t.common.save}
+                  </Button>
+                </div>
+              </TabsContent>
 
-            {/* Documentação */}
-            {vehicle && (
-              <DocumentsSection
-                vehicleId={vehicle.id}
-                documents={vehicle.documents || []}
-              />
-            )}
+              {/* Tab: Abastecimentos */}
+              {vehicle && (
+                <TabsContent value="fuelings" className="mt-4">
+                  <FuelingsSection
+                    vehicleId={vehicle.id}
+                    fuelings={vehicle.fuelings || []}
+                  />
+                </TabsContent>
+              )}
 
-            {/* Ocorrências */}
-            {vehicle && (
-              <IncidentsSection
-                vehicleId={vehicle.id}
-                incidents={vehicle.incidents || []}
-              />
-            )}
+              {/* Tab: Documentação */}
+              {vehicle && (
+                <TabsContent value="documents" className="mt-4">
+                  <DocumentsSection
+                    vehicleId={vehicle.id}
+                    documents={vehicle.documents || []}
+                  />
+                </TabsContent>
+              )}
 
-            {/* Footer Actions */}
-            <div className="flex justify-center gap-3 pt-4 ">
-              <Button
-                type="button"
-                variant="modal_white"
-                size="modal"
-                onClick={closeModal}
-              >
-                {t.common.close}
-              </Button>
-              <Button
-                size="modal"
-                type="submit"
-                variant="modal"
-                disabled={updateVehicle.isPending || createVehicle.isPending}
-              >
-                {updateVehicle.isPending || createVehicle.isPending
-                  ? t.common.loading
-                  : t.common.save}
-              </Button>
-            </div>
-          </form>
+              {/* Tab: Ocorrências */}
+              {vehicle && (
+                <TabsContent value="incidents" className="mt-4">
+                  <IncidentsSection
+                    vehicleId={vehicle.id}
+                    incidents={vehicle.incidents || []}
+                  />
+                </TabsContent>
+              )}
+            </form>
+          </Tabs>
         </motion.div>
       </DialogContent>
     </Dialog>

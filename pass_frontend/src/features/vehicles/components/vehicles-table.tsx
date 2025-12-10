@@ -8,6 +8,22 @@ import { useModalStore } from "@/store/use-modal-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronLast,
+  ChevronFirst,
+  ChevronsRight,
+} from "lucide-react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -32,8 +48,12 @@ interface VehiclesTableProps {
     page: number;
     totalPages: number;
     total: number;
+    limit: number; // ou 'pageSize', o número de itens por página atual
   };
   onPageChange: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  // Assumindo que você tem o estado de seleção aqui ou no pai
+  selectedRows?: Set<string>;
 }
 
 const rowVariants = {
@@ -49,9 +69,82 @@ export function VehiclesTable({
   vehicles,
   pagination,
   onPageChange,
+  onPageSizeChange,
 }: VehiclesTableProps) {
   const { t } = useI18n();
   const { openModal } = useModalStore();
+  const [sortColumn, setSortColumn] = React.useState<string | null>(null);
+  const [sortDirection, setSortDirection] = React.useState<
+    "asc" | "desc" | "none"
+  >("none");
+  const [selectedRows, setSelectedRows] = React.useState<Set<string>>(
+    new Set()
+  );
+  const [selectAll, setSelectAll] = React.useState(false);
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRows(new Set());
+      setSelectAll(false);
+    } else {
+      setSelectedRows(new Set(vehicles.map((v) => v.id)));
+      setSelectAll(true);
+    }
+  };
+
+  const handleSelectRow = (vehicleId: string) => {
+    const newSelected = new Set(selectedRows);
+    if (newSelected.has(vehicleId)) {
+      newSelected.delete(vehicleId);
+    } else {
+      newSelected.add(vehicleId);
+    }
+    setSelectedRows(newSelected);
+    setSelectAll(newSelected.size === vehicles.length);
+  };
+
+  // Limpar seleção quando veículos mudam
+  React.useEffect(() => {
+    setSelectedRows(new Set());
+    setSelectAll(false);
+  }, [vehicles]);
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      // Ciclo: none -> asc -> desc -> none
+      if (sortDirection === "none") {
+        setSortDirection("asc");
+      } else if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else {
+        setSortDirection("none");
+        setSortColumn(null);
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // Ordenar veículos
+  const sortedVehicles = React.useMemo(() => {
+    if (!sortColumn || sortDirection === "none") return vehicles;
+
+    return [...vehicles].sort((a, b) => {
+      let aVal: any = a[sortColumn as keyof Vehicle];
+      let bVal: any = b[sortColumn as keyof Vehicle];
+
+      // Tratamento especial para datas
+      if (sortColumn === "createdAt" || sortColumn === "updatedAt") {
+        aVal = new Date(aVal).getTime();
+        bVal = new Date(bVal).getTime();
+      }
+
+      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [vehicles, sortColumn, sortDirection]);
 
   function ActionsMenu({ vehicle }: { vehicle: Vehicle }) {
     const [open, setOpen] = React.useState(false);
@@ -109,7 +202,7 @@ export function VehiclesTable({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "LIBERADO":
-        return "bg-[#0c9d3c] hover:bg-[#0c9d3c]/80";
+        return "bg-emerald-600/70 hover:bg-esmerald-800/80";
       case "EM_MANUTENCAO":
         return "bg-yellow-500 hover:bg-yellow-500/80";
       case "INDISPONIVEL":
@@ -130,49 +223,128 @@ export function VehiclesTable({
   };
 
   return (
-    <div className="rounded-lg  overflow-hidden bg-card">
+    <div className=" overflow-hidden bg-card rounded-2xl">
       <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-card">
-            <TableHead className="font-semibold" variant="compact">
+        <TableHeader variant="minimal">
+          <TableRow className="hover:bg-transparent ">
+            <TableHead variant="minimal" className="w-12">
+              <div
+                className="flex items-center justify-center cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectAll();
+                }}
+              >
+                <div
+                  className={`w-4 h-4 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                    selectAll ? "bg-primary border-primary" : ""
+                  }`}
+                >
+                  {selectAll && (
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                    >
+                      <path
+                        d="M2 6L5 9L10 3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </div>
+              </div>
+            </TableHead>
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={
+                sortColumn === "internalId" ? sortDirection : "none"
+              }
+              onClick={() => handleSort("internalId")}
+            >
               {t.vehicles.identifier}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact">
-              {t.vehicles.createdAt}
-            </TableHead>
-            <TableHead className="font-semibold" variant="compact">
+
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={sortColumn === "model" ? sortDirection : "none"}
+              onClick={() => handleSort("model")}
+            >
               Título
             </TableHead>
-            <TableHead className="font-semibold" variant="compact">
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={sortColumn === "brand" ? sortDirection : "none"}
+              onClick={() => handleSort("brand")}
+            >
               {t.vehicles.brand}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact" center>
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={sortColumn === "capacity" ? sortDirection : "none"}
+              onClick={() => handleSort("capacity")}
+            >
               {t.vehicles.capacity}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact">
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={sortColumn === "plate" ? sortDirection : "none"}
+              onClick={() => handleSort("plate")}
+            >
               {t.vehicles.plate}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact">
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={
+                sortColumn === "companyName" ? sortDirection : "none"
+              }
+              onClick={() => handleSort("companyName")}
+            >
               {t.vehicles.company}
             </TableHead>
-            <TableHead className="font-semibold" variant="compact" center>
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={sortColumn === "status" ? sortDirection : "none"}
+              onClick={() => handleSort("status")}
+            >
               {t.vehicles.status}
             </TableHead>
-            <TableHead className="w-10"></TableHead>
+            <TableHead
+              variant="minimal"
+              sortable
+              sortDirection={
+                sortColumn === "createdAt" ? sortDirection : "none"
+              }
+              onClick={() => handleSort("createdAt")}
+            >
+              {t.vehicles.createdAt}
+            </TableHead>
+            <TableHead variant="minimal" className="w-10"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {vehicles.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={9}
-                className="text-center py-10 text-muted-foreground"
+                colSpan={10}
+                className="text-start py-10 text-muted-foreground"
               >
                 {t.common.noRecords}
               </TableCell>
             </TableRow>
           ) : (
-            vehicles.map((vehicle, index) => (
+            sortedVehicles.map((vehicle, index) => (
               <motion.tr
                 key={vehicle.id}
                 custom={index}
@@ -192,7 +364,8 @@ export function VehiclesTable({
                       target.closest("a") ||
                       target.closest("input") ||
                       target.closest("textarea") ||
-                      target.closest("select"))
+                      target.closest("select") ||
+                      target.closest("[data-checkbox]"))
                   ) {
                     return;
                   }
@@ -200,12 +373,45 @@ export function VehiclesTable({
                   openModal("vehicle-details", { vehicle });
                 }}
               >
-                <TableCell className="font-medium " variant="compact">
+                <TableCell variant="compact" firstPadding>
+                  <div
+                    data-checkbox
+                    className="flex items-center justify-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectRow(vehicle.id);
+                    }}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                        selectedRows.has(vehicle.id)
+                          ? "bg-primary border-primary"
+                          : ""
+                      }`}
+                    >
+                      {selectedRows.has(vehicle.id) && (
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="2"
+                        >
+                          <path
+                            d="M2 6L5 9L10 3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium" variant="compact">
                   {vehicle.internalId || "-"}
                 </TableCell>
-                <TableCell className="text-muted-foreground" variant="compact">
-                  {formatDate(vehicle.createdAt)}
-                </TableCell>
+
                 <TableCell variant="compact">
                   <div>
                     <span className="font-medium">{vehicle.model}</span>
@@ -216,23 +422,28 @@ export function VehiclesTable({
                   </div>
                 </TableCell>
                 <TableCell variant="compact">{vehicle.brand}</TableCell>
-                <TableCell variant="compact" center>
-                  {vehicle.capacity}
-                </TableCell>
+                <TableCell variant="compact">{vehicle.capacity}</TableCell>
                 <TableCell variant="compact">
                   {vehicle.plate} - {vehicle.state}
                 </TableCell>
                 <TableCell variant="compact">
                   {vehicle.companyName || "-"}
                 </TableCell>
-                <TableCell variant="compact" center>
-                  <Badge
-                    className={`${getStatusColor(
-                      vehicle.status
-                    )} text-foreground font-semibold border-0 px-8 py-2 rounded-2xl`}
-                  >
+                <TableCell variant="compact">
+                  <div className="text-center flex gap-2 text-muted-foreground">
+                    <Badge
+                      variant="point"
+                      className={`${getStatusColor(
+                        vehicle.status
+                      )} text-foreground font-semibold border-0  `}
+                    ></Badge>
                     {t.status[vehicle.status]}
-                  </Badge>
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground" variant="compact">
+                  {vehicle.createdAt
+                    ? format(new Date(vehicle.createdAt), "dd/MM/yyyy")
+                    : "-"}
                 </TableCell>
                 <TableCell variant="compact">
                   <ActionsMenu vehicle={vehicle} />
@@ -243,33 +454,90 @@ export function VehiclesTable({
         </TableBody>
       </Table>
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-          <span className="text-sm text-muted-foreground">
-            Página {pagination.page} de {pagination.totalPages} (
-            {pagination.total} registros)
-          </span>
-          <div className="flex gap-2">
+      {/* Footer de Paginação */}
+      <div className="sm:flex sm:flex-row gap-4 flex flex-col items-center justify-between px-5 py-4 border-t border-border">
+        {/* Lado Esquerdo: Texto de Seleção */}
+        <div className="text-sm text-muted-foreground">
+          {selectedRows?.size || 0} de {pagination.total} linha(s)
+          selecionada(s).
+        </div>
+
+        {/* Dropdown: Linhas por página */}
+        <div className="flex items-center space-x-2 h-8 bg-background ">
+          <Select
+            value={`${pagination.limit}`} // Converte para string pois o Select espera string
+            onValueChange={(value) => {
+              // Prefer onPageSizeChange; se não existir, apenas logamos
+              if (typeof onPageSizeChange === "function") {
+                onPageSizeChange(Number(value));
+                return;
+              }
+              // fallback: se pai não forneceu handler, apenas ignora
+              console.warn("onPageSizeChange not provided for VehiclesTable");
+            }}
+          >
+            <SelectTrigger className="h-8 w-[110px]" variant="pagination">
+              {/* Mostrar o texto formatado (ex.: "10 / page") */}
+              <SelectValue>{`${pagination.limit} / page`}</SelectValue>
+            </SelectTrigger>
+            {/* side é aceito; removeu-se o prop 'variant' que causava erro de tipo */}
+            <SelectContent side="top">
+              {[5, 10, 15, 20, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize} / page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* Lado Direito: Controles */}
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          {/* Texto: Página X de Y */}
+          <div className="flex w-[70px] items-center justify-center text-sm font-medium text-nowrap">
+            Página {pagination.page} de {pagination.totalPages}
+          </div>
+
+          {/* Botões de Navegação (Primeira, Anterior, Próxima, Última) */}
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => onPageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
+              className="h-8 w-8 p-0 lg:flex"
+              onClick={() => onPageChange(1)}
+              disabled={pagination.page === 1}
             >
-              Anterior
+              <span className="sr-only">Go to first page</span>
+              <ChevronFirst className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => onPageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
+              className="h-8 w-8 p-0"
+              onClick={() => onPageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
             >
-              Próximo
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => onPageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className=" h-8 w-8 p-0 lg:flex"
+              onClick={() => onPageChange(pagination.totalPages)}
+              disabled={pagination.page === pagination.totalPages}
+            >
+              <span className="sr-only">Go to last page</span>
+              <ChevronLast className="h-4 w-4" />
             </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

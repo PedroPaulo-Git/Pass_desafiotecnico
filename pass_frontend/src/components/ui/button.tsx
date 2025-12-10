@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 ",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
@@ -21,10 +21,14 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         modal: "border bg-foreground text-background hover:bg-foreground/90 ",
         modal_white: "border bg-muted text-muted-foreground hover:bg-muted-foreground/90 ",
+        table: "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2 ",
+        table_border_cutted: "border rounded-lg dark:bg-[#ffffff26]/30 border-border border-dashed px-0 py-2 ",
+        table_add: "bg-table-button text-black hover:bg-table-button/90 rounded-lg ",
+
       },
       size: {
         modal: "h-11 px-8 rounded-full",
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        default: "h-9 px-4 py-2 has-[>svg]:px-3 ",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",

@@ -2,19 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Search,
-  Filter,
-  Plus,
-  AlertCircle,
-  ChevronDown,
-} from "lucide-react";
-import { GoDependabot } from "react-icons/go";
-import { LuRefreshCw } from "react-icons/lu";
-import { RiDownloadLine } from "react-icons/ri";
-import { HiOutlineClipboardList } from "react-icons/hi";
-import { IoFilterOutline } from "react-icons/io5";
-import { Sparkles, RefreshCw } from "lucide-react";
+import { Search, Filter, Plus, AlertCircle, ChevronDown } from "lucide-react";
+
+import { Sparkles, RefreshCw ,CloudDownload,RotateCw } from "lucide-react";
 
 import FuelingModal from "@/features/fleet-events/components/Fueling/FuelingModal";
 import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
@@ -22,6 +12,7 @@ import DocumentModal from "@/features/fleet-events/components/Documents/Document
 
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
+import { useActiveNavTitle } from "@/hooks/use-active-nav-title";
 import { useVehicles } from "../hooks/use-vehicles";
 import { VehiclesTable } from "./vehicles-table";
 import { VehiclesFilters } from "./vehicles-filters";
@@ -51,6 +42,9 @@ const itemVariants = {
 export function VehiclesListPage() {
   const { t } = useI18n();
   const { openModal } = useModalStore();
+  
+  // Define automaticamente o título da página baseado na rota
+  const { currentTitle } = useActiveNavTitle();
   const [showFilters, setShowFilters] = useState(false);
   const [showMockData, setShowMockData] = useState(false);
   const [filters, setFilters] = useState<VehicleFilters>({
@@ -191,38 +185,75 @@ export function VehiclesListPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-4"
+        className="space-y-4 bg-card border-border border rounded-2xl"
       >
         {/* Toolbar - Matches reference design exactly */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between bg-card p-3 rounded-lg"
+          className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between  px-5 pt-4 overflow-x-hidden "
         >
           {/* Left: Icon button + Search + Filter buttons */}
-          <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center gap-2 flex-1 mb-1 ">
             {/* Clipboard/List icon button */}
-            <Button
-              variant="modal"
-              size="icon"
-              className="shrink-0 h-9 w-9 bg-foreground hover"
+
+            <button
+              data-slot="hover-card-trigger"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm 
+              font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 
+              [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 
+              outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] 
+              aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive
+               bg-foreground text-primary-foreground hover:bg-foreground/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 relative 
+               overflow-hidden before:absolute before:inset-0 before:rounded-[inherit] before:bg-size-[250%_250%,100%_100%] 
+               before:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.5)_50%,transparent_75%,transparent_100%)]
+                before:bg-position-[200%_0,0_0] before:bg-no-repeat before:transition-[background-position_0s_ease] 
+                before:duration-1000 hover:before:bg-position-[-100%_0,0_0] dark:before:bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.2)_50%,transparent_75%,transparent_100%)]"
+              type="button"
+              data-state="closed"
             >
-              <GoDependabot className="h-4 w-4 text-background" />
-            </Button>
-           
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                className="lucide lucide-bot size-4"
+                aria-hidden="true"
+              >
+                <path d="M12 8V4H8"></path>
+                <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                <path d="M2 14h2"></path>
+                <path d="M20 14h2"></path>
+                <path d="M15 13v2"></path>
+                <path d="M9 13v2"></path>
+              </svg>
+            </button>
+            <div
+              data-orientation="vertical"
+              role="none"
+              data-slot="separator"
+              className="bg-border 
+              shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:h-4 mx-0.5"
+            ></div>
             {/* Search */}
-            <div className="relative w-full max-w-xs">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t.common.search}
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-9 h-9"
+                className="pl-9 h-9 w-52 "
+                variant="light"
               />
             </div>
 
             {/* Mode Filter Button */}
             <Button
-              variant="outline"
+              variant="table_border_cutted"
               className="gap-1.5 h-9"
               onClick={() => setShowFilters(!showFilters)}
             >
@@ -232,7 +263,7 @@ export function VehiclesListPage() {
 
             {/* Status Filter Button */}
             <Button
-              variant="outline"
+              variant="table_border_cutted"
               className="gap-1.5 h-9"
               onClick={() => setShowFilters(!showFilters)}
             >
@@ -249,16 +280,13 @@ export function VehiclesListPage() {
               className="gap-1.5 h-9"
               onClick={() => refetch()}
             >
-              <LuRefreshCw className="h-4 w-4" />
+              <RotateCw className="h-4 w-4" />
               <span className="hidden sm:inline">Update</span>
             </Button>
 
             {/* Export button with dropdown */}
-            <Button
-              variant="outline"
-              className="gap-1.5 h-9"
-            >
-              <RiDownloadLine className="h-4 w-4" />
+            <Button variant="outline" className="gap-1.5 h-9">
+              <CloudDownload className="h-4 w-4" />
               <span className="hidden sm:inline">Export</span>
               <ChevronDown className="h-3 w-3" />
             </Button>
@@ -364,8 +392,16 @@ export function VehiclesListPage() {
                   page: displayData?.page || 1,
                   totalPages: displayData?.totalPages || 1,
                   total: displayData?.total || 0,
+                  limit: filters.limit || 10,
                 }}
                 onPageChange={handlePageChange}
+                onPageSizeChange={(newLimit) => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    limit: newLimit,
+                    page: 1, // Reset to first page when changing page size
+                  }));
+                }}
               />
             </>
           )}
