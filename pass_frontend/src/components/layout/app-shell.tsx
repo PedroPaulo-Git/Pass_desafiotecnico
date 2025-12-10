@@ -58,7 +58,7 @@ export function AppShell({ children }: AppShellProps) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="w-full md:p-2">
+      <div className="w-full md:p-2 ">
         <MainContent
           children={children}
           sidebarWidth={sidebarWidth}

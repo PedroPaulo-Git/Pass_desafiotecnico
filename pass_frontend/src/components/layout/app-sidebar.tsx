@@ -5,22 +5,13 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard,
-  BusFront,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
   Building2,
   Check,
   Plus,
-  // Novos ícones adicionados para o estilo
-  PieChart,
-  CalendarDays,
-  Users,
-  Settings,
-  FileText,
-  Activity,
-  LifeBuoy
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/i18n-context";
@@ -39,6 +30,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+// React Icons para ícones exatos das imagens
+import { BsGrid } from "react-icons/bs";
+import { TbActivity } from "react-icons/tb";
+import { RiBusLine, RiCompassLine, RiTicketLine, RiSettings4Line, RiHotelLine } from "react-icons/ri";
+import { MdOutlineTour } from "react-icons/md";
+import { IoGitBranchOutline } from "react-icons/io5";
+import { PiFlowArrow, PiMapPinArea } from "react-icons/pi";
+import { LuCalendarDays, LuFileText } from "react-icons/lu";
+import { FiDollarSign } from "react-icons/fi";
 
 interface AppSidebarProps {
   isCollapsed: boolean;
@@ -47,7 +47,7 @@ interface AppSidebarProps {
 
 // Mock de dados para as empresas
 const companies = [
-  { name: "Pass Company", id: 1, active: true },
+  { name: "Pass", id: 1, active: true },
   { name: "Allinsys", id: 2, active: false },
   { name: "Google", id: 3, active: false },
 ];
@@ -60,38 +60,46 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
     companies.find((c) => c.active)?.id ?? companies[0].id
   );
 
-  // Estrutura de navegação dividida em grupos (usar traduções em t.nav)
+  // Estrutura de navegação baseada exatamente nas imagens de referência
   const navGroups = [
     {
-      title: t.nav.main || "Main",
+      title: "Main",
       items: [
-        {
-          icon: LayoutDashboard,
-          label: t.nav.dashboard || "Dashboard",
-          href: "/dashboard",
-        },
-        {
-          icon: BusFront,
-          label: t.nav.vehicles || "Vehicles",
-          href: "/vehicles",
-        },
+        { icon: BsGrid, label: "Panel", href: "/dashboard" },
+        { icon: TbActivity, label: "Activity", href: "#activity" },
       ],
     },
     {
-      title: t.nav.panel || "Panel",
+      title: "Services",
       items: [
-        { icon: Activity, label: t.nav.activity || "Activity", href: "#activity" },
-        { icon: PieChart, label: t.nav.analytics || "Analytics", href: "#analytics" },
-        { icon: CalendarDays, label: t.nav.schedule || "Schedule", href: "#schedule" },
-        { icon: FileText, label: t.nav.reports || "Reports", href: "#reports" },
+        { icon: RiBusLine, label: "Transfer", href: "/vehicles" },
+        { icon: RiCompassLine, label: "Combo", href: "#combo" },
+        { icon: RiHotelLine, label: "Accommodation", href: "#accommodation" },
+        { icon: RiTicketLine, label: "Ticket", href: "#ticket" },
+        { icon: MdOutlineTour, label: "Tour", href: "#tour" },
+        { icon: Star, label: "Experience", href: "#experience" },
+        { icon: IoGitBranchOutline, label: "Circuit", href: "#circuit" },
       ],
     },
     {
-      title: t.nav.system || "System",
+      title: "Commercial",
       items: [
-        { icon: Users, label: t.nav.team || "Team", href: "#team" },
-        { icon: Settings, label: t.nav.settings || "Settings", href: "#settings" },
-        { icon: LifeBuoy, label: t.nav.help || "Help", href: "#help" },
+        { icon: FiDollarSign, label: "Tariff", href: "#tariff" },
+        { icon: LuCalendarDays, label: "Availability", href: "#availability" },
+      ],
+    },
+    {
+      title: "Complements",
+      items: [
+        { icon: PiFlowArrow, label: "Slots", href: "#slots" },
+        { icon: PiMapPinArea, label: "Perimeters", href: "#perimeters" },
+        { icon: LuFileText, label: "Guidelines", href: "#guidelines" },
+      ],
+    },
+    {
+      title: "Organization",
+      items: [
+        { icon: RiSettings4Line, label: "Settings", href: "#settings" },
       ],
     },
   ];
@@ -105,7 +113,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         className="left-0 top-0 z-40 h-screen bg-sidebar flex flex-col "
       >
         {/* --- HEADER (LOGO & DROPDOWN) --- */}
-        <div className="flex h-[72px] items-center px-2 border-b border-sidebar-border shrink-0">
+        <div className="flex h-[65px] items-center px-2 border-b border-sidebar-border shrink-0">
           <Link href="/dashboard" className="-mr-6 mt-1">
             <img
               src="/assets/Logo.png"
@@ -145,7 +153,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                 sideOffset={10}
               >
                 <DropdownMenuLabel className="text-xs text-muted-foreground font-normal px-2 py-1.5">
-                  {t.nav.companies || "Empresas"}
+                  Empresas
                 </DropdownMenuLabel>
 
                 {companies.map((company) => (
@@ -176,17 +184,17 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         </div>
 
         {/* --- NAVIGATION --- */}
-        <nav className="flex-1 overflow-y-auto py-4 p-2 space-y-6">
+        <nav className="flex-1 overflow-y-auto py-3 px-4 space-y-5 scrollbar-hidden">
           {navGroups.map((group, groupIndex) => (
             <div key={groupIndex}>
-              {/* Título do Grupo (Main, Panel, etc) */}
+              {/* Título do Grupo */}
               {!isCollapsed && (
-                <div className="mb-2 px-2 text-xs font-semibold tracking-wider text-muted-foreground/70">
+                <div className="mb-1.5 px-2 text-[11px] font-bold tracking-wide text-muted-foreground">
                   {group.title}
                 </div>
               )}
 
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -196,18 +204,17 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
-                            // Estilização condicional baseada na seleção
+                            "flex items-center gap-2.5 rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors duration-150",
                             isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground font-bold "
                               : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                           )}
                         >
                           <item.icon
                             className={cn(
-                              "h-4 w-4 shrink-0 ", // Ícones levemente menores para elegância
-                              isActive ? "text-primary " : "text-muted-foreground group-hover:text-foreground",
-                              isCollapsed ? " mx-auto" : ""
+                              "h-4 w-4 shrink-0",
+                              isActive ? "text-foreground" : "text-muted-foreground",
+                              isCollapsed && "mx-auto"
                             )}
                           />
                           {!isCollapsed && (
@@ -215,6 +222,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
+                              className="truncate"
                             >
                               {item.label}
                             </motion.span>
@@ -222,7 +230,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                         </Link>
                       </TooltipTrigger>
                       {isCollapsed && (
-                        <TooltipContent side="right" sideOffset={1} className="bg-foreground text-background">
+                        <TooltipContent side="right" sideOffset={8} className="bg-foreground text-background text-xs">
                           {item.label}
                         </TooltipContent>
                       )}
@@ -240,7 +248,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
             variant="ghost"
             size="sm"
             onClick={onToggle}
-            className="w-full justify-center text-sidebar-foreground hover:bg-sidebar-accent"
+            className="w-full justify-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />

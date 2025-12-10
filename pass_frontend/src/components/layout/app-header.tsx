@@ -8,8 +8,10 @@ import {
   Menu,
   PanelLeft,
   Search,
-  LayoutGrid,
   ChevronDown,
+  User,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme/theme-context";
 import { useI18n } from "@/lib/i18n/i18n-context";
@@ -21,10 +23,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Language } from "@/lib/i18n/translations";
-import { useEffect } from "react";
+// React Icons para o grid de apps
+import { BsGrid3X3Gap, BsPeople } from "react-icons/bs";
+import { RiBusLine, RiStore2Line } from "react-icons/ri";
+import { TbChartBar } from "react-icons/tb";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { PiFlowArrow } from "react-icons/pi";
+import { HiOutlineSignal } from "react-icons/hi2";
+import { LuLink2 } from "react-icons/lu";
 
 interface AppHeaderProps {
   onMenuClick?: () => void;
@@ -56,7 +66,7 @@ export function AppHeader({
     languages.find((l) => l.value === language)?.label || "English";
 
   return (
-    <header className="sticky top-0 flex h-16 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
+    <header className="sticky top-0 flex h-14 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
       {/* --- LEFT SECTION: Sidebar Toggle & Breadcrumb --- */}
       <div className="flex items-center gap-4">
         {/* Mobile Menu */}
@@ -91,7 +101,6 @@ export function AppHeader({
         <div className="relative w-full max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            variant="search"
             type="search"
             placeholder="Buscar..."
             className="h-9 w-full rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
@@ -103,7 +112,7 @@ export function AppHeader({
       </div>
 
       {/* --- RIGHT SECTION: Actions & Profile --- */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Theme Toggle */}
         <Button
           variant="ghost"
@@ -130,9 +139,9 @@ export function AppHeader({
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="gap-2 px-2 text-muted-foreground"
+              className="gap-1.5 px-2 text-muted-foreground"
             >
-              <Globe className="h-5 w-5" />
+              <Globe className="h-4 w-4" />
               <span className="hidden text-sm font-medium sm:inline-block">
                 {currentLanguageLabel}
               </span>
@@ -153,18 +162,77 @@ export function AppHeader({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* App Grid Icon */}
-        <Button variant="ghost" size="icon" className="text-muted-foreground">
-          <LayoutGrid className="h-5 w-5" />
-        </Button>
+        {/* App Grid Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-muted-foreground">
+              <BsGrid3X3Gap className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64 p-3">
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: BsPeople, label: "Workspace", color: "text-muted-foreground" },
+                { icon: RiBusLine, label: "Transfer", color: "text-muted-foreground" },
+                { icon: RiStore2Line, label: "Marketplace", color: "text-muted-foreground" },
+                { icon: PiFlowArrow, label: "Flow", color: "text-muted-foreground" },
+                { icon: TbChartBar, label: "Balance", color: "text-muted-foreground" },
+                { icon: HiOutlineOfficeBuilding, label: "Office", color: "text-muted-foreground" },
+                { icon: HiOutlineSignal, label: "Channel", color: "text-muted-foreground" },
+                { icon: LuLink2, label: "Connect", color: "text-muted-foreground" },
+              ].map((app, idx) => (
+                <button
+                  key={idx}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-accent transition-colors"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                    <app.icon className={`h-5 w-5 ${app.color}`} />
+                  </div>
+                  <span className="text-xs text-muted-foreground">{app.label}</span>
+                </button>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* User Avatar */}
-        <Avatar className="h-8 w-8 cursor-pointer ">
-          <AvatarImage src="" alt="JD" />
-          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
-            PP
-          </AvatarFallback>
-        </Avatar>
+        {/* User Avatar Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="h-8 w-8 cursor-pointer">
+              <AvatarImage src="" alt="JD" />
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                JD
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="flex items-center gap-3 p-3">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                  JD
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Jonathan Doe</span>
+                <span className="text-xs text-muted-foreground">jondoe@example.com</span>
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <User className="h-4 w-4" />
+              <span>Conta</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <Settings className="h-4 w-4" />
+              <span>Configurações</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+              <LogOut className="h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

@@ -5,18 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Filter,
-  Settings2,
-  MoreVertical,
-  Sparkles,
-  Pin,
-  Info,
   Plus,
-  RefreshCw,
   AlertCircle,
+  ChevronDown,
 } from "lucide-react";
-import { LuGitCommitHorizontal } from "react-icons/lu";
-import { GoPin } from "react-icons/go";
+import { GoDependabot } from "react-icons/go";
+import { LuRefreshCw } from "react-icons/lu";
+import { RiDownloadLine } from "react-icons/ri";
+import { HiOutlineClipboardList } from "react-icons/hi";
 import { IoFilterOutline } from "react-icons/io5";
+import { Sparkles, RefreshCw } from "lucide-react";
+
 import FuelingModal from "@/features/fleet-events/components/Fueling/FuelingModal";
 import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
 import DocumentModal from "@/features/fleet-events/components/Documents/DocumentModal";
@@ -29,15 +28,12 @@ import { VehiclesFilters } from "./vehicles-filters";
 import { VehicleModal } from "./vehicle-modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { VehicleFilters } from "@/types/vehicle";
 import { getMockVehiclesPaginated } from "../data/mock-vehicles";
 
 import { ConfirmDeleteVehicleModal } from "./vehicle-delete-modal";
-import { MdContentCopy } from "react-icons/md";
-import { FiAperture, FiCode } from "react-icons/fi";
-import { FiMinus, FiSquare, FiX } from "react-icons/fi";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -197,95 +193,83 @@ export function VehiclesListPage() {
         animate="visible"
         className="space-y-4"
       >
-        {/* Header */}
+        {/* Toolbar - Matches reference design exactly */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col items-start"
+          className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between bg-card p-3 rounded-lg"
         >
-          <div className="flex justify-between w-full gap-2">
-            <div className="flex gap-4 items-center">
-              <div className="p-2 bg-muted rounded-lg">
-                <LuGitCommitHorizontal className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <h1 className="text-lg font-semibold text-foreground">
-                {t.vehicles.title}
-              </h1>
-              <GoPin className="h-5 w-5 scale-x-[-1] text-muted-foreground " />
-            </div>
-            <div className="flex gap-4 ">
-              <div className="flex items-center justify-center sm:justify-center my-auto sm:space-x-1 h-6 w-6 sm:w-auto py-0 px-0.5 sm:px-3 bg-card rounded-full text-sm">
-                <FiCode className="w-3.5 h-3.5 sm:w-4 sm:h-4 " />
-                <span className="text-muted-foreground hidden sm:block text-center">
-                  Desenvolvedor
-                </span>
-              </div>
-              <div className="flex items-center gap-4 text-muted-foreground sm:pr-5 ">
-                <Info
-                  aria-label="info"
-                  className="cursor-pointer w-3.5 h-3.5 sm:w-4 sm:h-4 "
-                />
-                <FiMinus
-                  aria-label="minimize"
-                  className="cursor-pointer w-3.5 h-3.5 sm:w-4 sm:h-4 "
-                />
-                <MdContentCopy
-                  aria-label="maximize"
-                  className="cursor-pointer w-3.5 h-3.5  sm:w-4 sm:h-4 "
-                />
-                <FiX
-                  aria-label="close"
-                  className="cursor-pointer w-3.5 h-3.5  sm:w-4 sm:h-4 "
-                />
-              </div>
-            </div>
-          </div>
-          <span className="text-sm text-muted-foreground mt-2">
-            {t.nav.fleet}
-          </span>
-        </motion.div>
-
-        {/* Search and Filters Bar */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-card p-3 rounded-lg "
-        >
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              variant="search"
-              placeholder={t.common.search}
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <div className="flex ml-auto  sm:items-center ">
-            <span className="mr-2 hidden sm:flex flex-col">
-              <p className="text-muted-foreground font-semibold text-sm">
-                03/03/2012 - 20/07/2039
-              </p>
-            </span>
+          {/* Left: Icon button + Search + Filter buttons */}
+          <div className="flex items-center gap-2 flex-1">
+            {/* Clipboard/List icon button */}
             <Button
-              variant="ghost"
+              variant="modal"
               size="icon"
-              className="cursor-pointer"
+              className="shrink-0 h-9 w-9 bg-foreground hover"
+            >
+              <GoDependabot className="h-4 w-4 text-background" />
+            </Button>
+           
+            {/* Search */}
+            <div className="relative w-full max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t.common.search}
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+
+            {/* Mode Filter Button */}
+            <Button
+              variant="outline"
+              className="gap-1.5 h-9"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Modo</span>
+            </Button>
+
+            {/* Status Filter Button */}
+            <Button
+              variant="outline"
+              className="gap-1.5 h-9"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Status</span>
+            </Button>
+          </div>
+
+          {/* Right: Action buttons */}
+          <div className="flex items-center gap-2">
+            {/* Update button */}
+            <Button
+              variant="outline"
+              className="gap-1.5 h-9"
+              onClick={() => refetch()}
+            >
+              <LuRefreshCw className="h-4 w-4" />
+              <span className="hidden sm:inline">Update</span>
+            </Button>
+
+            {/* Export button with dropdown */}
+            <Button
+              variant="outline"
+              className="gap-1.5 h-9"
+            >
+              <RiDownloadLine className="h-4 w-4" />
+              <span className="hidden sm:inline">Export</span>
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+
+            {/* Add button - Primary */}
+            <Button
+              className="gap-1.5 h-9"
               onClick={() => openModal("vehicle-create")}
             >
-              <Plus className="w-4 h-4 cursor-pointer">
-                {t.vehicles.create}
-              </Plus>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowFilters(!showFilters)}
-              className={showFilters ? "bg-accent" : ""}
-            >
-              <IoFilterOutline className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-4 w-4" />
+              <Plus className="h-4 w-4" />
+              <span>Adicionar</span>
             </Button>
           </div>
         </motion.div>
@@ -320,11 +304,7 @@ export function VehiclesListPage() {
         {/* Table */}
         <motion.div variants={itemVariants}>
           {isLoading && !showQuickError ? (
-            <div className="space-y-2">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full" />
-              ))}
-            </div>
+            <TableSkeleton rows={10} />
           ) : (error && !showMockData) || (showQuickError && !showMockData) ? (
             <div className="space-y-4">
               <Alert variant="destructive">
