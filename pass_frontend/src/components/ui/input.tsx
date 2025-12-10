@@ -9,7 +9,7 @@ function Input({
   center = false,
   ...props
 }: React.ComponentProps<"input"> & {
-  variant?: "default" | "light" | "dark";
+  variant?: "default" | "light" | "modal";
   center?: boolean;
 }) {
   return (
@@ -24,8 +24,8 @@ function Input({
         variant === "light" && [
           "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2 ",
         ],
-        variant === "dark" && [
-          " text-black rounded-lg focus-visible:none focus-visible:none focus-visible:ring-none focus-visible:ring-none",
+        variant === "modal" && [
+          " text-foreground rounded-md focus-visible:none focus-visible:border-border border ",
         ],
 
         className

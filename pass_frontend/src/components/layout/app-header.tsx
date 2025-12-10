@@ -109,7 +109,7 @@ export function AppHeader({
         <div className="relative w-full max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            variant="dark"
+            variant="modal"
             placeholder="Buscar..."
             className="h-9 w-1/2 rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
           />

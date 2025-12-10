@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { useController } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,7 @@ export function FormInput({
 
   return (
     <Input
+      variant="modal"
       value={local}
       onChange={handleChange}
       onBlur={handleBlur}
