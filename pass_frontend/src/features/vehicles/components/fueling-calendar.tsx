@@ -331,16 +331,19 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                       >
                         {/* half-height colored overlay (top half) */}
                         {day === todayDate && currentYear === todayYear && (
-                          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-primary/40 pointer-events-none rounded-t-md" />
+                          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-muted/60 pointer-events-none rounded-t-md" />
                         )}
 
-                        <span className={cn(
-                          "text-center relative",
-                          day === todayDate && currentYear === todayYear
-                            ? " relative z-10 bg-foreground text-muted font-semibold px-4 py-3.5 rounded-md w-4   "
-                            : "relative z-10 bg-muted px-4 py-3.5 rounded-md w-4  "
-                        )}
-                      >
+                        <span
+                          className={cn(
+                            "relative z-10 bg-muted inline-flex items-center justify-center rounded-md text-xs",
+                            // fixed square so 1- and 2-digit days occupy same space
+                            "w-9 h-9",
+                            day === todayDate && currentYear === todayYear
+                              ? "bg-foreground text-muted font-semibold"
+                              : ""
+                          )}
+                        >
                           {day}
                         </span>
                       </TableHead>
@@ -373,7 +376,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                           );
                         }
 
-                        const cellClass = cn("p-0", isActiveDay && "bg-primary/30");
+                        const cellClass = cn("-py-1", isActiveDay && "bg-muted/60");
 
                         return (
                           <TableCell
@@ -388,7 +391,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                                   className={cn(
                                     "w-full h-8 flex items-center justify-center transition-colors",
                                     "cursor-pointer",
-                                    isActiveDay && "bg-primary/10",
+                                    isActiveDay && "",
                                     hasFuelings && "relative"
                                   )}
                                 >

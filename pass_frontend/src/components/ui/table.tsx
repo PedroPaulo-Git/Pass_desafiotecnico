@@ -236,7 +236,7 @@ function TableCell({
 
         // Variante Compact (Com o xl:p-2 que você pediu)
         variant === "compact" && "py-1 px-4 xl:px-0 xl:p-2 first:pl-0 sm:first:pl-4",
-        variant === "extra-compact" && "py-2 px-4 xl:px-0 first:pl-0 sm:first:pl-4   ",
+        variant === "extra-compact" && " px-0 xl:px-0 first:pl-0 sm:first:pl-4   ",
         
         center && "text-center",
         firstPadding && "first:pl-4 sm:first:pl-4",
