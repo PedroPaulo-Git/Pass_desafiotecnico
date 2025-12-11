@@ -239,20 +239,21 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-[70vw]  space-y-4">
       {/* Header with stats and add button */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-10">
         {/* Stats */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="text-sm">
-            {stats.total} abastecimentos
-          </Badge>
-          <Badge variant="outline" className="text-sm">
-            {stats.totalLiters.toFixed(1)}L total
-          </Badge>
-          <Badge variant="outline" className="text-sm">
-            {formatCurrency(stats.totalValue)}
-          </Badge>
+        <div className="flex flex-wrap items-center gap-4">
+          <Button disabled variant="outline">
+            Abastecimentos <Badge className="w-7 h-7 " variant="circle">{stats.total}</Badge>
+          </Button>
+          <span className="text-muted-foreground/40 flex items-center gap-2">
+            Litros <Badge className="px-4 " variant="circle">{stats.totalLiters.toFixed(1)}L</Badge>
+          </span>
+          <span className="text-muted-foreground/40 flex items-center gap-2">
+             Faturado <Badge className="px-4 " variant="circle">{formatCurrency(stats.totalValue)}</Badge>  
+          </span>
+       
         </div>
 
         {/* Add button */}
@@ -308,15 +309,15 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
               isGrabbing ? "cursor-grabbing" : "cursor-grab"
             )}
           >
-            <ScrollArea className="max-w-[1200px] ">
+            <ScrollArea className="max-w-screen ">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead
                       variant="date"
-                      className=" px-28 py-6 sticky -left-1 bg-background shadow-[inset_-1px_0_0_var(--color-border)]"
+                      className="w-52 px-36 z-50 py-6 sticky left-0 bg-background shadow-[inset_-1px_0_0_var(--color-border)]"
                     >
-                      <span>Mês</span>
+                      <span className=" ">Mês</span>
                     </TableHead>
                     {days.map((day) => (
                       <TableHead
@@ -364,7 +365,8 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                         const dayFuelings = getFuelingsForDay(monthIndex, day);
                         const hasFuelings = dayFuelings.length > 0;
                         const isValidDay = isDayValid(monthIndex, day);
-                        const isActiveDay = day === todayDate && currentYear === todayYear;
+                        const isActiveDay =
+                          day === todayDate && currentYear === todayYear;
 
                         if (!isValidDay) {
                           return (
@@ -376,7 +378,10 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                           );
                         }
 
-                        const cellClass = cn("-py-1", isActiveDay && "bg-muted/60");
+                        const cellClass = cn(
+                          "-py-1",
+                          isActiveDay && "bg-muted/60"
+                        );
 
                         return (
                           <TableCell

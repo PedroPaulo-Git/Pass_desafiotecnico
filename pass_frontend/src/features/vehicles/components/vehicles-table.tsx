@@ -225,9 +225,9 @@ export function VehiclesTable({
   return (
     <div className=" overflow-hidden bg-card rounded-2xl">
       <Table>
-        <TableHeader variant="minimal">
-          <TableRow className="hover:bg-transparent ">
-            <TableHead variant="minimal" className="w-12">
+        <TableHeader variant="main">
+          <TableRow className="">
+            <TableHead  className="w-12">
               <div
                 className="flex items-center justify-center cursor-pointer"
                 onClick={(e) => {
@@ -236,7 +236,7 @@ export function VehiclesTable({
                 }}
               >
                 <div
-                  className={`w-4 h-4 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                  className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
                     selectAll ? "bg-primary border-primary" : ""
                   }`}
                 >
@@ -260,7 +260,7 @@ export function VehiclesTable({
               </div>
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={
                 sortColumn === "internalId" ? sortDirection : "none"
@@ -271,7 +271,7 @@ export function VehiclesTable({
             </TableHead>
 
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={sortColumn === "model" ? sortDirection : "none"}
               onClick={() => handleSort("model")}
@@ -279,7 +279,7 @@ export function VehiclesTable({
               Título
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={sortColumn === "brand" ? sortDirection : "none"}
               onClick={() => handleSort("brand")}
@@ -287,7 +287,7 @@ export function VehiclesTable({
               {t.vehicles.brand}
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={sortColumn === "capacity" ? sortDirection : "none"}
               onClick={() => handleSort("capacity")}
@@ -295,7 +295,7 @@ export function VehiclesTable({
               {t.vehicles.capacity}
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={sortColumn === "plate" ? sortDirection : "none"}
               onClick={() => handleSort("plate")}
@@ -303,7 +303,7 @@ export function VehiclesTable({
               {t.vehicles.plate}
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={
                 sortColumn === "companyName" ? sortDirection : "none"
@@ -313,7 +313,7 @@ export function VehiclesTable({
               {t.vehicles.company}
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={sortColumn === "status" ? sortDirection : "none"}
               onClick={() => handleSort("status")}
@@ -321,7 +321,7 @@ export function VehiclesTable({
               {t.vehicles.status}
             </TableHead>
             <TableHead
-              variant="minimal"
+              
               sortable
               sortDirection={
                 sortColumn === "createdAt" ? sortDirection : "none"
@@ -330,7 +330,7 @@ export function VehiclesTable({
             >
               {t.vehicles.createdAt}
             </TableHead>
-            <TableHead variant="minimal" className="w-10"></TableHead>
+            <TableHead  className="w-10"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -351,8 +351,7 @@ export function VehiclesTable({
                 variants={rowVariants}
                 initial="hidden"
                 animate="visible"
-                whileHover={{ backgroundColor: "var(--accent)" }}
-                className="cursor-pointer border-b border-border transition-colors "
+                className=" border-t border-border transition-colors cursor-grab "
                 onClick={(e: React.MouseEvent) => {
                   const target = e.target as HTMLElement | null;
 
@@ -383,7 +382,7 @@ export function VehiclesTable({
                     }}
                   >
                     <div
-                      className={`w-4 h-4 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                      className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
                         selectedRows.has(vehicle.id)
                           ? "bg-primary border-primary"
                           : ""
@@ -440,7 +439,7 @@ export function VehiclesTable({
                     {t.status[vehicle.status]}
                   </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground" variant="compact">
+                <TableCell variant="compact">
                   {vehicle.createdAt
                     ? format(new Date(vehicle.createdAt), "dd/MM/yyyy")
                     : "-"}

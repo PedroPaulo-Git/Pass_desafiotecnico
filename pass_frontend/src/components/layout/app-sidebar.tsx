@@ -199,12 +199,12 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         </div>
 
         {/* --- NAVIGATION --- */}
-        <nav className="flex-1 overflow-y-auto py-3 px-4 space-y-10 scrollbar-hidden">
+        <nav className="flex-1 overflow-y-auto py-5 pr-2 pl-4 space-y-8 scrollbar-hidden">
           {navGroups.map((group, groupIndex) => (
             <div key={groupIndex}>
               {/* Título do Grupo */}
               {!isCollapsed && (
-                <div className="mb-1.5 px-2 text-[11px] font-bold tracking-wide text-muted-foreground">
+                <div className="first:mt-1.5 mb-1.5 px-2 text-[11px] font-bold tracking-wide text-muted-foreground">
                   {group.title}
                 </div>
               )}
@@ -219,7 +219,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-2.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-150",
+                            "flex items-center gap-2.5 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
                             isActive
                               ? "bg-sidebar-accent text-sidebar-accent-foreground font-bold "
                               : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"

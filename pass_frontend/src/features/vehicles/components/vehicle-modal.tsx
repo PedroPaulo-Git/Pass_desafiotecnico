@@ -22,6 +22,7 @@ import {
   MoreVertical,
   FileText,
   CarFront,
+  XIcon,
   Fuel,
 } from "lucide-react";
 import { FaCar } from "react-icons/fa6";
@@ -45,6 +46,9 @@ import { makePreSubmitHandler } from "../hooks/make-pre-submit-handler";
 import { FuelingsSection } from "./fuelings-section";
 import { IncidentsSection } from "./incidents-section";
 import { DocumentsSection } from "./documents-section";
+import { TermsSection } from "./terms-section";
+import { FuelingRatesTable } from "./fueling-rates-table";
+import { DollarSign, FileCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -107,15 +111,15 @@ const modalVariants: any = {
 
 const tabContentVariants: any = {
   hidden: { opacity: 0, x: 10 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     x: 0,
-    transition: { duration: 0.2, ease: "easeOut" }
+    transition: { duration: 0.2, ease: "easeOut" },
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     x: -10,
-    transition: { duration: 0.15, ease: "easeIn" }
+    transition: { duration: 0.15, ease: "easeIn" },
   },
 };
 
@@ -310,7 +314,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     if (!vehicle?.id) return;
 
     const formData = getValues();
-    
+
     try {
       await updateVehicle.mutateAsync({
         id: vehicle.id,
@@ -380,9 +384,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         showCloseButton={false}
         className={cn(
           "overflow-y-auto p-2 pt-0 rounded-2xl max-h-[90vh]",
-          activeTab === "fuelings" 
-            ? "w-screen max-w-[1200px] px-0 max-h-[75vh]" 
-            : "w-[90vw] max-w-[900px] md:w-[max(70vw,900px)]"
+         activeTab === "fuelings"  && "w-screen max-w-[70vw] px-0 min-h-[80vh] max-h-[90vh]" ,
+         activeTab === "rates"  && "w-screen max-w-[95vw] px-0 min-h-[80vh] max-h-[90vh]" ,
+         activeTab === "terms" && "w-screen max-w-[1000px] max-h-[85vh]"
         )}
       >
         <motion.div
@@ -395,7 +399,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           <DialogHeader className="sticky z-10 top-0 px-3 py-6 bg-background ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-card border border-muted rounded-full">
+                <div className="p-3 bg-background border border-muted rounded-full">
                   <BusFront className="h-4 w-4 text-foreground" />
                 </div>
                 <div>
@@ -463,6 +467,22 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     <RiAlertLine className="h-4 w-4 mr-2" />
                     {t.incidents.title}
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="rates"
+                    className="rounded-none py-3"
+                    modalTabsTriggerStyle
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Tarifas
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="terms"
+                    className="rounded-none py-3"
+                    modalTabsTriggerStyle
+                  >
+                    <FileCheck className="h-4 w-4 mr-2" />
+                    Termos
+                  </TabsTrigger>
                 </>
               )}
             </TabsList>
@@ -478,723 +498,777 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 onSubmit,
               })}
               className={cn(
-          "px-2 pb-4",
-          activeTab === "fuelings" 
-            ? "px-0 pb-0" 
-            : "w-[90vw] max-w-[900px] md:w-[max(70vw,900px)]"
-        )}
+                "px-2 pb-4",
+                activeTab === "fuelings" || activeTab === "rates"
+                  ? "px-0 pb-0"
+                  : activeTab === "terms"
+                  ? "px-0 pb-0 w-full"
+                  : "w-[90vw] max-w-[900px] md:w-[max(70vw,900px)]"
+              )}
             >
-              <AnimatePresence mode="wait">
-              {/* Tab: Dados Gerais */}
-              <TabsContent value="general" className="mt-4 space-y-2" forceMount>
-                {activeTab === "general" && (
-                <motion.div
-                  key="general"
-                  variants={tabContentVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
+              <AnimatePresence mode="wait" >
+                {/* Tab: Dados Gerais */}
+                <TabsContent
+                  value="general"
+                  className="mt-4 space-y-2"
+                  forceMount
                 >
-                {/* Dados Gerais */}
-                <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
-                  <div className="overflow-hidden">
-                    <CollapsibleContent>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="p-4 pt-0 space-y-4"
+                  {activeTab === "general" && (
+                    <motion.div
+                      key="general"
+                      variants={tabContentVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                    >
+                      {/* Dados Gerais */}
+                      <Collapsible
+                        open={generalOpen}
+                        onOpenChange={setGeneralOpen}
                       >
-                        {/* Row 1: ID, Created, Identifier, Company, Status */}
-                        <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                          <div>
-                            <label className="text-xs text-muted-foreground">
-                              ID
-                            </label>
-                            <p className="text-sm font-medium">
-                              {vehicle?.id?.slice(4, 6) || "-"}
-                            </p>
-                          </div>
-                          <div className="col-span-2 w-full ">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.createdAt}
-                            </label>
-                            <p className="text-sm whitespace-nowrap overflow-x-hidden">
-                              {vehicle
-                                ? format(
-                                    new Date(vehicle.createdAt),
-                                    "dd/MM/yyyy HH:mm"
-                                  )
-                                : "-"}
-                            </p>
-                          </div>
-                          <div className="col-span-2 w-full ">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.identifier}
-                            </label>
-                            <FormInput
-                              name="internalId"
-                              control={control}
-                              rules={{
-                                required: "Identificador é obrigatório",
-                                pattern: {
-                                  value: /^\d+$/,
-                                  message:
-                                    "Identificador deve conter apenas números",
-                                },
-                                maxLength: {
-                                  value: 10,
-                                  message:
-                                    "Identificador deve ter no máximo 10 dígitos",
-                                },
-                              }}
-                              placeholder="316"
-                              className="h-8"
-                              formatter={(v: string) =>
-                                (v || "")
-                                  .toString()
-                                  .replace(/\D/g, "")
-                                  .slice(0, 10)
-                              }
-                              clearErrors={() => clearErrors("internalId")}
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.internalId?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.internalId.message)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="col-span-3 w-full ">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.company}
-                              <span className=" pl-2">(#180461)</span>
-                            </label>
-                            <Select
-                              value={watch("companyName") || ""}
-                              onValueChange={(value) => {
-                                setValue("companyName", value);
-                                handleAutoSave();
-                              }}
+                        <div className="overflow-hidden">
+                          <CollapsibleContent>
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="p-4 pt-0 space-y-4"
                             >
-                              <SelectTrigger className="h-8 ">
-                                <SelectValue placeholder="Selecione" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Inbuzios Receptivo">
-                                  Inbuzios Receptivo
-                                </SelectItem>
-                                <SelectItem value="Companhia A">
-                                  Companhia A
-                                </SelectItem>
-                                <SelectItem value="Companhia B">
-                                  Companhia B
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="col-span-3 ">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.status}
-                              <span className=" pl-2">(#180451)</span>
-                            </label>
-                            <Select
-                              value={watch("status")}
-                              onValueChange={(value) => {
-                                setValue("status", value as VehicleStatus);
-                                handleAutoSave();
-                              }}
-                            >
-                              <SelectTrigger iconRight={true} className="h-8  ">
-                                <SelectValue>
-                                  <Badge
-                                    variant="point"
-                                    className={`${
-                                      getStatusColor(
-                                        watch("status")
-                                      ) as VehicleStatus
-                                    }  `}
-                                  ></Badge>
-                                  {
-                                    t.status[
-                                      watch("status") as keyof typeof t.status
-                                    ]
-                                  }
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                {statuses.map((status) => (
-                                  <SelectItem
-                                    key={status}
-                                    value={status}
-                                    className=""
+                              {/* Row 1: ID, Created, Identifier, Company, Status */}
+                              <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                                <div>
+                                  <label className="text-xs text-foreground ">
+                                    ID
+                                  </label>
+                                  <p className="text-sm font-medium">
+                                    {vehicle?.id?.slice(4, 6) || "-"}
+                                  </p>
+                                </div>
+                                <div className={` w-full ${isCreating ? "col-span-3" : "col-span-3"}`}>
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.createdAt}
+                                  </label>
+                                  <p className="text-sm whitespace-nowrap overflow-x-hidden">
+                                    {vehicle
+                                      ? format(
+                                          new Date(vehicle.createdAt),
+                                          "dd/MM/yyyy HH:mm"
+                                        )
+                                      : "-"}
+                                  </p>
+                                </div>
+                                {!isCreating ? null : (
+                                  <div className="col-span-2 w-full ">
+                                    <label className="text-xs text-foreground">
+                                      {t.vehicles.identifier}
+                                    </label>
+
+                                    <FormInput
+                                      name="internalId"
+                                      control={control}
+                                      rules={{
+                                        required: "Identificador é obrigatório",
+                                        pattern: {
+                                          value: /^\d+$/,
+                                          message:
+                                            "Identificador deve conter apenas números",
+                                        },
+                                        maxLength: {
+                                          value: 10,
+                                          message:
+                                            "Identificador deve ter no máximo 10 dígitos",
+                                        },
+                                      }}
+                                      placeholder="316"
+                                      className="h-8"
+                                      formatter={(v: string) =>
+                                        (v || "")
+                                          .toString()
+                                          .replace(/\D/g, "")
+                                          .slice(0, 10)
+                                      }
+                                      clearErrors={() =>
+                                        clearErrors("internalId")
+                                      }
+                                      onBlurSave={handleAutoSave}
+                                    />
+                                    {errors.internalId?.message && (
+                                      <span className="text-xs text-destructive">
+                                        {String(errors.internalId.message)}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                <div className="col-span-3 w-full ">
+                                  <label className="text-sm text-foreground">
+                                    {t.vehicles.company}
+                                    {/* <span className=" pl-2">(#180461)</span> */}
+                                  </label>
+                                  <Select
+                                    value={watch("companyName") || ""}
+                                    onValueChange={(value) => {
+                                      setValue("companyName", value);
+                                      handleAutoSave();
+                                    }}
                                   >
-                                    <Badge
-                                      variant="point"
-                                      className={`${getStatusColor(
-                                        status
-                                      )} text-white font-semibold border-0 `}
-                                    ></Badge>
-                                    {t.status[status]}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
+                                    <SelectTrigger className="h-8 ">
+                                      <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Inbuzios Receptivo">
+                                        Inbuzios Receptivo
+                                      </SelectItem>
+                                      <SelectItem value="Companhia A">
+                                        Companhia A
+                                      </SelectItem>
+                                      <SelectItem value="Companhia B">
+                                        Companhia B
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="col-span-3 ">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.status}
+                                    {/* <span className=" pl-2">(#180451)</span> */}
+                                  </label>
+                                  <Select
+                                    value={watch("status")}
+                                    onValueChange={(value) => {
+                                      setValue(
+                                        "status",
+                                        value as VehicleStatus
+                                      );
+                                      handleAutoSave();
+                                    }}
+                                  >
+                                    <SelectTrigger
+                                      iconRight={true}
+                                      className="h-8  "
+                                    >
+                                      <SelectValue>
+                                        <Badge
+                                          variant="point"
+                                          className={`${
+                                            getStatusColor(
+                                              watch("status")
+                                            ) as VehicleStatus
+                                          }  `}
+                                        ></Badge>
+                                        {
+                                          t.status[
+                                            watch(
+                                              "status"
+                                            ) as keyof typeof t.status
+                                          ]
+                                        }
+                                      </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {statuses.map((status) => (
+                                        <SelectItem
+                                          key={status}
+                                          value={status}
+                                          className=""
+                                        >
+                                          <Badge
+                                            variant="point"
+                                            className={`${getStatusColor(
+                                              status
+                                            )} text-white font-semibold border-0 `}
+                                          ></Badge>
+                                          {t.status[status]}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
 
-                        {/* Row 2: Model, Year, Brand, Category, Classification */}
-                        <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                          <div className="col-span-4">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.model}
-                            </label>
-                            <FormInput
-                              name="model"
-                              control={control}
-                              rules={{
-                                required: "Modelo é obrigatório",
-                                pattern: {
-                                  value: /^[\p{L} \-\.]+$/u,
-                                  message: "Modelo não pode conter números",
-                                },
-                              }}
-                              className="h-8"
-                              formatter={formatLetters}
-                              placeholder="Busscar Buss Vissta 340"
-                              clearErrors={
-                                clearErrors as (
-                                  name?: string | string[]
-                                ) => void
-                              }
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.model?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.model.message)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.year}
-                            </label>
-                            <Input
-                              variant="modal"
-                              type="number"
-                              {...register("year", { valueAsNumber: true })}
-                              className="h-8"
-                              onBlur={handleAutoSave}
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.brand}
-                            </label>
-                            <FormInput
-                              name="brand"
-                              control={control}
-                              rules={{
-                                required: "Marca é obrigatória",
-                                pattern: {
-                                  value: /^[\p{L} \-\.]+$/u,
-                                  message: "Marca não pode conter números",
-                                },
-                              }}
-                              className="h-8"
-                              formatter={formatLetters}
-                              placeholder="Scania"
-                              clearErrors={
-                                clearErrors as (
-                                  name?: string | string[]
-                                ) => void
-                              }
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.brand?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.brand.message)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="col-span-3 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.category}
-                              <span className=" pl-2">(#1106)</span>
-                            </label>
-                            <Select
-                              value={watch("category")}
-                              onValueChange={(value) => {
-                                setValue("category", value as VehicleCategory);
-                                handleAutoSave();
-                              }}
-                            >
-                              <SelectTrigger className="h-8 ">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categories.map((cat) => (
-                                  <SelectItem key={cat} value={cat}>
-                                    {t.categories[cat]}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="col-span-1 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.classification}
-                              <span className=" pl-2">(#1105)</span>
-                            </label>
-                            <Select
-                              value={watch("classification")}
-                              onValueChange={(value) => {
-                                setValue(
-                                  "classification",
-                                  value as VehicleClassification
-                                );
-                                handleAutoSave();
-                              }}
-                            >
-                              <SelectTrigger className="h-8 ">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {classifications.map((cls) => (
-                                  <SelectItem key={cls} value={cls}>
-                                    {t.classifications[cls]}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
-                        <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                          <div className="col-span-1 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.capacity}
-                            </label>
-                            <Input
-                              variant="modal"
-                              type="number"
-                              {...register("capacity", { valueAsNumber: true })}
-                              className="h-8"
-                              onBlur={handleAutoSave}
-                            />
-                          </div>
-                          <div className="col-span-3 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.doors}
-                            </label>
-                            <Input
-                              variant="modal"
-                              type="number"
-                              {...register("doors", { valueAsNumber: true })}
-                              className="h-8"
-                              onBlur={handleAutoSave}
-                            />
-                          </div>
-
-                          {/* State Search - placed after Doors for quick lookup */}
-                          <div className="col-span-4">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.searchState}
-                            </label>
-                            <FormInput
-                              name="stateSearch"
-                              control={control}
-                              rules={{}}
-                              // placeholder={t.vehicles.searchState || 'Search'}
-                              className="h-8"
-                              clearErrors={() => {}}
-                            />
-                          </div>
-
-                          <div className="col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.state}
-                            </label>
-                            <FormInput
-                              name="state"
-                              control={control}
-                              rules={{
-                                required: "UF é obrigatória",
-                                pattern: {
-                                  value: /^[A-Z]{2}$/,
-                                  message: "UF deve conter 2 letras",
-                                },
-                              }}
-                              placeholder="RJ"
-                              className="h-8"
-                              formatter={formatUf}
-                              clearErrors={
-                                clearErrors as (
-                                  name?: string | string[]
-                                ) => void
-                              }
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.state?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.state.message)}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.plateType}
-                            </label>
-                            <Select defaultValue="mercosul">
-                              <SelectTrigger className="h-8 ">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="mercosul">
-                                  Mercosul
-                                </SelectItem>
-                                <SelectItem value="antiga">Antiga</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
-                        <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                          <div className="col-span-4 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.plate}
-                            </label>
-                            <FormInput
-                              name="plate"
-                              control={control}
-                              rules={
-                                isCreating
-                                  ? {
-                                      required: "Campo obrigatório",
-                                      validate: (v: string) => {
-                                        const clean = (v || "").replace(
-                                          /-/g,
-                                          ""
-                                        );
-                                        return (
-                                          clean.length >= 6 || "Placa inválida"
-                                        );
-                                      },
-                                    }
-                                  : {}
-                              }
-                              className="h-8 "
-                              disabled={!isCreating}
-                              formatter={formatPlate}
-                              placeholder="SQX8A12"
-                              clearErrors={
-                                clearErrors as (
-                                  name?: string | string[]
-                                ) => void
-                              }
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.plate?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.plate.message)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="col-span-4 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.renavam}
-                            </label>
-                            <FormInput
-                              name="renavam"
-                              control={control}
-                              rules={
-                                isCreating
-                                  ? {
-                                      required: "Campo obrigatório",
+                              {/* Row 2: Model, Year, Brand, Category, Classification */}
+                              <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                                <div className="col-span-4">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.model}
+                                  </label>
+                                  <FormInput
+                                    name="model"
+                                    control={control}
+                                    rules={{
+                                      required: "Modelo é obrigatório",
                                       pattern: {
-                                        value: /^\d{11}$/,
-                                        message: "Renavam deve ter 11 dígitos",
-                                      },
-                                    }
-                                  : {}
-                              }
-                              className="h-8 "
-                              inputMode="numeric"
-                              disabled={!isCreating}
-                              placeholder="1365373352"
-                              formatter={formatRenavam}
-                              clearErrors={
-                                clearErrors as (
-                                  name?: string | string[]
-                                ) => void
-                              }
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.renavam?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.renavam.message)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="col-span-4">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.chassis}
-                            </label>
-                            <FormInput
-                              name="chassis"
-                              control={control}
-                              rules={
-                                isCreating
-                                  ? {
-                                      required: "Campo obrigatório",
-                                      pattern: {
-                                        value: /^[A-Z0-9]{17}$/,
+                                        value: /^[\p{L} \-\.]+$/u,
                                         message:
-                                          "Chassi deve ter 17 caracteres alfanuméricos",
+                                          "Modelo não pode conter números",
                                       },
+                                    }}
+                                    className="h-8"
+                                    formatter={formatLetters}
+                                    placeholder="Busscar Buss Vissta 340"
+                                    clearErrors={
+                                      clearErrors as (
+                                        name?: string | string[]
+                                      ) => void
                                     }
-                                  : {}
-                              }
-                              className="h-8 "
-                              placeholder="9BSK4X200P4018406"
-                              disabled={!isCreating}
-                              formatter={formatChassis}
-                              clearErrors={
-                                clearErrors as (
-                                  name?: string | string[]
-                                ) => void
-                              }
-                              onBlurSave={handleAutoSave}
-                            />
-                            {errors.chassis?.message && (
-                              <span className="text-xs text-destructive">
-                                {String(errors.chassis.message)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="col-span-3 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.currentKm}
-                            </label>
-                            <Input
-                              variant="modal"
-                              type="number"
-                              placeholder=""
-                              {...register("currentKm", {
-                                valueAsNumber: true,
-                              })}
-                              className="h-8"
-                              onBlur={handleAutoSave}
-                            />
-                          </div>
-                          <div className="col-span-1 sm:col-span-2">
-                            <label className="text-xs text-muted-foreground">
-                              {t.vehicles.fuelType}
-                              <span className=" pl-2">(#1337)</span>
-                            </label>
-                            <Select
-                              value={watch("fuelType")}
-                              onValueChange={(value) => {
-                                setValue("fuelType", value as FuelType);
-                                handleAutoSave();
-                              }}
+                                    onBlurSave={handleAutoSave}
+                                  />
+                                  {errors.model?.message && (
+                                    <span className="text-xs text-destructive">
+                                      {String(errors.model.message)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.year}
+                                  </label>
+                                  <Input
+                                    variant="modal"
+                                    type="number"
+                                    {...register("year", {
+                                      valueAsNumber: true,
+                                    })}
+                                    className="h-8"
+                                    onBlur={handleAutoSave}
+                                  />
+                                </div>
+                                <div className="col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.brand}
+                                  </label>
+                                  <FormInput
+                                    name="brand"
+                                    control={control}
+                                    rules={{
+                                      required: "Marca é obrigatória",
+                                      pattern: {
+                                        value: /^[\p{L} \-\.]+$/u,
+                                        message:
+                                          "Marca não pode conter números",
+                                      },
+                                    }}
+                                    className="h-8"
+                                    formatter={formatLetters}
+                                    placeholder="Scania"
+                                    clearErrors={
+                                      clearErrors as (
+                                        name?: string | string[]
+                                      ) => void
+                                    }
+                                    onBlurSave={handleAutoSave}
+                                  />
+                                  {errors.brand?.message && (
+                                    <span className="text-xs text-destructive">
+                                      {String(errors.brand.message)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="col-span-3 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.category}
+                                    <span className=" pl-2">(#1106)</span>
+                                  </label>
+                                  <Select
+                                    value={watch("category")}
+                                    onValueChange={(value) => {
+                                      setValue(
+                                        "category",
+                                        value as VehicleCategory
+                                      );
+                                      handleAutoSave();
+                                    }}
+                                  >
+                                    <SelectTrigger className="h-8 ">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {categories.map((cat) => (
+                                        <SelectItem key={cat} value={cat}>
+                                          {t.categories[cat]}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="col-span-1 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.classification}
+                                    <span className=" pl-2">(#1105)</span>
+                                  </label>
+                                  <Select
+                                    value={watch("classification")}
+                                    onValueChange={(value) => {
+                                      setValue(
+                                        "classification",
+                                        value as VehicleClassification
+                                      );
+                                      handleAutoSave();
+                                    }}
+                                  >
+                                    <SelectTrigger className="h-8 ">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {classifications.map((cls) => (
+                                        <SelectItem key={cls} value={cls}>
+                                          {t.classifications[cls]}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
+                              <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                                <div className="col-span-1 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.capacity}
+                                  </label>
+                                  <Input
+                                    variant="modal"
+                                    type="number"
+                                    {...register("capacity", {
+                                      valueAsNumber: true,
+                                    })}
+                                    className="h-8"
+                                    onBlur={handleAutoSave}
+                                  />
+                                </div>
+                                <div className="col-span-3 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.doors}
+                                  </label>
+                                  <Input
+                                    variant="modal"
+                                    type="number"
+                                    {...register("doors", {
+                                      valueAsNumber: true,
+                                    })}
+                                    className="h-8"
+                                    onBlur={handleAutoSave}
+                                  />
+                                </div>
+
+                                {/* State Search - placed after Doors for quick lookup */}
+                                <div className="col-span-4">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.searchState}
+                                  </label>
+                                  <FormInput
+                                    name="stateSearch"
+                                    control={control}
+                                    rules={{}}
+                                    // placeholder={t.vehicles.searchState || 'Search'}
+                                    className="h-8"
+                                    clearErrors={() => {}}
+                                  />
+                                </div>
+
+                                <div className="col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.state}
+                                  </label>
+                                  <FormInput
+                                    name="state"
+                                    control={control}
+                                    rules={{
+                                      required: "UF é obrigatória",
+                                      pattern: {
+                                        value: /^[A-Z]{2}$/,
+                                        message: "UF deve conter 2 letras",
+                                      },
+                                    }}
+                                    placeholder="RJ"
+                                    className="h-8"
+                                    formatter={formatUf}
+                                    clearErrors={
+                                      clearErrors as (
+                                        name?: string | string[]
+                                      ) => void
+                                    }
+                                    onBlurSave={handleAutoSave}
+                                  />
+                                  {errors.state?.message && (
+                                    <span className="text-xs text-destructive">
+                                      {String(errors.state.message)}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.plateType}
+                                  </label>
+                                  <Select defaultValue="mercosul">
+                                    <SelectTrigger className="h-8 ">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="mercosul">
+                                        Mercosul
+                                      </SelectItem>
+                                      <SelectItem value="antiga">
+                                        Antiga
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
+                              <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                                <div className="col-span-4 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.plate}
+                                  </label>
+                                  <FormInput
+                                    name="plate"
+                                    control={control}
+                                    rules={
+                                      isCreating
+                                        ? {
+                                            required: "Campo obrigatório",
+                                            validate: (v: string) => {
+                                              const clean = (v || "").replace(
+                                                /-/g,
+                                                ""
+                                              );
+                                              return (
+                                                clean.length >= 6 ||
+                                                "Placa inválida"
+                                              );
+                                            },
+                                          }
+                                        : {}
+                                    }
+                                    className="h-8 "
+                                    disabled={!isCreating}
+                                    formatter={formatPlate}
+                                    placeholder="SQX8A12"
+                                    clearErrors={
+                                      clearErrors as (
+                                        name?: string | string[]
+                                      ) => void
+                                    }
+                                    onBlurSave={handleAutoSave}
+                                  />
+                                  {errors.plate?.message && (
+                                    <span className="text-xs text-destructive">
+                                      {String(errors.plate.message)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="col-span-4 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.renavam}
+                                  </label>
+                                  <FormInput
+                                    name="renavam"
+                                    control={control}
+                                    rules={
+                                      isCreating
+                                        ? {
+                                            required: "Campo obrigatório",
+                                            pattern: {
+                                              value: /^\d{11}$/,
+                                              message:
+                                                "Renavam deve ter 11 dígitos",
+                                            },
+                                          }
+                                        : {}
+                                    }
+                                    className="h-8 "
+                                    inputMode="numeric"
+                                    disabled={!isCreating}
+                                    placeholder="1365373352"
+                                    formatter={formatRenavam}
+                                    clearErrors={
+                                      clearErrors as (
+                                        name?: string | string[]
+                                      ) => void
+                                    }
+                                    onBlurSave={handleAutoSave}
+                                  />
+                                  {errors.renavam?.message && (
+                                    <span className="text-xs text-destructive">
+                                      {String(errors.renavam.message)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="col-span-4">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.chassis}
+                                  </label>
+                                  <FormInput
+                                    name="chassis"
+                                    control={control}
+                                    rules={
+                                      isCreating
+                                        ? {
+                                            required: "Campo obrigatório",
+                                            pattern: {
+                                              value: /^[A-Z0-9]{17}$/,
+                                              message:
+                                                "Chassi deve ter 17 caracteres alfanuméricos",
+                                            },
+                                          }
+                                        : {}
+                                    }
+                                    className="h-8 "
+                                    placeholder="9BSK4X200P4018406"
+                                    disabled={!isCreating}
+                                    formatter={formatChassis}
+                                    clearErrors={
+                                      clearErrors as (
+                                        name?: string | string[]
+                                      ) => void
+                                    }
+                                    onBlurSave={handleAutoSave}
+                                  />
+                                  {errors.chassis?.message && (
+                                    <span className="text-xs text-destructive">
+                                      {String(errors.chassis.message)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="col-span-3 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.currentKm}
+                                  </label>
+                                  <Input
+                                    variant="modal"
+                                    type="number"
+                                    placeholder=""
+                                    {...register("currentKm", {
+                                      valueAsNumber: true,
+                                    })}
+                                    className="h-8"
+                                    onBlur={handleAutoSave}
+                                  />
+                                </div>
+                                <div className="col-span-1 sm:col-span-2">
+                                  <label className="text-xs text-foreground">
+                                    {t.vehicles.fuelType}
+                                    <span className=" pl-2">(#1337)</span>
+                                  </label>
+                                  <Select
+                                    value={watch("fuelType")}
+                                    onValueChange={(value) => {
+                                      setValue("fuelType", value as FuelType);
+                                      handleAutoSave();
+                                    }}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {fuelTypes.map((fuel) => (
+                                        <SelectItem key={fuel} value={fuel}>
+                                          {t.fuelTypes[fuel]}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                    {errors.fuelType?.message && (
+                                      <span className="text-xs text-destructive">
+                                        {String(errors.fuelType.message)}
+                                      </span>
+                                    )}
+                                  </Select>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 mt-10">
+                                <div className="col-span-2">
+                                  <Select
+                                    value={watch("color")}
+                                    onValueChange={(value) => {
+                                      setValue("color", value as FuelType);
+                                      handleAutoSave();
+                                    }}
+                                  >
+                                    <SelectTrigger className="h-10">
+                                      {watch("color") ? (
+                                        <span className="flex text-center gap-2 justify-center items-center bg-muted/40 p-1 px-2 rounded-[6px] border-border border">
+                                          {watch("color")}
+                                          <XIcon
+                                            className="size-4 cursor-pointer hover:text-destructive"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setValue("color", "" as any);
+                                              handleAutoSave();
+                                            }}
+                                          />
+                                        </span>
+                                      ) : (
+                                        <SelectValue
+                                          placeholder="Caracteristicas (#180471)"
+                                        />
+                                      )}
+                                    </SelectTrigger>
+                                    <SelectContent showSearch>
+                                      <SelectItem value="Branco">Branco</SelectItem>
+                                      <SelectItem value="Preto">Preto</SelectItem>
+                                      <SelectItem value="Cinza">Cinza</SelectItem>
+                                      <SelectItem value="Azul">Azul</SelectItem>
+                                      <SelectItem value="Vermelho">Vermelho</SelectItem>
+                                      <SelectItem value="Verde">Verde</SelectItem>
+                                      <SelectItem value="Amarelo">Amarelo</SelectItem>
+                                      <SelectItem value="Prata">Prata</SelectItem>
+                                      <SelectItem value="Marrom">Marrom</SelectItem>
+                                      <SelectItem value="Laranja">Laranja</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            </motion.div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+                      {/* Descrição */}
+                      <Collapsible
+                        open={descriptionOpen}
+                        onOpenChange={setDescriptionOpen}
+                      >
+                        <div className=" rounded-lg overflow-hidden">
+                          <CollapsibleTrigger asChild>
+                            <button
+                              type="button"
+                              className="w-full flex items-center justify-between p-4 transition-colors"
                             >
-                              <SelectTrigger className="h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {fuelTypes.map((fuel) => (
-                                  <SelectItem key={fuel} value={fuel}>
-                                    {t.fuelTypes[fuel]}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                              {errors.fuelType?.message && (
+                              <div className="flex items-center gap-1.5">
+                                <FaRegListAlt className="h-4 w-4 font-bold" />
+                                <span className="font-semibold">
+                                  {t.vehicles.description}
+                                </span>
+                              </div>
+                              {descriptionOpen ? (
+                                <ChevronUp className="h-4 w-4 text-foreground" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4 text-foreground" />
+                              )}
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0">
+                              <Textarea
+                                variant="underlined"
+                                {...register("description", {
+                                  required: "Descrição é obrigatória",
+                                })}
+                                placeholder="316"
+                                onBlur={handleAutoSave}
+                              />
+                              {errors.description?.message && (
                                 <span className="text-xs text-destructive">
-                                  {String(errors.fuelType.message)}
+                                  {String(errors.description.message)}
                                 </span>
                               )}
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 mt-10">
-                          <div className="col-span-2">
-                            <Select
-                              value={watch("color")}
-                              onValueChange={(value) => {
-                                setValue("color", value as FuelType);
-                                handleAutoSave();
-                              }}
-                            >
-                              <SelectTrigger className="h-8">
-                                <SelectValue
-                                  placeholder={"Caracteristicas (#180471)"}
-                                />
-                              </SelectTrigger>
-                              <SelectContent showSearch>
-                                <SelectItem value="Branco">Branco</SelectItem>
-                                <SelectItem value="Preto">Preto</SelectItem>
-                                <SelectItem value="Cinza">Cinza</SelectItem>
-                                <SelectItem value="Azul">Azul</SelectItem>
-                                <SelectItem value="Vermelho">
-                                  Vermelho
-                                </SelectItem>
-                                <SelectItem value="Verde">Verde</SelectItem>
-                                <SelectItem value="Amarelo">Amarelo</SelectItem>
-                                <SelectItem value="Prata">Prata</SelectItem>
-                                <SelectItem value="Marrom">Marrom</SelectItem>
-                                <SelectItem value="Laranja">Laranja</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </CollapsibleContent>
-                  </div>
-                </Collapsible>
-                {/* Descrição */}
-                <Collapsible
-                  open={descriptionOpen}
-                  onOpenChange={setDescriptionOpen}
-                >
-                  <div className=" rounded-lg overflow-hidden">
-                    <CollapsibleTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between p-4 transition-colors"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          <FaRegListAlt className="h-4 w-4 font-bold" />
-                          <span className="font-semibold">
-                            {t.vehicles.description}
-                          </span>
-                        </div>
-                        {descriptionOpen ? (
-                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="p-4 pt-0">
-                        <Textarea
-                          variant="underlined"
-                          {...register("description", {
-                            required: "Descrição é obrigatória",
-                          })}
-                          placeholder="316"
-                          onBlur={handleAutoSave}
-                        />
-                        {errors.description?.message && (
-                          <span className="text-xs text-destructive">
-                            {String(errors.description.message)}
-                          </span>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </div>
-                </Collapsible>
-
-                {/* Imagens do Veículo */}
-                <Collapsible open={imagesOpen} onOpenChange={setImagesOpen}>
-                  <div className=" overflow-hidden">
-                    <CollapsibleTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between p-4 transition-colors"
-                      >
-                        <div className="flex items-center gap-2 ">
-                          <MdOutlineImageSearch className="h-5 w-5 font-bold" />
-                          <span className="font-semibold">
-                            {t.vehicles.images}
-                          </span>
-                        </div>
-                        {imagesOpen ? (
-                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="p-4 pt-0">
-                        {vehicle ? (
-                          <div className="flex flex-wrap gap-3">
-                            {/* Upload Box */}
-                            <label
-                              className="w-24 h-24 px-2 border-2 border-dashed border-foreground
-                         rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
-                            >
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                disabled={isUploading}
-                                className="hidden"
-                              />
-                              <MdCamera className="h-8 w-8 mb-1" />
-                              <span className="text-xs text-center ">
-                                {isUploading
-                                  ? "Uploading..."
-                                  : t.common.uploadFiles}
-                              </span>
-                            </label>
-                            {/* Existing Images */}
-                            {imagesData?.map((image, index) => (
-                              <motion.div
-                                key={image.id}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="relative w-44 h-24 rounded-md overflow-hidden group"
-                              >
-                                <img
-                                  src={image.url}
-                                  alt={`Vehicle ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-white hover:bg-white/20"
-                                    onClick={() => handleDeleteImage(image.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4 font-bold" />
-                                  </Button>
-                                </div>
-                              </motion.div>
-                            ))}
-                            <div className="w-full my-3 flex items-center">
-                              <PiTrashSimpleBold
-                                onClick={handleDeleteAllImages}
-                                className="h-4 w-4 hover:text-red-500 cursor-pointer "
-                              />
-
-                              <p className="text-xs ml-2 font-normal">
-                                Excluir todos arquivos
-                              </p>
                             </div>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            {t.common.saveVehicleFirst ||
-                              "Save vehicle first to upload images"}
-                          </p>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </div>
-                </Collapsible>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
 
-                {/* Footer Actions - Dentro da tab Geral */}
-                {/* {isCreating && (
+                      {/* Imagens do Veículo */}
+                      <Collapsible
+                        open={imagesOpen}
+                        onOpenChange={setImagesOpen}
+                      >
+                        <div className=" overflow-hidden">
+                          <CollapsibleTrigger asChild>
+                            <button
+                              type="button"
+                              className="w-full flex items-center justify-between p-4 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 ">
+                                <MdOutlineImageSearch className="h-5 w-5 font-bold" />
+                                <span className="font-semibold">
+                                  {t.vehicles.images}
+                                </span>
+                              </div>
+                              {imagesOpen ? (
+                                <ChevronUp className="h-4 w-4 text-foreground" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4 text-foreground" />
+                              )}
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0">
+                              {vehicle ? (
+                                <div className="flex flex-wrap gap-3">
+                                  {/* Upload Box */}
+                                  <label
+                                    className="w-24 h-24 px-2 border-2 border-dashed border-foreground
+                         rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
+                                  >
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handleImageUpload}
+                                      disabled={isUploading}
+                                      className="hidden"
+                                    />
+                                    <MdCamera className="h-8 w-8 mb-1" />
+                                    <span className="text-xs text-center ">
+                                      {isUploading
+                                        ? "Uploading..."
+                                        : t.common.uploadFiles}
+                                    </span>
+                                  </label>
+                                  {/* Existing Images */}
+                                  {imagesData?.map((image, index) => (
+                                    <motion.div
+                                      key={image.id}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="relative w-44 h-24 rounded-md overflow-hidden group"
+                                    >
+                                      <img
+                                        src={image.url}
+                                        alt={`Vehicle ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-white hover:bg-white/20"
+                                          onClick={() =>
+                                            handleDeleteImage(image.id)
+                                          }
+                                        >
+                                          <Trash2 className="h-4 w-4 font-bold" />
+                                        </Button>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                  <div className="w-full my-3 flex items-center">
+                                    <PiTrashSimpleBold
+                                      onClick={handleDeleteAllImages}
+                                      className="h-4 w-4 hover:text-red-500 cursor-pointer "
+                                    />
+
+                                    <p className="text-xs ml-2 font-normal">
+                                      Excluir todos arquivos
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-foreground">
+                                  {t.common.saveVehicleFirst ||
+                                    "Save vehicle first to upload images"}
+                                </p>
+                              )}
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+
+                      {/* Footer Actions - Dentro da tab Geral */}
+                      {/* {isCreating && (
                   <div className="flex justify-center gap-3 pt-4">
                     <Button
                       type="button"
@@ -1216,69 +1290,106 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     </Button>
                   </div>
                 )} */}
-                </motion.div>
+                    </motion.div>
+                  )}
+                </TabsContent>
+
+                {/* Tab: Abastecimentos */}
+                {vehicle && (
+                  <TabsContent value="fuelings" forceMount>
+                    {activeTab === "fuelings" && (
+                      <motion.div
+                        key="fuelings"
+                        variants={tabContentVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <FuelingsSection
+                          vehicleId={vehicle.id}
+                          fuelings={vehicle.fuelings || []}
+                        />
+                      </motion.div>
+                    )}
+                  </TabsContent>
                 )}
-              </TabsContent>
 
-              {/* Tab: Abastecimentos */}
-              {vehicle && (
-                <TabsContent value="fuelings" forceMount>
-                  {activeTab === "fuelings" && (
-                  <motion.div
-                    key="fuelings"
-                    variants={tabContentVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                  <FuelingsSection
-                    vehicleId={vehicle.id}
-                    fuelings={vehicle.fuelings || []}
-                  />
-                  </motion.div>
-                  )}
-                </TabsContent>
-              )}
+                {/* Tab: Documentação */}
+                {vehicle && (
+                  <TabsContent value="documents" forceMount>
+                    {activeTab === "documents" && (
+                      <motion.div
+                        key="documents"
+                        variants={tabContentVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <DocumentsSection
+                          vehicleId={vehicle.id}
+                          documents={vehicle.documents || []}
+                        />
+                      </motion.div>
+                    )}
+                  </TabsContent>
+                )}
 
-              {/* Tab: Documentação */}
-              {vehicle && (
-                <TabsContent value="documents" forceMount>
-                  {activeTab === "documents" && (
-                  <motion.div
-                    key="documents"
-                    variants={tabContentVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                  <DocumentsSection
-                    vehicleId={vehicle.id}
-                    documents={vehicle.documents || []}
-                  />
-                  </motion.div>
-                  )}
-                </TabsContent>
-              )}
+                {/* Tab: Ocorrências */}
+                {vehicle && (
+                  <TabsContent value="incidents" forceMount>
+                    {activeTab === "incidents" && (
+                      <motion.div
+                        key="incidents"
+                        variants={tabContentVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <IncidentsSection
+                          vehicleId={vehicle.id}
+                          incidents={vehicle.incidents || []}
+                        />
+                      </motion.div>
+                    )}
+                  </TabsContent>
+                )}
 
-              {/* Tab: Ocorrências */}
-              {vehicle && (
-                <TabsContent value="incidents" forceMount>
-                  {activeTab === "incidents" && (
-                  <motion.div
-                    key="incidents"
-                    variants={tabContentVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                  <IncidentsSection
-                    vehicleId={vehicle.id}
-                    incidents={vehicle.incidents || []}
-                  />
-                  </motion.div>
-                  )}
-                </TabsContent>
-              )}
+                {/* Tab: Tarifas */}
+                {vehicle && (
+                  <TabsContent value="rates" forceMount>
+                    {activeTab === "rates" && (
+                      <motion.div
+                        key="rates"
+                        variants={tabContentVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <FuelingRatesTable
+                          vehicleId={vehicle.id}
+                          fuelings={vehicle.fuelings || []}
+                        />
+                      </motion.div>
+                    )}
+                  </TabsContent>
+                )}
+
+                {/* Tab: Termos */}
+                {vehicle && (
+                  <TabsContent value="terms" forceMount>
+                    {activeTab === "terms" && (
+                      <motion.div
+                        key="terms"
+                        variants={tabContentVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <TermsSection vehicleId={vehicle.id} />
+                      </motion.div>
+                    )}
+                  </TabsContent>
+                )}
               </AnimatePresence>
             </form>
           </Tabs>
