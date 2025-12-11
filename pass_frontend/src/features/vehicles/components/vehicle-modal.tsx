@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm, UseFormSetError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -76,6 +76,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import type {
   Vehicle,
   VehicleStatus,
@@ -102,6 +103,20 @@ const modalVariants: any = {
     transition: { type: "spring", damping: 25, stiffness: 300 },
   },
   exit: { opacity: 0, scale: 0.95, y: 20 },
+};
+
+const tabContentVariants: any = {
+  hidden: { opacity: 0, x: 10 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { duration: 0.2, ease: "easeOut" }
+  },
+  exit: { 
+    opacity: 0, 
+    x: -10,
+    transition: { duration: 0.15, ease: "easeIn" }
+  },
 };
 
 export function VehicleModal({ isCreate = false }: VehicleModalProps) {
@@ -289,6 +304,30 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     }
   }, [descriptionValue, clearErrors]);
 
+  // Auto-save handler - saves on blur without closing modal
+  const handleAutoSave = async () => {
+    if (isCreating) return; // Only auto-save for existing vehicles
+    if (!vehicle?.id) return;
+
+    const formData = getValues();
+    
+    try {
+      await updateVehicle.mutateAsync({
+        id: vehicle.id,
+        ...formData,
+      });
+      sonnerToast.success("Salvo!");
+    } catch (err: any) {
+      console.error("Auto-save error:", err);
+    }
+  };
+
+  // Wrapper for Select onValueChange with auto-save
+  const handleSelectChange = (field: string) => (value: any) => {
+    setValue(field as any, value);
+    setTimeout(() => handleAutoSave(), 100);
+  };
+
   const onSubmit = useVehicleSubmit({
     isCreating,
     vehicle,
@@ -339,7 +378,12 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent
         showCloseButton={false}
-        className="w-[min(100vw,700px)] max-h-[60vh] overflow-y-auto p-2 pt-0 rounded-2xl"
+        className={cn(
+          "overflow-y-auto p-2 pt-0 rounded-2xl max-h-[90vh]",
+          activeTab === "fuelings" 
+            ? "w-screen max-w-[1200px] px-0 max-h-[75vh]" 
+            : "w-[90vw] max-w-[900px] md:w-[max(70vw,900px)]"
+        )}
       >
         <motion.div
           variants={modalVariants}
@@ -367,7 +411,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 <Button
                   variant="ghost"
                   onClick={closeModal}
-                  className=" absolute top-2 right-3 p-1.5 hover:bg-gray-100 cursor-pointer"
+                  className=" absolute top-4 right-3 p-1.5 hover:bg-gray-100 cursor-pointer"
                 >
                   <X className="h-4 w-4 " />
                 </Button>
@@ -433,10 +477,24 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 handleSubmit: handleSubmit as any,
                 onSubmit,
               })}
-              className="px-2 pb-4"
+              className={cn(
+          "px-2 pb-4",
+          activeTab === "fuelings" 
+            ? "px-0 pb-0" 
+            : "w-[90vw] max-w-[900px] md:w-[max(70vw,900px)]"
+        )}
             >
+              <AnimatePresence mode="wait">
               {/* Tab: Dados Gerais */}
-              <TabsContent value="general" className="mt-4 space-y-2">
+              <TabsContent value="general" className="mt-4 space-y-2" forceMount>
+                {activeTab === "general" && (
+                <motion.div
+                  key="general"
+                  variants={tabContentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
                 {/* Dados Gerais */}
                 <Collapsible open={generalOpen} onOpenChange={setGeneralOpen}>
                   <div className="overflow-hidden">
@@ -499,6 +557,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   .slice(0, 10)
                               }
                               clearErrors={() => clearErrors("internalId")}
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.internalId?.message && (
                               <span className="text-xs text-destructive">
@@ -513,9 +572,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             </label>
                             <Select
                               value={watch("companyName") || ""}
-                              onValueChange={(value) =>
-                                setValue("companyName", value)
-                              }
+                              onValueChange={(value) => {
+                                setValue("companyName", value);
+                                handleAutoSave();
+                              }}
                             >
                               <SelectTrigger className="h-8 ">
                                 <SelectValue placeholder="Selecione" />
@@ -540,9 +600,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             </label>
                             <Select
                               value={watch("status")}
-                              onValueChange={(value) =>
-                                setValue("status", value as VehicleStatus)
-                              }
+                              onValueChange={(value) => {
+                                setValue("status", value as VehicleStatus);
+                                handleAutoSave();
+                              }}
                             >
                               <SelectTrigger iconRight={true} className="h-8  ">
                                 <SelectValue>
@@ -606,6 +667,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   name?: string | string[]
                                 ) => void
                               }
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.model?.message && (
                               <span className="text-xs text-destructive">
@@ -622,6 +684,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                               type="number"
                               {...register("year", { valueAsNumber: true })}
                               className="h-8"
+                              onBlur={handleAutoSave}
                             />
                           </div>
                           <div className="col-span-2">
@@ -646,6 +709,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   name?: string | string[]
                                 ) => void
                               }
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.brand?.message && (
                               <span className="text-xs text-destructive">
@@ -660,9 +724,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             </label>
                             <Select
                               value={watch("category")}
-                              onValueChange={(value) =>
-                                setValue("category", value as VehicleCategory)
-                              }
+                              onValueChange={(value) => {
+                                setValue("category", value as VehicleCategory);
+                                handleAutoSave();
+                              }}
                             >
                               <SelectTrigger className="h-8 ">
                                 <SelectValue />
@@ -683,12 +748,13 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             </label>
                             <Select
                               value={watch("classification")}
-                              onValueChange={(value) =>
+                              onValueChange={(value) => {
                                 setValue(
                                   "classification",
                                   value as VehicleClassification
-                                )
-                              }
+                                );
+                                handleAutoSave();
+                              }}
                             >
                               <SelectTrigger className="h-8 ">
                                 <SelectValue />
@@ -715,6 +781,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                               type="number"
                               {...register("capacity", { valueAsNumber: true })}
                               className="h-8"
+                              onBlur={handleAutoSave}
                             />
                           </div>
                           <div className="col-span-3 sm:col-span-2">
@@ -726,6 +793,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                               type="number"
                               {...register("doors", { valueAsNumber: true })}
                               className="h-8"
+                              onBlur={handleAutoSave}
                             />
                           </div>
 
@@ -766,6 +834,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   name?: string | string[]
                                 ) => void
                               }
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.state?.message && (
                               <span className="text-xs text-destructive">
@@ -826,6 +895,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   name?: string | string[]
                                 ) => void
                               }
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.plate?.message && (
                               <span className="text-xs text-destructive">
@@ -861,6 +931,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   name?: string | string[]
                                 ) => void
                               }
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.renavam?.message && (
                               <span className="text-xs text-destructive">
@@ -896,6 +967,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   name?: string | string[]
                                 ) => void
                               }
+                              onBlurSave={handleAutoSave}
                             />
                             {errors.chassis?.message && (
                               <span className="text-xs text-destructive">
@@ -915,6 +987,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                 valueAsNumber: true,
                               })}
                               className="h-8"
+                              onBlur={handleAutoSave}
                             />
                           </div>
                           <div className="col-span-1 sm:col-span-2">
@@ -924,9 +997,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             </label>
                             <Select
                               value={watch("fuelType")}
-                              onValueChange={(value) =>
-                                setValue("fuelType", value as FuelType)
-                              }
+                              onValueChange={(value) => {
+                                setValue("fuelType", value as FuelType);
+                                handleAutoSave();
+                              }}
                             >
                               <SelectTrigger className="h-8">
                                 <SelectValue />
@@ -951,9 +1025,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           <div className="col-span-2">
                             <Select
                               value={watch("color")}
-                              onValueChange={(value) =>
-                                setValue("color", value as FuelType)
-                              }
+                              onValueChange={(value) => {
+                                setValue("color", value as FuelType);
+                                handleAutoSave();
+                              }}
                             >
                               <SelectTrigger className="h-8">
                                 <SelectValue
@@ -986,7 +1061,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                   open={descriptionOpen}
                   onOpenChange={setDescriptionOpen}
                 >
-                  <div className="border border-border rounded-lg overflow-hidden">
+                  <div className=" rounded-lg overflow-hidden">
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
@@ -1013,6 +1088,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                             required: "Descrição é obrigatória",
                           })}
                           placeholder="316"
+                          onBlur={handleAutoSave}
                         />
                         {errors.description?.message && (
                           <span className="text-xs text-destructive">
@@ -1026,7 +1102,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                 {/* Imagens do Veículo */}
                 <Collapsible open={imagesOpen} onOpenChange={setImagesOpen}>
-                  <div className="border border-border rounded-lg overflow-hidden">
+                  <div className=" overflow-hidden">
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
@@ -1118,59 +1194,92 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 </Collapsible>
 
                 {/* Footer Actions - Dentro da tab Geral */}
-                <div className="flex justify-center gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="modal_white"
-                    size="modal"
-                    onClick={closeModal}
-                  >
-                    {t.common.close}
-                  </Button>
-                  <Button
-                    size="modal"
-                    type="submit"
-                    variant="modal"
-                    disabled={
-                      updateVehicle.isPending || createVehicle.isPending
-                    }
-                  >
-                    {updateVehicle.isPending || createVehicle.isPending
-                      ? t.common.loading
-                      : t.common.save}
-                  </Button>
-                </div>
+                {/* {isCreating && (
+                  <div className="flex justify-center gap-3 pt-4">
+                    <Button
+                      type="button"
+                      variant="modal_white"
+                      size="modal"
+                      onClick={closeModal}
+                    >
+                      {t.common.close}
+                    </Button>
+                    <Button
+                      size="modal"
+                      type="submit"
+                      variant="modal"
+                      disabled={createVehicle.isPending}
+                    >
+                      {createVehicle.isPending
+                        ? t.common.loading
+                        : t.common.save}
+                    </Button>
+                  </div>
+                )} */}
+                </motion.div>
+                )}
               </TabsContent>
 
               {/* Tab: Abastecimentos */}
               {vehicle && (
-                <TabsContent value="fuelings" className="mt-4">
+                <TabsContent value="fuelings" forceMount>
+                  {activeTab === "fuelings" && (
+                  <motion.div
+                    key="fuelings"
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
                   <FuelingsSection
                     vehicleId={vehicle.id}
                     fuelings={vehicle.fuelings || []}
                   />
+                  </motion.div>
+                  )}
                 </TabsContent>
               )}
 
               {/* Tab: Documentação */}
               {vehicle && (
-                <TabsContent value="documents" className="mt-4">
+                <TabsContent value="documents" forceMount>
+                  {activeTab === "documents" && (
+                  <motion.div
+                    key="documents"
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
                   <DocumentsSection
                     vehicleId={vehicle.id}
                     documents={vehicle.documents || []}
                   />
+                  </motion.div>
+                  )}
                 </TabsContent>
               )}
 
               {/* Tab: Ocorrências */}
               {vehicle && (
-                <TabsContent value="incidents" className="mt-4">
+                <TabsContent value="incidents" forceMount>
+                  {activeTab === "incidents" && (
+                  <motion.div
+                    key="incidents"
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
                   <IncidentsSection
                     vehicleId={vehicle.id}
                     incidents={vehicle.incidents || []}
                   />
+                  </motion.div>
+                  )}
                 </TabsContent>
               )}
+              </AnimatePresence>
             </form>
           </Tabs>
         </motion.div>

@@ -15,6 +15,7 @@ type FormInputProps = {
   type?: any;
   disabled?: boolean;
   clearErrors?: (name?: string | string[]) => void;
+  onBlurSave?: () => void;
 };
 
 export function FormInput({
@@ -29,6 +30,7 @@ export function FormInput({
   type,
   disabled,
   clearErrors,
+  onBlurSave,
 }: FormInputProps) {
   const { field } = useController({ name, control, rules });
 
@@ -54,7 +56,10 @@ export function FormInput({
   const handleBlur = useCallback(() => {
     field.onBlur();
     if (clearErrors) clearErrors(name);
-  }, [field, clearErrors, name]);
+    if (onBlurSave) {
+      setTimeout(() => onBlurSave(), 100);
+    }
+  }, [field, clearErrors, name, onBlurSave]);
 
   return (
     <Input

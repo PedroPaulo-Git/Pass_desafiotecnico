@@ -107,23 +107,8 @@ export function DocumentsSection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="">
-      <div className="border border-border rounded-lg overflow-hidden">
-        <CollapsibleTrigger asChild>
-          <button
-            type="button"
-            className="w-full flex items-center justify-between p-4 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <FaRegListAlt className="h-4 w-4" />
-              <span className="font-semibold">{t.documents.title}</span>
-            </div>
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-        </CollapsibleTrigger>
+      <div className="overflow-hidden">
+       
         <CollapsibleContent>
           <motion.div
             initial={{ opacity: 0 }}
@@ -132,16 +117,16 @@ export function DocumentsSection({
             className="p-2 sm:p-4 pt-0 max-[440px]:w-80 max-[550px]:w-92 mx-auto sm:w-full "
           >
             <Table>
-              <TableHeader>
+              <TableHeader variant="minimal">
                 <TableRow>
-                  <TableHead>{t.documents.name}</TableHead>
-                  <TableHead>{t.documents.type}</TableHead>
-                  <TableHead>{t.documents.expiryDate}</TableHead>
-                  <TableHead>{t.documents.anticipation}</TableHead>
-                  <TableHead>{t.documents.days}</TableHead>
+                  <TableHead variant="minimal">{t.documents.name}</TableHead>
+                  <TableHead variant="minimal">{t.documents.type}</TableHead>
+                  <TableHead variant="minimal">{t.documents.expiryDate}</TableHead>
+                  <TableHead variant="minimal">{t.documents.anticipation}</TableHead>
+                  <TableHead variant="minimal">{t.documents.days}</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="border-b border-border">
+              <TableBody >
                 {currentDocuments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">

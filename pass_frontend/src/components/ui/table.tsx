@@ -5,14 +5,14 @@ import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 interface TableCellProps extends React.ComponentProps<"td"> {
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "extra-compact";
 }
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full "
     >
       <table
         data-slot="table"
@@ -27,7 +27,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 }
 
 interface TableHeaderProps extends React.ComponentProps<"thead"> {
-  variant?: "default" | "minimal" | "bordered";
+  variant?: "default" | "minimal" | "bordered" | "date";
   withFilterIcons?: boolean;
 }
 function TableHeader({
@@ -41,7 +41,7 @@ function TableHeader({
       data-slot="table-header"
       className={cn(
         // Estilos base
-        "border-b border-border/50",
+        "",
 
         variant === "minimal" &&
           cn(
@@ -64,6 +64,12 @@ function TableHeader({
             "[&_th]:first:rounded-tl-md",
             "[&_th]:last:rounded-tr-md"
           ),
+          variant === "date" &&
+          cn(
+            "[&_th]:bg-amber-500",
+            "",
+          ),
+
 
         className
       )}
@@ -83,7 +89,7 @@ function TableHead({
   filterActive = false,
   ...props
 }: React.ComponentProps<"th"> & {
-  variant?: "default" | "compact" | "minimal";
+  variant?: "default" | "compact" | "minimal" | "date";
   center?: boolean;
   sortable?: boolean;
   sortDirection?: "none" | "asc" | "desc";
@@ -95,7 +101,7 @@ function TableHead({
       data-slot="table-head"
       className={cn(
         // Estilos base
-        "text-foreground h-10 px-4 text-left align-middle font-medium border-y-2 ",
+        "text-foreground h-10 px-4 text-left align-middle font-medium ",
         "text-nowrap",
         "[&:has([role=checkbox])]:pr-0",
 
@@ -104,9 +110,15 @@ function TableHead({
         variant === "compact" && "py-2 px-3 xl:p-3",
         variant === "minimal" &&
           cn(
-            "px-4 py-3",
-            "text-xs font-semibold text-muted-foreground tracking-wide",
+            "px-4 py-3 border-y-2 ",
+            "text-xs font-semibold text-muted-foreground tracking-wide ",
             "",
+          ),
+            variant === "date" &&
+          cn(
+            "border-t",
+            " px-0.5",
+             "nth-2:pl-5 nth-1:pl-20 ",
           ),
 
         // Centralização
@@ -173,7 +185,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn("", className)}
       {...props}
     />
   );
@@ -197,7 +209,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors",
+        "hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors p-4",
         className
       )}
       {...props}
@@ -224,6 +236,8 @@ function TableCell({
 
         // Variante Compact (Com o xl:p-2 que você pediu)
         variant === "compact" && "py-1 px-4 xl:px-0 xl:p-2 first:pl-0 sm:first:pl-4",
+        variant === "extra-compact" && "py-2 px-4 xl:px-0 first:pl-0 sm:first:pl-4   ",
+        
         center && "text-center",
         firstPadding && "first:pl-4 sm:first:pl-4",
 
