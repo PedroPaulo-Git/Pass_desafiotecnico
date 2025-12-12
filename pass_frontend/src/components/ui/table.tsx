@@ -154,7 +154,7 @@ function TableHead({
           ),
            variant === "minimal-fueling" &&
           cn(
-            "py-0 h-0 pl-7 border-t z-10 min-w-[200px]",
+            "py-0 h-0 pl-7 border-t z-10 min-w-[150px]",
             "text-sm font-semibold text-muted-foreground tracking-wide ",
             ""
           ),
@@ -268,7 +268,7 @@ function TableCell({
         variant === "sticky-second" &&
           cn(
             "py-2 px-3 border-y border-border pr-8",
-            "sticky left-12 bg-background/90 z-50 shadow-[inset_-2px_0_0_var(--color-border)] "
+            "sticky left-12 bg-background/90 z-50"
           ),
 
         center && "text-center",

@@ -238,10 +238,11 @@ export function FuelingRatesTable({
   const [editOdometer, setEditOdometer] = useState<number>(0);
 
   // Pinned columns state - 'left' | 'right' | null
+  // Period starts pinned to the left by default
   type PinPosition = "left" | "right" | null;
   const [pinnedColumns, setPinnedColumns] = useState<
     Record<string, PinPosition>
-  >({});
+  >({ period: "left" });
 
   // Sorting state - 'asc' | 'desc' | null (cycles: null -> asc -> desc -> null)
   type SortDirection = "asc" | "desc" | null;
@@ -351,10 +352,22 @@ export function FuelingRatesTable({
   };
 
   // Check if column is the last pinned on its side (for shadow)
+  // The shadow should appear on the LAST pinned column on the left side
   const isLastPinnedLeft = (columnId: string): boolean => {
     const pinnedLeftCols = getPinnedLeftColumns();
-    if (pinnedLeftCols.length === 0) return columnId === "period"; // period is always "last" fixed
+    if (pinnedLeftCols.length === 0) return false;
+    // Last column in table order that is pinned left gets the shadow
     return pinnedLeftCols[pinnedLeftCols.length - 1] === columnId;
+  };
+
+  // Check if period column should show shadow (only when it's the last pinned left)
+  const shouldPeriodShowShadow = (): boolean => {
+    return isLastPinnedLeft("period");
+  };
+
+  // Check if period is currently pinned left
+  const isPeriodPinnedLeft = (): boolean => {
+    return pinnedColumns["period"] === "left";
   };
 
   const isFirstPinnedRight = (columnId: string): boolean => {
@@ -371,9 +384,10 @@ export function FuelingRatesTable({
     const baseClass = "sticky bg-background z-30";
 
     if (pin === "left") {
-      const hasShadow = isLastPinnedLeft(columnId);
-      return hasShadow
-        ? `${baseClass} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]`
+      const isLast = isLastPinnedLeft(columnId);
+      // Last pinned left column gets the inset border shadow
+      return isLast
+        ? `${baseClass} shadow-[inset_-1px_0_0_var(--color-border)]`
         : baseClass;
     }
     if (pin === "right") {
@@ -612,23 +626,78 @@ export function FuelingRatesTable({
     return periods;
   }, [currentFuelings, vehicleCategory]);
 
-  // Filter periods by date range
+  // Filter and sort periods by date range and sort state
   const filteredPeriodsData = useMemo(() => {
-    if (!dateRange?.from && !dateRange?.to) return periodsData;
-    return periodsData.filter((period) => {
-      if (dateRange?.from && dateRange?.to) {
-        return (
-          (period.periodStart >= dateRange.from &&
-            period.periodStart <= dateRange.to) ||
-          (period.periodEnd >= dateRange.from &&
-            period.periodEnd <= dateRange.to) ||
-          (period.periodStart <= dateRange.from &&
-            period.periodEnd >= dateRange.to)
-        );
-      }
-      return true;
-    });
-  }, [periodsData, dateRange]);
+    let result = periodsData;
+
+    // Apply date range filter
+    if (dateRange?.from || dateRange?.to) {
+      result = result.filter((period) => {
+        if (dateRange?.from && dateRange?.to) {
+          return (
+            (period.periodStart >= dateRange.from &&
+              period.periodStart <= dateRange.to) ||
+            (period.periodEnd >= dateRange.from &&
+              period.periodEnd <= dateRange.to) ||
+            (period.periodStart <= dateRange.from &&
+              period.periodEnd >= dateRange.to)
+          );
+        }
+        return true;
+      });
+    }
+
+    // Apply sorting
+    if (sortColumn && sortDirection) {
+      result = [...result].sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        switch (sortColumn) {
+          case "period":
+            aValue = a.periodStart.getTime();
+            bValue = b.periodStart.getTime();
+            break;
+          case "provider":
+            aValue = a.provider.toLowerCase();
+            bValue = b.provider.toLowerCase();
+            break;
+          case "fuelType":
+            aValue = a.fuelType;
+            bValue = b.fuelType;
+            break;
+          case "liters":
+            aValue = a.totalLiters;
+            bValue = b.totalLiters;
+            break;
+          case "totalValue":
+            aValue = a.totalValue;
+            bValue = b.totalValue;
+            break;
+          case "unitPrice":
+            aValue = a.unitPrice;
+            bValue = b.unitPrice;
+            break;
+          case "odometer":
+            aValue = a.odometer;
+            bValue = b.odometer;
+            break;
+          case "category":
+            aValue = a.category || "";
+            bValue = b.category || "";
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [periodsData, dateRange, sortColumn, sortDirection]);
 
   // Pagination
   const totalPages = Math.ceil(filteredPeriodsData.length / itemsPerPage);
@@ -699,6 +768,8 @@ export function FuelingRatesTable({
   );
 
   // Pinnable header content component
+  // - checkbox: never shows any controls (fixed, immutable)
+  // - all other columns (including period): show PinOff when pinned, MoreHorizontal menu when not pinned
   const PinnableHeaderContent = ({
     columnId,
     label,
@@ -713,12 +784,15 @@ export function FuelingRatesTable({
     const SortIcon =
       sort === "asc" ? ArrowUp : sort === "desc" ? ArrowDown : ChevronsUpDown;
 
+    // Determine if this column is pinned
+    const isPinned = pin !== null;
+
     return (
-      <div className="flex items-center justify-between  w-full">
+      <div className="flex items-center justify-between w-full">
         <button
           type="button"
           onClick={() => toggleSort(columnId)}
-          className="flex items-center gap-1 hover:text-foreground transition-colors"
+          className="flex items-center gap-1 hover:text-foreground transition-colors mr-10"
         >
           <span className="truncate">{label}</span>
           <SortIcon
@@ -729,11 +803,9 @@ export function FuelingRatesTable({
           />
         </button>
         <div className="ml-auto">
-          {/* Left side: Label + Sort Arrow (clickable for sorting) */}
-
           {/* Right side: Pin toggle or Menu */}
-          {pin ? (
-            // If pinned, show PinOff button that directly unpins on click
+          {isPinned ? (
+            // Pinned column - show PinOff button that unpins on click
             <Button
               type="button"
               variant="ghost"
@@ -744,7 +816,7 @@ export function FuelingRatesTable({
               <PinOff className="h-3 w-3" />
             </Button>
           ) : (
-            // If not pinned, show 3 dots with dropdown menu
+            // Not pinned - show 3 dots with dropdown menu
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -970,14 +1042,15 @@ export function FuelingRatesTable({
                       />
                     </TableHead>
 
-                    {/* Period - FIXED with dynamic shadow */}
+                    {/* Period - Pinned left by default, can be unpinned */}
                     <TableHead
-                      variant="sticky-second"
+                      variant={isPeriodPinnedLeft() ? "sticky-second" : "minimal-fueling"}
                       sortable
                       className={cn(
-                        "max-w-[100px] ",
-                        getPinnedLeftColumns().length === 0 &&
-                          "shadow-[inset_-1px_0_0_var(--color-border)]"
+                        "min-w-[200px]:",
+                        !isPeriodPinnedLeft() && "pl-5 min-w-[200px]",
+                        isPeriodPinnedLeft() && shouldPeriodShowShadow() &&
+                          "shadow-[inset_-1px_0_0_var(--color-border)] "
                       )}
                     >
                       <PinnableHeaderContent
@@ -991,7 +1064,7 @@ export function FuelingRatesTable({
                       variant="minimal-fueling"
                       sortable
                       className={cn(
-                        "min-w-[130px]",
+                        "",
                         getStickyClass("provider")
                       )}
                       style={getStickyStyle("provider")}
@@ -1007,7 +1080,7 @@ export function FuelingRatesTable({
                       variant="minimal-fueling"
                       sortable
                       className={cn(
-                        "min-w-[110px]",
+                        "",
                         getStickyClass("fuelType")
                       )}
                       style={getStickyStyle("fuelType")}
@@ -1022,7 +1095,7 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn("min-w-[90px]", getStickyClass("liters"))}
+                      className={cn("" , getStickyClass("liters"))}
                       style={getStickyStyle("liters")}
                     >
                       <PinnableHeaderContent columnId="liters" label="Litros" />
@@ -1033,7 +1106,7 @@ export function FuelingRatesTable({
                       variant="minimal-fueling"
                       sortable
                       className={cn(
-                        "min-w-[110px]",
+                        "",
                         getStickyClass("totalValue")
                       )}
                       style={getStickyStyle("totalValue")}
@@ -1049,7 +1122,7 @@ export function FuelingRatesTable({
                       variant="minimal-fueling"
                       sortable
                       className={cn(
-                        "min-w-[110px]",
+                        "",
                         getStickyClass("unitPrice")
                       )}
                       style={getStickyStyle("unitPrice")}
@@ -1065,7 +1138,7 @@ export function FuelingRatesTable({
                       variant="minimal-fueling"
                       sortable
                       className={cn(
-                        "min-w-[100px]",
+                        "",
                         getStickyClass("odometer")
                       )}
                       style={getStickyStyle("odometer")}
@@ -1081,7 +1154,7 @@ export function FuelingRatesTable({
                       variant="minimal-fueling"
                       sortable
                       className={cn(
-                        "min-w-[100px]",
+                        "",
                         getStickyClass("category")
                       )}
                       style={getStickyStyle("category")}
@@ -1095,7 +1168,7 @@ export function FuelingRatesTable({
                     {/* Fueling days */}
                     <TableHead
                       variant="minimal-fueling"
-                      className="min-w-[200px]"
+                      className=""
                     >
                       Dias c/ Abast.
                     </TableHead>
@@ -1137,12 +1210,12 @@ export function FuelingRatesTable({
                           />
                         </TableCell>
 
-                        {/* Period - FIXED with dynamic shadow */}
+                        {/* Period - Pinned left by default, can be unpinned */}
                         <TableCell
-                          variant="sticky-second"
+                          variant={isPeriodPinnedLeft() ? "sticky-second" : "compact-fueling"}
                           className={cn(
                             "font-medium",
-                            getPinnedLeftColumns().length === 0 &&
+                            isPeriodPinnedLeft() && shouldPeriodShowShadow() &&
                               "shadow-[inset_-1px_0_0_var(--color-border)]"
                           )}
                         >
@@ -1578,7 +1651,7 @@ export function FuelingRatesTable({
                         <TableCell
                           variant="compact-fueling"
                           onClick={(e) => e.stopPropagation()}
-                        >
+                         >
                           <Popover
                             open={detailsPopoverOpen === period.id}
                             onOpenChange={(open) => {
@@ -1731,6 +1804,9 @@ export function FuelingRatesTable({
                             </PopoverContent>
                           </Popover>
                         </TableCell>
+
+
+                        
                       </TableRow>
                     ))
                   )}
