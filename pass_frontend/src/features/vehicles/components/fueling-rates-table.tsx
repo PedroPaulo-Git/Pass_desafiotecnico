@@ -31,17 +31,17 @@ import {
   CalendarIcon,
   Fuel,
   X,
-  Check,
   Search,
+  Check,
   Plus,
   Edit,
   Eye,
   PanelLeft,
   MoreHorizontal,
   Pin,
+  User,
+  Building2,
   PinOff,
-  MapPin,
-  Clock,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import {
@@ -90,7 +90,6 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import {
   Command,
   CommandEmpty,
@@ -101,12 +100,15 @@ import {
 } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Fueling, FuelType, VehicleCategory } from "@/types/vehicle";
 
 interface FuelingRatesTableProps {
   vehicleId: string;
   fuelings: Fueling[];
+  sidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 // Day of week labels (Sunday=0 to Saturday=6)
@@ -150,8 +152,44 @@ interface FuelingPeriodData {
 export function FuelingRatesTable({
   vehicleId,
   fuelings,
+  sidebarOpen = false,
+  onToggleSidebar,
 }: FuelingRatesTableProps) {
   const { t } = useI18n();
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("p1");
+  const profiles = [
+    {
+      id: "p1",
+      name: "E-Commerce",
+      typeLabel: "Canal de Venda",
+      icon: "building",
+    },
+    {
+      id: "p2",
+      name: "Clientes VIP",
+      typeLabel: "Grupo de Usuários",
+      icon: "users",
+    },
+    {
+      id: "p3",
+      name: "Funcionários Internos",
+      typeLabel: "Grupo de Usuários",
+      icon: "users",
+    },
+    { id: "p4", name: "João Pereira", typeLabel: "Usuário", icon: "user" },
+    { id: "p5", name: "Maria Silva", typeLabel: "Usuário", icon: "user" },
+    { id: "p4", name: "João Pereira", typeLabel: "Usuário", icon: "user" },
+    { id: "p5", name: "Maria Silva", typeLabel: "Usuário", icon: "user" },
+  ];
+  const filteredProfiles = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return profiles;
+    return profiles.filter((p) => p.name.toLowerCase().includes(q));
+  }, [searchTerm]);
+  
+  const selectedProfile = profiles.find((p) => p.id === selectedProfileId) || profiles[0];
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -193,23 +231,23 @@ export function FuelingRatesTable({
   const [editValue, setEditValue] = useState<number>(0);
   const [editOdometer, setEditOdometer] = useState<number>(0);
 
-  // Sidebar state
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   // Pinned columns state - 'left' | 'right' | null
-  type PinPosition = 'left' | 'right' | null;
-  const [pinnedColumns, setPinnedColumns] = useState<Record<string, PinPosition>>({});
+  type PinPosition = "left" | "right" | null;
+  const [pinnedColumns, setPinnedColumns] = useState<
+    Record<string, PinPosition>
+  >({});
 
   // Toggle pin for a column
   const togglePin = (columnId: string, position: PinPosition) => {
-    setPinnedColumns(prev => ({
+    setPinnedColumns((prev) => ({
       ...prev,
-      [columnId]: prev[columnId] === position ? null : position
+      [columnId]: prev[columnId] === position ? null : position,
     }));
   };
 
   // Get pin position for a column
-  const getColumnPin = (columnId: string): PinPosition => pinnedColumns[columnId] || null;
+  const getColumnPin = (columnId: string): PinPosition =>
+    pinnedColumns[columnId] || null;
 
   // Column widths for sticky position calculation (approximate)
   const columnWidths: Record<string, number> = {
@@ -227,15 +265,27 @@ export function FuelingRatesTable({
   };
 
   // Order of columns for pin calculation (maintains table order)
-  const columnOrder = ['checkbox', 'period', 'provider', 'fuelType', 'liters', 'totalValue', 'unitPrice', 'odometer', 'category', 'days', 'actions'];
+  const columnOrder = [
+    "checkbox",
+    "period",
+    "provider",
+    "fuelType",
+    "liters",
+    "totalValue",
+    "unitPrice",
+    "odometer",
+    "category",
+    "days",
+    "actions",
+  ];
 
   // Get all pinned columns sorted by their position in table
   const getPinnedLeftColumns = (): string[] => {
-    return columnOrder.filter(col => pinnedColumns[col] === 'left');
+    return columnOrder.filter((col) => pinnedColumns[col] === "left");
   };
 
   const getPinnedRightColumns = (): string[] => {
-    return columnOrder.filter(col => pinnedColumns[col] === 'right');
+    return columnOrder.filter((col) => pinnedColumns[col] === "right");
   };
 
   // Calculate left position for a pinned-left column
@@ -245,7 +295,7 @@ export function FuelingRatesTable({
     const pinnedLeftCols = getPinnedLeftColumns();
     const colIndex = pinnedLeftCols.indexOf(columnId);
     if (colIndex < 0) return baseLeft;
-    
+
     let left = baseLeft;
     for (let i = 0; i < colIndex; i++) {
       left += columnWidths[pinnedLeftCols[i]] || 100;
@@ -253,12 +303,12 @@ export function FuelingRatesTable({
     return left;
   };
 
-  // Calculate right position for a pinned-right column  
+  // Calculate right position for a pinned-right column
   const getRightPosition = (columnId: string): number => {
     const pinnedRightCols = getPinnedRightColumns().reverse(); // rightmost first
     const colIndex = pinnedRightCols.indexOf(columnId);
     if (colIndex < 0) return 0;
-    
+
     let right = 0;
     for (let i = 0; i < colIndex; i++) {
       right += columnWidths[pinnedRightCols[i]] || 100;
@@ -269,7 +319,7 @@ export function FuelingRatesTable({
   // Check if column is the last pinned on its side (for shadow)
   const isLastPinnedLeft = (columnId: string): boolean => {
     const pinnedLeftCols = getPinnedLeftColumns();
-    if (pinnedLeftCols.length === 0) return columnId === 'period'; // period is always "last" fixed
+    if (pinnedLeftCols.length === 0) return columnId === "period"; // period is always "last" fixed
     return pinnedLeftCols[pinnedLeftCols.length - 1] === columnId;
   };
 
@@ -282,33 +332,33 @@ export function FuelingRatesTable({
   // Get sticky class for a column with shadow
   const getStickyClass = (columnId: string): string => {
     const pin = pinnedColumns[columnId];
-    if (!pin) return '';
-    
-    const baseClass = 'sticky bg-background z-30';
-    
-    if (pin === 'left') {
+    if (!pin) return "";
+
+    const baseClass = "sticky bg-background z-30";
+
+    if (pin === "left") {
       const hasShadow = isLastPinnedLeft(columnId);
-      return hasShadow 
-        ? `${baseClass} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]` 
+      return hasShadow
+        ? `${baseClass} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]`
         : baseClass;
     }
-    if (pin === 'right') {
+    if (pin === "right") {
       const hasShadow = isFirstPinnedRight(columnId);
-      return hasShadow 
-        ? `${baseClass} shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]` 
+      return hasShadow
+        ? `${baseClass} shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]`
         : baseClass;
     }
-    return '';
+    return "";
   };
 
   // Get sticky style for a column
   const getStickyStyle = (columnId: string): React.CSSProperties => {
     const pin = pinnedColumns[columnId];
     if (!pin) return {};
-    if (pin === 'left') {
+    if (pin === "left") {
       return { left: getLeftPosition(columnId) };
     }
-    if (pin === 'right') {
+    if (pin === "right") {
       return { right: getRightPosition(columnId) };
     }
     return {};
@@ -615,11 +665,11 @@ export function FuelingRatesTable({
   );
 
   // Pinnable header content component
-  const PinnableHeaderContent = ({ 
-    columnId, 
-    label 
-  }: { 
-    columnId: string; 
+  const PinnableHeaderContent = ({
+    columnId,
+    label,
+  }: {
+    columnId: string;
     label: string;
   }) => {
     const pin = getColumnPin(columnId);
@@ -627,16 +677,23 @@ export function FuelingRatesTable({
       <div className="flex items-center justify-between gap-1">
         <div className="flex items-center gap-1">
           {pin && (
-            <Pin className={cn(
-              "h-3 w-3 text-primary",
-              pin === 'right' && "rotate-90"
-            )} />
+            <Pin
+              className={cn(
+                "h-3 w-3 text-primary",
+                pin === "right" && "rotate-90"
+              )}
+            />
           )}
           <span className="truncate">{label}</span>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" className="h-5 w-5 -mr-1 shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 -mr-1 shrink-0"
+            >
               {pin ? (
                 <PinOff className="h-3 w-3" />
               ) : (
@@ -652,11 +709,11 @@ export function FuelingRatesTable({
               </DropdownMenuItem>
             ) : (
               <>
-                <DropdownMenuItem onClick={() => togglePin(columnId, 'left')}>
+                <DropdownMenuItem onClick={() => togglePin(columnId, "left")}>
                   <Pin className="h-4 w-4 mr-2" />
                   Fixar à esquerda
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => togglePin(columnId, 'right')}>
+                <DropdownMenuItem onClick={() => togglePin(columnId, "right")}>
                   <Pin className="h-4 w-4 mr-2 rotate-90" />
                   Fixar à direita
                 </DropdownMenuItem>
@@ -761,1026 +818,1116 @@ export function FuelingRatesTable({
     },
   ];
 
-  // Mock route data for sidebar
-  const routeItems = [
-    {
-      id: "1",
-      title: "Disponível",
-      origin: "Aeroporto Galeão, Rio De Janeiro",
-      destination: "Búzios, Armação Dos Búzios",
-      schedule: "In – 08:30 às 23:30",
-      badge: "+1",
-    },
-    {
-      id: "2", 
-      title: "Disponível",
-      origin: "Aeroporto Galeão, Rio De Janeiro",
-      destination: "Apa Pau, Armação Dos Búzios",
-      schedule: "In – 08:30 às 23:30",
-      badge: null,
-    },
-    {
-      id: "3",
-      title: "Disponível",
-      origin: "Barra, Rio De Janeiro",
-      destination: "Búzios, Armação Dos Búzios",
-      schedule: "Interhotel – 07:00 às 12:00",
-      badge: null,
-    },
-    {
-      id: "4",
-      title: "Disponível",
-      origin: "Barra, Rio De Janeiro",
-      destination: "Apa Pau, Armação Dos Búzios",
-      schedule: "Interhotel – 07:00 às 12:00",
-      badge: null,
-    },
-  ];
-
   return (
-    <div className="flex h-full w-[95vw] ">
-      {/* Inline Left Sidebar - pushes content */}
-      <div 
+    <>
+      <div
         className={cn(
-          "shrink-0 border-r border-border bg-background transition-all duration-300 ease-in-out overflow-hidden",
-          sidebarOpen ? "w-[280px]" : "w-0"
+          "transition-all duration-300 ease-in-out flex w-screen lg:w-[95vw] h-[68vh] ",
+          sidebarOpen && "ml-[280px] overflow-hidden "
         )}
       >
-        <div className="flex flex-col h-full w-[280px]">
-          {/* Search Header */}
-          <div className="p-3 border-b">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar tarifa..."
-                  className="pl-9 h-8 text-sm"
-                />
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header Section */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-border shrink-0">
+            {/* Left side - Panel Toggle & Title */}
+            <div className="flex items-center  gap-4">
+              <div className="flex items-center gap-2 hover:bg-muted/40 pl-1.5 pr-3 py-2.5 rounded-md outline-0 outline-border hover:outline-1  cursor-pointer">
+                {onToggleSidebar && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={onToggleSidebar}
+                  >
+                    <PanelLeft className="h-4 w-4" />
+                  </Button>
+                )}
+
+                <div>
+                  <h3 className="font-semibold text-sm">
+                    Histórico de Abastecimentos
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {filteredPeriodsData.length} períodos
+                  </p>
+                </div>
               </div>
-              <Button type="button" size="sm" className="h-8 px-2">
-                <Plus className="h-4 w-4" />
+
+              <div className="h-5 border-l border-border ">
+                <Separator orientation="vertical" className="max-h-5" />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-1.5 h-9"
+                onClick={() => setUpdateOpen(true)}
+              >
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">{selectedProfile.name}</span>
+              </Button>
+
+              {/* Filters Button */}
+              <Button
+                type="button"
+                variant="table_border_cutted"
+                size="sm"
+                className="gap-1.5 h-9"
+              >
+                <Filter className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Filtros</span>
               </Button>
             </div>
-          </div>
 
-          {/* Route Cards List */}
-          <ScrollArea className="flex-1">
-            <div className="p-2 space-y-2">
-              {routeItems.map((route) => (
-                <div
-                  key={route.id}
-                  className="p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
-                >
-                  {/* Header with switch */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Switch defaultChecked className="scale-75" />
-                      <span className="text-xs font-medium">{route.title}</span>
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" className="h-5 w-5">
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
-                  </div>
-
-                  {/* Route info */}
-                  <div className="space-y-1.5 text-xs">
-                    <div className="flex items-start gap-1.5">
-                      <MapPin className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                      <span className="text-foreground line-clamp-1">{route.origin}</span>
-                      {route.badge && (
-                        <Badge variant="secondary" className="text-[9px] h-4 px-1 ml-auto">
-                          {route.badge}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <MapPin className="h-3 w-3 text-primary mt-0.5 shrink-0" />
-                      <span className="text-foreground line-clamp-1">{route.destination}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">{route.schedule}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0   ">
-        {/* Header Section */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-border shrink-0">
-          {/* Left side - Panel Toggle & Title */}
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <PanelLeft className="h-4 w-4" />
-            </Button>
-            <Separator orientation="vertical" className="h-5" />
-            <div>
-              <h3 className="font-semibold text-sm">
-                Histórico de Abastecimentos
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {filteredPeriodsData.length} períodos
-              </p>
+            {/* Right side - Actions */}
+            <div className="flex items-center gap-2">
+              {/* Add Button with Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" size="sm" className="gap-1.5 h-8">
+                    <Plus className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Adicionar</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleAddNew}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Abastecimento
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
-          {/* Right side - Actions */}
-          <div className="flex items-center gap-2">
-            {/* Category Badge */}
-            {vehicleCategory && (
-              <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
-                {CATEGORY_LABELS[vehicleCategory] || vehicleCategory}
-              </Badge>
-            )}
+          {/* Table with drag-to-scroll */}
+          <div
+            ref={dragRef}
+            onPointerDown={onPointerDown}
+            className={cn("", isGrabbing && "cursor-grabbing select-none")}
+          >
+            <ScrollArea className="max-w-screen border-r border-border">
+              <Table>
+                <TableHeader variant="compact-fueling">
+                  <TableRow className="hover:bg-transparent">
+                    {/* Checkbox column - FIXED */}
+                    <TableHead variant="sticky-first" className="w-12">
+                      <Checkbox
+                        checked={
+                          paginatedData.length > 0 &&
+                          selectedRows.size === paginatedData.length
+                        }
+                        onCheckedChange={toggleAllSelection}
+                        className="translate-y-0.5"
+                      />
+                    </TableHead>
 
-            {/* Filters Button */}
-            <Button type="button" variant="outline" size="sm" className="gap-1.5 h-8">
-              <Filter className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Filtros</span>
-            </Button>
-
-            {/* Add Button with Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button type="button" size="sm" className="gap-1.5 h-8">
-                  <Plus className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Adicionar</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleAddNew}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Abastecimento
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-      {/* Table with drag-to-scroll */}
-      <div
-        ref={dragRef}
-        onPointerDown={onPointerDown}
-        className={cn("", isGrabbing && "cursor-grabbing select-none")}
-      >
-        <ScrollArea className="max-w-screen border-r border-border">
-          <Table>
-            <TableHeader variant="compact-fueling">
-              <TableRow className="hover:bg-transparent">
-                {/* Checkbox column - FIXED */}
-                <TableHead variant="sticky-first" className="w-12">
-                  <Checkbox
-                    checked={
-                      paginatedData.length > 0 &&
-                        selectedRows.size === paginatedData.length
-                      }
-                      onCheckedChange={toggleAllSelection}
-                      className="translate-y-0.5"
-                    />
-                  </TableHead>
-
-                  {/* Period - FIXED with dynamic shadow */}
-                  <TableHead
-                    variant="sticky-second"
-                    sortable
-                    className={cn(
-                      "min-w-[180px]",
-                      getPinnedLeftColumns().length === 0 && "shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>Período</span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 -mr-2">
-                            <MoreHorizontal className="h-3.5 w-3.5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => togglePin('period', 'left')}>
-                            <Pin className="h-4 w-4 mr-2" />
-                            {getColumnPin('period') === 'left' ? 'Desafixar' : 'Fixar à esquerda'}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => togglePin('period', 'right')}>
-                            <Pin className="h-4 w-4 mr-2 rotate-90" />
-                          {getColumnPin('period') === 'right' ? 'Desafixar' : 'Fixar à direita'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  </TableHead>
-
-                  {/* Provider */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[130px]", getStickyClass('provider'))}
-                    style={getStickyStyle('provider')}
-                  >
-                    <PinnableHeaderContent columnId="provider" label="Posto" />
-                  </TableHead>
-
-                  {/* Fuel Type */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[110px]", getStickyClass('fuelType'))}
-                    style={getStickyStyle('fuelType')}
-                  >
-                    <PinnableHeaderContent columnId="fuelType" label="Combustível" />
-                  </TableHead>
-
-                  {/* Liters */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[90px]", getStickyClass('liters'))}
-                    style={getStickyStyle('liters')}
-                  >
-                    <PinnableHeaderContent columnId="liters" label="Litros" />
-                  </TableHead>
-
-                  {/* Total Value */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[110px]", getStickyClass('totalValue'))}
-                    style={getStickyStyle('totalValue')}
-                  >
-                    <PinnableHeaderContent columnId="totalValue" label="Valor Total" />
-                  </TableHead>
-
-                  {/* Unit Price */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[110px]", getStickyClass('unitPrice'))}
-                    style={getStickyStyle('unitPrice')}
-                  >
-                    <PinnableHeaderContent columnId="unitPrice" label="Preço/L" />
-                  </TableHead>
-
-                  {/* Odometer */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[100px]", getStickyClass('odometer'))}
-                    style={getStickyStyle('odometer')}
-                  >
-                    <PinnableHeaderContent columnId="odometer" label="Odômetro" />
-                  </TableHead>
-
-                  {/* Category */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    sortable
-                    className={cn("min-w-[100px]", getStickyClass('category'))}
-                    style={getStickyStyle('category')}
-                  >
-                    <PinnableHeaderContent columnId="category" label="Categoria" />
-                  </TableHead>
-
-                  {/* Fueling days */}
-                  <TableHead
-                    variant="minimal-fueling"
-                    className="min-w-[200px]"
-                  >
-                    Dias c/ Abast.
-                  </TableHead>
-
-                  {/* Actions column */}
-                  <TableHead variant="minimal-fueling" className="w-10" />
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {paginatedData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={11} className="h-24 text-center">
-                      <p className="text-muted-foreground">
-                        Nenhum registro encontrado
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedData.map((period) => (
-                    <TableRow
-                      key={period.id}
+                    {/* Period - FIXED with dynamic shadow */}
+                    <TableHead
+                      variant="sticky-second"
+                      sortable
                       className={cn(
-                        "group transition-colors hover:bg-muted/50",
-                        selectedRows.has(period.id) && "bg-muted/30"
+                        "min-w-[180px]",
+                        getPinnedLeftColumns().length === 0 &&
+                          "shadow-[inset_-1px_0_0_var(--color-border)]"
                       )}
                     >
-                      {/* Checkbox - FIXED */}
-                      <TableCell
-                        variant="sticky-first"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Checkbox
-                          checked={selectedRows.has(period.id)}
-                          onCheckedChange={() => toggleRowSelection(period.id)}
-                          className="translate-y-0.5"
-                        />
-                      </TableCell>
+                      <div className="flex items-center justify-between">
+                        <span>Período</span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 -mr-2"
+                            >
+                              <MoreHorizontal className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => togglePin("period", "left")}
+                            >
+                              <Pin className="h-4 w-4 mr-2" />
+                              {getColumnPin("period") === "left"
+                                ? "Desafixar"
+                                : "Fixar à esquerda"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => togglePin("period", "right")}
+                            >
+                              <Pin className="h-4 w-4 mr-2 rotate-90" />
+                              {getColumnPin("period") === "right"
+                                ? "Desafixar"
+                                : "Fixar à direita"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableHead>
 
-                      {/* Period - FIXED with dynamic shadow */}
-                      <TableCell 
-                        variant="sticky-second" 
-                        className={cn(
-                          "font-medium",
-                          getPinnedLeftColumns().length === 0 && "shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"
-                        )}
-                      >
-                        <Popover
-                          open={periodPopoverOpen === period.id}
-                          onOpenChange={(open) =>
-                            setPeriodPopoverOpen(open ? period.id : null)
-                          }
-                        >
-                          <PopoverTrigger asChild>
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 px-3 py-1  cursor-pointer text-left transition-colors 
-                            truncate hover:bg-background/20 rounded-lg hover:py-2
-             hover:ring-1 hover:ring-border -mx-3 -my-1"
-                            onClick={() => {
-                              setDateRange({
-                                from: period.periodStart,
-                                to: period.periodEnd,
-                              });
-                              setDatePickerMonth(period.periodStart);
-                            }}
-                          >
-                            {/* <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" /> */}
-                            <span>{period.periodLabel}</span>
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto p-0"
-                          align="start"
-                          side="bottom"
-                        >
-                          <div className="flex">
-                            {/* Presets sidebar */}
-                            <div className="border-r p-2 space-y-0.5 min-w-36 bg-popover">
-                              {datePresets.map((preset) => (
-                                <button
-                                  key={preset.label}
-                                  type="button"
-                                  className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
-                                  onClick={() => {
-                                    const range = preset.getValue();
-                                    setDateRange(range);
-                                  }}
-                                >
-                                  {preset.label}
-                                </button>
-                              ))}
-                            </div>
-                            {/* Calendar */}
-                            <div className="p-3">
-                              <Calendar
-                                mode="range"
-                                selected={dateRange}
-                                onSelect={setDateRange}
-                                numberOfMonths={2}
-                                locale={ptBR}
-                                month={datePickerMonth}
-                                onMonthChange={setDatePickerMonth}
-                              />
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
-
-                    {/* Provider - Popover with search */}
-                    <TableCell 
-                      variant="compact-fueling" 
-                      className={cn("w-[150px]", getStickyClass('provider'))}
-                      style={getStickyStyle('provider')}
+                    {/* Provider */}
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn(
+                        "min-w-[130px]",
+                        getStickyClass("provider")
+                      )}
+                      style={getStickyStyle("provider")}
                     >
-                      <Popover
-                        open={providerPopoverOpen === period.id}
-                        onOpenChange={(open) =>
-                          setProviderPopoverOpen(open ? period.id : null)
-                        }
-                      >
-                        <PopoverTrigger asChild>
-                          <button
-                            type="button"
-                            className="truncate hover:bg-background/20 rounded-lg hover:py-2
-             hover:ring-1 hover:ring-border
-             cursor-pointer text-left px-5 transition-colors -mx-3 -my-1 "
-                            title={period.provider}
-                          >
-                            {period.provider || "Selecione..."}
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar posto..." />
-                            <CommandList>
-                              <CommandEmpty>
-                                Nenhum posto encontrado.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {[
-                                  "Ipiranga",
-                                  "Shell",
-                                  "Petrobras",
-                                  "BR",
-                                  "Outro",
-                                ].map((provider) => (
-                                  <CommandItem
-                                    key={provider}
-                                    value={provider}
-                                    onSelect={() => {
-                                      setProviderPopoverOpen(null);
-                                    }}
-                                  >
-                                    {provider}
-                                    {period.provider === provider && (
-                                      <Check className="ml-auto h-4 w-4" />
-                                    )}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
+                      <PinnableHeaderContent
+                        columnId="provider"
+                        label="Posto"
+                      />
+                    </TableHead>
 
-                    {/* Fuel Type - Popover with selector */}
-                    <TableCell 
-                      variant="compact-fueling"
-                      className={getStickyClass('fuelType')}
-                      style={getStickyStyle('fuelType')}
+                    {/* Fuel Type */}
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn(
+                        "min-w-[110px]",
+                        getStickyClass("fuelType")
+                      )}
+                      style={getStickyStyle("fuelType")}
                     >
-                      <Popover
-                        open={fuelTypePopoverOpen === period.id}
-                        onOpenChange={(open) =>
-                          setFuelTypePopoverOpen(open ? period.id : null)
-                        }
-                      >
-                        <PopoverTrigger asChild>
-                          <Badge
-                            variant="outline"
-                            className=" hover:bg-background/20 border-none rounded-lg hover:py-2 
-                hover:ring-1 hover:ring-border
-                py-2 cursor-pointer text-left px-3 transition-colors "
-                          >
-                            {FUEL_TYPE_LABELS[period.fuelType] ||
-                              period.fuelType}
-                          </Badge>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[180px] p-0" align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar..." />
-                            <CommandList>
-                              <CommandEmpty>Nenhum encontrado.</CommandEmpty>
-                              <CommandGroup>
-                                {Object.entries(FUEL_TYPE_LABELS).map(
-                                  ([key, label]) => (
-                                    <CommandItem
-                                      key={key}
-                                      value={key}
-                                      onSelect={() =>
-                                        setFuelTypePopoverOpen(null)
-                                      }
-                                    >
-                                      {label}
-                                      {period.fuelType === key && (
-                                        <Check className="ml-auto h-4 w-4" />
-                                      )}
-                                    </CommandItem>
-                                  )
-                                )}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
+                      <PinnableHeaderContent
+                        columnId="fuelType"
+                        label="Combustível"
+                      />
+                    </TableHead>
 
-                    {/* Liters - Popover with input */}
-                    <TableCell 
-                      variant="compact-fueling"
-                      className={getStickyClass('liters')}
-                      style={getStickyStyle('liters')}
+                    {/* Liters */}
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn("min-w-[90px]", getStickyClass("liters"))}
+                      style={getStickyStyle("liters")}
                     >
-                      <Popover
-                        open={litersPopoverOpen === period.id}
-                        onOpenChange={(open) => {
-                          setLitersPopoverOpen(open ? period.id : null);
-                          if (open) setEditLiters(period.totalLiters);
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <button
-                            className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-             hover:ring-1 hover:ring-border
-             py-2 cursor-pointer text-left px-3  transition-colors "
-                          >
-                            {formatNumber(period.totalLiters)} L
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-3" align="start">
-                          <div className="space-y-3">
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium">
-                                Litros
-                              </label>
-                              <Input
-                                type="number"
-                                value={editLiters}
-                                onChange={(e) =>
-                                  setEditLiters(Number(e.target.value))
-                                }
-                                className="h-8"
-                                step="0.01"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2 justify-end">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7"
-                                onClick={() => setLitersPopoverOpen(null)}
-                              >
-                                Cancelar
-                              </Button>
-                              <Button
-                                size="sm"
-                                className="h-7"
-                                onClick={() => {
-                                  // TODO: Save liters
-                                  setLitersPopoverOpen(null);
-                                }}
-                              >
-                                Salvar
-                              </Button>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
+                      <PinnableHeaderContent columnId="liters" label="Litros" />
+                    </TableHead>
 
-                    {/* Total Value - Popover with input */}
-                    <TableCell 
-                      variant="compact-fueling"
-                      className={getStickyClass('totalValue')}
-                      style={getStickyStyle('totalValue')}
+                    {/* Total Value */}
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn(
+                        "min-w-[110px]",
+                        getStickyClass("totalValue")
+                      )}
+                      style={getStickyStyle("totalValue")}
                     >
-                      <Popover
-                        open={valuePopoverOpen === period.id}
-                        onOpenChange={(open) => {
-                          setValuePopoverOpen(open ? period.id : null);
-                          if (open) setEditValue(period.totalValue);
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <button
-                            className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-             hover:ring-1 hover:ring-border
-             py-2 cursor-pointer text-left px-3 transition-colors "
-                          >
-                            {formatCurrency(period.totalValue)}
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-3" align="start">
-                          <div className="space-y-3">
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium">
-                                Valor Total (R$)
-                              </label>
-                              <Input
-                                type="number"
-                                value={editValue}
-                                onChange={(e) =>
-                                  setEditValue(Number(e.target.value))
-                                }
-                                className="h-8"
-                                step="0.01"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2 justify-end">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7"
-                                onClick={() => setValuePopoverOpen(null)}
-                              >
-                                Cancelar
-                              </Button>
-                              <Button
-                                size="sm"
-                                className="h-7"
-                                onClick={() => {
-                                  // TODO: Save value
-                                  setValuePopoverOpen(null);
-                                }}
-                              >
-                                Salvar
-                              </Button>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
+                      <PinnableHeaderContent
+                        columnId="totalValue"
+                        label="Valor Total"
+                      />
+                    </TableHead>
 
                     {/* Unit Price */}
-                    <TableCell 
-                      variant="compact-fueling" 
-                      className={cn("px-8", getStickyClass('unitPrice'))}
-                      style={getStickyStyle('unitPrice')}
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn(
+                        "min-w-[110px]",
+                        getStickyClass("unitPrice")
+                      )}
+                      style={getStickyStyle("unitPrice")}
                     >
-                      {formatCurrency(period.unitPrice)}/L
-                    </TableCell>
+                      <PinnableHeaderContent
+                        columnId="unitPrice"
+                        label="Preço/L"
+                      />
+                    </TableHead>
 
-                    {/* Odometer - Popover with input */}
-                    <TableCell 
-                      variant="compact-fueling"
-                      className={getStickyClass('odometer')}
-                      style={getStickyStyle('odometer')}
+                    {/* Odometer */}
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn(
+                        "min-w-[100px]",
+                        getStickyClass("odometer")
+                      )}
+                      style={getStickyStyle("odometer")}
                     >
-                      <Popover
-                        open={odometerPopoverOpen === period.id}
-                        onOpenChange={(open) => {
-                          setOdometerPopoverOpen(open ? period.id : null);
-                          if (open) setEditOdometer(period.odometer);
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <button
-                            className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-             hover:ring-1 hover:ring-border
-             py-2 cursor-pointer text-left px-3 transition-colors "
-                          >
-                            {formatNumber(period.odometer, 0)} km
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-3" align="start">
-                          <div className="space-y-3">
-                            <div className="space-y-1">
-                              <label className="text-sm font-medium">
-                                Odômetro (km)
-                              </label>
-                              <Input
-                                type="number"
-                                value={editOdometer}
-                                onChange={(e) =>
-                                  setEditOdometer(Number(e.target.value))
-                                }
-                                className="h-8"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2 justify-end">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7"
-                                onClick={() => setOdometerPopoverOpen(null)}
-                              >
-                                Cancelar
-                              </Button>
-                              <Button
-                                size="sm"
-                                className="h-7"
-                                onClick={() => {
-                                  // TODO: Save odometer
-                                  setOdometerPopoverOpen(null);
-                                }}
-                              >
-                                Salvar
-                              </Button>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
+                      <PinnableHeaderContent
+                        columnId="odometer"
+                        label="Odômetro"
+                      />
+                    </TableHead>
 
                     {/* Category */}
-                    <TableCell 
-                      variant="compact-fueling"
-                      className={getStickyClass('category')}
-                      style={getStickyStyle('category')}
-                    >
-                      {period.category ? (
-                        <Badge variant="secondary" className="text-xs ml-2">
-                          {CATEGORY_LABELS[period.category] || period.category}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
+                    <TableHead
+                      variant="minimal-fueling"
+                      sortable
+                      className={cn(
+                        "min-w-[100px]",
+                        getStickyClass("category")
                       )}
-                    </TableCell>
-
-                    {/* Fueling days - marks days that HAD fueling */}
-                    <TableCell variant="compact-fueling">
-                      <div className="flex items-center gap-1">
-                        {WEEK_DAYS.map((day, index) => (
-                          <DayChip
-                            key={`${period.id}-day-${index}`}
-                            day={day}
-                            dayIndex={index}
-                            isActive={period.fuelingDays.includes(index)}
-                            onClick={() => {
-                              setDetailsPopoverOpen(
-                                detailsPopoverOpen === period.id
-                                  ? null
-                                  : period.id
-                              );
-                              handleCellClick(period);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </TableCell>
-
-                    {/* Actions with Details Popover */}
-                    <TableCell
-                      variant="compact-fueling"
-                      onClick={(e) => e.stopPropagation()}
+                      style={getStickyStyle("category")}
                     >
-                      <Popover
-                        open={detailsPopoverOpen === period.id}
-                        onOpenChange={(open) => {
-                          setDetailsPopoverOpen(open ? period.id : null);
-                          if (open) handleCellClick(period);
-                        }}
+                      <PinnableHeaderContent
+                        columnId="category"
+                        label="Categoria"
+                      />
+                    </TableHead>
+
+                    {/* Fueling days */}
+                    <TableHead
+                      variant="minimal-fueling"
+                      className="min-w-[200px]"
+                    >
+                      Dias c/ Abast.
+                    </TableHead>
+
+                    {/* Actions column */}
+                    <TableHead variant="minimal-fueling" className="w-10" />
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {paginatedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={11} className="h-24 text-center">
+                        <p className="text-muted-foreground">
+                          Nenhum registro encontrado
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedData.map((period) => (
+                      <TableRow
+                        key={period.id}
+                        className={cn(
+                          "group transition-colors hover:bg-muted/50",
+                          selectedRows.has(period.id) && "bg-muted/30"
+                        )}
                       >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-[320px] p-0"
-                          align="end"
-                          side="left"
+                        {/* Checkbox - FIXED */}
+                        <TableCell
+                          variant="sticky-first"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="p-4 space-y-4">
-                            {/* Header */}
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold text-sm">
-                                Detalhes do Período
-                              </h4>
+                          <Checkbox
+                            checked={selectedRows.has(period.id)}
+                            onCheckedChange={() =>
+                              toggleRowSelection(period.id)
+                            }
+                            className="translate-y-0.5"
+                          />
+                        </TableCell>
+
+                        {/* Period - FIXED with dynamic shadow */}
+                        <TableCell
+                          variant="sticky-second"
+                          className={cn(
+                            "font-medium",
+                            getPinnedLeftColumns().length === 0 &&
+                              "shadow-[inset_-1px_0_0_var(--color-border)]"
+                          )}
+                        >
+                          <Popover
+                            open={periodPopoverOpen === period.id}
+                            onOpenChange={(open) =>
+                              setPeriodPopoverOpen(open ? period.id : null)
+                            }
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 px-3 py-1  cursor-pointer text-left transition-colors 
+                            truncate hover:bg-background/20 rounded-lg hover:py-2
+             hover:ring-1 hover:ring-border -mx-3 -my-1"
+                                onClick={() => {
+                                  setDateRange({
+                                    from: period.periodStart,
+                                    to: period.periodEnd,
+                                  });
+                                  setDatePickerMonth(period.periodStart);
+                                }}
+                              >
+                                {/* <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" /> */}
+                                <span>{period.periodLabel}</span>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                              side="bottom"
+                            >
+                              <div className="flex">
+                                {/* Presets sidebar */}
+                                <div className="border-r p-2 space-y-0.5 min-w-36 bg-popover">
+                                  {datePresets.map((preset) => (
+                                    <button
+                                      key={preset.label}
+                                      type="button"
+                                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
+                                      onClick={() => {
+                                        const range = preset.getValue();
+                                        setDateRange(range);
+                                      }}
+                                    >
+                                      {preset.label}
+                                    </button>
+                                  ))}
+                                </div>
+                                {/* Calendar */}
+                                <div className="p-3">
+                                  <Calendar
+                                    mode="range"
+                                    selected={dateRange}
+                                    onSelect={setDateRange}
+                                    numberOfMonths={2}
+                                    locale={ptBR}
+                                    month={datePickerMonth}
+                                    onMonthChange={setDatePickerMonth}
+                                  />
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+
+                        {/* Provider - Popover with search */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={cn(
+                            "w-[150px]",
+                            getStickyClass("provider")
+                          )}
+                          style={getStickyStyle("provider")}
+                        >
+                          <Popover
+                            open={providerPopoverOpen === period.id}
+                            onOpenChange={(open) =>
+                              setProviderPopoverOpen(open ? period.id : null)
+                            }
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                type="button"
+                                className="truncate hover:bg-background/20 rounded-lg hover:py-2
+             hover:ring-1 hover:ring-border
+             cursor-pointer text-left px-5 transition-colors -mx-3 -my-1 "
+                                title={period.provider}
+                              >
+                                {period.provider || "Selecione..."}
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[200px] p-0"
+                              align="start"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Buscar posto..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    Nenhum posto encontrado.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {[
+                                      "Ipiranga",
+                                      "Shell",
+                                      "Petrobras",
+                                      "BR",
+                                      "Outro",
+                                    ].map((provider) => (
+                                      <CommandItem
+                                        key={provider}
+                                        value={provider}
+                                        onSelect={() => {
+                                          setProviderPopoverOpen(null);
+                                        }}
+                                      >
+                                        {provider}
+                                        {period.provider === provider && (
+                                          <Check className="ml-auto h-4 w-4" />
+                                        )}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+
+                        {/* Fuel Type - Popover with selector */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={getStickyClass("fuelType")}
+                          style={getStickyStyle("fuelType")}
+                        >
+                          <Popover
+                            open={fuelTypePopoverOpen === period.id}
+                            onOpenChange={(open) =>
+                              setFuelTypePopoverOpen(open ? period.id : null)
+                            }
+                          >
+                            <PopoverTrigger asChild>
+                              <Badge
+                                variant="outline"
+                                className=" hover:bg-background/20 border-none rounded-lg hover:py-2 
+                hover:ring-1 hover:ring-border
+                py-2 cursor-pointer text-left px-3 transition-colors "
+                              >
+                                {FUEL_TYPE_LABELS[period.fuelType] ||
+                                  period.fuelType}
+                              </Badge>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[180px] p-0"
+                              align="start"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Buscar..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    Nenhum encontrado.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {Object.entries(FUEL_TYPE_LABELS).map(
+                                      ([key, label]) => (
+                                        <CommandItem
+                                          key={key}
+                                          value={key}
+                                          onSelect={() =>
+                                            setFuelTypePopoverOpen(null)
+                                          }
+                                        >
+                                          {label}
+                                          {period.fuelType === key && (
+                                            <Check className="ml-auto h-4 w-4" />
+                                          )}
+                                        </CommandItem>
+                                      )
+                                    )}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+
+                        {/* Liters - Popover with input */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={getStickyClass("liters")}
+                          style={getStickyStyle("liters")}
+                        >
+                          <Popover
+                            open={litersPopoverOpen === period.id}
+                            onOpenChange={(open) => {
+                              setLitersPopoverOpen(open ? period.id : null);
+                              if (open) setEditLiters(period.totalLiters);
+                            }}
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                className="hover:bg-background/20 border-none rounded-lg hover:py-2 
+             hover:ring-1 hover:ring-border
+             py-2 cursor-pointer text-left px-3  transition-colors "
+                              >
+                                {formatNumber(period.totalLiters)} L
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[200px] p-3"
+                              align="start"
+                            >
+                              <div className="space-y-3">
+                                <div className="space-y-1">
+                                  <label className="text-sm font-medium">
+                                    Litros
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    value={editLiters}
+                                    onChange={(e) =>
+                                      setEditLiters(Number(e.target.value))
+                                    }
+                                    className="h-8"
+                                    step="0.01"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => setLitersPopoverOpen(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => {
+                                      // TODO: Save liters
+                                      setLitersPopoverOpen(null);
+                                    }}
+                                  >
+                                    Salvar
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+
+                        {/* Total Value - Popover with input */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={getStickyClass("totalValue")}
+                          style={getStickyStyle("totalValue")}
+                        >
+                          <Popover
+                            open={valuePopoverOpen === period.id}
+                            onOpenChange={(open) => {
+                              setValuePopoverOpen(open ? period.id : null);
+                              if (open) setEditValue(period.totalValue);
+                            }}
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                className="hover:bg-background/20 border-none rounded-lg hover:py-2 
+             hover:ring-1 hover:ring-border
+             py-2 cursor-pointer text-left px-3 transition-colors "
+                              >
+                                {formatCurrency(period.totalValue)}
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[200px] p-3"
+                              align="start"
+                            >
+                              <div className="space-y-3">
+                                <div className="space-y-1">
+                                  <label className="text-sm font-medium">
+                                    Valor Total (R$)
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    value={editValue}
+                                    onChange={(e) =>
+                                      setEditValue(Number(e.target.value))
+                                    }
+                                    className="h-8"
+                                    step="0.01"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => setValuePopoverOpen(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => {
+                                      // TODO: Save value
+                                      setValuePopoverOpen(null);
+                                    }}
+                                  >
+                                    Salvar
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+
+                        {/* Unit Price */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={cn("px-8", getStickyClass("unitPrice"))}
+                          style={getStickyStyle("unitPrice")}
+                        >
+                          {formatCurrency(period.unitPrice)}/L
+                        </TableCell>
+
+                        {/* Odometer - Popover with input */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={getStickyClass("odometer")}
+                          style={getStickyStyle("odometer")}
+                        >
+                          <Popover
+                            open={odometerPopoverOpen === period.id}
+                            onOpenChange={(open) => {
+                              setOdometerPopoverOpen(open ? period.id : null);
+                              if (open) setEditOdometer(period.odometer);
+                            }}
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                className="hover:bg-background/20 border-none rounded-lg hover:py-2 
+             hover:ring-1 hover:ring-border
+             py-2 cursor-pointer text-left px-3 transition-colors "
+                              >
+                                {formatNumber(period.odometer, 0)} km
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[200px] p-3"
+                              align="start"
+                            >
+                              <div className="space-y-3">
+                                <div className="space-y-1">
+                                  <label className="text-sm font-medium">
+                                    Odômetro (km)
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    value={editOdometer}
+                                    onChange={(e) =>
+                                      setEditOdometer(Number(e.target.value))
+                                    }
+                                    className="h-8"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => setOdometerPopoverOpen(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => {
+                                      // TODO: Save odometer
+                                      setOdometerPopoverOpen(null);
+                                    }}
+                                  >
+                                    Salvar
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+
+                        {/* Category */}
+                        <TableCell
+                          variant="compact-fueling"
+                          className={getStickyClass("category")}
+                          style={getStickyStyle("category")}
+                        >
+                          {period.category ? (
+                            <Badge variant="secondary" className="text-xs ml-2">
+                              {CATEGORY_LABELS[period.category] ||
+                                period.category}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+
+                        {/* Fueling days - marks days that HAD fueling */}
+                        <TableCell variant="compact-fueling">
+                          <div className="flex items-center gap-1">
+                            {WEEK_DAYS.map((day, index) => (
+                              <DayChip
+                                key={`${period.id}-day-${index}`}
+                                day={day}
+                                dayIndex={index}
+                                isActive={period.fuelingDays.includes(index)}
+                                onClick={() => {
+                                  setDetailsPopoverOpen(
+                                    detailsPopoverOpen === period.id
+                                      ? null
+                                      : period.id
+                                  );
+                                  handleCellClick(period);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </TableCell>
+
+                        {/* Actions with Details Popover */}
+                        <TableCell
+                          variant="compact-fueling"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Popover
+                            open={detailsPopoverOpen === period.id}
+                            onOpenChange={(open) => {
+                              setDetailsPopoverOpen(open ? period.id : null);
+                              if (open) handleCellClick(period);
+                            }}
+                          >
+                            <PopoverTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6"
-                                onClick={() => setDetailsPopoverOpen(null)}
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
-                                <X className="h-3.5 w-3.5" />
+                                <Eye className="h-3.5 w-3.5" />
                               </Button>
-                            </div>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[320px] p-0"
+                              align="end"
+                              side="left"
+                            >
+                              <div className="p-4 space-y-4">
+                                {/* Header */}
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-semibold text-sm">
+                                    Detalhes do Período
+                                  </h4>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => setDetailsPopoverOpen(null)}
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
 
-                            <Separator />
+                                <Separator />
 
-                            {/* Details */}
-                            <div className="space-y-3 text-sm">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Período:
-                                </span>
-                                <span className="font-medium">
-                                  {period.periodLabel}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Posto:
-                                </span>
-                                <span className="font-medium">
-                                  {period.provider}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Combustível:
-                                </span>
-                                <span className="font-medium">
-                                  {FUEL_TYPE_LABELS[period.fuelType]}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Litros:
-                                </span>
-                                <span className="font-medium">
-                                  {formatNumber(period.totalLiters)} L
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Valor Total:
-                                </span>
-                                <span className="font-medium">
-                                  {formatCurrency(period.totalValue)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Preço/Litro:
-                                </span>
-                                <span className="font-medium">
-                                  {formatCurrency(period.unitPrice)}/L
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Odômetro:
-                                </span>
-                                <span className="font-medium">
-                                  {formatNumber(period.odometer, 0)} km
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Abastecimentos:
-                                </span>
-                                <span className="font-medium">
-                                  {period.fuelingCount}x
-                                </span>
-                              </div>
-                            </div>
+                                {/* Details */}
+                                <div className="space-y-3 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Período:
+                                    </span>
+                                    <span className="font-medium">
+                                      {period.periodLabel}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Posto:
+                                    </span>
+                                    <span className="font-medium">
+                                      {period.provider}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Combustível:
+                                    </span>
+                                    <span className="font-medium">
+                                      {FUEL_TYPE_LABELS[period.fuelType]}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Litros:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatNumber(period.totalLiters)} L
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Valor Total:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatCurrency(period.totalValue)}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Preço/Litro:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatCurrency(period.unitPrice)}/L
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Odômetro:
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatNumber(period.odometer, 0)} km
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">
+                                      Abastecimentos:
+                                    </span>
+                                    <span className="font-medium">
+                                      {period.fuelingCount}x
+                                    </span>
+                                  </div>
+                                </div>
 
-                            <Separator />
+                                <Separator />
 
-                            {/* Actions */}
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 gap-2"
-                                onClick={() => {
-                                  setDetailsPopoverOpen(null);
-                                  // Open edit mode or other action
-                                }}
-                              >
-                                <Edit className="h-3.5 w-3.5" />
-                                Editar
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="flex-1 gap-2"
-                                onClick={() => {
-                                  const periodFuelings = currentFuelings.filter(
-                                    (f) => {
-                                      const fDate = new Date(f.date);
-                                      return (
-                                        fDate >= period.periodStart &&
-                                        fDate <= period.periodEnd
-                                      );
-                                    }
-                                  );
-                                  if (periodFuelings[0]) {
-                                    handleDeleteFueling(periodFuelings[0].id);
-                                  }
-                                  setDetailsPopoverOpen(null);
-                                }}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                                Excluir
-                              </Button>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </div>
-
-      {/* Footer / Pagination */}
-      <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 ">
-        {/* Selected count */}
-        <p className="text-sm text-muted-foreground">
-          {selectedRows.size} de {filteredPeriodsData.length} linha(s)
-          selecionada(s).
-        </p>
-
-        {/* Pagination controls */}
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          {/* Items per page */}
-          <div className="flex items-center gap-2">
-            <Select
-              value={String(itemsPerPage)}
-              onValueChange={(v) => {
-                setItemsPerPage(Number(v));
-                setCurrentPage(1);
-              }}
-            >
-              <SelectTrigger className="h-8 w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-sm text-muted-foreground">/ página</span>
+                                {/* Actions */}
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 gap-2"
+                                    onClick={() => {
+                                      setDetailsPopoverOpen(null);
+                                      // Open edit mode or other action
+                                    }}
+                                  >
+                                    <Edit className="h-3.5 w-3.5" />
+                                    Editar
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="flex-1 gap-2"
+                                    onClick={() => {
+                                      const periodFuelings =
+                                        currentFuelings.filter((f) => {
+                                          const fDate = new Date(f.date);
+                                          return (
+                                            fDate >= period.periodStart &&
+                                            fDate <= period.periodEnd
+                                          );
+                                        });
+                                      if (periodFuelings[0]) {
+                                        handleDeleteFueling(
+                                          periodFuelings[0].id
+                                        );
+                                      }
+                                      setDetailsPopoverOpen(null);
+                                    }}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    Excluir
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           </div>
 
-          {/* Page info */}
-          <p className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages || 1}
-          </p>
+          {/* Footer / Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 ">
+            {/* Selected count */}
+            <p className="text-sm text-muted-foreground">
+              {selectedRows.size} de {filteredPeriodsData.length} linha(s)
+              selecionada(s).
+            </p>
 
-          {/* Page navigation */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage(1)}
-            >
-              <span className="sr-only">Primeira página</span>
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            >
-              <span className="sr-only">Página anterior</span>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            >
-              <span className="sr-only">Próxima página</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage(totalPages)}
-            >
-              <span className="sr-only">Última página</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
+            {/* Pagination controls */}
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {/* Items per page */}
+              <div className="flex items-center gap-2">
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={(v) => {
+                    setItemsPerPage(Number(v));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground">/ página</span>
+              </div>
+
+              {/* Page info */}
+              <p className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages || 1}
+              </p>
+
+              {/* Page navigation */}
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(1)}
+                >
+                  <span className="sr-only">Primeira página</span>
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                >
+                  <span className="sr-only">Página anterior</span>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={currentPage >= totalPages}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                >
+                  <span className="sr-only">Próxima página</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                >
+                  <span className="sr-only">Última página</span>
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
+
+          {/* Add Fueling Sheet */}
+          <Sheet open={showAddSheet} onOpenChange={setShowAddSheet}>
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-md overflow-y-auto"
+            >
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Fuel className="h-5 w-5" />
+                  Novo Abastecimento
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <FuelingForm
+                  vehicleId={vehicleId}
+                  onClose={() => setShowAddSheet(false)}
+                  onSuccess={() => {
+                    setShowAddSheet(false);
+                    refetch();
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Add Fueling Sheet */}
-      <Sheet open={showAddSheet} onOpenChange={setShowAddSheet}>
-        <SheetContent
-          side="right"
-          className="w-full sm:max-w-md overflow-y-auto"
+      {/* Update Modal */}
+      <Dialog open={updateOpen} onOpenChange={setUpdateOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="w-screen max-w-[520px] sm:max-w-[560px] p-0 overflow-hidden rounded-xl gap-0"
         >
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <Fuel className="h-5 w-5" />
-              Novo Abastecimento
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <FuelingForm
-              vehicleId={vehicleId}
-              onClose={() => setShowAddSheet(false)}
-              onSuccess={() => {
-                setShowAddSheet(false);
-                refetch();
-              }}
-            />
+          {/* Header mimic as in screenshot */}
+          <div className="flex items-center justify-between border-b border-border px-2">
+            {/* Search and list */}
+            <div className="">
+              <div className="relative">
+                <Input
+                  variant="modal"
+                  placeholder="Pesquisar perfil..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 border-none py-6"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setUpdateOpen(false)}
+            >
+              <X className="h-4 w-4 " />
+            </Button>
           </div>
-        </SheetContent>
-      </Sheet>
-      </div>
-    </div>
+
+          <div className="relative">
+            {/* Scroll container with custom arrows */}
+            <div className="absolute -right-px top-0 w-2 h-3 flex items-center justify-center z-10 bg-background">
+              <div className="w-0 h-0 border-l-3 border-l-transparent border-r-3 border-r-transparent border-b-4 border-b-muted-foreground/20" />
+            </div>
+            <div
+              className="h-[280px] overflow-y-scroll pr-1
+                [&::-webkit-scrollbar]:w-2
+                [&::-webkit-scrollbar-track]:bg-transparent
+                [&::-webkit-scrollbar-track]:my-3
+                [&::-webkit-scrollbar-thumb]:bg-muted!
+                [&::-webkit-scrollbar-thumb]:hover:bg-muted-foreground/80!
+                [&::-webkit-scrollbar-thumb]:rounded-full
+                [&::-webkit-scrollbar-button]:h-0
+                [&::-webkit-scrollbar-button]:hidden
+              "
+            >
+              <div className="px-2 pb-2">
+                {filteredProfiles.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedProfileId(p.id);
+                      setUpdateOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between cursor-pointer my-2 px-3 py-2 rounded-lg transition-colors ${
+                      p.id === selectedProfileId ? "bg-muted/50" : "hover:bg-muted/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="h-9 w-9 rounded-md bg-muted/60 flex items-center justify-center">
+                        {p.icon === "users" ? (
+                          <User className="h-4 w-4" />
+                        ) : p.icon === "user" ? (
+                          <User className="h-4 w-4" />
+                        ) : (
+                          <Building2 className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="text-left flex justify-between items-center w-full">
+                        <div className="text-sm font-medium">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {p.typeLabel}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Bottom arrow */}
+            <div className="absolute -right-px bottom-0 w-2 h-3 flex items-center justify-center z-10 bg-background">
+              <div className="w-0 h-0 border-l-3 border-l-transparent border-r-3 border-r-transparent border-t-4 border-t-muted-foreground/20" />
+            </div>
+          </div>
+
+          {/* Add new profile footer - outside scroll */}
+          <div className="px-7 py-3 bg-background border-t border-border flex items-center justify-center">
+            <span className="w-full justify-start gap-3 flex py-1 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+              <Plus className="h-6 w-6 border-border border p-1 rounded-md" />
+              Adicionar Perfil
+            </span>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

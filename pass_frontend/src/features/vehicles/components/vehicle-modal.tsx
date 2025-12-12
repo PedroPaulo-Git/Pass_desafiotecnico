@@ -24,6 +24,11 @@ import {
   CarFront,
   XIcon,
   Fuel,
+  Search,
+  Plus,
+  MoreHorizontal,
+  MapPin,
+  Clock,
 } from "lucide-react";
 import { FaCar } from "react-icons/fa6";
 import { FaRegListAlt } from "react-icons/fa";
@@ -80,6 +85,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type {
   Vehicle,
@@ -139,6 +146,43 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const [imagesOpen, setImagesOpen] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeletingImages, setIsDeletingImages] = useState(false);
+  const [ratesSidebarOpen, setRatesSidebarOpen] = useState(false);
+
+  // Mock route data for rates sidebar
+  const routeItems = [
+    {
+      id: "1",
+      title: "Disponível",
+      origin: "Aeroporto Galeão, Rio De Janeiro",
+      destination: "Búzios, Armação Dos Búzios",
+      schedule: "In – 08:30 às 23:30",
+      badge: "+1",
+    },
+    {
+      id: "2",
+      title: "Disponível",
+      origin: "Aeroporto Galeão, Rio De Janeiro",
+      destination: "Apa Pau, Armação Dos Búzios",
+      schedule: "In – 08:30 às 23:30",
+      badge: null,
+    },
+    {
+      id: "3",
+      title: "Disponível",
+      origin: "Barra, Rio De Janeiro",
+      destination: "Búzios, Armação Dos Búzios",
+      schedule: "Interhotel – 07:00 às 12:00",
+      badge: null,
+    },
+    {
+      id: "4",
+      title: "Disponível",
+      origin: "Barra, Rio De Janeiro",
+      destination: "Apa Pau, Armação Dos Búzios",
+      schedule: "Interhotel – 07:00 às 12:00",
+      badge: null,
+    },
+  ];
 
   const { data: imagesData } = useVehicleImages(vehicle?.id || "");
   const createImage = useCreateVehicleImage();
@@ -383,27 +427,102 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "overflow-y-auto p-2 pt-0 rounded-2xl max-h-[90vh]",
-         activeTab === "fuelings"  && "w-screen max-w-[70vw] px-0 min-h-[80vh] max-h-[90vh]" ,
-         activeTab === "rates"  && "w-screen max-w-[95vw] px-0 min-h-[80vh] max-h-[90vh]" ,
+          "overflow-hidden p-0 rounded-2xl max-h-[90vh]",
+         activeTab === "fuelings"  && "w-screen max-w-[70vw] min-h-[80vh] max-h-[90vh]" ,
+         activeTab === "rates"  && "w-screen lg:max-w-[95vw] min-h-[80vh] max-h-[95vh]" ,
          activeTab === "terms" && "w-screen max-w-[1000px] max-h-[85vh]"
         )}
       >
-        <motion.div
-          variants={modalVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
-          {/* Header */}
-          <DialogHeader className="sticky z-10 top-0 px-3 py-6 bg-background ">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-background border border-muted rounded-full">
-                  <BusFront className="h-4 w-4 text-foreground" />
+        <div className="relative h-full max-h-[inherit]">
+          {/* Rates Sidebar - absolute overlay covering entire modal */}
+          {activeTab === "rates" && (
+            <div 
+              className={cn(
+                "absolute top-0 left-0 h-full border-r border-border bg-background transition-all duration-300 ease-in-out overflow-hidden z-50",
+                ratesSidebarOpen ? "w-[280px] " : "w-0"
+              )}
+            >
+              <div className="flex flex-col h-full w-[280px]">
+                {/* Search Header */}
+                <div className="p-3 border-b">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar tarifa..."
+                        className="pl-9 h-8 text-sm"
+                      />
+                    </div>
+                    <Button type="button" size="sm" className="h-8 px-2">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <DialogTitle className="text-md font-semibold">
+
+                {/* Route Cards List */}
+                <ScrollArea className="flex-1">
+                  <div className="p-2 space-y-2">
+                    {routeItems.map((route) => (
+                      <div
+                        key={route.id}
+                        className="p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        {/* Header with switch */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Switch defaultChecked className="scale-75" />
+                            <span className="text-xs font-medium">{route.title}</span>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-5 w-5">
+                            <MoreHorizontal className="h-3 w-3" />
+                          </Button>
+                        </div>
+
+                        {/* Route info */}
+                        <div className="space-y-1.5 text-xs">
+                          <div className="flex items-start gap-1.5">
+                            <MapPin className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                            <span className="text-foreground line-clamp-1">{route.origin}</span>
+                            {route.badge && (
+                              <Badge variant="secondary" className="text-[9px] h-4 px-1 ml-auto">
+                                {route.badge}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-start gap-1.5">
+                            <MapPin className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+                            <span className="text-foreground line-clamp-1">{route.destination}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">{route.schedule}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+
+          {/* Main Modal Content */}
+          <div className="h-full overflow-y-auto overflow-x-hidden p-2 pt-0">
+            <motion.div
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {/* Header */}
+              <DialogHeader className="sticky z-10 top-0 px-3 py-6 bg-background ">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-background border border-muted rounded-full">
+                      <BusFront className="h-4 w-4 text-foreground" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-md font-semibold">
                     {isCreate ? t.vehicles.newTitle : t.vehicles.title}
                   </DialogTitle>
                   <p className="text-sm text-muted-foreground">
@@ -426,7 +545,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
-            className="w-full"
+            className="w-full gap-0"
           >
             {/* Tabs Navigation */}
             <TabsList
@@ -510,7 +629,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 {/* Tab: Dados Gerais */}
                 <TabsContent
                   value="general"
-                  className="mt-4 space-y-2"
+                  className=""
                   forceMount
                 >
                   {activeTab === "general" && (
@@ -1368,6 +1487,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                         <FuelingRatesTable
                           vehicleId={vehicle.id}
                           fuelings={vehicle.fuelings || []}
+                          sidebarOpen={ratesSidebarOpen}
+                          onToggleSidebar={() => setRatesSidebarOpen(!ratesSidebarOpen)}
                         />
                       </motion.div>
                     )}
@@ -1394,6 +1515,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
             </form>
           </Tabs>
         </motion.div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

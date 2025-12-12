@@ -17,12 +17,12 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-full cursor-pointer",
         link: "text-primary underline-offset-4 hover:underline",
         modal: "border bg-foreground text-background hover:bg-foreground/90 ",
         modal_white: "border bg-muted text-muted-foreground hover:bg-muted-foreground/90 ",
         table: "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2 ",
-        table_border_cutted: "border rounded-lg dark:bg-[#ffffff26]/30 border-border border-dashed px-0 py-2 ",
+        table_border_cutted: "border rounded-lg bg-input/30 border-input border-dashed px-0 py-2 ",
         table_add: "bg-table-button text-black hover:bg-table-button/90 rounded-lg ",
 
       },

@@ -154,7 +154,7 @@ function TableHead({
           ),
            variant === "minimal-fueling" &&
           cn(
-            "py-3 px-8 border-t z-10",
+            "py-0 h-0 px-8 border-t z-10",
             "text-sm font-semibold text-muted-foreground tracking-wide ",
             ""
           ),
@@ -164,15 +164,15 @@ function TableHead({
           cn("border-t", " px-0.5", "nth-2:pl-5 nth-1:pl-20 "),
         variant === "sticky-first" &&
           cn(
-            "py-3 px-3 border-y ",
+            "py-2 h-0 px-3 border-y ",
             "text-xs font-semibold text-muted-foreground tracking-wide",
             "sticky left-0 bg-background z-60 "
           ),
         variant === "sticky-second" &&
           cn(
-            "py-3 px-3 border-y",
-            "text-sm font-semibold text-muted-foreground tracking-wide",
-            "sticky left-12 bg-background z-60 shadow-[inset_-1px_0_0_var(--color-border)]"
+            "py-0 h-0 px-3 ",
+            "text-sm border-y font-semibold text-muted-foreground tracking-wide",
+            "sticky left-12 bg-background/90 z-60 "
           ),
 
         // Centralização
@@ -301,8 +301,8 @@ function TableCell({
           ),
         variant === "sticky-second" &&
           cn(
-            "py-2 px-3 border-y border-border pr-2",
-            "sticky left-12 bg-background z-50 shadow-[inset_-1px_0_0_var(--color-border)]"
+            "py-2 px-3 border-y border-border pr-8",
+            "sticky left-12 bg-background/90 z-50 shadow-[inset_-2px_0_0_var(--color-border)] "
           ),
 
         center && "text-center",
