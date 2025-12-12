@@ -134,7 +134,7 @@ function TableHead({
       data-slot="table-head"
       className={cn(
         // Estilos base
-        "text-foreground h-10 text-left align-middle font-medium ",
+        "text-foreground h-10 text-left align-middle font-medium  ",
         "text-nowrap",
         "",
 
@@ -154,7 +154,7 @@ function TableHead({
           ),
            variant === "minimal-fueling" &&
           cn(
-            "py-0 h-0 px-8 border-t z-10",
+            "py-0 h-0 pl-7 border-t z-10 min-w-[200px]",
             "text-sm font-semibold text-muted-foreground tracking-wide ",
             ""
           ),
@@ -170,7 +170,7 @@ function TableHead({
           ),
         variant === "sticky-second" &&
           cn(
-            "py-0 h-0 px-3 ",
+            "py-0 h-0 px-3 w-[200px] ",
             "text-sm border-y font-semibold text-muted-foreground tracking-wide",
             "sticky left-12 bg-background/90 z-60 "
           ),
@@ -193,43 +193,9 @@ function TableHead({
           (sortable || filterable) && "group"
         )}
       >
-        <span>{props.children}</span>
+        <span className="w-full">{props.children}</span>
 
-        {/* Ícone de filtro/ordenação (como ¢ na imagem) */}
-        {(filterable || sortable) && (
-          <span
-            className={cn(
-              "flex items-center text-[10px] text-muted-foreground/60",
-              "group-hover:text-muted-foreground transition-colors",
-              // filterActive && "text-primary",
-              sortDirection !== "none"
-            )}
-          >
-            {sortable ? (
-              <ChevronDown
-                className={cn(
-                  "w-3 h-3 transition-transform",
-                  sortDirection === "asc" && "rotate-180",
-                  sortDirection === "none" && "opacity-50"
-                )}
-              />
-            ) : (
-              // Ícone de filtro (similar ao ¢ da imagem)
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                stroke="currentColor"
-                className="opacity-60"
-              >
-                <path d="M2 3H10" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M3 6H9" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M4.5 9H7.5" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            )}
-          </span>
-        )}
+    
       </div>
     </th>
   );
@@ -289,7 +255,7 @@ function TableCell({
           "py-1 px-4 xl:px-0 xl:p-1 first:pl-0 sm:first:pl-4 ",
 
         variant === "compact-fueling" &&
-          "py-1.5 px-5 border-y ",
+          "py-1.5 pl-5 border-y max-w-[150px]",
 
         variant === "extra-compact" &&
           " px-0 xl:px-0 first:pl-0 sm:first:pl-4   ",

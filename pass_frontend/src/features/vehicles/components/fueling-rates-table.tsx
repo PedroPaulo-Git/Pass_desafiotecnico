@@ -28,6 +28,11 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsUpDown,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeftToLine,
+  ArrowRightToLine,
   CalendarIcon,
   Fuel,
   X,
@@ -188,8 +193,9 @@ export function FuelingRatesTable({
     if (!q) return profiles;
     return profiles.filter((p) => p.name.toLowerCase().includes(q));
   }, [searchTerm]);
-  
-  const selectedProfile = profiles.find((p) => p.id === selectedProfileId) || profiles[0];
+
+  const selectedProfile =
+    profiles.find((p) => p.id === selectedProfileId) || profiles[0];
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -236,6 +242,34 @@ export function FuelingRatesTable({
   const [pinnedColumns, setPinnedColumns] = useState<
     Record<string, PinPosition>
   >({});
+
+  // Sorting state - 'asc' | 'desc' | null (cycles: null -> asc -> desc -> null)
+  type SortDirection = "asc" | "desc" | null;
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  // Toggle sorting for a column
+  const toggleSort = (columnId: string) => {
+    if (sortColumn !== columnId) {
+      // New column - start with asc
+      setSortColumn(columnId);
+      setSortDirection("asc");
+    } else {
+      // Same column - cycle through: asc -> desc -> null
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
+        setSortColumn(null);
+        setSortDirection(null);
+      } else {
+        setSortDirection("asc");
+      }
+    }
+  };
+
+  // Get sort direction for a column
+  const getColumnSort = (columnId: string): SortDirection =>
+    sortColumn === columnId ? sortDirection : null;
 
   // Toggle pin for a column
   const togglePin = (columnId: string, position: PinPosition) => {
@@ -673,54 +707,68 @@ export function FuelingRatesTable({
     label: string;
   }) => {
     const pin = getColumnPin(columnId);
+    const sort = getColumnSort(columnId);
+
+    // Get sort icon based on current state
+    const SortIcon =
+      sort === "asc" ? ArrowUp : sort === "desc" ? ArrowDown : ChevronsUpDown;
+
     return (
-      <div className="flex items-center justify-between gap-1">
-        <div className="flex items-center gap-1">
-          {pin && (
-            <Pin
-              className={cn(
-                "h-3 w-3 text-primary",
-                pin === "right" && "rotate-90"
-              )}
-            />
-          )}
+      <div className="flex items-center justify-between  w-full">
+        <button
+          type="button"
+          onClick={() => toggleSort(columnId)}
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+        >
           <span className="truncate">{label}</span>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <SortIcon
+            className={cn(
+              "h-3.5 w-3.5 shrink-0",
+              sort ? "text-foreground" : "text-muted-foreground"
+            )}
+          />
+        </button>
+        <div className="ml-auto">
+          {/* Left side: Label + Sort Arrow (clickable for sorting) */}
+
+          {/* Right side: Pin toggle or Menu */}
+          {pin ? (
+            // If pinned, show PinOff button that directly unpins on click
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-5 w-5 -mr-1 shrink-0"
+              className="h-5 w-5 shrink-0"
+              onClick={() => togglePin(columnId, pin)}
             >
-              {pin ? (
-                <PinOff className="h-3 w-3" />
-              ) : (
-                <MoreHorizontal className="h-3 w-3" />
-              )}
+              <PinOff className="h-3 w-3" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {pin ? (
-              <DropdownMenuItem onClick={() => togglePin(columnId, pin)}>
-                <PinOff className="h-4 w-4 mr-2" />
-                Desafixar coluna
-              </DropdownMenuItem>
-            ) : (
-              <>
+          ) : (
+            // If not pinned, show 3 dots with dropdown menu
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 shrink-0"
+                >
+                  <MoreHorizontal className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => togglePin(columnId, "left")}>
-                  <Pin className="h-4 w-4 mr-2" />
+                  <ArrowLeftToLine className="h-4 w-4 mr-2" />
                   Fixar à esquerda
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => togglePin(columnId, "right")}>
-                  <Pin className="h-4 w-4 mr-2 rotate-90" />
+                  <ArrowRightToLine className="h-4 w-4 mr-2" />
                   Fixar à direita
                 </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
     );
   };
@@ -927,44 +975,15 @@ export function FuelingRatesTable({
                       variant="sticky-second"
                       sortable
                       className={cn(
-                        "min-w-[180px]",
+                        "max-w-[100px] ",
                         getPinnedLeftColumns().length === 0 &&
                           "shadow-[inset_-1px_0_0_var(--color-border)]"
                       )}
                     >
-                      <div className="flex items-center justify-between">
-                        <span>Período</span>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 -mr-2"
-                            >
-                              <MoreHorizontal className="h-3.5 w-3.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => togglePin("period", "left")}
-                            >
-                              <Pin className="h-4 w-4 mr-2" />
-                              {getColumnPin("period") === "left"
-                                ? "Desafixar"
-                                : "Fixar à esquerda"}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => togglePin("period", "right")}
-                            >
-                              <Pin className="h-4 w-4 mr-2 rotate-90" />
-                              {getColumnPin("period") === "right"
-                                ? "Desafixar"
-                                : "Fixar à direita"}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      <PinnableHeaderContent
+                        columnId="period"
+                        label="Período"
+                      />
                     </TableHead>
 
                     {/* Provider */}
@@ -1148,7 +1167,7 @@ export function FuelingRatesTable({
                                 }}
                               >
                                 {/* <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" /> */}
-                                <span>{period.periodLabel}</span>
+                                <span className="w-full">{period.periodLabel}</span>
                               </button>
                             </PopoverTrigger>
                             <PopoverContent
@@ -1208,7 +1227,7 @@ export function FuelingRatesTable({
                             <PopoverTrigger asChild>
                               <button
                                 type="button"
-                                className="truncate hover:bg-background/20 rounded-lg hover:py-2
+                                className="truncate hover:bg-background/20 rounded-lg hover:py-2 max-w-[150px]
              hover:ring-1 hover:ring-border
              cursor-pointer text-left px-5 transition-colors -mx-3 -my-1 "
                                 title={period.provider}
@@ -1888,7 +1907,9 @@ export function FuelingRatesTable({
                       setUpdateOpen(false);
                     }}
                     className={`w-full flex items-center justify-between cursor-pointer my-2 px-3 py-2 rounded-lg transition-colors ${
-                      p.id === selectedProfileId ? "bg-muted/50" : "hover:bg-muted/40"
+                      p.id === selectedProfileId
+                        ? "bg-muted/50"
+                        : "hover:bg-muted/40"
                     }`}
                   >
                     <div className="flex items-center gap-2 w-full">
