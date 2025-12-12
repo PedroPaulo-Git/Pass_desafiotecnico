@@ -221,6 +221,9 @@ export function FuelingRatesTable({
     null
   );
   const [valuePopoverOpen, setValuePopoverOpen] = useState<string | null>(null);
+  const [unitPricePopoverOpen, setUnitPricePopoverOpen] = useState<string | null>(
+    null
+  );
   const [odometerPopoverOpen, setOdometerPopoverOpen] = useState<string | null>(
     null
   );
@@ -235,6 +238,7 @@ export function FuelingRatesTable({
   // Inline edit form states
   const [editLiters, setEditLiters] = useState<number>(0);
   const [editValue, setEditValue] = useState<number>(0);
+  const [editUnitPrice, setEditUnitPrice] = useState<number>(0);
   const [editOdometer, setEditOdometer] = useState<number>(0);
 
   // Pinned columns state - 'left' | 'right' | null
@@ -284,23 +288,23 @@ export function FuelingRatesTable({
   const getColumnPin = (columnId: string): PinPosition =>
     pinnedColumns[columnId] || null;
 
-  // Column widths for sticky position calculation (approximate)
+  // Column widths for sticky position calculation - FIXED widths for alignment
   const columnWidths: Record<string, number> = {
-    checkbox: 48,
+    checkbox: 52,
     period: 200,
-    provider: 150,
-    fuelType: 120,
-    liters: 100,
-    totalValue: 130,
-    unitPrice: 130,
-    odometer: 110,
-    category: 110,
-    days: 240,
-    actions: 48,
+    provider: 160,
+    fuelType: 160,
+    liters: 150,
+    totalValue: 160,
+    unitPrice: 160,
+    odometer: 140,
+    category: 140,
+    days: 260,
+    actions: 60,
   };
 
-  // Order of columns for pin calculation (maintains table order)
-  const columnOrder = [
+  // Base order of columns (original table order without pinning)
+  const baseColumnOrder = [
     "checkbox",
     "period",
     "provider",
@@ -314,6 +318,33 @@ export function FuelingRatesTable({
     "actions",
   ];
 
+  // Get the visual order of columns based on pinning
+  // Order: checkbox (always first) -> pinned left columns -> unpinned columns -> pinned right columns -> actions (always last)
+  const getVisualColumnOrder = (): string[] => {
+    const pinnedLeft: string[] = [];
+    const pinnedRight: string[] = [];
+    const unpinned: string[] = [];
+
+    baseColumnOrder.forEach((col) => {
+      if (col === "checkbox") return; // handled separately
+      if (col === "actions") return; // handled separately
+
+      const pin = pinnedColumns[col];
+      if (pin === "left") {
+        pinnedLeft.push(col);
+      } else if (pin === "right") {
+        pinnedRight.push(col);
+      } else {
+        unpinned.push(col);
+      }
+    });
+
+    return ["checkbox", ...pinnedLeft, ...unpinned, ...pinnedRight, "actions"];
+  };
+
+  // For backward compatibility - use baseColumnOrder when calculating positions
+  const columnOrder = baseColumnOrder;
+
   // Get all pinned columns sorted by their position in table
   const getPinnedLeftColumns = (): string[] => {
     return columnOrder.filter((col) => pinnedColumns[col] === "left");
@@ -324,14 +355,23 @@ export function FuelingRatesTable({
   };
 
   // Calculate left position for a pinned-left column
+  // This considers: checkbox is ALWAYS fixed at left:0, period may or may not be pinned
   const getLeftPosition = (columnId: string): number => {
-    // Always start after checkbox (48) and period (200) = 248
-    const baseLeft = 248;
+    // Checkbox is always fixed at left:0 with width 48
+    const checkboxWidth = columnWidths.checkbox; // 48
+
+    // Get all columns pinned left (in table order)
     const pinnedLeftCols = getPinnedLeftColumns();
     const colIndex = pinnedLeftCols.indexOf(columnId);
-    if (colIndex < 0) return baseLeft;
 
-    let left = baseLeft;
+    if (colIndex < 0) {
+      // Not in pinned left list - shouldn't happen but return safe value
+      // Start after checkbox
+      return checkboxWidth;
+    }
+
+    // Calculate position: checkbox width + sum of widths of all pinned columns before this one
+    let left = checkboxWidth;
     for (let i = 0; i < colIndex; i++) {
       left += columnWidths[pinnedLeftCols[i]] || 100;
     }
@@ -381,7 +421,8 @@ export function FuelingRatesTable({
     const pin = pinnedColumns[columnId];
     if (!pin) return "";
 
-    const baseClass = "sticky bg-background z-30";
+    // Use semi-transparent background so content behind is slightly visible
+    const baseClass = "sticky bg-background/95 backdrop-blur-sm z-30";
 
     if (pin === "left") {
       const isLast = isLastPinnedLeft(columnId);
@@ -399,17 +440,38 @@ export function FuelingRatesTable({
     return "";
   };
 
-  // Get sticky style for a column
+  // Get CSS order value for a column based on its visual position
+  const getColumnCSSOrder = (columnId: string): number => {
+    const visualOrder = getVisualColumnOrder();
+    return visualOrder.indexOf(columnId);
+  };
+
+  // Get sticky style for a column (includes order for visual reordering and sizing for flex)
   const getStickyStyle = (columnId: string): React.CSSProperties => {
     const pin = pinnedColumns[columnId];
-    if (!pin) return {};
+    const order = getColumnCSSOrder(columnId);
+    const width = columnWidths[columnId] || 100;
+
+    // Base styles for flex layout - use fixed width for alignment
+    const baseStyle: React.CSSProperties = {
+      order,
+      width,
+      minWidth: width,
+      maxWidth: width,
+      flexShrink: 0,
+      flexGrow: 0,
+    };
+
+    if (!pin) {
+      return baseStyle;
+    }
     if (pin === "left") {
-      return { left: getLeftPosition(columnId) };
+      return { ...baseStyle, left: getLeftPosition(columnId) };
     }
     if (pin === "right") {
-      return { right: getRightPosition(columnId) };
+      return { ...baseStyle, right: getRightPosition(columnId) };
     }
-    return {};
+    return baseStyle;
   };
 
   // Drag-to-scroll refs and state (like fueling-calendar)
@@ -792,7 +854,7 @@ export function FuelingRatesTable({
         <button
           type="button"
           onClick={() => toggleSort(columnId)}
-          className="flex items-center gap-1 hover:text-foreground transition-colors mr-10"
+          className="flex items-center gap-1 hover:text-foreground transition-colors ml-4"
         >
           <span className="truncate">{label}</span>
           <SortIcon
@@ -802,7 +864,7 @@ export function FuelingRatesTable({
             )}
           />
         </button>
-        <div className="ml-auto">
+        <div className="ml-auto relative z-50">
           {/* Right side: Pin toggle or Menu */}
           {isPinned ? (
             // Pinned column - show PinOff button that unpins on click
@@ -810,10 +872,10 @@ export function FuelingRatesTable({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-5 w-5 shrink-0"
+              className="h-6 w-6 shrink-0 hover:bg-muted"
               onClick={() => togglePin(columnId, pin)}
             >
-              <PinOff className="h-3 w-3" />
+              <PinOff className="h-3.5 w-3.5" />
             </Button>
           ) : (
             // Not pinned - show 3 dots with dropdown menu
@@ -823,9 +885,9 @@ export function FuelingRatesTable({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-5 w-5 shrink-0"
+                  className="h-6 w-6 shrink-0 hover:bg-muted"
                 >
-                  <MoreHorizontal className="h-3 w-3" />
+                  <MoreHorizontal className="h-3.5 w-3.5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -1029,9 +1091,20 @@ export function FuelingRatesTable({
             <ScrollArea className="max-w-screen border-r border-border">
               <Table>
                 <TableHeader variant="compact-fueling">
-                  <TableRow className="hover:bg-transparent">
+                  <TableRow className="hover:bg-transparent" flexLayout>
                     {/* Checkbox column - FIXED */}
-                    <TableHead variant="sticky-first" className="w-12">
+                    <TableHead
+                      variant="sticky-first"
+                      flexCell
+                      style={{
+                        order: getColumnCSSOrder("checkbox"),
+                        width: columnWidths.checkbox,
+                        minWidth: columnWidths.checkbox,
+                        maxWidth: columnWidths.checkbox,
+                        flexShrink: 0,
+                        flexGrow: 0,
+                      }}
+                    >
                       <Checkbox
                         checked={
                           paginatedData.length > 0 &&
@@ -1044,14 +1117,29 @@ export function FuelingRatesTable({
 
                     {/* Period - Pinned left by default, can be unpinned */}
                     <TableHead
-                      variant={isPeriodPinnedLeft() ? "sticky-second" : "minimal-fueling"}
+                      variant={
+                        isPeriodPinnedLeft()
+                          ? "sticky-second"
+                          : "minimal-fueling"
+                      }
                       sortable
+                      flexCell
                       className={cn(
-                        "min-w-[200px]:",
-                        !isPeriodPinnedLeft() && "pl-5 min-w-[200px]",
-                        isPeriodPinnedLeft() && shouldPeriodShowShadow() &&
+                        isPeriodPinnedLeft() &&
+                          shouldPeriodShowShadow() &&
                           "shadow-[inset_-1px_0_0_var(--color-border)] "
                       )}
+                      style={{
+                        order: getColumnCSSOrder("period"),
+                        width: columnWidths.period,
+                        minWidth: columnWidths.period,
+                        maxWidth: columnWidths.period,
+                        flexShrink: 0,
+                        flexGrow: 0,
+                        ...(isPeriodPinnedLeft() && {
+                          left: columnWidths.checkbox,
+                        }),
+                      }}
                     >
                       <PinnableHeaderContent
                         columnId="period"
@@ -1063,10 +1151,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn(
-                        "",
-                        getStickyClass("provider")
-                      )}
+                      flexCell
+                      className={cn("", getStickyClass("provider"))}
                       style={getStickyStyle("provider")}
                     >
                       <PinnableHeaderContent
@@ -1079,10 +1165,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn(
-                        "",
-                        getStickyClass("fuelType")
-                      )}
+                      flexCell
+                      className={cn("", getStickyClass("fuelType"))}
                       style={getStickyStyle("fuelType")}
                     >
                       <PinnableHeaderContent
@@ -1095,7 +1179,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn("" , getStickyClass("liters"))}
+                      flexCell
+                      className={cn("", getStickyClass("liters"))}
                       style={getStickyStyle("liters")}
                     >
                       <PinnableHeaderContent columnId="liters" label="Litros" />
@@ -1105,10 +1190,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn(
-                        "",
-                        getStickyClass("totalValue")
-                      )}
+                      flexCell
+                      className={cn("", getStickyClass("totalValue"))}
                       style={getStickyStyle("totalValue")}
                     >
                       <PinnableHeaderContent
@@ -1121,10 +1204,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn(
-                        "",
-                        getStickyClass("unitPrice")
-                      )}
+                      flexCell
+                      className={cn("", getStickyClass("unitPrice"))}
                       style={getStickyStyle("unitPrice")}
                     >
                       <PinnableHeaderContent
@@ -1137,10 +1218,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn(
-                        "",
-                        getStickyClass("odometer")
-                      )}
+                      flexCell
+                      className={cn("", getStickyClass("odometer"))}
                       style={getStickyStyle("odometer")}
                     >
                       <PinnableHeaderContent
@@ -1153,10 +1232,8 @@ export function FuelingRatesTable({
                     <TableHead
                       variant="minimal-fueling"
                       sortable
-                      className={cn(
-                        "",
-                        getStickyClass("category")
-                      )}
+                      flexCell
+                      className={cn("", getStickyClass("category"))}
                       style={getStickyStyle("category")}
                     >
                       <PinnableHeaderContent
@@ -1168,13 +1245,26 @@ export function FuelingRatesTable({
                     {/* Fueling days */}
                     <TableHead
                       variant="minimal-fueling"
-                      className=""
+                      flexCell
+                      className={cn("", getStickyClass("days"))}
+                      style={getStickyStyle("days")}
                     >
                       Dias c/ Abast.
                     </TableHead>
 
                     {/* Actions column */}
-                    <TableHead variant="minimal-fueling" className="w-10" />
+                    <TableHead
+                      variant="minimal-fueling"
+                      flexCell
+                      style={{
+                        order: getColumnCSSOrder("actions"),
+                        width: columnWidths.actions,
+                        minWidth: columnWidths.actions,
+                        maxWidth: columnWidths.actions,
+                        flexShrink: 0,
+                        flexGrow: 0,
+                      }}
+                    />
                   </TableRow>
                 </TableHeader>
 
@@ -1191,6 +1281,7 @@ export function FuelingRatesTable({
                     paginatedData.map((period) => (
                       <TableRow
                         key={period.id}
+                        flexLayout
                         className={cn(
                           "group transition-colors hover:bg-muted/50",
                           selectedRows.has(period.id) && "bg-muted/30"
@@ -1199,7 +1290,16 @@ export function FuelingRatesTable({
                         {/* Checkbox - FIXED */}
                         <TableCell
                           variant="sticky-first"
+                          flexCell
                           onClick={(e) => e.stopPropagation()}
+                          style={{
+                            order: getColumnCSSOrder("checkbox"),
+                            width: columnWidths.checkbox,
+                            minWidth: columnWidths.checkbox,
+                            maxWidth: columnWidths.checkbox,
+                            flexShrink: 0,
+                            flexGrow: 0,
+                          }}
                         >
                           <Checkbox
                             checked={selectedRows.has(period.id)}
@@ -1212,12 +1312,29 @@ export function FuelingRatesTable({
 
                         {/* Period - Pinned left by default, can be unpinned */}
                         <TableCell
-                          variant={isPeriodPinnedLeft() ? "sticky-second" : "compact-fueling"}
+                          variant={
+                            isPeriodPinnedLeft()
+                              ? "sticky-second"
+                              : "compact-fueling"
+                          }
+                          flexCell
                           className={cn(
                             "font-medium",
-                            isPeriodPinnedLeft() && shouldPeriodShowShadow() &&
+                            isPeriodPinnedLeft() &&
+                              shouldPeriodShowShadow() &&
                               "shadow-[inset_-1px_0_0_var(--color-border)]"
                           )}
+                          style={{
+                            order: getColumnCSSOrder("period"),
+                            width: columnWidths.period,
+                            minWidth: columnWidths.period,
+                            maxWidth: columnWidths.period,
+                            flexShrink: 0,
+                            flexGrow: 0,
+                            ...(isPeriodPinnedLeft() && {
+                              left: columnWidths.checkbox,
+                            }),
+                          }}
                         >
                           <Popover
                             open={periodPopoverOpen === period.id}
@@ -1240,7 +1357,9 @@ export function FuelingRatesTable({
                                 }}
                               >
                                 {/* <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" /> */}
-                                <span className="w-full">{period.periodLabel}</span>
+                                <span className="w-full">
+                                  {period.periodLabel}
+                                </span>
                               </button>
                             </PopoverTrigger>
                             <PopoverContent
@@ -1285,6 +1404,7 @@ export function FuelingRatesTable({
                         {/* Provider - Popover with search */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           className={cn(
                             "w-[150px]",
                             getStickyClass("provider")
@@ -1349,6 +1469,7 @@ export function FuelingRatesTable({
                         {/* Fuel Type - Popover with selector */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           className={getStickyClass("fuelType")}
                           style={getStickyStyle("fuelType")}
                         >
@@ -1406,6 +1527,7 @@ export function FuelingRatesTable({
                         {/* Liters - Popover with input */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           className={getStickyClass("liters")}
                           style={getStickyStyle("liters")}
                         >
@@ -1472,9 +1594,10 @@ export function FuelingRatesTable({
                         {/* Total Value - Popover with input */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           className={getStickyClass("totalValue")}
                           style={getStickyStyle("totalValue")}
-                        >
+                         >
                           <Popover
                             open={valuePopoverOpen === period.id}
                             onOpenChange={(open) => {
@@ -1485,8 +1608,8 @@ export function FuelingRatesTable({
                             <PopoverTrigger asChild>
                               <button
                                 className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-             hover:ring-1 hover:ring-border
-             py-2 cursor-pointer text-left px-3 transition-colors "
+                            hover:ring-1 hover:ring-border
+                             py-2 cursor-pointer text-left px-3 transition-colors "
                               >
                                 {formatCurrency(period.totalValue)}
                               </button>
@@ -1535,18 +1658,77 @@ export function FuelingRatesTable({
                           </Popover>
                         </TableCell>
 
-                        {/* Unit Price */}
+                        {/* Unit Price - Popover with input */}
                         <TableCell
                           variant="compact-fueling"
-                          className={cn("px-8", getStickyClass("unitPrice"))}
+                          flexCell
+                          className={cn("", getStickyClass("unitPrice"))}
                           style={getStickyStyle("unitPrice")}
                         >
-                          {formatCurrency(period.unitPrice)}/L
+                          <Popover
+                            open={unitPricePopoverOpen === period.id}
+                            onOpenChange={(open) => {
+                              setUnitPricePopoverOpen(open ? period.id : null);
+                              if (open) setEditUnitPrice(period.unitPrice);
+                            }}
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                className="hover:bg-background/20 border-none rounded-lg hover:py-2 
+                            hover:ring-1 hover:ring-border
+                             py-2 cursor-pointer text-left px-3 transition-colors "
+                              >
+                                {formatCurrency(period.unitPrice)}/L
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[200px] p-3"
+                              align="start"
+                            >
+                              <div className="space-y-3">
+                                <div className="space-y-1">
+                                  <label className="text-sm font-medium">
+                                    Preço/L (R$)
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    value={editUnitPrice}
+                                    onChange={(e) =>
+                                      setEditUnitPrice(Number(e.target.value))
+                                    }
+                                    className="h-8"
+                                    step="0.01"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => setUnitPricePopoverOpen(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="h-7"
+                                    onClick={() => {
+                                      // TODO: Save unit price
+                                      setUnitPricePopoverOpen(null);
+                                    }}
+                                  >
+                                    Salvar
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </TableCell>
 
                         {/* Odometer - Popover with input */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           className={getStickyClass("odometer")}
                           style={getStickyStyle("odometer")}
                         >
@@ -1612,6 +1794,7 @@ export function FuelingRatesTable({
                         {/* Category */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           className={getStickyClass("category")}
                           style={getStickyStyle("category")}
                         >
@@ -1626,7 +1809,12 @@ export function FuelingRatesTable({
                         </TableCell>
 
                         {/* Fueling days - marks days that HAD fueling */}
-                        <TableCell variant="compact-fueling">
+                        <TableCell
+                          variant="compact-fueling"
+                          flexCell
+                          className={getStickyClass("days")}
+                          style={getStickyStyle("days")}
+                        >
                           <div className="flex items-center gap-1">
                             {WEEK_DAYS.map((day, index) => (
                               <DayChip
@@ -1650,8 +1838,17 @@ export function FuelingRatesTable({
                         {/* Actions with Details Popover */}
                         <TableCell
                           variant="compact-fueling"
+                          flexCell
                           onClick={(e) => e.stopPropagation()}
-                         >
+                          style={{
+                            order: getColumnCSSOrder("actions"),
+                            width: columnWidths.actions,
+                            minWidth: columnWidths.actions,
+                            maxWidth: columnWidths.actions,
+                            flexShrink: 0,
+                            flexGrow: 0,
+                          }}
+                        >
                           <Popover
                             open={detailsPopoverOpen === period.id}
                             onOpenChange={(open) => {
@@ -1804,9 +2001,6 @@ export function FuelingRatesTable({
                             </PopoverContent>
                           </Popover>
                         </TableCell>
-
-
-                        
                       </TableRow>
                     ))
                   )}

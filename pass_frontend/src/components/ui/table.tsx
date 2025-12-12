@@ -111,6 +111,7 @@ function TableHead({
   filterable = false,
   filterActive = false,
   sticky = false,
+  flexCell = false,
   ...props
 }: React.ComponentProps<"th"> & {
   variant?:
@@ -128,15 +129,18 @@ function TableHead({
   filterable?: boolean;
   filterActive?: boolean;
   sticky?: boolean;
+  flexCell?: boolean;
 }) {
   return (
     <th
       data-slot="table-head"
       className={cn(
         // Estilos base
-        "text-foreground h-10 text-left align-middle font-medium  ",
+        "text-foreground text-left align-middle font-medium",
         "text-nowrap",
-        "",
+        // Flex cell styling - maintain table-like appearance in flex container
+        flexCell && "flex items-center box-border h-10",
+        !flexCell && "h-10",
 
         // Variantes
         variant === "default" &&
@@ -154,7 +158,7 @@ function TableHead({
           ),
            variant === "minimal-fueling" &&
           cn(
-            "py-0 h-0 pl-7 border-t z-10 min-w-[150px]",
+            "py-0 px-0 border-t z-10",
             "text-sm font-semibold text-muted-foreground tracking-wide ",
             ""
           ),
@@ -164,15 +168,15 @@ function TableHead({
           cn("border-t", " px-0.5", "nth-2:pl-5 nth-1:pl-20 "),
         variant === "sticky-first" &&
           cn(
-            "py-2 h-0 px-3 border-y ",
+            "py-2 px-3 border-y ",
             "text-xs font-semibold text-muted-foreground tracking-wide",
-            "sticky left-0 bg-background z-60 "
+            "sticky left-0 bg-background/95 backdrop-blur-sm z-40 "
           ),
         variant === "sticky-second" &&
           cn(
-            "py-0 h-0 px-3 w-[200px] ",
+            "py-0 px-3 ",
             "text-sm border-y font-semibold text-muted-foreground tracking-wide",
-            "sticky left-12 bg-background/90 z-60 "
+            "sticky bg-background/95 backdrop-blur-sm z-40 "
           ),
 
         // Centralização
@@ -188,7 +192,7 @@ function TableHead({
     >
       <div
         className={cn(
-          "flex items-center gap-1.5",
+          "flex items-center gap-1.5 w-full",
           center && "justify-center",
           (sortable || filterable) && "group"
         )}
@@ -220,12 +224,18 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   );
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+interface TableRowProps extends React.ComponentProps<"tr"> {
+  flexLayout?: boolean;
+}
+
+function TableRow({ className, flexLayout = false, ...props }: TableRowProps) {
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        "data-[state=selected]:bg-muted transition-colors p-4 ",
+        "data-[state=selected]:bg-muted transition-colors",
+        // When using flex layout for column reordering
+        flexLayout && "flex w-full",
         className
       )}
       {...props}
@@ -238,14 +248,18 @@ function TableCell({
   variant = "default",
   center = false,
   firstPadding = false,
+  flexCell = false,
   ...props
-}: TableCellProps & { center?: boolean; firstPadding?: boolean }) {
+}: TableCellProps & { center?: boolean; firstPadding?: boolean; flexCell?: boolean }) {
   return (
     <td
       data-slot="table-cell"
       className={cn(
         // Estilos Base (Sempre aplicados)
-        "align-middle text-nowrap first:pl-5 sm:first:pl-8 bg-table ",
+        "align-middle text-nowrap bg-table",
+        // Flex cell styling - maintain table-like appearance in flex container
+        flexCell && "flex items-center box-border h-12",
+        !flexCell && "first:pl-5 sm:first:pl-8",
 
         // Variante Default (O estilo original que você tinha)
         variant === "default" && "py-2 px-2 xl:px-0 xl:p-5",
@@ -255,20 +269,20 @@ function TableCell({
           "py-1 px-4 xl:px-0 xl:p-1 first:pl-0 sm:first:pl-4 ",
 
         variant === "compact-fueling" &&
-          "py-1.5 pl-5 border-y max-w-[150px]",
+          "py-1.5 px-2 border-y",
 
         variant === "extra-compact" &&
           " px-0 xl:px-0 first:pl-0 sm:first:pl-4   ",
 
         variant === "sticky-first" &&
           cn(
-            "py-2 px-5 border-y border-border  sm:first:pl-3",
-            "sticky left-0 bg-background z-50"
+            "py-2 px-3 border-y border-border",
+            "sticky left-0 bg-background/95 backdrop-blur-sm z-40"
           ),
         variant === "sticky-second" &&
           cn(
-            "py-2 px-3 border-y border-border pr-8",
-            "sticky left-12 bg-background/90 z-50"
+            "py-2 px-3 border-y border-border",
+            "sticky bg-background/95 backdrop-blur-sm z-40"
           ),
 
         center && "text-center",
