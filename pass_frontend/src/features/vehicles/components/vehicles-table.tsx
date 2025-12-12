@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { MoreVertical } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,6 +16,9 @@ import {
   ChevronLast,
   ChevronFirst,
   ChevronsRight,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUpDown,
 } from "lucide-react";
 
 import {
@@ -54,6 +59,7 @@ interface VehiclesTableProps {
   onPageSizeChange?: (pageSize: number) => void;
   // Assumindo que você tem o estado de seleção aqui ou no pai
   selectedRows?: Set<string>;
+  sidebarCollapsed?: boolean;
 }
 
 const rowVariants = {
@@ -81,6 +87,110 @@ export function VehiclesTable({
     new Set()
   );
   const [selectAll, setSelectAll] = React.useState(false);
+
+  // Drag-to-scroll refs and state
+  const dragRef = useRef<HTMLDivElement | null>(null);
+  const isDownRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const [isGrabbing, setIsGrabbing] = useState(false);
+  const activeViewportRef = useRef<HTMLElement | null>(null);
+  const DRAG_THRESHOLD = 5;
+
+  // Pointer handlers for drag-to-scroll
+  const handleWindowPointerMove = (evt: PointerEvent) => {
+    if (!isDownRef.current || !activeViewportRef.current) return;
+    const dx = evt.clientX - startXRef.current;
+    if (!isDraggingRef.current && Math.abs(dx) > DRAG_THRESHOLD) {
+      isDraggingRef.current = true;
+      setIsGrabbing(true);
+    }
+    if (isDraggingRef.current) {
+      const newLeft = scrollLeftRef.current - dx;
+      activeViewportRef.current.scrollLeft = newLeft;
+    }
+  };
+
+  const handleWindowPointerUp = (evt: PointerEvent) => {
+    if (!isDownRef.current) return;
+    try {
+      activeViewportRef.current?.releasePointerCapture?.(
+        (evt as any).pointerId
+      );
+    } catch {}
+    isDownRef.current = false;
+    isDraggingRef.current = false;
+    setIsGrabbing(false);
+    activeViewportRef.current = null;
+    window.removeEventListener("pointermove", handleWindowPointerMove);
+    window.removeEventListener("pointerup", handleWindowPointerUp);
+    window.removeEventListener("mousemove", handleWindowMouseMove);
+    window.removeEventListener("mouseup", handleWindowMouseUp);
+    try {
+      document.body.style.userSelect = "";
+    } catch {}
+  };
+
+  const handleWindowMouseMove = (evt: MouseEvent) => {
+    if (!isDownRef.current || !activeViewportRef.current) return;
+    const dx = evt.clientX - startXRef.current;
+    if (!isDraggingRef.current && Math.abs(dx) > DRAG_THRESHOLD) {
+      isDraggingRef.current = true;
+      setIsGrabbing(true);
+    }
+    if (isDraggingRef.current) {
+      const newLeft = scrollLeftRef.current - dx;
+      activeViewportRef.current.scrollLeft = newLeft;
+    }
+  };
+
+  const handleWindowMouseUp = () => {
+    if (!isDownRef.current) return;
+    isDownRef.current = false;
+    isDraggingRef.current = false;
+    setIsGrabbing(false);
+    activeViewportRef.current = null;
+    window.removeEventListener("pointermove", handleWindowPointerMove);
+    window.removeEventListener("pointerup", handleWindowPointerUp);
+    window.removeEventListener("mousemove", handleWindowMouseMove);
+    window.removeEventListener("mouseup", handleWindowMouseUp);
+    try {
+      document.body.style.userSelect = "";
+    } catch {}
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    // Only enable drag on screens smaller than xl (1280px)
+    // if (window.innerWidth >= 1280) return;
+
+    const target = e.target as HTMLElement;
+    if (
+      target.closest(
+        'button, input, [role="checkbox"], [data-radix-popper-content-wrapper]'
+      )
+    ) {
+      return;
+    }
+    // Use the dragRef div itself as the scrollable container
+    const viewport = dragRef.current;
+    if (!viewport) return;
+    activeViewportRef.current = viewport;
+    isDownRef.current = true;
+    isDraggingRef.current = false;
+    startXRef.current = e.clientX;
+    scrollLeftRef.current = viewport.scrollLeft;
+    try {
+      viewport.setPointerCapture?.(e.pointerId);
+    } catch {}
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerup", handleWindowPointerUp);
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    window.addEventListener("mouseup", handleWindowMouseUp);
+    try {
+      document.body.style.userSelect = "none";
+    } catch {}
+  };
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -147,55 +257,34 @@ export function VehiclesTable({
   }, [vehicles, sortColumn, sortDirection]);
 
   function ActionsMenu({ vehicle }: { vehicle: Vehicle }) {
-    const [open, setOpen] = React.useState(false);
-
-    // helper to defensively stop propagation on Radix events
-    const stopRadixEvent = (e?: Event) => {
-      if (!e) return;
-      try {
-        e.stopPropagation();
-        e.preventDefault();
-      } catch {}
-    };
-
     return (
-      <DropdownMenu open={open} onOpenChange={(v) => setOpen(v)}>
-        <DropdownMenuTrigger
-          asChild
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 hover:bg-muted"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            openModal("vehicle-details", { vehicle });
+          }}
         >
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-
-        {/* mark content so row clicks can detect the origin */}
-        <DropdownMenuContent align="end" data-vehicle-action-menu>
-          <DropdownMenuItem
-            onSelect={(e?: Event) => {
-              stopRadixEvent(e);
-              openModal("vehicle-details", { vehicle });
-              setOpen(false);
-            }}
-          >
-            {t.common.edit}
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onSelect={(e?: Event) => {
-              stopRadixEvent(e);
-              openModal("confirm-delete", {
-                vehicleId: vehicle.id,
-                title: t.common.deleteConfirm,
-              });
-              setOpen(false);
-            }}
-            className="text-destructive"
-          >
-            {t.common.delete}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            openModal("confirm-delete", {
+              vehicleId: vehicle.id,
+              title: t.common.deleteConfirm,
+            });
+          }}
+        >
+          <Trash2 className="h-4 w-4 text-red-400" />
+        </Button>
+      </div>
     );
   }
 
@@ -222,236 +311,300 @@ export function VehiclesTable({
     }
   };
 
+  // Sortable header content component with arrow icons
+  const SortableHeaderContent = ({
+    columnId,
+    label,
+  }: {
+    columnId: string;
+    label: string;
+  }) => {
+    const isActive = sortColumn === columnId;
+    const direction = isActive ? sortDirection : "none";
+
+    const SortIcon =
+      direction === "asc"
+        ? ArrowUp
+        : direction === "desc"
+        ? ArrowDown
+        : ChevronsUpDown;
+
+    return (
+      <div className="flex items-center gap-1 text-foreground/70">
+        <span>{label}</span>
+        <SortIcon className={`h-3.5 w-3.5 shrink-0 ${isActive ? "" : ""}`} />
+      </div>
+    );
+  };
+
   return (
-    <div className=" overflow-hidden bg-card rounded-2xl">
-      <Table>
-        <TableHeader variant="main">
-          <TableRow className="">
-            <TableHead  className="w-12">
-              <div
-                className="flex items-center justify-center cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectAll();
-                }}
-              >
+    // Mobile: 100vw - padding (48px)
+    // Desktop lg+: 100vw - sidebar (240px) - padding wrapper (16px) - padding main (48px) = ~304px
+    <div className="w-full max-w-[calc(100vw-48px)] lg:max-w-[calc(100vw-306px)] overflow-hidden">
+      {/* Table with drag-to-scroll - only on screens smaller than xl */}
+      <div
+        ref={dragRef}
+        onPointerDown={onPointerDown}
+        className={cn(
+          "cursor-grab overflow-x-auto",
+          isGrabbing && "cursor-grabbing select-none"
+        )}
+      >
+        <Table className="w-full min-w-max">
+          <TableHeader variant="main">
+            <TableRow className="">
+              <TableHead variant="main" className="w-12">
                 <div
-                  className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
-                    selectAll ? "bg-primary border-primary" : ""
-                  }`}
+                  className="flex items-center justify-center cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectAll();
+                  }}
                 >
-                  {selectAll && (
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="2"
-                    >
-                      <path
-                        d="M2 6L5 9L10 3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </div>
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={
-                sortColumn === "internalId" ? sortDirection : "none"
-              }
-              onClick={() => handleSort("internalId")}
-            >
-              {t.vehicles.identifier}
-            </TableHead>
-
-            <TableHead
-              
-              sortable
-              sortDirection={sortColumn === "model" ? sortDirection : "none"}
-              onClick={() => handleSort("model")}
-            >
-              Título
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={sortColumn === "brand" ? sortDirection : "none"}
-              onClick={() => handleSort("brand")}
-            >
-              {t.vehicles.brand}
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={sortColumn === "capacity" ? sortDirection : "none"}
-              onClick={() => handleSort("capacity")}
-            >
-              {t.vehicles.capacity}
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={sortColumn === "plate" ? sortDirection : "none"}
-              onClick={() => handleSort("plate")}
-            >
-              {t.vehicles.plate}
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={
-                sortColumn === "companyName" ? sortDirection : "none"
-              }
-              onClick={() => handleSort("companyName")}
-            >
-              {t.vehicles.company}
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={sortColumn === "status" ? sortDirection : "none"}
-              onClick={() => handleSort("status")}
-            >
-              {t.vehicles.status}
-            </TableHead>
-            <TableHead
-              
-              sortable
-              sortDirection={
-                sortColumn === "createdAt" ? sortDirection : "none"
-              }
-              onClick={() => handleSort("createdAt")}
-            >
-              {t.vehicles.createdAt}
-            </TableHead>
-            <TableHead  className="w-10"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {vehicles.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={10}
-                className="text-start py-10 text-muted-foreground"
-              >
-                {t.common.noRecords}
-              </TableCell>
-            </TableRow>
-          ) : (
-            sortedVehicles.map((vehicle, index) => (
-              <motion.tr
-                key={vehicle.id}
-                custom={index}
-                variants={rowVariants}
-                initial="hidden"
-                animate="visible"
-                className=" border-t border-border transition-colors cursor-grab "
-                onClick={(e: React.MouseEvent) => {
-                  const target = e.target as HTMLElement | null;
-
-                  // If the click started inside the action menu or on an interactive element, ignore.
-                  if (
-                    target &&
-                    (target.closest("[data-vehicle-action-menu]") ||
-                      target.closest("button") ||
-                      target.closest("a") ||
-                      target.closest("input") ||
-                      target.closest("textarea") ||
-                      target.closest("select") ||
-                      target.closest("[data-checkbox]"))
-                  ) {
-                    return;
-                  }
-
-                  openModal("vehicle-details", { vehicle });
-                }}
-              >
-                <TableCell variant="compact" firstPadding>
                   <div
-                    data-checkbox
-                    className="flex items-center justify-center cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectRow(vehicle.id);
-                    }}
+                    className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                      selectAll ? "bg-primary border-primary" : ""
+                    }`}
                   >
-                    <div
-                      className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
-                        selectedRows.has(vehicle.id)
-                          ? "bg-primary border-primary"
-                          : ""
-                      }`}
-                    >
-                      {selectedRows.has(vehicle.id) && (
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 12 12"
-                          fill="none"
-                          stroke="white"
-                          strokeWidth="2"
-                        >
-                          <path
-                            d="M2 6L5 9L10 3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </div>
+                    {selectAll && (
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2"
+                      >
+                        <path
+                          d="M2 6L5 9L10 3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
                   </div>
-                </TableCell>
-                <TableCell className="font-medium" variant="compact">
-                  {vehicle.internalId || "-"}
-                </TableCell>
+                </div>
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={
+                  sortColumn === "internalId" ? sortDirection : "none"
+                }
+                onClick={() => handleSort("internalId")}
+              >
+                <SortableHeaderContent
+                  columnId="internalId"
+                  label={t.vehicles.identifier}
+                />
+              </TableHead>
 
-                <TableCell variant="compact">
-                  <div>
-                    <span className="font-medium">{vehicle.model}</span>
-                    <p className="text-sm text-muted-foreground">
-                      {t.categories[vehicle.category]}{" "}
-                      {t.classifications[vehicle.classification]}
-                    </p>
-                  </div>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={sortColumn === "model" ? sortDirection : "none"}
+                onClick={() => handleSort("model")}
+              >
+                <SortableHeaderContent columnId="model" label="Título" />
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={sortColumn === "brand" ? sortDirection : "none"}
+                onClick={() => handleSort("brand")}
+              >
+                <SortableHeaderContent
+                  columnId="brand"
+                  label={t.vehicles.brand}
+                />
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={
+                  sortColumn === "capacity" ? sortDirection : "none"
+                }
+                onClick={() => handleSort("capacity")}
+              >
+                <SortableHeaderContent
+                  columnId="capacity"
+                  label={t.vehicles.capacity}
+                />
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={sortColumn === "plate" ? sortDirection : "none"}
+                onClick={() => handleSort("plate")}
+              >
+                <SortableHeaderContent
+                  columnId="plate"
+                  label={t.vehicles.plate}
+                />
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={
+                  sortColumn === "companyName" ? sortDirection : "none"
+                }
+                onClick={() => handleSort("companyName")}
+              >
+                <SortableHeaderContent
+                  columnId="companyName"
+                  label={t.vehicles.company}
+                />
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={sortColumn === "status" ? sortDirection : "none"}
+                onClick={() => handleSort("status")}
+              >
+                <SortableHeaderContent
+                  columnId="status"
+                  label={t.vehicles.status}
+                />
+              </TableHead>
+              <TableHead
+                variant="main"
+                sortable
+                sortDirection={
+                  sortColumn === "createdAt" ? sortDirection : "none"
+                }
+                onClick={() => handleSort("createdAt")}
+              >
+                <SortableHeaderContent
+                  columnId="createdAt"
+                  label={t.vehicles.createdAt}
+                />
+              </TableHead>
+         
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {vehicles.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={11}
+                  className="text-start py-10 text-muted-foreground"
+                >
+                  {t.common.noRecords}
                 </TableCell>
-                <TableCell variant="compact">{vehicle.brand}</TableCell>
-                <TableCell variant="compact">{vehicle.capacity}</TableCell>
-                <TableCell variant="compact">
-                  {vehicle.plate} - {vehicle.state}
-                </TableCell>
-                <TableCell variant="compact">
-                  {vehicle.companyName || "-"}
-                </TableCell>
-                <TableCell variant="compact">
-                  <div className="text-center flex gap-2 text-muted-foreground">
-                    <Badge
-                      variant="point"
-                      className={`${getStatusColor(
-                        vehicle.status
-                      )} text-foreground font-semibold border-0  `}
-                    ></Badge>
-                    {t.status[vehicle.status]}
-                  </div>
-                </TableCell>
-                <TableCell variant="compact">
-                  {vehicle.createdAt
-                    ? format(new Date(vehicle.createdAt), "dd/MM/yyyy")
-                    : "-"}
-                </TableCell>
-                <TableCell variant="compact">
-                  <ActionsMenu vehicle={vehicle} />
-                </TableCell>
-              </motion.tr>
-            ))
-          )}
-        </TableBody>
-      </Table>
+              </TableRow>
+            ) : (
+              sortedVehicles.map((vehicle, index) => (
+                <motion.tr
+                  key={vehicle.id}
+                  custom={index}
+                  variants={rowVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="border-t border-border transition-colors group/row hover:bg-muted/50"
+                  onClick={(e: React.MouseEvent) => {
+                    const target = e.target as HTMLElement | null;
+
+                    // If the click started inside the action menu or on an interactive element, ignore.
+                    // if (
+                    //   target &&
+                    //   (target.closest("[data-vehicle-action-menu]") ||
+                    //     target.closest("button") ||
+                    //     target.closest("a") ||
+                    //     target.closest("input") ||
+                    //     target.closest("textarea") ||
+                    //     target.closest("select") ||
+                    //     target.closest("[data-checkbox]"))
+                    // ) {
+                    //   return;
+                    // }
+
+                    // openModal("vehicle-details", { vehicle });
+                  }}
+                >
+                  <TableCell variant="compact" firstPadding>
+                    <div
+                      data-checkbox
+                      className="flex items-center justify-center cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectRow(vehicle.id);
+                      }}
+                    >
+                      <div
+                        className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                          selectedRows.has(vehicle.id)
+                            ? "bg-primary border-primary"
+                            : ""
+                        }`}
+                      >
+                        {selectedRows.has(vehicle.id) && (
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 12 12"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="2"
+                          >
+                            <path
+                              d="M2 6L5 9L10 3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium" variant="compact">
+                    {vehicle.internalId || "-"}
+                  </TableCell>
+
+                  <TableCell variant="compact">
+                    <div>
+                      <span className="font-medium">{vehicle.model}</span>
+                      <p className="text-sm text-muted-foreground">
+                        {t.categories[vehicle.category]}{" "}
+                        {t.classifications[vehicle.classification]}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell variant="compact">{vehicle.brand}</TableCell>
+                  <TableCell variant="compact">{vehicle.capacity}</TableCell>
+                  <TableCell variant="compact">
+                    {vehicle.plate} - {vehicle.state}
+                  </TableCell>
+                  <TableCell variant="compact">
+                    {vehicle.companyName || "-"}
+                  </TableCell>
+                  <TableCell variant="compact">
+                    <div className="text-center flex gap-2 text-muted-foreground">
+                      <Badge
+                        variant="point"
+                        className={`${getStatusColor(
+                          vehicle.status
+                        )} text-foreground font-semibold border-0  `}
+                      ></Badge>
+                      {t.status[vehicle.status]}
+                    </div>
+                  </TableCell>
+                  <TableCell variant="compact">
+                    {vehicle.createdAt
+                      ? format(new Date(vehicle.createdAt), "dd/MM/yyyy")
+                      : "-"}
+                  </TableCell>
+                  {/* Actions - sticky right, only visible on row hover */}
+                  <td className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible">
+                    <div className="absolute right-0 top-0 h-full flex items-center pr-2 pl-4 opacity-0 group-hover/row:opacity-100 transition-opacity z-20 bg-sidebar">
+                      <ActionsMenu vehicle={vehicle} />
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Footer de Paginação */}
       <div className="sm:flex sm:flex-row gap-4 flex flex-col items-center justify-between px-5 py-4 border-t border-border">

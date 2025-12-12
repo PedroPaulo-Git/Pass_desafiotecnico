@@ -54,7 +54,8 @@ function TableHeader({
         // Estilos base
         variant === "main" &&
           cn(
-            "[&_th]:border-border/30",
+             "[&_th]:rounded-none",
+            "[&_th]:border-t border-border",
             "[&_th]:bg-table",
             "[&_th]:text-sm",
             "[&_th]:font-semibold",
@@ -116,6 +117,7 @@ function TableHead({
 }: React.ComponentProps<"th"> & {
   variant?:
     | "default"
+    | "main"
     | "compact"
     | "minimal"
     | "minimal-fueling"
@@ -149,6 +151,13 @@ function TableHead({
             "text-xs font-semibold text-muted-foreground tracking-wide ",
             ""
           ),
+           variant === "main" &&
+          cn(
+            "",
+            "py-0 px-1   z-10",
+            "text-sm font-semibold tracking-wide ",
+            ""
+          ),
         variant === "compact" && "py-2 px-3 xl:p-3 border border-border",
         variant === "minimal" &&
           cn(
@@ -174,7 +183,7 @@ function TableHead({
           ),
         variant === "sticky-second" &&
           cn(
-            "py-0 px-3 ",
+            "py-0 px-0 ml-0",
             "text-sm border-y font-semibold text-muted-foreground tracking-wide",
             "sticky bg-background/95 backdrop-blur-sm z-40 "
           ),
@@ -266,7 +275,7 @@ function TableCell({
 
         // Variante Compact (Com o xl:p-2 que você pediu)
         variant === "compact" &&
-          "py-1 px-4 xl:px-0 xl:p-1 first:pl-0 sm:first:pl-4 ",
+          "py-1 pl-1 pr-2 xl:px-0 xl:p-1 min-w-[150px] xl:min-w-auto first:w-[50px] first:min-w-[50px] first:pr-4 ",
 
         variant === "compact-fueling" &&
           "py-1.5 px-2 border-y",
@@ -281,7 +290,7 @@ function TableCell({
           ),
         variant === "sticky-second" &&
           cn(
-            "py-2 px-3 border-y border-border",
+            "py-2 px-0 border-y border-border",
             "sticky bg-background/95 backdrop-blur-sm z-40"
           ),
 

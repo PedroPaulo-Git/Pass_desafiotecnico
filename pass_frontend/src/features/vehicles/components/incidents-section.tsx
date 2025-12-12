@@ -63,7 +63,7 @@ export function IncidentsSection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="overflow-hidden max-w-full ">
+      <div className="overflow-hidden w-[90vw] sm:w-[630px] ">
         <CollapsibleTrigger asChild>
           <button
             type="button"

@@ -7,12 +7,14 @@ import { cn } from '@/lib/utils'
 
 interface ScrollAreaProps extends React.ComponentProps<typeof ScrollAreaPrimitive.Root> {
   orientation?: 'vertical' | 'horizontal' | 'both';
+  bordertop?: boolean;
 }
 
 function ScrollArea({
   className,
   children,
   orientation = 'vertical',
+  bordertop = false,
   ...props
 }: ScrollAreaProps) {
   return (
@@ -33,16 +35,22 @@ function ScrollArea({
       </ScrollAreaPrimitive.Viewport>
       {(orientation === 'vertical' || orientation === 'both') && <ScrollBar orientation="vertical" />}
       {(orientation === 'horizontal' || orientation === 'both') && <ScrollBar orientation="horizontal" />}
+      {(bordertop === true) && <ScrollBar bordertop={true} />}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   )
 }
 
+interface ScrollBarProps extends React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar> {
+  bordertop?: boolean;
+}
+
 function ScrollBar({
   className,
   orientation = 'vertical',
+  bordertop = false,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
+}: ScrollBarProps) {
   return (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
       data-slot="scroll-area-scrollbar"
@@ -53,6 +61,7 @@ function ScrollBar({
           'h-full w-2.5 border-l border-l-transparent',
         orientation === 'horizontal' &&
           'h-2.5 flex-col border-t border-t-transparent',
+        bordertop && 'border-t border-border bg-amber-500',
         className,
       )}
       {...props}

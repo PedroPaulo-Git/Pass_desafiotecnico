@@ -239,7 +239,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
   };
 
   return (
-    <div className="w-[70vw]  space-y-4">
+    <div className="w-[90vw] mt-auto space-y-4 ">
       {/* Header with stats and add button */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-10">
         {/* Stats */}
@@ -309,7 +309,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
               isGrabbing ? "cursor-grabbing" : "cursor-grab"
             )}
           >
-            <ScrollArea className="max-w-screen ">
+            <ScrollArea className="max-w-screen  ">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -436,7 +436,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
       </Card>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground bg-amber-500">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 bg-emerald-500 rounded-full" />
           <span>Dia com abastecimento</span>

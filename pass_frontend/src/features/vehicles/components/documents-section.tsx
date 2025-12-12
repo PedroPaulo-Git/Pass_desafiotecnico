@@ -107,14 +107,14 @@ export function DocumentsSection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="">
-      <div className="overflow-hidden">
+      <div className="overflow-hidden w-[90vw] sm:w-[630px]">
        
         <CollapsibleContent>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="p-2 sm:p-4 pt-0 max-[440px]:w-80 max-[550px]:w-92 mx-auto sm:w-full "
+            className="  "
           >
             <Table>
               <TableHeader variant="minimal">

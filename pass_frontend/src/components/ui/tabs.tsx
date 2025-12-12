@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { useRef } from "react";
+import { useDragToScroll } from "@/hooks/use-drag-to-scroll";
 
 import { cn } from "@/lib/utils";
 
@@ -14,7 +16,7 @@ function Tabs({ className, modalTabsStyle = false, ...props }: TabsRootProps) {
     <TabsPrimitive.Root
       data-slot="tabs"
       className={cn(
-        "flex flex-col gap-2",
+        "flex flex-col gap-2 ",
         className,
         modalTabsStyle && "gap-0"
       )}
@@ -32,13 +34,19 @@ function TabsList({
   modalTabsListStyle = false,
   ...props
 }: TabsListProps) {
+  const listRef = useRef<HTMLDivElement | null>(null);
+  useDragToScroll(listRef as any);
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
+      ref={listRef}
       className={cn(
         "bg-muted border-b-muted-foreground/20 text-muted-foreground h-9 w-fit items-center justify-center rounded-lg ",
         className,
-        modalTabsListStyle && "w-full justify-start flex-wrap px-3 "
+        // Keep flex mode but add a prettier scrollbar. `tabs-scrollbar` can be defined in globals.css
+        // if the project doesn't include the Tailwind scrollbar plugin.
+        modalTabsListStyle &&
+          " justify-start flex px-3 overflow-x-auto tabs-scrollbar scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent"
       )}
       {...props}
     />

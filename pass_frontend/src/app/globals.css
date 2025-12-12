@@ -383,3 +383,30 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground);
 }
+
+/* Tiny / almost invisible scrollbar for tabs */
+.tabs-scrollbar {
+  scrollbar-width:none;
+  scrollbar-color: rgba(100,116,139,0.08) transparent; /* subtle thumb */
+}
+.tabs-scrollbar::-webkit-scrollbar {
+  height: 4px; /* smaller */
+}
+.tabs-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tabs-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(100,116,139,0.04); /* very subtle */
+  border-radius: 9999px;
+  border: 1px solid transparent; /* small inset look */
+  background-clip: padding-box;
+}
+.tabs-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(100,116,139,0.08);
+}
+
+/* Add an accessible focus-visible outline for keyboard users */
+.tabs-scrollbar:focus-visible {
+  outline: 3px solid rgba(100,116,139,0.08);
+  outline-offset: 2px;
+}
