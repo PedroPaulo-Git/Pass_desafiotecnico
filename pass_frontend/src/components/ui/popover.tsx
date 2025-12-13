@@ -27,7 +27,7 @@ function PopoverContent({
   onPointerDownOutside,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  const contentProps: React.ComponentProps<typeof PopoverPrimitive.Content> = {
+  const contentProps: React.ComponentProps<typeof PopoverPrimitive.Content> & { 'data-slot'?: string } = {
     'data-slot': 'popover-content',
     align,
     sideOffset,
