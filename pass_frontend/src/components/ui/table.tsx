@@ -174,7 +174,7 @@ function TableHead({
 
 
         variant === "date" &&
-          cn("border-t", " px-0.5", "nth-2:pl-5 nth-1:pl-20 "),
+          cn("border-t", " px-0.5", " "),
         variant === "sticky-first" &&
           cn(
             "py-2 px-3 border-y ",

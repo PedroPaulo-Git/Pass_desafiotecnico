@@ -84,6 +84,7 @@ export function useCreateFueling() {
         `/vehicles/${vehicleId}/fuelings`,
         payload
       );
+      console.log("fueling payload mutation:", payload);
       return data;
     },
     onSuccess: (data) => {
@@ -102,8 +103,8 @@ export function useUpdateFueling() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...payload }: any) => {
-      const { data } = await api.put<Fueling>(`/fuelings/${id}`, payload);
+    mutationFn: async ({ id, data: updateData }: { id: string; data: Partial<Fueling> }) => {
+      const { data } = await api.put<Fueling>(`/fuelings/${id}`, updateData);
       return data;
     },
     onSuccess: (data) => {

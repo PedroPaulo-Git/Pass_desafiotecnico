@@ -6,7 +6,7 @@ import { Search, Filter, Plus, AlertCircle, ChevronDown } from "lucide-react";
 
 import { Sparkles, RefreshCw, CloudDownload, RotateCw } from "lucide-react";
 
-import FuelingModal from "@/features/fleet-events/components/Fueling/FuelingModal";
+import {InlineFuelingForm} from "@/features/fleet-events/components/Fueling/FuelingModal";
 import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
 import DocumentModal from "@/features/fleet-events/components/Documents/DocumentModal";
 
@@ -382,7 +382,6 @@ export function VehiclesListPage() {
             isCreate={modalType === "vehicle-create"}
           />
         )}
-        {modalType === "fueling-create" && <FuelingModal />}
         {modalType === "incident-create" && <IncidentModal />}
         {modalType === "document-create" && <DocumentModal />}
         {modalType === "confirm-delete" && <ConfirmDeleteVehicleModal />}

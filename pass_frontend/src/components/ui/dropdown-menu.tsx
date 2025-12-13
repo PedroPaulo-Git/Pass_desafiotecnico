@@ -5,6 +5,89 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+// components/ui/dropdown-modal.tsx
+import { motion, AnimatePresence } from "framer-motion";
+
+interface DropdownModalProps {
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
+  className?: string;
+  align?: "start" | "center" | "end";
+  sideOffset?: number;
+}
+
+export function DropdownModal({
+  open,
+  onOpenChange,
+  children,
+  className,
+  align = "end",
+  sideOffset = 4,
+}: DropdownModalProps) {
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Fecha ao clicar fora
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        onOpenChange
+      ) {
+        onOpenChange(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [open, onOpenChange]);
+
+  // Fecha ao pressionar Escape
+  React.useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open && onOpenChange) {
+        onOpenChange(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open, onOpenChange]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          transition={{ duration: 0.15 }}
+          className={cn(
+            "absolute z-[9999] mt-2 shadow-lg rounded-md border bg-background",
+            align === "start" && "left-0",
+            align === "center" && "left-1/2 -translate-x-1/2",
+            align === "end" && "right-0",
+            className
+          )}
+          style={{ top: `calc(100% + ${sideOffset}px)` }}
+          // Impedir que eventos vazem
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 function DropdownMenu({
   ...props

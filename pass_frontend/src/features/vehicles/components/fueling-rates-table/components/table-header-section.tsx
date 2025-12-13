@@ -35,14 +35,14 @@ export function TableHeaderSection({
     <div className="flex items-center justify-between px-3 py-2 border-b border-border shrink-0">
       {/* Left side - Panel Toggle & Title */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 hover:bg-muted/40 pl-1.5 pr-3 py-2.5 rounded-md outline-0 outline-border hover:outline-1 cursor-pointer">
+        <div  onClick={onToggleSidebar} className="flex items-center gap-2 hover:bg-muted/40 pl-1.5 pr-3 py-2.5 rounded-md outline-0 outline-border hover:outline-1 cursor-pointer">
           {onToggleSidebar && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={onToggleSidebar}
+           
             >
               <PanelLeft className="h-4 w-4" />
             </Button>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, Plus, Fuel, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Plus,
+  Fuel,
+  X,
+} from "lucide-react";
 import { format, getDaysInMonth } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateFuelingInput, createFuelingSchema } from "@pass/schemas";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import {
   useCreateFueling,
@@ -21,13 +24,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -39,10 +35,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import type { Fueling, FuelType } from "@/types/vehicle";
+import { InlineFuelingForm } from "@/features/fleet-events/components/Fueling/FuelingModal";
+import { DayDetailPopover } from "@/features/fleet-events/components/Fueling/FuelingDayDetailPopover";
+import { DropdownModal } from "@/components/ui/dropdown-menu";
 
 interface FuelingCalendarProps {
   vehicleId: string;
@@ -66,8 +63,41 @@ const MONTHS_PT = [
 
 export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
   const { t } = useI18n();
+  // No componente FuelingCalendar, adicione este useEffect
+  useEffect(() => {
+    // Listener GLOBAL para prevenir qualquer submit na página
+    const handleGlobalSubmit = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      return false;
+    };
+
+    // Captura o evento na fase de captura (true) para pegar antes de qualquer outro
+    document.addEventListener("submit", handleGlobalSubmit, true);
+
+    // Também captura eventos de click em botões submit
+    const handleButtonClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "BUTTON" &&
+        target.getAttribute("type") === "submit"
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener("click", handleButtonClick, true);
+
+    return () => {
+      document.removeEventListener("submit", handleGlobalSubmit, true);
+      document.removeEventListener("click", handleButtonClick, true);
+    };
+  }, []);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [showAddForm, setShowAddForm] = useState(false);
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
 
   // Use the dedicated fuelings query with refetch
   const { data: fuelingsData, refetch } = useFuelings({ vehicleId });
@@ -164,6 +194,13 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
+    const target = e.target as HTMLElement;
+    
+    // Don't start drag if clicking on interactive elements like buttons
+    if (target.closest('button') || target.closest('[role="button"]') || target.closest('a')) {
+      return;
+    }
+    
     const viewport = dragRef.current?.querySelector(
       '[data-slot="scroll-area-viewport"]'
     ) as HTMLElement | null;
@@ -239,39 +276,73 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
   };
 
   return (
-    <div className="w-[90vw] mt-auto space-y-4 ">
+    <div className="w-[90vw] mt-auto space-y-4 pt-4">
       {/* Header with stats and add button */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-10">
         {/* Stats */}
         <div className="flex flex-wrap items-center gap-4">
           <Button disabled variant="outline">
-            Abastecimentos <Badge className="w-7 h-7 " variant="circle">{stats.total}</Badge>
+            Abastecimentos{" "}
+            <Badge className="w-7 h-7 " variant="circle">
+              {stats.total}
+            </Badge>
           </Button>
           <span className="text-muted-foreground/40 flex items-center gap-2">
-            Litros <Badge className="px-4 " variant="circle">{stats.totalLiters.toFixed(1)}L</Badge>
+            Litros{" "}
+            <Badge className="px-4 " variant="circle">
+              {stats.totalLiters.toFixed(1)}L
+            </Badge>
           </span>
           <span className="text-muted-foreground/40 flex items-center gap-2">
-             Faturado <Badge className="px-4 " variant="circle">{formatCurrency(stats.totalValue)}</Badge>  
+            Faturado{" "}
+            <Badge className="px-4 " variant="circle">
+              {formatCurrency(stats.totalValue)}
+            </Badge>
           </span>
-       
         </div>
-
-        {/* Add button */}
-        <Popover open={showAddForm} onOpenChange={setShowAddForm}>
-          <PopoverTrigger asChild>
-            <Button variant="default" size="sm" className="gap-1">
-              <Plus className="h-4 w-4" />
+        <div className="relative">
+          {/* Container dos botões */}
+          <div className="flex rounded-md shadow-sm">
+            <Button
+              className="rounded-r-none border-r-0 pr-3"
+              variant="default"
+              size="default"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowAddForm(!showAddForm);
+              }}
+            >
               Adicionar
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-0" align="end" side="bottom">
+            <Button
+              className="rounded-l-none border-l pl-2 pr-2"
+              variant="default"
+              size="default"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowAddForm(!showAddForm);
+              }}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Dropdown Modal personalizado */}
+          <DropdownModal
+            open={showAddForm}
+            onOpenChange={setShowAddForm}
+            align="end"
+            sideOffset={4}
+          >
             <InlineFuelingForm
               vehicleId={vehicleId}
               onClose={() => setShowAddForm(false)}
               onSuccess={handleFuelingCreated}
             />
-          </PopoverContent>
-        </Popover>
+          </DropdownModal>
+        </div>
       </div>
 
       {/* Year navigation */}
@@ -315,9 +386,12 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                   <TableRow>
                     <TableHead
                       variant="date"
-                      className="w-52 px-36 z-50 py-6 sticky left-0 bg-background shadow-[inset_-1px_0_0_var(--color-border)]"
+                      className="  px-2 z-20 py-4 sticky left-0 bg-background shadow-[inset_-1px_0_0_var(--color-border)] "
                     >
-                      <span className=" ">Mês</span>
+                      <span className=" bg-muted  rounded-md  mx-4 flex items-center justify-center w-40 h-9 text-muted-foreground">
+                        <span>Mês</span>
+                        <ChevronDown className="w-4 h-4 ml-4 text-muted-foreground/50" />
+                      </span>
                     </TableHead>
                     {days.map((day) => (
                       <TableHead
@@ -389,40 +463,45 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                             key={day}
                             className={cellClass}
                           >
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <button
-                                  type="button"
-                                  className={cn(
-                                    "w-full h-8 flex items-center justify-center transition-colors",
-                                    "cursor-pointer",
-                                    isActiveDay && "",
-                                    hasFuelings && "relative"
-                                  )}
-                                >
-                                  {hasFuelings && (
+                            {hasFuelings ? (
+                              <Popover
+                                open={openPopover === `${monthIndex}-${day}`}
+                                onOpenChange={(open) => setOpenPopover(open ? `${monthIndex}-${day}` : null)}
+                              >
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className={cn(
+                                      "w-full h-8 flex items-center justify-center transition-colors",
+                                      "cursor-pointer",
+                                      "relative"
+                                    )}
+                                  >
                                     <div className="flex flex-col items-center">
                                       <span className="text-xs font-semibold text-emerald-600">
                                         {dayFuelings.length}
                                       </span>
                                       <div className="h-1 w-4 bg-emerald-500 rounded-full" />
                                     </div>
-                                  )}
-                                </button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-72 p-0"
-                                align="center"
-                                side="top"
-                              >
-                                <DayDetailPopover
-                                  date={new Date(currentYear, monthIndex, day)}
-                                  fuelings={dayFuelings}
-                                  formatCurrency={formatCurrency}
-                                  t={t}
-                                />
-                              </PopoverContent>
-                            </Popover>
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-72 p-0"
+                                  align="center"
+                                  side="top"
+                                >
+                                  <DayDetailPopover
+                                    date={new Date(currentYear, monthIndex, day)}
+                                    fuelings={dayFuelings}
+                                    formatCurrency={formatCurrency}
+                                    t={t}
+                                    onRefetch={refetch}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            ) : (
+                              <div className="w-full h-8" />
+                            )}
                           </TableCell>
                         );
                       })}
@@ -436,7 +515,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
       </Card>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground bg-amber-500">
+      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 bg-emerald-500 rounded-full" />
           <span>Dia com abastecimento</span>
@@ -444,362 +523,6 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 bg-primary/20 rounded" />
           <span>Hoje</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Inline fueling form component
-interface InlineFuelingFormProps {
-  vehicleId: string;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-function InlineFuelingForm({
-  vehicleId,
-  onClose,
-  onSuccess,
-}: InlineFuelingFormProps) {
-  const { t } = useI18n();
-  const createFueling = useCreateFueling();
-  const vehicleQuery = useVehicle(vehicleId);
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm<CreateFuelingInput>({
-    resolver: zodResolver(createFuelingSchema),
-    defaultValues: {
-      fuelType: "DIESEL",
-      odometer: undefined as unknown as number,
-      liters: undefined as unknown as number,
-      totalValue: undefined as unknown as number,
-      unitPrice: 0,
-      date: new Date(),
-    },
-  });
-
-  // Set default odometer
-  useEffect(() => {
-    const km = vehicleQuery?.data?.currentKm;
-    if (km !== undefined && km !== null) {
-      setValue("odometer", Number(km));
-    }
-  }, [vehicleQuery?.data?.currentKm, setValue]);
-
-  const onSubmit = async (formData: CreateFuelingInput) => {
-    if (!formData.totalValue || Number(formData.totalValue) < 1) {
-      sonnerToast.error("Valor total inválido");
-      return;
-    }
-    if (!formData.liters || Number(formData.liters) < 1) {
-      sonnerToast.error("Litros inválidos");
-      return;
-    }
-
-    try {
-      const odometerStop = Number(formData.odometer) || 0;
-      const currentKm = vehicleQuery?.data?.currentKm;
-
-      if (currentKm !== undefined && odometerStop < currentKm) {
-        sonnerToast.error("KM de parada não pode ser menor que o KM atual");
-        return;
-      }
-
-      const payload = { ...formData, vehicleId, odometer: odometerStop };
-      await createFueling.mutateAsync(payload);
-
-      sonnerToast.success("Abastecimento criado com sucesso!");
-      onSuccess();
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message || err?.message || "Erro ao salvar";
-      sonnerToast.error(message);
-    }
-  };
-
-  const isCreating = createFueling.isPending;
-  const fuelTypes: FuelType[] = [
-    "DIESEL",
-    "DIESEL_S10",
-    "GASOLINA",
-    "ETANOL",
-    "ARLA32",
-  ];
-
-  return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="font-semibold flex items-center gap-2">
-          <Fuel className="h-4 w-4" />
-          Novo Abastecimento
-        </h4>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={onClose}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        {/* Provider */}
-        <div>
-          <label className="text-xs text-muted-foreground">Posto</label>
-          <Select
-            value={watch("provider") ?? ""}
-            onValueChange={(value) => setValue("provider", value)}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Selecione o posto" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Ipiranga">Ipiranga</SelectItem>
-              <SelectItem value="Shell">Shell</SelectItem>
-              <SelectItem value="Petrobras">Petrobras</SelectItem>
-              <SelectItem value="Outro">Outro</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Fuel Type */}
-        <div>
-          <label className="text-xs text-muted-foreground">Combustível</label>
-          <Select
-            value={watch("fuelType") ?? "DIESEL"}
-            onValueChange={(value) => setValue("fuelType", value as FuelType)}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {fuelTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Date */}
-        <div>
-          <label className="text-xs text-muted-foreground">Data</label>
-          <Controller
-            control={control}
-            name="date"
-            render={({ field }) => (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-8 justify-start text-left font-normal"
-                  >
-                    {field.value
-                      ? format(new Date(field.value), "dd/MM/yyyy", {
-                          locale: ptBR,
-                        })
-                      : "Selecione"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => field.onChange(date)}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
-          />
-        </div>
-
-        {/* Liters and Value */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs text-muted-foreground">Litros</label>
-            <Controller
-              control={control}
-              name="liters"
-              render={({ field }) => (
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="Ex: 50"
-                  className="h-8"
-                  value={field.value ?? ""}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                />
-              )}
-            />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Valor Total</label>
-            <Controller
-              control={control}
-              name="totalValue"
-              render={({ field }) => (
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="Ex: 300"
-                  className="h-8"
-                  value={field.value ?? ""}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                />
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Odometer */}
-        <div>
-          <label className="text-xs text-muted-foreground">KM Atual</label>
-          <Controller
-            control={control}
-            name="odometer"
-            render={({ field }) => (
-              <Input
-                type="number"
-                placeholder="Ex: 50000"
-                className="h-8"
-                value={field.value ?? ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              />
-            )}
-          />
-        </div>
-
-        {/* Hidden unit price */}
-        <input
-          type="hidden"
-          {...register("unitPrice", { valueAsNumber: true })}
-        />
-
-        {/* Actions */}
-        <div className="flex gap-2 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 h-8"
-            onClick={onClose}
-          >
-            Cancelar
-          </Button>
-          <Button type="submit" className="flex-1 h-8" disabled={isCreating}>
-            {isCreating ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-// Day detail popover component
-interface DayDetailPopoverProps {
-  date: Date;
-  fuelings: Fueling[];
-  formatCurrency: (value: number) => string;
-  t: any;
-}
-
-function DayDetailPopover({
-  date,
-  fuelings,
-  formatCurrency,
-  t,
-}: DayDetailPopoverProps) {
-  if (fuelings.length === 0) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        <p className="text-sm">Nenhum abastecimento</p>
-        <p className="text-xs mt-1">{format(date, "dd/MM/yyyy")}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-h-80 ">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-background">
-        <span className="text-sm font-medium flex items-center gap-2">
-          <Fuel className="h-4 w-4" />
-          Abastecimentos
-        </span>
-        <Badge variant="secondary">{format(date, "dd/MM/yyyy")}</Badge>
-      </div>
-
-      {/* Fueling list */}
-      <div className="p-3 space-y-2">
-        {fuelings.map((fueling, idx) => (
-          <Card key={fueling.id || idx} className="">
-            <div className="flex items-center justify-between mb-2">
-              <Badge variant="outline">{fueling.fuelType}</Badge>
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(fueling.date), "HH:mm")}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <span className="text-muted-foreground">Litros:</span>
-                <span className="ml-1 font-medium">{fueling.liters}L</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Valor:</span>
-                <span className="ml-1 font-medium">
-                  {formatCurrency(fueling.totalValue)}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">KM:</span>
-                <span className="ml-1 font-medium">
-                  {fueling.odometer?.toLocaleString("pt-BR") || "-"}
-                </span>
-              </div>
-              {fueling.provider && (
-                <div>
-                  <span className="text-muted-foreground">Posto:</span>
-                  <span className="ml-1 font-medium">{fueling.provider}</span>
-                </div>
-              )}
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Footer summary */}
-      <Separator />
-      <div className="px-4 py-3 bg-muted/30">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Total do dia:</span>
-          <span className="font-medium">
-            {fuelings.reduce((acc, f) => acc + (f.liters || 0), 0).toFixed(1)}L
-            -{" "}
-            {formatCurrency(
-              fuelings.reduce((acc, f) => acc + (f.totalValue || 0), 0)
-            )}
-          </span>
         </div>
       </div>
     </div>

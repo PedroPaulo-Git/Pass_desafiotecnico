@@ -543,7 +543,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 {/* Header */}
                 <DialogHeader
                   className={cn(
-                    "sticky z-50 top-0 w-full  rounded-t ",
+                    "sticky bg-background z-10 -top-1 w-full  rounded-t ",
                     activeTab === "general" && "w-[90vw] sm:w-[650px] ",
                     activeTab === "fuelings" && "w-screen max-w-[90vw] ",
                     activeTab === "documents" && "w-[90vw] sm:w-[647px]  ",
@@ -551,7 +551,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     activeTab === "rates" && "w-screen lg:max-w-[67vw]",
                     activeTab === "terms" && "w-screen max-w-[1000px] "
                   )}
-                >
+                 >
                   <div className="flex items-center justify-between px-6 py-6 ">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-background border border-muted rounded-full">
@@ -653,7 +653,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       ? "px-0 pb-0"
                       : activeTab === "terms"
                       ? "px-0 pb-0 w-full"
-                      : "w-[90vw] max-w-[900px] md:w-[max(70vw,900px)]"
+                      : "w-[90vw] max-w-[900px] sm:w-[650px]"
                   )}
                 >
                   <AnimatePresence mode="wait">
@@ -750,10 +750,12 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         )}
                                       </div>
                                     )}
-                                    <div className="col-span-3 w-full ">
+                                    <div className={` w-full ${
+                                        isCreating ? "col-span-3" : "col-span-4"
+                                      }`}>
                                       <label className="text-sm text-foreground">
                                         {t.vehicles.company}
-                                        {/* <span className=" pl-2">(#180461)</span> */}
+                                     
                                       </label>
                                       <Select
                                         value={watch("companyName") || ""}
@@ -778,10 +780,12 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                    <div className="col-span-3 ">
+                                    <div className={` w-full ${
+                                        isCreating ? "col-span-3" : "col-span-4"
+                                      }`}>
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.status}
-                                        {/* <span className=" pl-2">(#180451)</span> */}
+                                  
                                       </label>
                                       <Select
                                         value={watch("status")}
@@ -917,7 +921,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     <div className="col-span-3 sm:col-span-2">
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.category}
-                                        <span className=" pl-2">(#1106)</span>
+                                    
                                       </label>
                                       <Select
                                         value={watch("category")}
@@ -944,7 +948,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     <div className="col-span-1 sm:col-span-2">
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.classification}
-                                        <span className=" pl-2">(#1105)</span>
+                                    
                                       </label>
                                       <Select
                                         value={watch("classification")}
@@ -1200,7 +1204,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     <div className="col-span-1 sm:col-span-2">
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.fuelType}
-                                        <span className=" pl-2">(#1337)</span>
+                                   
                                       </label>
                                       <Select
                                         value={watch("fuelType")}
@@ -1254,7 +1258,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                               />
                                             </span>
                                           ) : (
-                                            <SelectValue placeholder="Caracteristicas (#180471)" />
+                                            <SelectValue placeholder="Caracteristicas" />
                                           )}
                                         </SelectTrigger>
                                         <SelectContent showSearch>
