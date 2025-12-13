@@ -430,7 +430,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           " p-0 rounded-2xl max-h-[90vh]  ",
           activeTab === "general" &&
             "w-[90vw] sm:w-[650px] max-h-[55vh] overflow-y-auto",
-          activeTab === "fuelings" && "w-screen max-w-[90vw] h-[75vh]  ",
+          activeTab === "fuelings" && "w-screen max-w-7xl h-[75vh]  ",
           activeTab === "documents" && "w-[90vw] sm:w-[650px] h-[75vh]   ",
           activeTab === "incidents" && "w-[90vw] sm:w-[650px] h-[75vh]  ",
           activeTab === "rates" &&
@@ -543,9 +543,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 {/* Header */}
                 <DialogHeader
                   className={cn(
-                    "sticky bg-background z-10 -top-1 w-full  rounded-t ",
+                    "sticky bg-background z-10 -top-1 w-full  rounded-t-xl ",
                     activeTab === "general" && "w-[90vw] sm:w-[650px] ",
-                    activeTab === "fuelings" && "w-screen max-w-[90vw] ",
+                    activeTab === "fuelings" && "w-screen max-w-7xl border-r ",
                     activeTab === "documents" && "w-[90vw] sm:w-[647px]  ",
                     activeTab === "incidents" && "w-[90vw] sm:w-[647px]  ",
                     activeTab === "rates" && "w-screen lg:max-w-[67vw]",
