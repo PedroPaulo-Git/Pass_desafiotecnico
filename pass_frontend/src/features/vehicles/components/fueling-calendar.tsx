@@ -40,6 +40,7 @@ import type { Fueling, FuelType } from "@/types/vehicle";
 import { InlineFuelingForm } from "@/features/fleet-events/components/Fueling/FuelingModal";
 import { DayDetailPopover } from "@/features/fleet-events/components/Fueling/FuelingDayDetailPopover";
 import { DropdownModal } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FuelingCalendarProps {
   vehicleId: string;
@@ -196,8 +197,8 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
   const onPointerDown = (e: React.PointerEvent) => {
     const target = e.target as HTMLElement;
     
-    // Don't start drag if clicking on interactive elements like buttons
-    if (target.closest('button') || target.closest('[role="button"]') || target.closest('a')) {
+    // Don't start drag if clicking on interactive elements like buttons or in table header
+    if (target.closest('button') || target.closest('[role="button"]') || target.closest('a') || target.closest('[role="combobox"]') || target.closest('[data-slot="select-trigger"]') || target.closest('thead')) {
       return;
     }
     
@@ -345,36 +346,12 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
         </div>
       </div>
 
-      {/* Year navigation */}
-      {/* <div className="flex items-center justify-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentYear((y) => y - 1)}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {currentYear - 1}
-        </Button>
-        <span className="text-lg font-semibold min-w-20 text-center">
-          {currentYear}
-        </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentYear((y) => y + 1)}
-        >
-          {currentYear + 1}
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div> */}
 
-      {/* Calendar Grid using shadcn Table */}
       <Card variant="card-date" className="bg-red-500">
         <CardContent className="p-0 ">
           <div
             ref={dragRef}
             onPointerDown={onPointerDown}
-            onPointerDownCapture={onPointerDown}
             className={cn(
               "w-full",
               isGrabbing ? "cursor-grabbing" : "cursor-grab"
@@ -388,10 +365,24 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
                       variant="date"
                       className="  px-2 z-20 py-4 sticky left-0 bg-background shadow-[inset_-1px_0_0_var(--color-border)] "
                     >
-                      <span className=" bg-muted  rounded-md  mx-4 flex items-center justify-center w-40 h-9 text-muted-foreground">
-                        <span>Mês</span>
-                        <ChevronDown className="w-4 h-4 ml-4 text-muted-foreground/50" />
-                      </span>
+                      <Select
+                        value={currentYear.toString()}
+                        onValueChange={(value) => setCurrentYear(parseInt(value))}
+                      >
+                        <SelectTrigger 
+                          className="bg-muted rounded-md mx-4 flex items-center justify-center w-40 h-9 text-muted-foreground border-none"
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 11 }, (_, i) => 2020 + i).map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableHead>
                     {days.map((day) => (
                       <TableHead
