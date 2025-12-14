@@ -92,12 +92,12 @@ export function TableHeaderSection({
             onClick={() => setShowAddForm(!showAddForm)}
             className="rounded-r-none border-r-0 pr-3"
           >
-            <Plus className="h-3.5 w-3.5" />
+         
             <span className="hidden sm:inline">Adicionar</span>
           </Button>
           <Button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="rounded-l-none  pl-2 pr-2 border-l border-black"
+            className="rounded-l-none  pl-2 pr-2 border-black"
             variant="default"
             size="default"
           >

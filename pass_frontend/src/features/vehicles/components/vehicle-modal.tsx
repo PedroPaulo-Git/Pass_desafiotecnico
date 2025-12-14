@@ -184,7 +184,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       schedule: "Interhotel – 07:00 às 12:00",
       badge: null,
     },
-  ] as RouteItem[] ;
+  ] as RouteItem[];
 
   const { data: imagesData } = useVehicleImages(vehicle?.id || "");
   const createImage = useCreateVehicleImage();
@@ -551,7 +551,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           className="rounded-none py-3"
                           modalTabsTriggerStyle
                         >
-                          <FileCheck className="h-4 w-4 mr-2" />
+                          <FileText className="h-4 w-4 mr-2" />
                           Termos
                         </TabsTrigger>
                       </>
@@ -1365,28 +1365,28 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           </Collapsible>
 
                           {/* Footer Actions - Dentro da tab Geral */}
-                          {/* {isCreating && (
-                  <div className="flex justify-center gap-3 pt-4">
-                    <Button
-                      type="button"
-                      variant="modal_white"
-                      size="modal"
-                      onClick={closeModal}
-                    >
-                      {t.common.close}
-                    </Button>
-                    <Button
-                      size="modal"
-                      type="submit"
-                      variant="modal"
-                      disabled={createVehicle.isPending}
-                    >
-                      {createVehicle.isPending
-                        ? t.common.loading
-                        : t.common.save}
-                    </Button>
-                  </div>
-                )} */}
+                          {isCreating && (
+                            <div className="flex justify-center gap-3 pt-4">
+                              <Button
+                                type="button"
+                                variant="modal_white"
+                                size="modal"
+                                onClick={closeModal}
+                              >
+                                {t.common.close}
+                              </Button>
+                              <Button
+                                size="modal"
+                                type="submit"
+                                variant="modal"
+                                disabled={createVehicle.isPending}
+                              >
+                                {createVehicle.isPending
+                                  ? t.common.loading
+                                  : t.common.save}
+                              </Button>
+                            </div>
+                          )}
                         </motion.div>
                       )}
                     </TabsContent>

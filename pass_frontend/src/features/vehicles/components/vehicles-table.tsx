@@ -9,6 +9,7 @@ import { useModalStore } from "@/store/use-modal-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useDragToScroll } from "@/features/vehicles/components/fueling-rates-table/hooks/use-drag-to-scroll";
 import {
   ChevronLeft,
   ChevronRight,
@@ -88,109 +89,7 @@ export function VehiclesTable({
   );
   const [selectAll, setSelectAll] = React.useState(false);
 
-  // Drag-to-scroll refs and state
-  const dragRef = useRef<HTMLDivElement | null>(null);
-  const isDownRef = useRef(false);
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const [isGrabbing, setIsGrabbing] = useState(false);
-  const activeViewportRef = useRef<HTMLElement | null>(null);
-  const DRAG_THRESHOLD = 5;
-
-  // Pointer handlers for drag-to-scroll
-  const handleWindowPointerMove = (evt: PointerEvent) => {
-    if (!isDownRef.current || !activeViewportRef.current) return;
-    const dx = evt.clientX - startXRef.current;
-    if (!isDraggingRef.current && Math.abs(dx) > DRAG_THRESHOLD) {
-      isDraggingRef.current = true;
-      setIsGrabbing(true);
-    }
-    if (isDraggingRef.current) {
-      const newLeft = scrollLeftRef.current - dx;
-      activeViewportRef.current.scrollLeft = newLeft;
-    }
-  };
-
-  const handleWindowPointerUp = (evt: PointerEvent) => {
-    if (!isDownRef.current) return;
-    try {
-      activeViewportRef.current?.releasePointerCapture?.(
-        (evt as any).pointerId
-      );
-    } catch {}
-    isDownRef.current = false;
-    isDraggingRef.current = false;
-    setIsGrabbing(false);
-    activeViewportRef.current = null;
-    window.removeEventListener("pointermove", handleWindowPointerMove);
-    window.removeEventListener("pointerup", handleWindowPointerUp);
-    window.removeEventListener("mousemove", handleWindowMouseMove);
-    window.removeEventListener("mouseup", handleWindowMouseUp);
-    try {
-      document.body.style.userSelect = "";
-    } catch {}
-  };
-
-  const handleWindowMouseMove = (evt: MouseEvent) => {
-    if (!isDownRef.current || !activeViewportRef.current) return;
-    const dx = evt.clientX - startXRef.current;
-    if (!isDraggingRef.current && Math.abs(dx) > DRAG_THRESHOLD) {
-      isDraggingRef.current = true;
-      setIsGrabbing(true);
-    }
-    if (isDraggingRef.current) {
-      const newLeft = scrollLeftRef.current - dx;
-      activeViewportRef.current.scrollLeft = newLeft;
-    }
-  };
-
-  const handleWindowMouseUp = () => {
-    if (!isDownRef.current) return;
-    isDownRef.current = false;
-    isDraggingRef.current = false;
-    setIsGrabbing(false);
-    activeViewportRef.current = null;
-    window.removeEventListener("pointermove", handleWindowPointerMove);
-    window.removeEventListener("pointerup", handleWindowPointerUp);
-    window.removeEventListener("mousemove", handleWindowMouseMove);
-    window.removeEventListener("mouseup", handleWindowMouseUp);
-    try {
-      document.body.style.userSelect = "";
-    } catch {}
-  };
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    // Only enable drag on screens smaller than xl (1280px)
-    // if (window.innerWidth >= 1280) return;
-
-    const target = e.target as HTMLElement;
-    if (
-      target.closest(
-        'button, input, [role="checkbox"], [data-radix-popper-content-wrapper]'
-      )
-    ) {
-      return;
-    }
-    // Use the dragRef div itself as the scrollable container
-    const viewport = dragRef.current;
-    if (!viewport) return;
-    activeViewportRef.current = viewport;
-    isDownRef.current = true;
-    isDraggingRef.current = false;
-    startXRef.current = e.clientX;
-    scrollLeftRef.current = viewport.scrollLeft;
-    try {
-      viewport.setPointerCapture?.(e.pointerId);
-    } catch {}
-    window.addEventListener("pointermove", handleWindowPointerMove);
-    window.addEventListener("pointerup", handleWindowPointerUp);
-    window.addEventListener("mousemove", handleWindowMouseMove);
-    window.addEventListener("mouseup", handleWindowMouseUp);
-    try {
-      document.body.style.userSelect = "none";
-    } catch {}
-  };
+  const { dragRef, isGrabbing, onPointerDown, onClickCapture } = useDragToScroll(true);
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -345,9 +244,11 @@ export function VehiclesTable({
       <div
         ref={dragRef}
         onPointerDown={onPointerDown}
+        onClick={onClickCapture}
+        onClickCapture={onClickCapture}
         className={cn(
           "cursor-grab overflow-x-auto",
-          isGrabbing && "cursor-grabbing select-none"
+          isGrabbing && "cursor-grabbing select-none [&_*]:pointer-events-none"
         )}
       >
         <Table className="w-full min-w-max">

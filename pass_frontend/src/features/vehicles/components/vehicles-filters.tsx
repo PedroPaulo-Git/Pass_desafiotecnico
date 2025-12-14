@@ -55,10 +55,10 @@ export function VehiclesFilters({
               onFilterChange({ status: (value as VehicleStatus) || undefined })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger variant="modal" className="bg-muted">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent showSearch={true} className="bg-background">
               <SelectItem value="all">Todos</SelectItem>
               {statuses.map((status) => (
                 <SelectItem key={status} value={status}>
@@ -81,10 +81,10 @@ export function VehiclesFilters({
               })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger variant="modal" className="bg-muted">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent showSearch={true} className="bg-background">
               <SelectItem value="all">Todas</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
@@ -107,10 +107,10 @@ export function VehiclesFilters({
               })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger  variant="modal" className="bg-muted">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent showSearch={true} className="bg-background">
               <SelectItem value="all">Todas</SelectItem>
               {classifications.map((classification) => (
                 <SelectItem key={classification} value={classification}>
@@ -129,10 +129,10 @@ export function VehiclesFilters({
             value={filters.sortBy || "createdAt"}
             onValueChange={(value) => onFilterChange({ sortBy: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger variant="modal" className="bg-muted">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent showSearch={true} className="bg-background">
               <SelectItem value="createdAt">{t.vehicles.createdAt}</SelectItem>
               <SelectItem value="brand">{t.vehicles.brand}</SelectItem>
               <SelectItem value="plate">{t.vehicles.plate}</SelectItem>

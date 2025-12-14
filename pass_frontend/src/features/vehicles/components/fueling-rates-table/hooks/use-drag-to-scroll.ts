@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from "react";
 import { DRAG_THRESHOLD } from "../constants";
 
-export function useDragToScroll() {
+export function useDragToScroll(allowDragOnInteractive: boolean = false) {
   const dragRef = useRef<HTMLDivElement | null>(null);
   const isDownRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -30,7 +30,7 @@ export function useDragToScroll() {
         console.log("error setting pointer capture", e);
       }
     }
-  
+
     if (isDraggingRef.current) {
       evt.preventDefault(); // Impede seleção de texto nativa enquanto arrasta
       activeViewportRef.current.scrollLeft = scrollLeftRef.current - walk;
@@ -102,11 +102,15 @@ export function useDragToScroll() {
     (e: React.PointerEvent) => {
       blockClickRef.current = false;
       const target = e.target as HTMLElement;
-      // Removed check for interactive elements to allow drag starting on inputs/buttons
+      if (!allowDragOnInteractive) {
+        // Check if the target is an interactive element
+        const isInteractive = target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.closest('button, input, select, textarea, a');
+        if (isInteractive) return; // Don't start drag on interactive elements
+      }
 
       const viewport = dragRef.current?.querySelector(
         '[data-slot="scroll-area-viewport"]'
-      ) as HTMLElement | null;
+      ) as HTMLElement | null || dragRef.current;
       if (!viewport) return;
 
       activeViewportRef.current = viewport;
@@ -135,12 +139,12 @@ export function useDragToScroll() {
   );
 
   const onClickCapture = useCallback((e: React.MouseEvent) => {
-      // Se houve movimento de arraste real, matamos o evento de clique aqui
-      if (blockClickRef.current) {
-          e.stopPropagation();
-          e.preventDefault();
-          blockClickRef.current = false; // Reset para o próximo
-      }
+    // Se houve movimento de arraste real, matamos o evento de clique aqui
+    if (blockClickRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      blockClickRef.current = false; // Reset para o próximo
+    }
   }, []);
 
   return {

@@ -35,7 +35,7 @@ export function Pagination({
   onItemsPerPageChange,
 }: PaginationProps) {
   return (
-    <div className="sm:flex sm:flex-row gap-4 flex flex-col items-center justify-between px-5 py-4 border-t border-border">
+    <div className="sm:flex sm:flex-row gap-4 flex flex-col items-center justify-between px-5 py-4">
       {/* Lado Esquerdo: Texto de Seleção */}
       <div className="text-sm text-muted-foreground">
         {selectedCount} de {totalCount} linha(s)

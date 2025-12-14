@@ -140,7 +140,7 @@ export function FuelingRatesTable({
   // const [editOdometer, setEditOdometer] = useState<number>(0);
 
   // Custom hooks
-  const { dragRef, isGrabbing, onPointerDown } = useDragToScroll();
+  const { dragRef, isGrabbing, onPointerDown } = useDragToScroll(true);
   const {
     togglePin,
     getColumnPin,

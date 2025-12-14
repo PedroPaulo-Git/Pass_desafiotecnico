@@ -85,7 +85,7 @@ export function FuelingScrollTable({
   } = useColumnPinning();
   const { toggleSort, getColumnSort } = useColumnSorting();
   const { dragRef, isGrabbing, onPointerDown, onClickCapture } =
-    useDragToScroll();
+    useDragToScroll(true);
   const { openModal } = useModalStore();
 
   const [editingField, setEditingField] = useState<{
