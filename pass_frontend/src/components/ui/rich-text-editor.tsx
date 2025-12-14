@@ -11,7 +11,7 @@ import Superscript from "@tiptap/extension-superscript";
 import {
   Undo2,
   Redo2,
-  Heading1,
+  Heading,  Heading1,  Heading2,  Heading3,
   List,
   ListOrdered,
   CheckSquare,
@@ -99,7 +99,7 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-background px-2 py-1.5">
+    <div className="flex flex-wrap items-center justify-center gap-0.5 border-b border-border bg-background px-2 py-1.5">
       {/* Undo/Redo */}
       <ToolbarButton
         onPressedChange={() => editor.chain().focus().undo().run()}
@@ -138,14 +138,27 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
           }
         }}
       >
-        <SelectTrigger className="h-8 w-20 text-xs border-0 bg-transparent hover:bg-muted/60">
-          <SelectValue />
+        <SelectTrigger className={cn(
+          "h-8 w-14 text-xs border-0 bg-transparent hover:bg-muted/60",
+          editor.isActive("heading") && "bg-muted"
+        )}>
+          <SelectValue>
+            {editor.isActive("heading", { level: 1 }) ? (
+              <Heading1 className="h-4 w-4" />
+            ) : editor.isActive("heading", { level: 2 }) ? (
+              <Heading2 className="h-4 w-4" />
+            ) : editor.isActive("heading", { level: 3 }) ? (
+              <Heading3 className="h-4 w-4" />
+            ) : (
+              <Heading className="h-4 w-4" />
+            )}
+          </SelectValue>
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="p">Normal</SelectItem>
-          <SelectItem value="h1">H1</SelectItem>
-          <SelectItem value="h2">H2</SelectItem>
-          <SelectItem value="h3">H3</SelectItem>
+        <SelectContent className="text-muted-foreground">
+          {/* <SelectItem value="p"><Heading/></SelectItem> */}
+          <SelectItem value="h1"><Heading1 className="hover:text-inherit"/>Titulo 1</SelectItem>
+          <SelectItem value="h2"><Heading2 className="hover:text-inherit"/>Titulo 2</SelectItem>
+          <SelectItem value="h3"><Heading3 className="hover:text-inherit"/>Titulo 3</SelectItem>
         </SelectContent>
       </Select>
 
@@ -317,17 +330,24 @@ export function RichTextEditor({
         class: cn(
           "prose prose-sm dark:prose-invert max-w-none",
           "min-h-[300px] w-full px-6 py-4 focus:outline-none",
-          "prose-headings:font-bold prose-headings:text-foreground",
-          "prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-6",
-          "prose-h2:text-xl prose-h2:mb-3 prose-h2:mt-5",
-          "prose-h3:text-lg prose-h3:mb-2 prose-h3:mt-4",
-          "prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-3",
-          "prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-3",
-          "prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-3",
-          "prose-li:mb-1",
-          "prose-blockquote:border-l-4 prose-blockquote:border-muted-foreground/30 prose-blockquote:pl-4 prose-blockquote:italic",
-          "prose-a:text-primary prose-a:underline",
-          "prose-strong:font-bold prose-strong:text-foreground",
+          // Custom heading styles using [&_*] selectors for better specificity
+          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h1]:mt-6 [&_h1]:text-foreground",
+          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-foreground",
+          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:text-foreground",
+          "[&_p]:text-foreground [&_p]:leading-relaxed [&_p]:mb-3",
+          "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-3",
+          "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-3",
+          "[&_li]:mb-1 [&_li]:text-foreground",
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-muted-foreground/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-foreground",
+          "[&_a]:text-primary [&_a]:underline [&_a]:cursor-pointer hover:[&_a]:text-primary/80",
+          "[&_strong]:font-bold [&_strong]:text-foreground",
+          "[&_em]:text-foreground",
+          "[&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono",
+          "[&_pre]:bg-muted [&_pre]:p-4 [&_pre]:rounded [&_pre]:overflow-x-auto",
+          "[&_u]:underline",
+          "[&_s]:line-through",
+          "[&_sup]:text-xs [&_sup]:align-super",
+          "[&_sub]:text-xs [&_sub]:align-sub",
           "[&_*]:text-foreground"
         ),
       },
@@ -340,7 +360,7 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        "rounded-lg border border-border bg-background overflow-hidden",
+        "bg-background overflow-hidden",
         className
       )}
     >

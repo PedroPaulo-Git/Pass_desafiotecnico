@@ -84,7 +84,7 @@ export function FuelingScrollTable({
     getStickyStyle,
   } = useColumnPinning();
   const { toggleSort, getColumnSort } = useColumnSorting();
-  const { dragRef, isGrabbing, onPointerDown } = useDragToScroll();
+  const { dragRef, isGrabbing, onPointerDown,onClickCapture } = useDragToScroll();
   const { openModal } = useModalStore();
 
   const [editingField, setEditingField] = useState<{
@@ -96,14 +96,27 @@ export function FuelingScrollTable({
     setEditingField({ periodId, field });
   };
 
-  const handleFieldBlur = (periodId: string, field: string, valueStr: string) => {
-    let prefix = '';
-    let suffix = '';
-    if (field === 'unitPrice') { prefix = 'R$'; suffix = '/L'; }
-    else if (field === 'value') { prefix = 'R$'; }
-    else if (field === 'odometer') { suffix = 'km'; }
-    else if (field === 'liters') { suffix = 'L'; }
-    const extracted = valueStr.replace(prefix, '').replace(suffix, '').replace(/[^\d.-]/g, '');
+  const handleFieldBlur = (
+    periodId: string,
+    field: string,
+    valueStr: string
+  ) => {
+    let prefix = "";
+    let suffix = "";
+    if (field === "unitPrice") {
+      prefix = "R$";
+      suffix = "/L";
+    } else if (field === "value") {
+      prefix = "R$";
+    } else if (field === "odometer") {
+      suffix = "km";
+    } else if (field === "liters") {
+      suffix = "L";
+    }
+    const extracted = valueStr
+      .replace(prefix, "")
+      .replace(suffix, "")
+      .replace(/[^\d.-]/g, "");
     const newValue = Number(extracted);
     console.log("handleFieldBlur", { periodId, field, newValue });
     if (isNaN(newValue)) {
@@ -123,13 +136,22 @@ export function FuelingScrollTable({
     if (e.key === "Enter") {
       e.preventDefault();
       const valueStr = (e.target as HTMLInputElement).value;
-      let prefix = '';
-      let suffix = '';
-      if (field === 'unitPrice') { prefix = 'R$'; suffix = '/L'; }
-      else if (field === 'value') { prefix = 'R$'; }
-      else if (field === 'odometer') { suffix = 'km'; }
-      else if (field === 'liters') { suffix = 'L'; }
-      const extracted = valueStr.replace(prefix, '').replace(suffix, '').replace(/[^\d.-]/g, '');
+      let prefix = "";
+      let suffix = "";
+      if (field === "unitPrice") {
+        prefix = "R$";
+        suffix = "/L";
+      } else if (field === "value") {
+        prefix = "R$";
+      } else if (field === "odometer") {
+        suffix = "km";
+      } else if (field === "liters") {
+        suffix = "L";
+      }
+      const extracted = valueStr
+        .replace(prefix, "")
+        .replace(suffix, "")
+        .replace(/[^\d.-]/g, "");
       const newValue = Number(extracted);
       console.log("handleFieldKeyDown Enter", { periodId, field, newValue });
       if (isNaN(newValue)) {
@@ -165,7 +187,7 @@ export function FuelingScrollTable({
           onClick={(e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            const fuelingId = period.id.replace(/^period-[^-]+-[^-]+-/, '');
+            const fuelingId = period.id.replace(/^period-[^-]+-[^-]+-/, "");
             handleDeleteFueling(fuelingId);
           }}
         >
@@ -179,7 +201,12 @@ export function FuelingScrollTable({
     <div
       ref={dragRef}
       onPointerDown={onPointerDown}
-      className={cn("", isGrabbing && "cursor-grabbing select-none")}
+      onClick={onClickCapture}
+      onClickCapture={onClickCapture}
+      className={cn(
+        "",
+        isGrabbing && "cursor-grabbing select-none [&_*]:pointer-events-none"
+      )}
     >
       <ScrollArea className="max-w-screen border-x border-border">
         <Table>
@@ -383,7 +410,6 @@ export function FuelingScrollTable({
               </TableHead>
 
               {/* Actions */}
-            
             </TableRow>
           </TableHeader>
 
@@ -533,7 +559,7 @@ export function FuelingScrollTable({
                           type="button"
                           className="truncate hover:bg-background/20 rounded-lg hover:py-2 max-w-[150px]
                                   hover:ring-1 hover:ring-border
-                                  cursor-pointer text-left px-5 transition-colors -mx-3 -my-1"
+                                  cursor-pointer text-left px-5 transition-colors "
                           title={
                             period.category
                               ? CATEGORY_LABELS[period.category]
@@ -545,7 +571,7 @@ export function FuelingScrollTable({
                             : "Selecione..."}
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0" align="start">
+                      <PopoverContent className="w-[200px] p-0 " align="start">
                         <Command>
                           <CommandInput placeholder="Buscar categoria..." />
                           <CommandList>
@@ -557,6 +583,7 @@ export function FuelingScrollTable({
                                 ([key, label]) => (
                                   <CommandItem
                                     key={key}
+                                    className=""
                                     value={key}
                                     onSelect={() => {
                                       onUpdateField(period.id, "category", key);
@@ -565,7 +592,7 @@ export function FuelingScrollTable({
                                   >
                                     {label}
                                     {period.category === key && (
-                                      <Check className="ml-auto h-4 w-4" />
+                                      <Check className="ml-auto h-4 w-4 " />
                                     )}
                                   </CommandItem>
                                 )
@@ -596,7 +623,7 @@ export function FuelingScrollTable({
                           type="button"
                           className="truncate hover:bg-background/20 rounded-lg hover:py-2 max-w-[150px]
                                   hover:ring-1 hover:ring-border
-                                  cursor-pointer text-left px-5 transition-colors -mx-3 -my-1"
+                                  cursor-pointer text-left px-5 transition-colors"
                           title={period.provider}
                         >
                           {period.provider || "Selecione..."}
@@ -651,14 +678,14 @@ export function FuelingScrollTable({
                       modal={true}
                     >
                       <PopoverTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className="hover:bg-background/20 border-none rounded-lg hover:py-2 
+                        <button
+                          type="button"
+                          className="truncate hover:bg-background/20 border-none rounded-lg hover:py-2 
                                   hover:ring-1 hover:ring-border
-                                  py-2 cursor-pointer text-left px-3 transition-colors"
+                                  py-2 cursor-pointer text-left px-5  transition-colors"
                         >
                           {FUEL_TYPE_LABELS[period.fuelType] || period.fuelType}
-                        </Badge>
+                        </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[180px] p-0" align="start">
                         <Command>
@@ -700,18 +727,48 @@ export function FuelingScrollTable({
                     <Input
                       variant="number"
                       type="number"
-                      value={editingField?.periodId === period.id && editingField?.field === "odometer" ? undefined : period.odometer}
-                      defaultValue={editingField?.periodId === period.id && editingField?.field === "odometer" ? period.odometer : undefined}
-                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "odometer")}
-                      className={cn("h-8 w-full ", !(editingField?.periodId === period.id && editingField?.field === "odometer") && "bg-transparent cursor-pointer")}
+                      value={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "odometer"
+                          ? undefined
+                          : period.odometer
+                      }
+                      defaultValue={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "odometer"
+                          ? period.odometer
+                          : undefined
+                      }
+                      readOnly={
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "odometer"
+                        )
+                      }
+                      className={cn(
+                        "h-8 w-full ",
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "odometer"
+                        ) && "bg-transparent cursor-pointer"
+                      )}
                       suffix="km"
                       onClick={() => {
-                        if (!(editingField?.periodId === period.id && editingField?.field === "odometer")) {
+                        if (
+                          !(
+                            editingField?.periodId === period.id &&
+                            editingField?.field === "odometer"
+                          )
+                        ) {
                           handleFieldClick(period.id, "odometer");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "odometer", e.target.value)}
-                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "odometer")}
+                      onBlur={(e) =>
+                        handleFieldBlur(period.id, "odometer", e.target.value)
+                      }
+                      onKeyDown={(e) =>
+                        handleFieldKeyDown(e, period.id, "odometer")
+                      }
                       step={1}
                       min={0}
                     />
@@ -727,19 +784,49 @@ export function FuelingScrollTable({
                     <Input
                       variant="number"
                       type="number"
-                      value={editingField?.periodId === period.id && editingField?.field === "unitPrice" ? undefined : period.unitPrice}
-                      defaultValue={editingField?.periodId === period.id && editingField?.field === "unitPrice" ? period.unitPrice : undefined}
-                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "unitPrice")}
-                      className={cn("h-8 w-full", !(editingField?.periodId === period.id && editingField?.field === "unitPrice") && "bg-transparent cursor-pointer")}
+                      value={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "unitPrice"
+                          ? undefined
+                          : period.unitPrice
+                      }
+                      defaultValue={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "unitPrice"
+                          ? period.unitPrice
+                          : undefined
+                      }
+                      readOnly={
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "unitPrice"
+                        )
+                      }
+                      className={cn(
+                        "h-8 w-full",
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "unitPrice"
+                        ) && "bg-transparent cursor-pointer"
+                      )}
                       prefix="R$"
                       suffix="/L"
                       onClick={() => {
-                        if (!(editingField?.periodId === period.id && editingField?.field === "unitPrice")) {
+                        if (
+                          !(
+                            editingField?.periodId === period.id &&
+                            editingField?.field === "unitPrice"
+                          )
+                        ) {
                           handleFieldClick(period.id, "unitPrice");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "unitPrice", e.target.value)}
-                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "unitPrice")}
+                      onBlur={(e) =>
+                        handleFieldBlur(period.id, "unitPrice", e.target.value)
+                      }
+                      onKeyDown={(e) =>
+                        handleFieldKeyDown(e, period.id, "unitPrice")
+                      }
                       step="1.00"
                     />
                   </TableCell>
@@ -754,20 +841,49 @@ export function FuelingScrollTable({
                     <Input
                       variant="number"
                       type="number"
-                      
-                      value={editingField?.periodId === period.id && editingField?.field === "value" ? undefined : period.totalValue}
-                      defaultValue={editingField?.periodId === period.id && editingField?.field === "value" ? period.totalValue : undefined}
-                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "value")}
-                      className={cn("h-8 w-full", !(editingField?.periodId === period.id && editingField?.field === "value") && "bg-transparent cursor-pointer")}
+                      value={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "value"
+                          ? undefined
+                          : period.totalValue
+                      }
+                      defaultValue={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "value"
+                          ? period.totalValue
+                          : undefined
+                      }
+                      readOnly={
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "value"
+                        )
+                      }
+                      className={cn(
+                        "h-8 w-full",
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "value"
+                        ) && "bg-transparent cursor-pointer"
+                      )}
                       prefix="R$"
                       onClick={() => {
-                        if (!(editingField?.periodId === period.id && editingField?.field === "value")) {
+                        if (
+                          !(
+                            editingField?.periodId === period.id &&
+                            editingField?.field === "value"
+                          )
+                        ) {
                           handleFieldClick(period.id, "value");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "value", e.target.value)}
-                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "value")}
-                       step="1.00"
+                      onBlur={(e) =>
+                        handleFieldBlur(period.id, "value", e.target.value)
+                      }
+                      onKeyDown={(e) =>
+                        handleFieldKeyDown(e, period.id, "value")
+                      }
+                      step="1.00"
                     />
                   </TableCell>
 
@@ -781,19 +897,49 @@ export function FuelingScrollTable({
                     <Input
                       variant="number"
                       type="number"
-                      value={editingField?.periodId === period.id && editingField?.field === "liters" ? undefined : period.totalLiters}
-                      defaultValue={editingField?.periodId === period.id && editingField?.field === "liters" ? period.totalLiters : undefined}
-                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "liters")}
-                      className={cn("h-8 w-full ", !(editingField?.periodId === period.id && editingField?.field === "liters") && "bg-transparent cursor-pointer")}
+                      value={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "liters"
+                          ? undefined
+                          : period.totalLiters
+                      }
+                      defaultValue={
+                        editingField?.periodId === period.id &&
+                        editingField?.field === "liters"
+                          ? period.totalLiters
+                          : undefined
+                      }
+                      readOnly={
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "liters"
+                        )
+                      }
+                      className={cn(
+                        "h-8 w-full ",
+                        !(
+                          editingField?.periodId === period.id &&
+                          editingField?.field === "liters"
+                        ) && "bg-transparent cursor-pointer"
+                      )}
                       suffix="L"
                       onClick={() => {
-                        if (!(editingField?.periodId === period.id && editingField?.field === "liters")) {
+                        if (
+                          !(
+                            editingField?.periodId === period.id &&
+                            editingField?.field === "liters"
+                          )
+                        ) {
                           handleFieldClick(period.id, "liters");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "liters", e.target.value)}
-                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "liters")}
-                       step="1.00"
+                      onBlur={(e) =>
+                        handleFieldBlur(period.id, "liters", e.target.value)
+                      }
+                      onKeyDown={(e) =>
+                        handleFieldKeyDown(e, period.id, "liters")
+                      }
+                      step="1.00"
                     />
                   </TableCell>
                   {/* Fueling days */}
@@ -824,7 +970,10 @@ export function FuelingScrollTable({
                   </TableCell>
 
                   {/* Actions */}
-                  <td className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible" style={{ order: getColumnCSSOrder("actions") }}>
+                  <td
+                    className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible"
+                    style={{ order: getColumnCSSOrder("actions") }}
+                  >
                     <div className="absolute right-0 top-0 h-full flex items-center pr-2 pl-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-sidebar">
                       <ActionsMenu period={period} />
                     </div>

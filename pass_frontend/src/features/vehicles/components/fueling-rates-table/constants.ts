@@ -65,7 +65,7 @@ export const BASE_COLUMN_ORDER = [
 ];
 
 // Drag threshold for scroll
-export const DRAG_THRESHOLD = 5;
+export const DRAG_THRESHOLD = 10;
 
 // Default profiles
 export const DEFAULT_PROFILES: Profile[] = [

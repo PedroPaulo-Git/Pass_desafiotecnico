@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateFuelingInput, createFuelingSchema } from "@pass/schemas";
 import { toast as sonnerToast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CalendarIcon, ChevronDown } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 
 import {
   useCreateFueling,
@@ -28,20 +26,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { DatePicker } from "@/components/ui/date-picker";
+
 import type { FuelType } from "@/types/vehicle";
 
 import type { FuelingFormProps } from "../types";
 import { FUEL_TYPE_LABELS, FUEL_TYPES, PROVIDERS } from "../constants";
+import { DayChip } from "./day-chip";
+
+const WEEK_DAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
 export function FuelingForm({
   vehicleId,
@@ -86,11 +80,27 @@ export function FuelingForm({
   }, [vehicleQuery?.data?.currentKm, setValue, isEdit]);
 
   const onSubmit = async (formData: CreateFuelingInput) => {
+    console.log("Botão Adicionar clicado");
+    console.log("Erros do form:", errors);
+    console.log("Valores do form:", watch());
+    if (Object.keys(errors).length > 0) {
+      const firstError = Object.values(errors)[0] as any;
+      sonnerToast.error(
+        firstError?.message || "Preencha todos os campos obrigatórios"
+      );
+      return;
+    }
+    console.log("onSubmit chamado com formData:", formData);
+    sonnerToast.loading("Salvando abastecimento...");
+    console.log("Validação: totalValue =", formData.totalValue);
     if (!formData.totalValue || Number(formData.totalValue) < 1) {
+      console.log("Erro: Valor total inválido");
       sonnerToast.error("Valor total inválido");
       return;
     }
+    console.log("Validação: liters =", formData.liters);
     if (!formData.liters || Number(formData.liters) < 1) {
+      console.log("Erro: Litros inválidos");
       sonnerToast.error("Litros inválidos");
       return;
     }
@@ -98,13 +108,16 @@ export function FuelingForm({
     try {
       const odometerStop = Number(formData.odometer) || 0;
       const currentKm = vehicleQuery?.data?.currentKm;
+      console.log("odometerStop =", odometerStop, "currentKm =", currentKm);
 
       if (!isEdit && currentKm !== undefined && odometerStop < currentKm) {
+        console.log("Erro: KM menor que atual");
         sonnerToast.error("KM de parada não pode ser menor que o KM atual");
         return;
       }
 
       if (isEdit && fueling) {
+        console.log("Editando fueling, id =", fueling.id);
         await updateFueling.mutateAsync({
           id: fueling.id,
           data: {
@@ -114,14 +127,25 @@ export function FuelingForm({
             odometer: odometerStop,
           },
         });
+        console.log("Update sucesso");
         sonnerToast.success("Abastecimento atualizado com sucesso!");
       } else {
-        const payload = { ...formData, date: formData.date.toISOString(), vehicleId, odometer: odometerStop };
+        const payload = {
+          ...formData,
+          date: formData.date.toISOString(),
+          vehicleId,
+          odometer: odometerStop,
+          periodo: customPeriod || undefined,
+        };
+        console.log("Criando fueling, payload =", payload);
         await createFueling.mutateAsync(payload);
+        console.log("Create sucesso");
         sonnerToast.success("Abastecimento criado com sucesso!");
       }
+      console.log("Chamando onSuccess");
       onSuccess();
     } catch (err: any) {
+      console.log("Erro no submit:", err);
       const message =
         err?.response?.data?.message || err?.message || "Erro ao salvar";
       sonnerToast.error(message);
@@ -130,165 +154,173 @@ export function FuelingForm({
 
   const isSubmitting = createFueling.isPending || updateFueling.isPending;
 
+  const [customPeriod, setCustomPeriod] = useState("");
+  const [selectedWeekDays, setSelectedWeekDays] = useState<number[]>([]);
+
+  // Prevenir reload da página ao submeter o form
+  useEffect(() => {
+    const handleGlobalSubmit = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Verifica se o target é um form dentro deste componente
+      if (target.closest("form")) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    };
+
+    const handleButtonClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "BUTTON" &&
+        target.getAttribute("type") === "submit" &&
+        target.closest("form")
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    };
+
+    document.addEventListener("submit", handleGlobalSubmit, true);
+    document.addEventListener("click", handleButtonClick, true);
+
+    return () => {
+      document.removeEventListener("submit", handleGlobalSubmit, true);
+      document.removeEventListener("click", handleButtonClick, true);
+    };
+  }, []);
+
+  // Handler para interceptar o submit do form e fazer preventDefault
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log("handleFormSubmit chamado");
+    e.preventDefault();
+    e.stopPropagation();
+    handleSubmit(onSubmit)();
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className=" ">
-      {/* Period Selection */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Período</label>
-        <Controller
-          control={control}
-          name="date"
-          render={({ field }) => (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {field.value
-                    ? format(new Date(field.value), "dd/MM/yyyy", {
-                        locale: ptBR,
-                      })
-                    : "Selecione um período"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date)}
-                  locale={ptBR}
+    <form onSubmit={handleFormSubmit} className=" min-w-screen pr-[10px] sm:pr-0 sm:min-w-[480px] space-y-2">
+      <div className="py-3 text-sm border-b px-4">Adicionar Período</div>
+      {/* Dias Selecionados (Apenas Visual) */}
+      <div className="px-4 pb-2 space-y-2 ">
+
+
+        <div className="grid w-full grid-cols-1 sm:grid-cols-2 space-x-2 gap-2">
+
+
+          {/* Período (Data) */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium ml-1 ">Data do Abastecimento</label>
+            <Controller
+              control={control}
+              name="date"
+              render={({ field }) => (
+                <DatePicker
+                  date={field.value ? new Date(field.value) : undefined}
+                  onDateChange={field.onChange}
+                  placeholder="Selecione a data"
+                  className="w-full "
+                  variant="modal"
                 />
-              </PopoverContent>
-            </Popover>
-          )}
-        />
-      </div>
-
-      {/* Days selection (visual indicator) */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Dias não aplicáveis</label>
-        <div className="flex gap-1">
-          {["D", "S", "T", "Q", "Q", "S", "S"].map((day, idx) => (
-            <button
-              key={idx}
-              type="button"
-              className={cn(
-                "w-9 h-9 rounded-md text-sm font-medium border transition-colors",
-                "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Category Selector */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Categoria</label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              Todas
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full p-0">
-            <Command>
-              <CommandInput placeholder="Buscar categoria..." />
-              <CommandList>
-                <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
-                <CommandGroup>
-                  <CommandItem>Todas</CommandItem>
-                  <CommandItem>Leito</CommandItem>
-                  <CommandItem>Cama</CommandItem>
-                  <CommandItem>Executivo</CommandItem>
-                  <CommandItem>Semi-leito</CommandItem>
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      {/* Provider */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Posto</label>
-        <Select
-          value={watch("provider") ?? ""}
-          onValueChange={(value) => setValue("provider", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o posto" />
-          </SelectTrigger>
-          <SelectContent>
-            {PROVIDERS.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Fuel Type */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Combustível</label>
-        <Select
-          value={watch("fuelType") ?? "DIESEL"}
-          onValueChange={(value) => setValue("fuelType", value as FuelType)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FUEL_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {FUEL_TYPE_LABELS[type]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Price fields grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Infantil</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-              R$
-            </span>
-            <Input
-              type="number"
-              step="0.01"
-              className="pl-10"
-              placeholder="0.00"
             />
           </div>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Criança</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-              R$
-            </span>
-            <Input
-              type="number"
-              step="0.01"
-              className="pl-10"
-              placeholder="0.00"
-            />
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium ml-1">Dias da Semana</label>
+            <div className="grid grid-cols-7 gap-1">
+              {WEEK_DAYS.map((day, index) => (
+                <DayChip
+                  key={index}
+                  day={day}
+                  dayIndex={index}
+                  isActive={selectedWeekDays.includes(index)}
+                  onClick={() => {
+                    setSelectedWeekDays((prev) =>
+                      prev.includes(index)
+                        ? prev.filter((d) => d !== index)
+                        : [...prev, index]
+                    );
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Adulto</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-              R$
-            </span>
+        {/* Posto */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium ml-1">Posto</label>
+          <Select
+       
+            value={watch("provider") ?? ""}
+            onValueChange={(value) => setValue("provider", value)}
+          >
+            <SelectTrigger  variant="modal" >
+              <SelectValue placeholder="Selecione o posto" />
+            </SelectTrigger>
+            <SelectContent className="bg-background" showSearch={true} >
+              {PROVIDERS.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Combustível */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium ml-1">Combustível</label>
+          <Select
+            value={watch("fuelType") ?? "DIESEL"}
+            onValueChange={(value) => setValue("fuelType", value as FuelType)}
+          >
+            <SelectTrigger   variant="modal">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-background"  showSearch={true}>
+              {FUEL_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {FUEL_TYPE_LABELS[type]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Litros e Valor Total */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium ml-1 ">Litros</label>
+            <Controller
+              control={control}
+              name="liters"
+              render={({ field }) => (
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="Ex: 50"
+                  value={field.value ?? ""}
+                  variant="number-border"
+                  onChange={(e) => {
+                    const value = e.target.value
+                      ? Number(e.target.value)
+                      : undefined;
+                    field.onChange(value);
+                    // Calcular unitPrice automaticamente
+                    const totalValue = watch("totalValue");
+                    if (value && totalValue) {
+                      setValue("unitPrice", totalValue / value);
+                    }
+                  }}
+                />
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium ml-1 ">Valor Total (R$)</label>
             <Controller
               control={control}
               name="totalValue"
@@ -296,59 +328,29 @@ export function FuelingForm({
                 <Input
                   type="number"
                   step="0.01"
-                  className="pl-10"
-                  placeholder="0.00"
+                  placeholder="Ex: 250.00"
                   value={field.value ?? ""}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
+                  variant="number-border"
+                  onChange={(e) => {
+                    const value = e.target.value
+                      ? Number(e.target.value)
+                      : undefined;
+                    field.onChange(value);
+                    // Calcular unitPrice automaticamente
+                    const liters = watch("liters");
+                    if (liters && value) {
+                      setValue("unitPrice", value / liters);
+                    }
+                  }}
                 />
               )}
             />
           </div>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Senior</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-              R$
-            </span>
-            <Input
-              type="number"
-              step="0.01"
-              className="pl-10"
-              placeholder="0.00"
-            />
-          </div>
-        </div>
-      </div>
 
-      {/* Liters and Odometer */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Litros</label>
-          <Controller
-            control={control}
-            name="liters"
-            render={({ field }) => (
-              <Input
-                type="number"
-                step="0.01"
-                placeholder="Ex: 50"
-                value={field.value ?? ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-              />
-            )}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">KM Atual</label>
+        {/* KM Atual */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium ml-1 ">KM Atual</label>
           <Controller
             control={control}
             name="odometer"
@@ -357,6 +359,7 @@ export function FuelingForm({
                 type="number"
                 placeholder="Ex: 50000"
                 value={field.value ?? ""}
+                variant="number-border"
                 onChange={(e) =>
                   field.onChange(
                     e.target.value ? Number(e.target.value) : undefined
@@ -366,47 +369,32 @@ export function FuelingForm({
             )}
           />
         </div>
+
+        {/* Hidden unit price */}
+        <input
+          type="hidden"
+          {...register("unitPrice", { valueAsNumber: true })}
+        />
       </div>
-
-      {/* Min Pax */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Min Pax</label>
-        <Input type="number" placeholder="0" defaultValue={0} />
-      </div>
-
-      {/* Payment Method */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Forma de Pagamento</label>
-        <Select defaultValue="todas">
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Todas</SelectItem>
-            <SelectItem value="dinheiro">Dinheiro</SelectItem>
-            <SelectItem value="cartao">Cartão</SelectItem>
-            <SelectItem value="pix">PIX</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Hidden unit price */}
-      <input
-        type="hidden"
-        {...register("unitPrice", { valueAsNumber: true })}
-      />
-
       {/* Actions */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex justify-between py-4 px-4 border-t ">
         <Button
           type="button"
           variant="outline"
-          className="flex-1"
+          className="flex-1 max-w-[100px]"
           onClick={onClose}
         >
           Cancelar
         </Button>
-        <Button type="submit" className="flex-1" disabled={isSubmitting}>
+        <Button
+          type="button"
+          className="flex-1  max-w-[100px]"
+          disabled={isSubmitting}
+          onClick={() => {
+            handleSubmit(onSubmit)();
+            console.log("handleSubmit executado");
+          }}
+        >
           {isSubmitting ? "Salvando..." : isEdit ? "Atualizar" : "Adicionar"}
         </Button>
       </div>

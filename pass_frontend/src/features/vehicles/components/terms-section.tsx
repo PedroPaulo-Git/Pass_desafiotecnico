@@ -83,24 +83,9 @@ export function TermsSection({
   };
 
   return (
-    <div className="w-full space-y-4 p-4">
+    <div className="w-full ">
       {/* Header with save button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Termos e Políticas</h3>
-          <p className="text-sm text-muted-foreground">
-            Defina os termos e condições do serviço para este veículo
-          </p>
-        </div>
-        <Button
-          onClick={handleSave}
-          disabled={isSaving || !hasChanges}
-          className="gap-2"
-        >
-          <Save className="h-4 w-4" />
-          {isSaving ? "Salvando..." : "Salvar"}
-        </Button>
-      </div>
+     
 
       {/* Rich Text Editor */}
       <RichTextEditor

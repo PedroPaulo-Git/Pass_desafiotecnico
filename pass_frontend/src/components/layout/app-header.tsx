@@ -92,7 +92,7 @@ export function AppHeader({
         <div className="flex h-4 items-center">
           <Separator
             orientation="vertical"
-            className="bg-muted w-2 h-10 z-40"
+            className="bg-muted w-2 h-5 z-40"
           />
         </div>
 
