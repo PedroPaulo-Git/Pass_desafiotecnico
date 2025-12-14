@@ -107,13 +107,16 @@ export function FuelingForm({
       if (isEdit && fueling) {
         await updateFueling.mutateAsync({
           id: fueling.id,
-          ...formData,
-          vehicleId,
-          odometer: odometerStop,
+          data: {
+            ...formData,
+            date: formData.date.toISOString(),
+            vehicleId,
+            odometer: odometerStop,
+          },
         });
         sonnerToast.success("Abastecimento atualizado com sucesso!");
       } else {
-        const payload = { ...formData, vehicleId, odometer: odometerStop };
+        const payload = { ...formData, date: formData.date.toISOString(), vehicleId, odometer: odometerStop };
         await createFueling.mutateAsync(payload);
         sonnerToast.success("Abastecimento criado com sucesso!");
       }
