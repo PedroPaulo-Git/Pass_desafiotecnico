@@ -91,7 +91,6 @@ export function FuelingForm({
       return;
     }
     console.log("onSubmit chamado com formData:", formData);
-    sonnerToast.loading("Salvando abastecimento...");
     console.log("Validação: totalValue =", formData.totalValue);
     if (!formData.totalValue || Number(formData.totalValue) < 1) {
       console.log("Erro: Valor total inválido");
@@ -118,6 +117,7 @@ export function FuelingForm({
 
       if (isEdit && fueling) {
         console.log("Editando fueling, id =", fueling.id);
+        sonnerToast.loading("Salvando abastecimento...");
         await updateFueling.mutateAsync({
           id: fueling.id,
           data: {
@@ -202,18 +202,19 @@ export function FuelingForm({
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className=" min-w-screen pr-[10px] sm:pr-0 sm:min-w-[480px] space-y-2">
+    <form
+      onSubmit={handleFormSubmit}
+      className=" min-w-screen pr-2.5 sm:pr-0 sm:min-w-[480px] space-y-2"
+    >
       <div className="py-3 text-sm border-b px-4">Adicionar Período</div>
       {/* Dias Selecionados (Apenas Visual) */}
       <div className="px-4 pb-2 space-y-2 ">
-
-
         <div className="grid w-full grid-cols-1 sm:grid-cols-2 space-x-2 gap-2">
-
-
           {/* Período (Data) */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium ml-1 ">Data do Abastecimento</label>
+            <label className="text-sm font-medium ml-1 ">
+              Data do Abastecimento
+            </label>
             <Controller
               control={control}
               name="date"
@@ -253,14 +254,13 @@ export function FuelingForm({
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium ml-1">Posto</label>
           <Select
-       
             value={watch("provider") ?? ""}
             onValueChange={(value) => setValue("provider", value)}
           >
-            <SelectTrigger  variant="modal" >
+            <SelectTrigger variant="modal">
               <SelectValue placeholder="Selecione o posto" />
             </SelectTrigger>
-            <SelectContent className="bg-background" showSearch={true} >
+            <SelectContent className="bg-background" showSearch={true}>
               {PROVIDERS.map((p) => (
                 <SelectItem key={p} value={p}>
                   {p}
@@ -277,10 +277,10 @@ export function FuelingForm({
             value={watch("fuelType") ?? "DIESEL"}
             onValueChange={(value) => setValue("fuelType", value as FuelType)}
           >
-            <SelectTrigger   variant="modal">
+            <SelectTrigger variant="modal">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-background"  showSearch={true}>
+            <SelectContent className="bg-background" showSearch={true}>
               {FUEL_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
                   {FUEL_TYPE_LABELS[type]}
@@ -320,7 +320,9 @@ export function FuelingForm({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium ml-1 ">Valor Total (R$)</label>
+            <label className="text-sm font-medium ml-1 ">
+              Valor Total (R$)
+            </label>
             <Controller
               control={control}
               name="totalValue"

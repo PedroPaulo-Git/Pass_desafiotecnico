@@ -84,7 +84,8 @@ export function FuelingScrollTable({
     getStickyStyle,
   } = useColumnPinning();
   const { toggleSort, getColumnSort } = useColumnSorting();
-  const { dragRef, isGrabbing, onPointerDown,onClickCapture } = useDragToScroll();
+  const { dragRef, isGrabbing, onPointerDown, onClickCapture } =
+    useDragToScroll();
   const { openModal } = useModalStore();
 
   const [editingField, setEditingField] = useState<{
@@ -168,22 +169,11 @@ export function FuelingScrollTable({
   };
   function ActionsMenu({ period }: { period: FuelingPeriodData }) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center gap-1">
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 hover:bg-muted"
-          onClick={(e: React.MouseEvent) => {
-            e.stopPropagation();
-            // openModal("fueling-details", { period });
-          }}
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive rounded-sm"
           onClick={(e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
@@ -974,7 +964,7 @@ export function FuelingScrollTable({
                     className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible"
                     style={{ order: getColumnCSSOrder("actions") }}
                   >
-                    <div className="absolute right-0 top-0 h-full flex items-center pr-2 pl-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-sidebar">
+                    <div className="absolute right-0 top-0 h-full flex items-center px-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-sidebar">
                       <ActionsMenu period={period} />
                     </div>
                   </td>
