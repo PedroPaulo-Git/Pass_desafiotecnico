@@ -50,6 +50,7 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  showCloseButtonClean = false,
   // show info icon (primitive-level)
   showInfo = true,
   onInfoClick,
@@ -57,6 +58,7 @@ function DialogContent({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  showCloseButtonClean?: boolean;
   fullWidth?: boolean;
   showInfo?: boolean;
   onInfoClick?: () => void;
@@ -78,6 +80,15 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             className="ring-offset-background border border-gray-500 rounded-full top-1 right-4 p-1.5 hover:bg-gray-100 cursor-pointer focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          >
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
+        {showCloseButtonClean && (
+          <DialogPrimitive.Close
+            data-slot="dialog-close"
+            className="ring-offset-0 border-0 rounded-full top-5 right-5 p-2 hover:bg-gray-100/10 cursor-pointer focus:ring-0 data-[state=open]:bg-accent text-foreground absolute opacity-100 transition-opacity focus:ring-offset-0  disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5"
           >
             <XIcon />
             <span className="sr-only">Close</span>

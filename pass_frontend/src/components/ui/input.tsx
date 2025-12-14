@@ -16,7 +16,7 @@ function Input({
   suffix,
   ...props
 }: React.ComponentProps<"input"> & {
-  variant?: "default" | "light" | "modal" | "custom" | "number";
+  variant?: "default" | "light" | "modal" | "custom" | "number" | "number-border";
   center?: boolean;
   prefix?: string;
   suffix?: string;
@@ -95,10 +95,163 @@ function Input({
     if (onChange) onChange(event);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Para edição, não fazer nada, deixar o usuário digitar
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    if ((variant === "number" || variant === "number-border") && (prefix || suffix)) {
+      // PROTEÇÃO ABSOLUTA: Garantir que prefixo e sufixo SEMPRE existam
+      const currentValue = displayValue;
+      
+      // Se o valor não tem prefixo ou sufixo, restaurar o valor anterior
+      if (prefix && !value.includes(prefix)) {
+        setDisplayValue(currentValue);
+        if (inputRef.current) {
+          inputRef.current.value = currentValue;
+        }
+        return;
+      }
+      
+      if (suffix && !value.includes(suffix)) {
+        setDisplayValue(currentValue);
+        if (inputRef.current) {
+          inputRef.current.value = currentValue;
+        }
+        return;
+      }
+      
+      // Extrair apenas a parte numérica (entre prefixo e sufixo)
+      let numericPart = value;
+      
+      if (prefix) {
+        const prefixIndex = value.indexOf(prefix);
+        if (prefixIndex === 0) {
+          numericPart = value.substring(prefix.length);
+        }
+      }
+      
+      if (suffix) {
+        const suffixIndex = numericPart.indexOf(suffix);
+        if (suffixIndex !== -1) {
+          numericPart = numericPart.substring(0, suffixIndex);
+        }
+      }
+      
+      // Limpar: apenas números, vírgula e ponto
+      numericPart = numericPart.replace(/[^0-9.,]/g, '');
+      
+      // Reconstruir o valor com prefixo e sufixo
+      value = (prefix || "") + numericPart + (suffix || "");
+    }
+    
+    setDisplayValue(value);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (variant === "number" || variant === "number-border") {
+      const input = inputRef.current;
+      if (!input) return;
+
+      const selectionStart = input.selectionStart || 0;
+      const selectionEnd = input.selectionEnd || 0;
+      const value = input.value;
+      const isFullSelection = selectionStart === 0 && selectionEnd === value.length;
+
+      // Só aplicar proteções se houver prefixo ou sufixo
+      if (prefix || suffix) {
+        // Bloquear TODAS as letras e caracteres especiais (exceto números, vírgula, ponto)
+        if (e.key.length === 1 && !/[0-9.,]/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
+          return;
+        }
+
+        // Calcular posições do prefixo e sufixo
+        const prefixEnd = prefix ? prefix.length : 0;
+        const suffixStart = suffix ? value.indexOf(suffix) : value.length;
+
+        // BACKSPACE: Proteger prefixo e sufixo
+        if (e.key === 'Backspace') {
+          // Permitir apenas se for Ctrl+A (limpar tudo)
+          if (isFullSelection) {
+            return;
+          }
+
+          // Bloquear se estiver tentando apagar o prefixo
+          if (selectionStart <= prefixEnd) {
+            e.preventDefault();
+            return;
+          }
+
+          // Bloquear se a seleção incluir parte do sufixo
+          if (suffix && selectionStart > suffixStart) {
+            e.preventDefault();
+            return;
+          }
+
+          // Bloquear se tentar apagar algo que resulte em remover o sufixo
+          if (suffix && selectionStart === suffixStart && selectionEnd === selectionStart) {
+            e.preventDefault();
+            return;
+          }
+        }
+
+        // DELETE: Proteger prefixo e sufixo
+        if (e.key === 'Delete') {
+          // Permitir apenas se for Ctrl+A
+          if (isFullSelection) {
+            return;
+          }
+
+          // Bloquear se estiver no prefixo ou antes dele
+          if (selectionStart < prefixEnd) {
+            e.preventDefault();
+            return;
+          }
+
+          // Bloquear se estiver no sufixo ou tentar deletar ele
+          if (suffix && selectionStart >= suffixStart) {
+            e.preventDefault();
+            return;
+          }
+        }
+
+        // Prevenir digitar números/vírgula/ponto fora da área permitida
+        if (e.key.length === 1 && /[0-9.,]/.test(e.key)) {
+          // Só pode digitar entre o prefixo e o sufixo
+          if (selectionStart < prefixEnd || (suffix && selectionStart >= suffixStart)) {
+            e.preventDefault();
+            return;
+          }
+        }
+
+        // HOME: Mover para depois do prefixo
+        if (e.key === 'Home' && !e.shiftKey) {
+          e.preventDefault();
+          input.setSelectionRange(prefixEnd, prefixEnd);
+          return;
+        }
+
+        // END: Mover para antes do sufixo
+        if (e.key === 'End' && !e.shiftKey && suffix) {
+          e.preventDefault();
+          input.setSelectionRange(suffixStart, suffixStart);
+          return;
+        }
+
+        // LEFT ARROW: Não permitir ir antes do prefixo
+        if (e.key === 'ArrowLeft' && selectionStart <= prefixEnd && !e.shiftKey) {
+          e.preventDefault();
+          return;
+        }
+
+        // RIGHT ARROW: Não permitir ir depois do início do sufixo
+        if (e.key === 'ArrowRight' && suffix && selectionEnd >= suffixStart && !e.shiftKey) {
+          e.preventDefault();
+          return;
+        }
+      }
+      // Se não houver prefixo ou sufixo, permitir edição normal
+    }
+  };
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (inputRef.current) {
       const currentValue = inputRef.current.value;
@@ -115,7 +268,7 @@ function Input({
     }
   };
 
-  if (variant === "number") {
+  if (variant === "number" || variant === "number-border") {
     const { defaultValue, ...inputProps } = props;
     const inputType = prefix || suffix ? "text" : type;
     return (
@@ -128,10 +281,9 @@ function Input({
             "peer px-2 py-1 pr-6 file:text-foreground placeholder:text-muted-foreground selection:text-muted-foreground h-9 w-full min-w-0 rounded-md  bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             "focus-visible:ring-0 focus-visible:outline-none focus-visible:border-border",
             "[-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                isHovered ||  inputRef.current === document.activeElement
-              ? "border border-border"
-              : "",
-               
+                isHovered ||  inputRef.current === document.activeElement ? "border border-border" : "",
+            variant === "number-border" && "border border-border",
+           
             className
           )}
           onMouseEnter={() => setIsHovered(true)}
@@ -140,6 +292,7 @@ function Input({
             ? { value: displayValue }
             : { defaultValue: formattedValue })}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           step={step}
           min={min}
@@ -151,7 +304,8 @@ function Input({
             "absolute right-0 flex h-[calc(100%+2px)] -mr-px flex-col transition-opacity",
             isHovered || inputRef.current === document.activeElement
               ? "opacity-100"
-              : "opacity-0"
+              : "opacity-0",
+              variant === "number-border" && "opacity-100"
           )}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -160,6 +314,7 @@ function Input({
             type="button"
             tabIndex={-1}
             onClick={handleIncrement}
+            disabled={props.disabled}
             className="flex h-1/2 w-6 flex-1 items-center justify-center border border-border text-sm text-muted-foreground/80 transition-[color,box-shadow] hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-md"
             aria-label="Aumentar valor"
           >
@@ -169,6 +324,7 @@ function Input({
             type="button"
             tabIndex={-1}
             onClick={handleDecrement}
+            disabled={props.disabled}
             className="-mt-px flex h-1/2 w-6 flex-1 items-center justify-center border border-border text-sm text-muted-foreground/80 transition-[color,box-shadow] hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 rounded-br-md"
             aria-label="Diminuir valor"
           >

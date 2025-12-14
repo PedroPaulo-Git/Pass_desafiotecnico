@@ -21,6 +21,8 @@ const buttonVariants = cva(
       
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-full cursor-pointer",
+          ghost_without_background_hover:
+          " hover:text-accent-foreground rounded-full cursor-pointer",
         link: "text-primary underline-offset-4 hover:underline",
         modal: "border bg-foreground text-background hover:bg-foreground/90 ",
         modal_white: "border bg-muted text-muted-foreground hover:bg-muted-foreground/90 ",

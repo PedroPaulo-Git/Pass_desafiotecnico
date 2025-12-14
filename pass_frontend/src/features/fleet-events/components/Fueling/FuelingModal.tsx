@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { CustomForm } from "@/components/ui/custom-form";
 import type { FuelType } from "@/types/vehicle";
 
@@ -27,7 +28,7 @@ interface InlineFuelingFormProps {
   onSuccess: () => void;
 }
 
-export function InlineFuelingForm({
+export function  InlineFuelingForm({
   vehicleId,
   onClose,
   onSuccess,
@@ -49,7 +50,7 @@ export function InlineFuelingForm({
       liters: 0,
       totalValue: 0,
       unitPrice: 0,
-      date: new Date(),
+      date: undefined,
     },
   });
 
@@ -111,19 +112,11 @@ export function InlineFuelingForm({
     "ARLA32",
   ];
 
-  // Função de submit que chama o react-hook-form
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Chama o submit do react-hook-form
-    await handleSubmit(onSubmit)();
-  };
 
   return (
-    <div className="p-4">
+    <div className="p-4 min-w-[280px]">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="font-semibold flex items-center gap-2">
+        <h4 className="text-sm flex items-center gap-2">
           <Fuel className="h-4 w-4" />
           Novo Abastecimento
         </h4>
@@ -141,7 +134,7 @@ export function InlineFuelingForm({
       <CustomForm className="space-y-3">
         {/* Posto */}
         <div>
-          <label className="text-xs text-muted-foreground">Posto</label>
+          <label className="text-xs text-foreground">Posto</label>
           <Controller
             control={control}
             name="provider"
@@ -163,7 +156,7 @@ export function InlineFuelingForm({
 
         {/* Combustível */}
         <div>
-          <label className="text-xs text-muted-foreground">Combustível</label>
+          <label className="text-xs text-foreground">Combustível</label>
           <Controller
             control={control}
             name="fuelType"
@@ -186,24 +179,16 @@ export function InlineFuelingForm({
 
         {/* Data */}
         <div>
-          <label className="text-xs text-muted-foreground">Data</label>
+          <label className="text-xs text-foreground">Data</label>
           <Controller
             control={control}
             name="date"
             render={({ field }) => (
-              <Input
-                type="date"
-                className="h-8"
-                value={
-                  field.value instanceof Date
-                    ? field.value.toISOString().split("T")[0]
-                    : field.value
-                }
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? new Date(e.target.value) : undefined
-                  )
-                }
+              <DatePicker
+                date={field.value}
+                onDateChange={field.onChange}
+                placeholder="Selecione a data"
+                variant="modal"
               />
             )}
           />
@@ -212,12 +197,13 @@ export function InlineFuelingForm({
         {/* LITROS E VALOR */}
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-xs text-muted-foreground">Litros</label>
+            <label className="text-xs text-foreground">Litros</label>
             <Controller
               control={control}
               name="liters"
               render={({ field }) => (
                 <Input
+                variant="number-border"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
@@ -235,12 +221,13 @@ export function InlineFuelingForm({
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Valor Total</label>
+            <label className="text-xs text-foreground">Valor Total</label>
             <Controller
               control={control}
               name="totalValue"
               render={({ field }) => (
                 <Input
+                    variant="number-border"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
@@ -261,12 +248,14 @@ export function InlineFuelingForm({
 
         {/* KM Atual */}
         <div>
-          <label className="text-xs text-muted-foreground">KM Atual</label>
+          <label className="text-xs text-foreground">KM Atual</label>
           <Controller
             control={control}
             name="odometer"
             render={({ field }) => (
               <Input
+              disabled
+                  variant="number-border"
                 type="number"
                 placeholder="KM"
                 className="h-8"
@@ -284,17 +273,16 @@ export function InlineFuelingForm({
           <Button
             type="button"
             variant="outline"
-            className="flex-1 h-8"
+            className="flex-1 h-9"
             onClick={onClose}
           >
             Cancelar
           </Button>
           <Button
-            type="button" // MUDEI PARA "button"
-            className="flex-1 h-8"
+            type="button" 
+            className="flex-1 h-9"
             disabled={isSubmitting || createFueling.isPending}
             onClick={() => {
-              // Chama o submit do react-hook-form diretamente
               handleSubmit(onSubmit)();
             }}
           >

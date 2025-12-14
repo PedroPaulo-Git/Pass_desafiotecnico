@@ -128,7 +128,7 @@ export function FuelingForm({
   const isSubmitting = createFueling.isPending || updateFueling.isPending;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className=" ">
       {/* Period Selection */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Período</label>

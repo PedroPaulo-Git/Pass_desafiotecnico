@@ -328,6 +328,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
             open={showAddForm}
             onOpenChange={setShowAddForm}
             align="end"
+            className=""
             sideOffset={4}
           >
             <InlineFuelingForm
@@ -402,7 +403,7 @@ export function FuelingCalendar({ vehicleId, fuelings }: FuelingCalendarProps) {
         </div>
       </div>
 
-      <Card variant="card-date" className="bg-red-500">
+      <Card variant="card-date" className="">
         <CardContent className="p-0 ">
           <div
             ref={dragRef}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ptBR } from "date-fns/locale";
+import { toast as sonnerToast } from "sonner";
 import { Pencil, Trash2, Check, X, Edit, Eye } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -95,8 +96,21 @@ export function FuelingScrollTable({
     setEditingField({ periodId, field });
   };
 
-  const handleFieldBlur = (periodId: string, field: string, newValue: number) => {
+  const handleFieldBlur = (periodId: string, field: string, valueStr: string) => {
+    let prefix = '';
+    let suffix = '';
+    if (field === 'unitPrice') { prefix = 'R$'; suffix = '/L'; }
+    else if (field === 'value') { prefix = 'R$'; }
+    else if (field === 'odometer') { suffix = 'km'; }
+    else if (field === 'liters') { suffix = 'L'; }
+    const extracted = valueStr.replace(prefix, '').replace(suffix, '').replace(/[^\d.-]/g, '');
+    const newValue = Number(extracted);
     console.log("handleFieldBlur", { periodId, field, newValue });
+    if (isNaN(newValue)) {
+      sonnerToast.error("Valor inválido. Digite um número válido.");
+      setEditingField(null);
+      return;
+    }
     onUpdateField(periodId, field, newValue);
     setEditingField(null);
   };
@@ -108,8 +122,21 @@ export function FuelingScrollTable({
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const newValue = Number((e.target as HTMLInputElement).value);
+      const valueStr = (e.target as HTMLInputElement).value;
+      let prefix = '';
+      let suffix = '';
+      if (field === 'unitPrice') { prefix = 'R$'; suffix = '/L'; }
+      else if (field === 'value') { prefix = 'R$'; }
+      else if (field === 'odometer') { suffix = 'km'; }
+      else if (field === 'liters') { suffix = 'L'; }
+      const extracted = valueStr.replace(prefix, '').replace(suffix, '').replace(/[^\d.-]/g, '');
+      const newValue = Number(extracted);
       console.log("handleFieldKeyDown Enter", { periodId, field, newValue });
+      if (isNaN(newValue)) {
+        sonnerToast.error("Valor inválido. Digite um número válido.");
+        setEditingField(null);
+        return;
+      }
       onUpdateField(periodId, field, newValue);
       setEditingField(null);
     } else if (e.key === "Escape") {
@@ -499,6 +526,7 @@ export function FuelingScrollTable({
                       onOpenChange={(open) =>
                         setCategoryPopoverOpen(open ? period.id : null)
                       }
+                      modal={true}
                     >
                       <PopoverTrigger asChild>
                         <button
@@ -561,6 +589,7 @@ export function FuelingScrollTable({
                       onOpenChange={(open) =>
                         setProviderPopoverOpen(open ? period.id : null)
                       }
+                      modal={true}
                     >
                       <PopoverTrigger asChild>
                         <button
@@ -619,6 +648,7 @@ export function FuelingScrollTable({
                       onOpenChange={(open) =>
                         setFuelTypePopoverOpen(open ? period.id : null)
                       }
+                      modal={true}
                     >
                       <PopoverTrigger asChild>
                         <Badge
@@ -680,7 +710,7 @@ export function FuelingScrollTable({
                           handleFieldClick(period.id, "odometer");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "odometer", Number(e.target.value))}
+                      onBlur={(e) => handleFieldBlur(period.id, "odometer", e.target.value)}
                       onKeyDown={(e) => handleFieldKeyDown(e, period.id, "odometer")}
                       step={1}
                       min={0}
@@ -708,7 +738,7 @@ export function FuelingScrollTable({
                           handleFieldClick(period.id, "unitPrice");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "unitPrice", Number(e.target.value))}
+                      onBlur={(e) => handleFieldBlur(period.id, "unitPrice", e.target.value)}
                       onKeyDown={(e) => handleFieldKeyDown(e, period.id, "unitPrice")}
                       step="1.00"
                     />
@@ -735,7 +765,7 @@ export function FuelingScrollTable({
                           handleFieldClick(period.id, "value");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "value", Number(e.target.value))}
+                      onBlur={(e) => handleFieldBlur(period.id, "value", e.target.value)}
                       onKeyDown={(e) => handleFieldKeyDown(e, period.id, "value")}
                        step="1.00"
                     />
@@ -761,7 +791,7 @@ export function FuelingScrollTable({
                           handleFieldClick(period.id, "liters");
                         }
                       }}
-                      onBlur={(e) => handleFieldBlur(period.id, "liters", Number(e.target.value))}
+                      onBlur={(e) => handleFieldBlur(period.id, "liters", e.target.value)}
                       onKeyDown={(e) => handleFieldKeyDown(e, period.id, "liters")}
                        step="1.00"
                     />

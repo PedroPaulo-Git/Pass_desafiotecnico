@@ -124,7 +124,7 @@ export function FuelingRatesTable({
   const [categoryPopoverOpen, setCategoryPopoverOpen] = useState<string | null>(
     null
   );
-  
+
   const [detailsPopoverOpen, setDetailsPopoverOpen] = useState<string | null>(
     null
   );
@@ -255,7 +255,16 @@ export function FuelingRatesTable({
     const updateData = { [actualField]: newValue };
     console.log("About to call mutate", { id: fueling.id, data: updateData });
 
-    updateFueling.mutate({ id: fueling.id, data: updateData });
+    updateFueling.mutate({ id: fueling.id, data: updateData }, {
+      onError: (error: any) => {
+        console.error("Error updating fueling:", error);
+        const message = error?.response?.data?.message || error?.message || "Erro ao atualizar abastecimento";
+        sonnerToast.error(message);
+      },
+      onSuccess: () => {
+        refetch();
+      }
+    });
   };
 
   return (
@@ -272,6 +281,7 @@ export function FuelingRatesTable({
           <TableHeaderSection
             filteredPeriodsCount={filteredPeriodsData.length}
             selectedProfile={selectedProfile}
+            vehicleId={vehicleId}
             onToggleSidebar={onToggleSidebar}
             onOpenProfileModal={() => setUpdateOpen(true)}
             onAddNew={handleAddNew}

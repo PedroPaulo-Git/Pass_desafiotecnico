@@ -97,7 +97,7 @@ function SelectContent({
       >
         {showSearch && (
           <div className="flex items-center  px-3 pb-1 pt-1 bg-background border-b ">
-            <Search className="mr-2 h-4 w-4 shrink-0 " />
+            <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground " />
             <input
               type="text"
               placeholder="Buscar..."
