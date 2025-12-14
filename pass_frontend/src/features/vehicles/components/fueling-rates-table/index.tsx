@@ -121,16 +121,10 @@ export function FuelingRatesTable({
   const [fuelTypePopoverOpen, setFuelTypePopoverOpen] = useState<string | null>(
     null
   );
-  const [litersPopoverOpen, setLitersPopoverOpen] = useState<string | null>(
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState<string | null>(
     null
   );
-  const [valuePopoverOpen, setValuePopoverOpen] = useState<string | null>(null);
-  const [unitPricePopoverOpen, setUnitPricePopoverOpen] = useState<
-    string | null
-  >(null);
-  const [odometerPopoverOpen, setOdometerPopoverOpen] = useState<string | null>(
-    null
-  );
+  
   const [detailsPopoverOpen, setDetailsPopoverOpen] = useState<string | null>(
     null
   );
@@ -299,6 +293,8 @@ export function FuelingRatesTable({
             setProviderPopoverOpen={setProviderPopoverOpen}
             fuelTypePopoverOpen={fuelTypePopoverOpen}
             setFuelTypePopoverOpen={setFuelTypePopoverOpen}
+            categoryPopoverOpen={categoryPopoverOpen}
+            setCategoryPopoverOpen={setCategoryPopoverOpen}
 
             // Date picker states
             datePickerMonth={datePickerMonth}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ptBR } from "date-fns/locale";
-import { Trash2, Check, X, Edit, Eye } from "lucide-react";
+import { Pencil, Trash2, Check, X, Edit, Eye } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,8 +32,8 @@ import {
 } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
+import { useModalStore } from "@/store/use-modal-store";
 import { cn } from "@/lib/utils";
-
 import type { FuelingPeriodData } from "../types";
 import {
   WEEK_DAYS,
@@ -84,6 +84,7 @@ export function FuelingScrollTable({
   } = useColumnPinning();
   const { toggleSort, getColumnSort } = useColumnSorting();
   const { dragRef, isGrabbing, onPointerDown } = useDragToScroll();
+  const { openModal } = useModalStore();
 
   const [editingField, setEditingField] = useState<{
     periodId: string;
@@ -106,6 +107,7 @@ export function FuelingScrollTable({
     field: string
   ) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       const newValue = Number((e.target as HTMLInputElement).value);
       console.log("handleFieldKeyDown Enter", { periodId, field, newValue });
       onUpdateField(periodId, field, newValue);
@@ -115,15 +117,29 @@ export function FuelingScrollTable({
       setEditingField(null);
     }
   };
-  function ActionsMenu() {
+  function ActionsMenu({ period }: { period: FuelingPeriodData }) {
     return (
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon"
+          className="h-8 w-8 hover:bg-muted"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            // openModal("fueling-details", { period });
+          }}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
           onClick={(e: React.MouseEvent) => {
-            console.log("teste");
+            e.preventDefault();
+            e.stopPropagation();
+            const fuelingId = period.id.replace(/^period-[^-]+-[^-]+-/, '');
+            handleDeleteFueling(fuelingId);
           }}
         >
           <Trash2 className="h-4 w-4 text-red-400" />
@@ -340,18 +356,7 @@ export function FuelingScrollTable({
               </TableHead>
 
               {/* Actions */}
-              <TableHead
-                variant="minimal-fueling"
-                flexCell
-                style={{
-                  order: getColumnCSSOrder("actions"),
-                  width: COLUMN_WIDTHS.actions,
-                  minWidth: COLUMN_WIDTHS.actions,
-                  maxWidth: COLUMN_WIDTHS.actions,
-                  flexShrink: 0,
-                  flexGrow: 0,
-                }}
-              />
+            
             </TableRow>
           </TableHeader>
 
@@ -662,34 +667,24 @@ export function FuelingScrollTable({
                     className={getStickyClass("odometer")}
                     style={getStickyStyle("odometer")}
                   >
-                    {editingField?.periodId === period.id &&
-                    editingField?.field === "odometer" ? (
-                      <div className="flex items-center gap-1">
-                        <Input
-                          variant="number"
-                          type="number"
-                          defaultValue={period.odometer}
-                          key={period.odometer}
-                          className="h-8 w-24"
-                          onBlur={(e) => handleFieldBlur(period.id, "odometer", Number(e.target.value))}
-                          onKeyDown={(e) => handleFieldKeyDown(e, period.id, "odometer")}
-                          step={1}
-                          min={0}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          km
-                        </span>
-                      </div>
-                    ) : (
-                      <button
-                        className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-              hover:ring-1 hover:ring-border
-              py-2 cursor-pointer text-left px-3 transition-colors"
-                        onClick={() => handleFieldClick(period.id, "odometer")}
-                      >
-                        {formatNumber(period.odometer, 0)} km
-                      </button>
-                    )}
+                    <Input
+                      variant="number"
+                      type="number"
+                      value={editingField?.periodId === period.id && editingField?.field === "odometer" ? undefined : period.odometer}
+                      defaultValue={editingField?.periodId === period.id && editingField?.field === "odometer" ? period.odometer : undefined}
+                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "odometer")}
+                      className={cn("h-8 w-full ", !(editingField?.periodId === period.id && editingField?.field === "odometer") && "bg-transparent cursor-pointer")}
+                      suffix="km"
+                      onClick={() => {
+                        if (!(editingField?.periodId === period.id && editingField?.field === "odometer")) {
+                          handleFieldClick(period.id, "odometer");
+                        }
+                      }}
+                      onBlur={(e) => handleFieldBlur(period.id, "odometer", Number(e.target.value))}
+                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "odometer")}
+                      step={1}
+                      min={0}
+                    />
                   </TableCell>
 
                   {/* Preço/L - INLINE EDIT */}
@@ -699,37 +694,24 @@ export function FuelingScrollTable({
                     className={cn("", getStickyClass("unitPrice"))}
                     style={getStickyStyle("unitPrice")}
                   >
-                    {editingField?.periodId === period.id &&
-                    editingField?.field === "unitPrice" ? (
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm text-muted-foreground">
-                          R$
-                        </span>
-                        <Input
-                          variant="number"
-                          type="number"
-                          defaultValue={period.unitPrice}
-                          key={period.unitPrice}
-                          autoFocus
-                          step="0.01"
-                          className="h-8 w-20"
-                          onBlur={(e) => handleFieldBlur(period.id, "unitPrice", Number(e.target.value))}
-                          onKeyDown={(e) => handleFieldKeyDown(e, period.id, "unitPrice")}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          /L
-                        </span>
-                      </div>
-                    ) : (
-                      <button
-                        className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-                                hover:ring-1 hover:ring-border
-                                py-2 cursor-pointer text-left px-3 transition-colors"
-                        onClick={() => handleFieldClick(period.id, "unitPrice")}
-                      >
-                        {formatCurrency(period.unitPrice)}/L
-                      </button>
-                    )}
+                    <Input
+                      variant="number"
+                      type="number"
+                      value={editingField?.periodId === period.id && editingField?.field === "unitPrice" ? undefined : period.unitPrice}
+                      defaultValue={editingField?.periodId === period.id && editingField?.field === "unitPrice" ? period.unitPrice : undefined}
+                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "unitPrice")}
+                      className={cn("h-8 w-full", !(editingField?.periodId === period.id && editingField?.field === "unitPrice") && "bg-transparent cursor-pointer")}
+                      prefix="R$"
+                      suffix="/L"
+                      onClick={() => {
+                        if (!(editingField?.periodId === period.id && editingField?.field === "unitPrice")) {
+                          handleFieldClick(period.id, "unitPrice");
+                        }
+                      }}
+                      onBlur={(e) => handleFieldBlur(period.id, "unitPrice", Number(e.target.value))}
+                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "unitPrice")}
+                      step="1.00"
+                    />
                   </TableCell>
 
                   {/* Valor Total - INLINE EDIT */}
@@ -739,36 +721,24 @@ export function FuelingScrollTable({
                     className={getStickyClass("totalValue")}
                     style={getStickyStyle("totalValue")}
                   >
-                    {editingField?.periodId === period.id &&
-                    editingField?.field === "value" ? (
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm text-muted-foreground">
-                          R$
-                        </span>
-                        <Input
-                          variant="number"
-                          type="number"
-                          defaultValue={period.totalValue}
-                          key={period.totalValue}
-                          autoFocus
-                          step="0.01"
-                          className="h-8 w-24"
-                          onBlur={(e) => handleFieldBlur(period.id, "value", Number(e.target.value))}
-                          onKeyDown={(e) => handleFieldKeyDown(e, period.id, "value")}
-                        />
-                      </div>
-                    ) : (
-                      <button
-                        className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-                                hover:ring-1 hover:ring-border
-                                py-2 cursor-pointer text-left px-3 transition-colors"
-                        onClick={() =>
-                          handleFieldClick(period.id, "value")
+                    <Input
+                      variant="number"
+                      type="number"
+                      
+                      value={editingField?.periodId === period.id && editingField?.field === "value" ? undefined : period.totalValue}
+                      defaultValue={editingField?.periodId === period.id && editingField?.field === "value" ? period.totalValue : undefined}
+                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "value")}
+                      className={cn("h-8 w-full", !(editingField?.periodId === period.id && editingField?.field === "value") && "bg-transparent cursor-pointer")}
+                      prefix="R$"
+                      onClick={() => {
+                        if (!(editingField?.periodId === period.id && editingField?.field === "value")) {
+                          handleFieldClick(period.id, "value");
                         }
-                      >
-                        {formatCurrency(period.totalValue)}
-                      </button>
-                    )}
+                      }}
+                      onBlur={(e) => handleFieldBlur(period.id, "value", Number(e.target.value))}
+                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "value")}
+                       step="1.00"
+                    />
                   </TableCell>
 
                   {/* Litros - INLINE EDIT */}
@@ -778,32 +748,23 @@ export function FuelingScrollTable({
                     className={getStickyClass("liters")}
                     style={getStickyStyle("liters")}
                   >
-                    {editingField?.periodId === period.id &&
-                    editingField?.field === "liters" ? (
-                      <div className="flex items-center gap-1">
-                        <Input
-                          variant="number"
-                          type="number"
-                          defaultValue={period.totalLiters}
-                          key={period.totalLiters}
-                          autoFocus
-                          step="0.01"
-                          className="h-8 w-20"
-                          onBlur={(e) => handleFieldBlur(period.id, "liters", Number(e.target.value))}
-                          onKeyDown={(e) => handleFieldKeyDown(e, period.id, "liters")}
-                        />
-                        <span className="text-sm text-muted-foreground">L</span>
-                      </div>
-                    ) : (
-                      <button
-                        className="hover:bg-background/20 border-none rounded-lg hover:py-2 
-                                hover:ring-1 hover:ring-border
-                                py-2 cursor-pointer text-left px-3 transition-colors"
-                        onClick={() => handleFieldClick(period.id, "liters")}
-                      >
-                        {formatNumber(period.totalLiters)} L
-                      </button>
-                    )}
+                    <Input
+                      variant="number"
+                      type="number"
+                      value={editingField?.periodId === period.id && editingField?.field === "liters" ? undefined : period.totalLiters}
+                      defaultValue={editingField?.periodId === period.id && editingField?.field === "liters" ? period.totalLiters : undefined}
+                      readOnly={!(editingField?.periodId === period.id && editingField?.field === "liters")}
+                      className={cn("h-8 w-full ", !(editingField?.periodId === period.id && editingField?.field === "liters") && "bg-transparent cursor-pointer")}
+                      suffix="L"
+                      onClick={() => {
+                        if (!(editingField?.periodId === period.id && editingField?.field === "liters")) {
+                          handleFieldClick(period.id, "liters");
+                        }
+                      }}
+                      onBlur={(e) => handleFieldBlur(period.id, "liters", Number(e.target.value))}
+                      onKeyDown={(e) => handleFieldKeyDown(e, period.id, "liters")}
+                       step="1.00"
+                    />
                   </TableCell>
                   {/* Fueling days */}
                   <TableCell
@@ -833,9 +794,9 @@ export function FuelingScrollTable({
                   </TableCell>
 
                   {/* Actions */}
-                  <td className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible">
-                    <div className="absolute right-0 top-0 h-full flex items-center pr-2 pl-4 opacity-0 group-hover/row:opacity-100 transition-opacity z-20 bg-sidebar">
-                      <ActionsMenu />
+                  <td className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible" style={{ order: getColumnCSSOrder("actions") }}>
+                    <div className="absolute right-0 top-0 h-full flex items-center pr-2 pl-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-sidebar">
+                      <ActionsMenu period={period} />
                     </div>
                   </td>
                 </TableRow>

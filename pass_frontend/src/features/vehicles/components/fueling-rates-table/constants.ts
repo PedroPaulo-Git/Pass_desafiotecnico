@@ -53,13 +53,13 @@ export const COLUMN_WIDTHS: ColumnWidths = {
 export const BASE_COLUMN_ORDER = [
   "checkbox",
   "period",
+  "category",
   "provider",
   "fuelType",
   "liters",
   "totalValue",
   "unitPrice",
   "odometer",
-  "category",
   "days",
   "actions",
 ];
