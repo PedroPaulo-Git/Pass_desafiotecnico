@@ -149,7 +149,13 @@ export class FuelingController {
     const fuelingId = request.params;
     const fuelingData = updateFuelingSchema.parse(request.body);
 
+    console.log("UpdateFueling - Received fuelingId:", fuelingId);
+    console.log("UpdateFueling - Received fuelingData:", fuelingData);
+
     const result = await updateFuelingService(fuelingId, fuelingData);
+
+    console.log("UpdateFueling - Result:", result);
+
     return reply.status(200).send(result);
   }
 

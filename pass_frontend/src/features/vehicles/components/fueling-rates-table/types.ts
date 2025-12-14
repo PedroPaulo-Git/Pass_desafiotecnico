@@ -57,6 +57,7 @@ export interface PinnableHeaderContentProps {
   sort: SortDirection;
   onToggleSort: (columnId: string) => void;
   onTogglePin: (columnId: string, position: PinPosition) => void;
+  disableIcons?: boolean;
 }
 
 // Profile type
@@ -86,4 +87,29 @@ export interface PopoverStates {
   unitPricePopoverOpen: string | null;
   odometerPopoverOpen: string | null;
   detailsPopoverOpen: string | null;
+}
+export interface FuelingScrollTableProps {
+  selectedPeriod: FuelingPeriodData | null;
+  paginatedData: FuelingPeriodData[];
+  selectedRows: Set<string>;
+  toggleAllSelection: () => void;
+  toggleRowSelection: (id: string) => void;
+  handleDeleteFueling: (id: string) => void;
+  setPeriodPopoverOpen: (id: string | null) => void;
+  periodPopoverOpen: string | null;
+  setDateRange: (range: any) => void;
+  dateRange: any;
+  setDatePickerMonth: (date: Date) => void;
+  datePickerMonth: Date;
+  setProviderPopoverOpen: (id: string | null) => void;
+  providerPopoverOpen: string | null;
+  setFuelTypePopoverOpen: (id: string | null) => void;
+  fuelTypePopoverOpen: string | null;
+  setCategoryPopoverOpen: (id: string | null) => void;
+  categoryPopoverOpen: string | null;
+  setDetailsPopoverOpen: (id: string | null) => void;
+  detailsPopoverOpen: string | null;
+  handleCellClick: (period: FuelingPeriodData) => void;
+  currentFuelings: any[];
+  onUpdateField: (periodId: string, field: string, value: any) => void;
 }

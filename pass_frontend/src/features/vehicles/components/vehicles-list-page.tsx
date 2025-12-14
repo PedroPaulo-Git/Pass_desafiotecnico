@@ -194,7 +194,7 @@ export function VehiclesListPage() {
           className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between  px-5 pt-4"
         >
           {/* Left: Icon button + Search + Filter buttons */}
-          <div className="flex items-center gap-2 flex-1 mb-1 z-50 ">
+          <div className="flex items-center gap-2 flex-1 mb-1 z-30 ">
             <ButtonBot />
             <div
               data-orientation="vertical"

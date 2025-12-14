@@ -104,10 +104,13 @@ export function useUpdateFueling() {
 
   return useMutation({
     mutationFn: async ({ id, data: updateData }: { id: string; data: Partial<Fueling> }) => {
+      console.log("useUpdateFueling mutationFn called", { id, updateData });
       const { data } = await api.put<Fueling>(`/fuelings/${id}`, updateData);
+      console.log("useUpdateFueling response", data);
       return data;
     },
     onSuccess: (data) => {
+      console.log("useUpdateFueling onSuccess", data);
       queryClient.invalidateQueries({ queryKey: ["fuelings"] });
       queryClient.invalidateQueries({ queryKey: ["vehicles"] });
       if (data && (data as any).vehicleId) {
@@ -115,6 +118,9 @@ export function useUpdateFueling() {
           queryKey: ["vehicle", (data as any).vehicleId],
         });
       }
+    },
+    onError: (error) => {
+      console.log("useUpdateFueling onError", error);
     },
   });
 }

@@ -26,6 +26,7 @@ export function PinnableHeaderContent({
   sort,
   onToggleSort,
   onTogglePin,
+  disableIcons = false,
 }: PinnableHeaderContentProps) {
   const SortIcon =
     sort === "asc" ? ArrowUp : sort === "desc" ? ArrowDown : ChevronsUpDown;
@@ -55,39 +56,43 @@ export function PinnableHeaderContent({
         />
       </button>
       <div className="ml-auto relative z-50">
-        {isPinned ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 shrink-0 hover:bg-muted"
-            onClick={() => onTogglePin(columnId, pin)}
-          >
-            <PinOff className="h-3.5 w-3.5" />
-          </Button>
-        ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        {!disableIcons && (
+          <>
+            {isPinned ? (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 shrink-0 hover:bg-muted"
+                onClick={() => onTogglePin(columnId, pin)}
               >
-                <MoreHorizontal className="h-3.5 w-3.5" />
+                <PinOff className="h-3.5 w-3.5" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onTogglePin(columnId, "left")}>
-                <ArrowLeftToLine className="h-4 w-4 mr-2" />
-                Fixar à esquerda
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onTogglePin(columnId, "right")}>
-                <ArrowRightToLine className="h-4 w-4 mr-2" />
-                Fixar à direita
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0 hover:bg-muted"
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onTogglePin(columnId, "left")}>
+                    <ArrowLeftToLine className="h-4 w-4 mr-2" />
+                    Fixar à esquerda
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onTogglePin(columnId, "right")}>
+                    <ArrowRightToLine className="h-4 w-4 mr-2" />
+                    Fixar à direita
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </>
         )}
       </div>
     </div>

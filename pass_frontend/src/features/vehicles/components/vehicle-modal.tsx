@@ -95,6 +95,8 @@ import type {
   VehicleClassification,
   FuelType,
 } from "@/types/vehicle";
+import { SidebarTasks } from "./fueling-rates-table/components/sidebar-tasks";
+import type { RouteItem } from "./fueling-rates-table/components/sidebar-tasks";
 
 interface VehicleModalProps {
   isCreate?: boolean;
@@ -164,7 +166,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       origin: "Aeroporto Galeão, Rio De Janeiro",
       destination: "Apa Pau, Armação Dos Búzios",
       schedule: "In – 08:30 às 23:30",
-      badge: null,
+      badge: "+1",
     },
     {
       id: "3",
@@ -182,7 +184,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       schedule: "Interhotel – 07:00 às 12:00",
       badge: null,
     },
-  ];
+  ] as RouteItem[] ;
 
   const { data: imagesData } = useVehicleImages(vehicle?.id || "");
   const createImage = useCreateVehicleImage();
@@ -441,90 +443,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         <div className=" ">
           {/* Rates Sidebar - absolute overlay covering entire modal */}
           {activeTab === "rates" && (
-            <div
-              className={cn(
-                "absolute top-0 left-0 h-full  bg-background transition-all duration-300 ease-in-out overflow-hidden z-50",
-                ratesSidebarOpen ? "w-[280px] " : "w-0"
-              )}
-            >
-              <div className="flex flex-col h-full w-[280px]">
-                {/* Search Header */}
-                <div className="p-3 border-b">
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Buscar tarifa..."
-                        className="pl-9 h-8 text-sm"
-                      />
-                    </div>
-                    <Button type="button" size="sm" className="h-8 px-2">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Route Cards List */}
-                <ScrollArea className="flex-1 ">
-                  <div className="p-2 space-y-2">
-                    {routeItems.map((route) => (
-                      <div
-                        key={route.id}
-                        className="p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
-                      >
-                        {/* Header with switch */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Switch defaultChecked className="scale-75" />
-                            <span className="text-xs font-medium">
-                              {route.title}
-                            </span>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5"
-                          >
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        {/* Route info */}
-                        <div className="space-y-1.5 text-xs">
-                          <div className="flex items-start gap-1.5">
-                            <MapPin className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                            <span className="text-foreground line-clamp-1">
-                              {route.origin}
-                            </span>
-                            {route.badge && (
-                              <Badge
-                                variant="secondary"
-                                className="text-[9px] h-4 px-1 ml-auto"
-                              >
-                                {route.badge}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-start gap-1.5">
-                            <MapPin className="h-3 w-3 text-primary mt-0.5 shrink-0" />
-                            <span className="text-foreground line-clamp-1">
-                              {route.destination}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
-                            <span className="text-muted-foreground">
-                              {route.schedule}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            </div>
+            <SidebarTasks
+              ratesSidebarOpen={ratesSidebarOpen}
+              routeItems={routeItems}
+              setRatesSidebarOpen={setRatesSidebarOpen}
+            />
           )}
 
           {/* Main Modal Content */}
@@ -551,7 +474,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     activeTab === "rates" && "w-screen lg:max-w-[67vw]",
                     activeTab === "terms" && "w-screen max-w-[1000px] "
                   )}
-                 >
+                >
                   <div className="flex items-center justify-between px-6 py-6 ">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-background border border-muted rounded-full">
@@ -656,7 +579,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                       : "w-[90vw] max-w-[900px] sm:w-[650px]"
                   )}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence>
                     {/* Tab: Dados Gerais */}
                     <TabsContent value="general" className="" forceMount>
                       {activeTab === "general" && (
@@ -750,12 +673,13 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         )}
                                       </div>
                                     )}
-                                    <div className={` w-full ${
+                                    <div
+                                      className={` w-full ${
                                         isCreating ? "col-span-3" : "col-span-4"
-                                      }`}>
+                                      }`}
+                                    >
                                       <label className="text-sm text-foreground">
                                         {t.vehicles.company}
-                                     
                                       </label>
                                       <Select
                                         value={watch("companyName") || ""}
@@ -780,12 +704,13 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                    <div className={` w-full ${
+                                    <div
+                                      className={` w-full ${
                                         isCreating ? "col-span-3" : "col-span-4"
-                                      }`}>
+                                      }`}
+                                    >
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.status}
-                                  
                                       </label>
                                       <Select
                                         value={watch("status")}
@@ -921,7 +846,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     <div className="col-span-3 sm:col-span-2">
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.category}
-                                    
                                       </label>
                                       <Select
                                         value={watch("category")}
@@ -948,7 +872,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     <div className="col-span-1 sm:col-span-2">
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.classification}
-                                    
                                       </label>
                                       <Select
                                         value={watch("classification")}
@@ -1204,7 +1127,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     <div className="col-span-1 sm:col-span-2">
                                       <label className="text-xs text-foreground">
                                         {t.vehicles.fuelType}
-                                   
                                       </label>
                                       <Select
                                         value={watch("fuelType")}
@@ -1394,7 +1316,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       {/* Existing Images */}
                                       {imagesData?.map((image, index) => (
                                         <motion.div
-                                          key={image.id}
+                                          key={`image-${index}`}
                                           initial={{ opacity: 0, scale: 0.9 }}
                                           animate={{ opacity: 1, scale: 1 }}
                                           transition={{ delay: index * 0.1 }}

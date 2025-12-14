@@ -9,6 +9,7 @@ export const updateFuelingService = async (
   fuelingId: FuelingIdParam,
   fuelingData: UpdateFuelingInput
 ) => {
+  console.log("updateFuelingService - Entry with fuelingId:", fuelingId, "fuelingData:", fuelingData);
   const fueling = await prisma.fueling.findUnique({
     where: {
       id: fuelingId.id,
@@ -19,6 +20,7 @@ export const updateFuelingService = async (
       fuelingId,
     });
   }
+  console.log("updateFuelingService - Found fueling:", fueling);
   const vehicle = await prisma.vehicle.findUnique({
     where: {
       id: fueling.vehicleId,
@@ -74,12 +76,13 @@ export const updateFuelingService = async (
       { date: fuelingData.date }
     );
   }
-  // Recalculate total fuel cost if liters or unit price are updated
-  if (fuelingData.liters !== undefined || fuelingData.unitPrice !== undefined) {
+  // Recalculate total fuel cost only if totalValue is not explicitly provided and liters or unit price are updated
+  if (fuelingData.totalValue === undefined && (fuelingData.liters !== undefined || fuelingData.unitPrice !== undefined)) {
     fuelingData.totalValue =
       (fuelingData.liters ?? fueling.liters) *
       (fuelingData.unitPrice ?? fueling.unitPrice);
   }
+  console.log("updateFuelingService - After recalculation, fuelingData:", fuelingData);
 
   const result = await prisma.$transaction(async (tx) => {
     const updatedFueling = await tx.fueling.update({
@@ -97,6 +100,8 @@ export const updateFuelingService = async (
     }
     return updatedFueling;
   });
+
+  console.log("updateFuelingService - Final result:", result);
 
   return result;
 };
