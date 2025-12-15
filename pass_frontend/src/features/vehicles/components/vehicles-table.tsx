@@ -375,7 +375,7 @@ export function VehiclesTable({
               <TableRow>
                 <TableCell
                   colSpan={11}
-                  className="text-start py-10 text-muted-foreground"
+                  className="text-center py-10 text-muted-foreground "
                 >
                   {t.common.noRecords}
                 </TableCell>
@@ -477,6 +477,7 @@ export function VehiclesTable({
         {/* Dropdown: Linhas por página */}
         <div className="flex items-center space-x-2 h-8 bg-background ">
           <Select
+        
             value={`${pagination.limit}`} // Converte para string pois o Select espera string
             onValueChange={(value) => {
               // Prefer onPageSizeChange; se não existir, apenas logamos
@@ -488,12 +489,12 @@ export function VehiclesTable({
               console.warn("onPageSizeChange not provided for VehiclesTable");
             }}
           >
-            <SelectTrigger className="h-8 w-[110px]  text-foreground" variant="pagination">
+            <SelectTrigger className="h-8 w-[110px]  text-foreground " variant="pagination">
               {/* Mostrar o texto formatado (ex.: "10 / page") */}
-              <SelectValue className="text-foreground">{`${pagination.limit} / page`}</SelectValue>
+              <SelectValue className="text-foreground ">{`${pagination.limit} / page`}</SelectValue>
             </SelectTrigger>
             {/* side é aceito; removeu-se o prop 'variant' que causava erro de tipo */}
-            <SelectContent side="top">
+            <SelectContent bg_fill={true} side="top">
               {[5, 10, 15, 20, 50].map((pageSize) => (
                 <SelectItem className="text-foreground" key={pageSize} value={`${pageSize}`}>
                   {pageSize} / page
