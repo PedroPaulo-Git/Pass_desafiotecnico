@@ -92,7 +92,6 @@ export function TableHeaderSection({
             onClick={() => setShowAddForm(!showAddForm)}
             className="rounded-r-none border-r-0 pr-3"
           >
-         
             <span className="hidden sm:inline">Adicionar</span>
           </Button>
           <Button
@@ -114,10 +113,7 @@ export function TableHeaderSection({
           <FuelingForm
             vehicleId={vehicleId}
             onClose={() => setShowAddForm(false)}
-            onSuccess={() => {
-              setShowAddForm(false);
-              onAddNew();
-            }}
+            onSuccess={() => setShowAddForm(false)}
           />
         </DropdownModal>
       </div>

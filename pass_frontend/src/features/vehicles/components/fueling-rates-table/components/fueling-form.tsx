@@ -392,7 +392,8 @@ export function FuelingForm({
           type="button"
           className="flex-1  max-w-[100px]"
           disabled={isSubmitting}
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
             handleSubmit(onSubmit)();
             console.log("handleSubmit executado");
           }}

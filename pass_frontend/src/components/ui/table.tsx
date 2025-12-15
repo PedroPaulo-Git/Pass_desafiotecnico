@@ -177,7 +177,7 @@ function TableHead({
           cn("border-t", " px-0.5", " "),
         variant === "sticky-first" &&
           cn(
-            "py-2 px-3 border-y ",
+            "py-2 px-3 border-t ",
             "text-xs font-semibold text-muted-foreground tracking-wide",
             "sticky left-0 bg-background/95 backdrop-blur-sm z-40 "
           ),
