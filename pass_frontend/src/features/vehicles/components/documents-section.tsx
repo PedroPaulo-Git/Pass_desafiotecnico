@@ -81,8 +81,9 @@ export function DocumentsSection({
 
       if (expiredDocs.length > 0) {
         const docNames = expiredDocs.map((doc) => doc.name).join(", ");
-        sonnerToast.error(t.common.error || "Documentos vencidos detectados", {
-          description: `Os seguintes documentos estão vencidos: ${docNames}`,
+        console.log("Showing toast for", docNames);
+        sonnerToast.warning(t.documents.invalidExpiryDate, {
+          description: `Documentos afetados: ${docNames}`,
           duration: 7000,
         });
       }
@@ -140,20 +141,20 @@ export function DocumentsSection({
                   currentDocuments.map((doc) => (
                     <TableRow key={doc.id} className="ml-10">
                       <TableCell className="">
-                        <div className=" ml-12">
+                        <div className="">
                           {getDocumentIcon(doc.name)}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="ml-6">{doc.name ?? "-"}</span>
+                        <span className="">{doc.name ?? "-"}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="ml-6">
+                        <span className="">
                           {format(new Date(doc.expiryDate), "dd/MM/yyyy")}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Switch className="ml-12" checked={doc.activeAlert} />
+                        <Switch className="mx-auto" checked={doc.activeAlert} />
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {doc.alertDays

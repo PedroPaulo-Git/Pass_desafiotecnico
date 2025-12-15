@@ -269,6 +269,7 @@ export const translations = {
       alertDays: "Dias de Antecipação",
       activeAlert: "Alerta Ativo",
       days: "Dias",
+      invalidExpiryDate: "Data de vencimento não pode ser anterior à data atual",
     },
     // Tariffs
     tariffs: {
@@ -584,6 +585,7 @@ export const translations = {
       alertDays: "Alert Days",
       activeAlert: "Active Alert",
       days: "Days",
+      invalidExpiryDate: "Expiry date cannot be before today's date",
     },
     // Tariffs
     tariffs: {
@@ -899,6 +901,7 @@ export const translations = {
       alertDays: "Días de Anticipación",
       activeAlert: "Alerta Activa",
       days: "Días",
+      invalidExpiryDate: "La fecha de vencimiento no puede ser anterior a la fecha actual",
     },
     // Tariffs
     tariffs: {

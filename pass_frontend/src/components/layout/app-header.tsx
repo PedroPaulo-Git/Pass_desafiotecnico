@@ -125,7 +125,10 @@ export function AppHeader({
       {/* --- CENTER SECTION: Search Bar --- */}
       <div className="hidden flex-1 items-center justify-center px-4 lg:flex">
         <div className="relative w-full max-w-md">
-          <Search  onClick={() => setOpenSearchDialog(true)} className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search
+            onClick={() => setOpenSearchDialog(true)}
+            className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+          />
           <Input
             variant="modal"
             placeholder={t.common.search + "..."}
@@ -148,7 +151,10 @@ export function AppHeader({
 
       {/* --- RIGHT SECTION: Actions & Profile --- */}
       <div className="flex items-center gap-1">
-        <Search  onClick={() => setOpenSearchDialog(true)} className=" flex lg:hidden h-4 w-4 text-muted-foreground mr-3" />
+        <Search
+          onClick={() => setOpenSearchDialog(true)}
+          className=" flex lg:hidden h-4 w-4 text-muted-foreground "
+        />
 
         {/* Theme Toggle */}
         <Button

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateVehicleDocumentInput,
   createVehicleDocumentSchema,
 } from "@pass/schemas";
 import { FileText, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { useCreateVehicleDocument } from "@/features/fleet-events/hooks/use-vehicle-documents";
@@ -21,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Collapsible,
   CollapsibleContent,
@@ -50,6 +52,7 @@ export function DocumentModal() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<CreateVehicleDocumentInput>({
     resolver: zodResolver(createVehicleDocumentSchema),
@@ -62,7 +65,22 @@ export function DocumentModal() {
   const createDocument = useCreateVehicleDocument();
 
   const onSubmit = async (formData: CreateVehicleDocumentInput) => {
-    await createDocument.mutateAsync({ ...formData, vehicleId });
+    // Validate expiry date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiry = new Date(formData.expiryDate);
+    expiry.setHours(0, 0, 0, 0);
+    if (expiry < today) {
+      sonnerToast.error(t.documents.invalidExpiryDate);
+      return;
+    }
+
+    await createDocument.mutateAsync({
+      ...formData,
+      expiryDate: formData.expiryDate.toISOString(),
+      vehicleId,
+    });
+    sonnerToast.success(t.common.success || "Documento criado com sucesso!");
     closeModal();
   };
 
@@ -84,7 +102,11 @@ export function DocumentModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="w-full max-w-3xl p-0">
+      <DialogContent
+        showCloseButton={false}
+        showCloseButtonClean={true}
+        className="w-full max-w-3xl p-0"
+      >
         <motion.div
           variants={modalVariants}
           initial="hidden"
@@ -166,10 +188,20 @@ export function DocumentModal() {
                       <label className="text-xs text-muted-foreground">
                         {t.documents.expiryDate}
                       </label>
-                      <Input
-                        type="date"
-                        {...register("expiryDate")}
-                        className="h-9"
+                      <Controller
+                        control={control}
+                        name="expiryDate"
+                        render={({ field }) => (
+                          <DatePicker
+                            date={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onDateChange={field.onChange}
+                            placeholder="Selecione a data"
+                            className="w-full"
+                            variant="modal"
+                          />
+                        )}
                       />
                       {errors.expiryDate?.message && (
                         <span className="text-xs text-destructive">
@@ -184,6 +216,7 @@ export function DocumentModal() {
                         {t.documents.alertDays}
                       </label>
                       <Input
+                        variant="number-border"
                         type="number"
                         {...register("alertDays", { valueAsNumber: true })}
                         placeholder="30"
@@ -209,19 +242,21 @@ export function DocumentModal() {
             </Collapsible>
 
             {/* Footer */}
-            <div className="flex justify-center gap-3 pt-4">
+            <div className="flex justify-between gap-3 pt-4">
               <Button
+                // variant="secondary"
+                variant="outline"
                 type="button"
-                variant="modal_white"
-                size="modal"
+                size="sm"
+                className="w-28"
                 onClick={closeModal}
               >
                 {t.common.close}
               </Button>
               <Button
-                type="submit"
                 variant="modal"
-                size="modal"
+                type="submit"
+                className="w-28"
                 disabled={isCreatingDocument}
               >
                 {isCreatingDocument ? t.common.loading : t.common.register}
