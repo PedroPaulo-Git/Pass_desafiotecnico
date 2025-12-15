@@ -453,7 +453,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           activeTab === "terms" && "w-screen max-w-[1000px] max-h-[85vh]"
         )}
       >
-        <div className=" ">
+        <div className="overflow-hidden ">
           {/* Rates Sidebar - absolute overlay covering entire modal */}
           {activeTab === "rates" && (
             <SidebarTasks
@@ -1483,7 +1483,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                     {/* Tab: Tarifas */}
                     {vehicle && (
-                      <TabsContent value="rates" forceMount>
+                      <TabsContent className="overflow-x-hidden" value="rates" forceMount>
                         {activeTab === "rates" && (
                           <motion.div
                             key="rates"
