@@ -11,6 +11,7 @@ type FormInputProps = {
   formatter?: (v: string) => string;
   debounceMs?: number;
   className?: string;
+  maxLength?: number;
   inputMode?: any;
   type?: any;
   disabled?: boolean;
@@ -26,6 +27,7 @@ export function FormInput({
   formatter,
   debounceMs = 180,
   className,
+  maxLength,
   inputMode,
   type,
   disabled,
@@ -44,13 +46,16 @@ export function FormInput({
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      const formatted = formatter ? formatter(raw) : raw;
+      let formatted = formatter ? formatter(raw) : raw;
+      if (maxLength && formatted.length > maxLength) {
+        formatted = formatted.slice(0, maxLength);
+      }
       setLocal(formatted);
       // update RHF immediately so validation runs (useForm mode: 'onChange')
       field.onChange(formatted);
       if (clearErrors) clearErrors(name);
     },
-    [formatter, field, clearErrors, name]
+    [formatter, maxLength, field, clearErrors, name]
   );
 
   const handleBlur = useCallback(() => {
@@ -68,6 +73,7 @@ export function FormInput({
       onChange={handleChange}
       onBlur={handleBlur}
       placeholder={placeholder}
+      maxLength={maxLength}
       className={className}
       inputMode={inputMode}
       type={type}

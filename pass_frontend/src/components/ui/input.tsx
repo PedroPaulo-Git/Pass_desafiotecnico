@@ -153,6 +153,16 @@ function Input({
     }
 
     setDisplayValue(value);
+
+    // For non-number variants, propagate the change
+    if (variant !== "number" && variant !== "number-border") {
+      if (onChange) {
+        const event = {
+          target: { value },
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(event);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -284,15 +294,25 @@ function Input({
     }
   };
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (inputRef.current) {
-      const currentValue = inputRef.current.value;
-      const extracted = extractNumber(currentValue);
-      const formatted = formatValue(extracted);
-      inputRef.current.value = formatted;
-      setDisplayValue(formatted);
+    if (variant === "number" || variant === "number-border") {
+      if (inputRef.current) {
+        const currentValue = inputRef.current.value;
+        const extracted = extractNumber(currentValue);
+        const formatted = formatValue(extracted);
+        inputRef.current.value = formatted;
+        setDisplayValue(formatted);
+        if (onChange) {
+          const event = {
+            target: { value: extracted },
+          } as React.ChangeEvent<HTMLInputElement>;
+          onChange(event);
+        }
+      }
+    } else {
+      // For text inputs, just propagate the current value
       if (onChange) {
         const event = {
-          target: { value: extracted },
+          target: { value: displayValue },
         } as React.ChangeEvent<HTMLInputElement>;
         onChange(event);
       }
@@ -390,6 +410,8 @@ function Input({
 
         className
       )}
+      value={value}
+      onChange={onChange}
       {...inputProps}
     />
   );

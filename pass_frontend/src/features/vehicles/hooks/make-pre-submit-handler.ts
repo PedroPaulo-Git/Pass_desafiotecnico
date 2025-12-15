@@ -99,6 +99,9 @@ export function makePreSubmitHandler<T extends FieldValues>({
       if (!description)
         setFieldError("description", t.vehicles.validation.descriptionRequired);
 
+      const color = String(v["color"] ?? "").trim();
+      if (!color) setFieldError("color", t.vehicles.validation.colorRequired);
+
       if (hasErrors) {
         toast.error(t.vehicles.messages.checkRequiredFields);
         return;

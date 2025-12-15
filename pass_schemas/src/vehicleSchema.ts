@@ -22,7 +22,7 @@ const createVehicleSchema = z.object({
 
   brand: z.string().min(1, "Brand is required"),
   model: z.string().min(1, "Model is required"),
-  color: z.string().min(1, "Color").optional(),
+  color: z.string().min(1, "Color is required"),
   year: z.number().min(1886, "Year must be 1886 or later"),
   doors: z.number().min(1, "Doors must be at least 1"),
   capacity: z.number().min(1, "Capacity must be at least 1"),
