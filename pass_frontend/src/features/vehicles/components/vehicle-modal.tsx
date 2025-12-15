@@ -442,18 +442,18 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
       <DialogContent
         showCloseButton={false}
         className={cn(
-          " p-0 rounded-2xl max-h-[90vh]  ",
+          " p-0 rounded-2xl min-h-[90vh]  ",
           activeTab === "general" &&
-            "w-[90vw] sm:w-[650px] max-h-[55vh] overflow-y-auto",
+            "w-[90vw] sm:w-[650px] max-h-[55vh] sm:min-h-0 sm:max-h-[90vh] overflow-y-auto",
           activeTab === "fuelings" && "w-screen max-w-7xl h-[75vh]  ",
           activeTab === "documents" && "w-[90vw] sm:w-[650px] h-[75vh]   ",
           activeTab === "incidents" && "w-[90vw] sm:w-[650px] h-[75vh]  ",
           activeTab === "rates" &&
-            "w-screen lg:max-w-[67vw] min-h-[80vh] max-h-[95vh]",
+            "w-screen lg:max-w-[67vw] min-h-[80vh] max-h-[95vh] overflow-x-hidden",
           activeTab === "terms" && "w-screen max-w-[1000px] max-h-[85vh]"
         )}
       >
-        <div className="overflow-hidden ">
+        <div className=" ">
           {/* Rates Sidebar - absolute overlay covering entire modal */}
           {activeTab === "rates" && (
             <SidebarTasks
@@ -464,13 +464,13 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
           )}
 
           {/* Main Modal Content */}
-          <div className="  pt-0  ">
+          <div className="  pt-0 ">
             <motion.div
               variants={modalVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
-            >
+             >
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -479,7 +479,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 {/* Header */}
                 <DialogHeader
                   className={cn(
-                    "sticky bg-background z-10 -top-1 w-full  rounded-t-xl ",
+                    "sticky bg-background z-10 -top-1 w-full overflow-x-hidden   rounded-t-xl ",
                     activeTab === "general" && "w-[90vw] sm:w-[650px] ",
                     activeTab === "fuelings" && "w-screen max-w-7xl border-r ",
                     activeTab === "documents" && "w-[90vw] sm:w-[647px]  ",
@@ -487,7 +487,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     activeTab === "rates" && "w-screen lg:max-w-[67vw]",
                     activeTab === "terms" && "w-screen max-w-[1000px] "
                   )}
-                >
+                 >
                   <div className="flex items-center justify-between px-6 py-6 ">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-background border border-border rounded-full">
@@ -583,15 +583,15 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     onSubmit,
                   })}
                   className={cn(
-                    "px-2",
-                    activeTab === "general" && "pt-5",
+                    "px-2 ",
+                    activeTab === "general" && "pt-5 ",
                     activeTab === "fuelings" || activeTab === "rates"
-                      ? "px-0 pb-0"
+                      ? "px-0 pb-0 "
                       : activeTab === "terms"
                       ? "px-0 pb-0 w-full"
                       : "w-[90vw] max-w-[900px] sm:w-[650px]"
                   )}
-                >
+                 >
                   <AnimatePresence>
                     {/* Tab: Dados Gerais */}
                     <TabsContent value="general" className="" forceMount>
