@@ -16,7 +16,13 @@ function Input({
   suffix,
   ...props
 }: React.ComponentProps<"input"> & {
-  variant?: "default" | "light" | "modal" | "custom" | "number" | "number-border";
+  variant?:
+    | "default"
+    | "light"
+    | "modal"
+    | "custom"
+    | "number"
+    | "number-border";
   center?: boolean;
   prefix?: string;
   suffix?: string;
@@ -95,13 +101,16 @@ function Input({
     if (onChange) onChange(event);
   };
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    
-    if ((variant === "number" || variant === "number-border") && (prefix || suffix)) {
+
+    if (
+      (variant === "number" || variant === "number-border") &&
+      (prefix || suffix)
+    ) {
       // PROTEÇÃO ABSOLUTA: Garantir que prefixo e sufixo SEMPRE existam
       const currentValue = displayValue;
-      
+
       // Se o valor não tem prefixo ou sufixo, restaurar o valor anterior
       if (prefix && !value.includes(prefix)) {
         setDisplayValue(currentValue);
@@ -110,7 +119,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         }
         return;
       }
-      
+
       if (suffix && !value.includes(suffix)) {
         setDisplayValue(currentValue);
         if (inputRef.current) {
@@ -118,31 +127,31 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         }
         return;
       }
-      
+
       // Extrair apenas a parte numérica (entre prefixo e sufixo)
       let numericPart = value;
-      
+
       if (prefix) {
         const prefixIndex = value.indexOf(prefix);
         if (prefixIndex === 0) {
           numericPart = value.substring(prefix.length);
         }
       }
-      
+
       if (suffix) {
         const suffixIndex = numericPart.indexOf(suffix);
         if (suffixIndex !== -1) {
           numericPart = numericPart.substring(0, suffixIndex);
         }
       }
-      
+
       // Limpar: apenas números, vírgula e ponto
-      numericPart = numericPart.replace(/[^0-9.,]/g, '');
-      
+      numericPart = numericPart.replace(/[^0-9.,]/g, "");
+
       // Reconstruir o valor com prefixo e sufixo
       value = (prefix || "") + numericPart + (suffix || "");
     }
-    
+
     setDisplayValue(value);
   };
 
@@ -154,12 +163,18 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectionStart = input.selectionStart || 0;
       const selectionEnd = input.selectionEnd || 0;
       const value = input.value;
-      const isFullSelection = selectionStart === 0 && selectionEnd === value.length;
+      const isFullSelection =
+        selectionStart === 0 && selectionEnd === value.length;
 
       // Só aplicar proteções se houver prefixo ou sufixo
       if (prefix || suffix) {
         // Bloquear TODAS as letras e caracteres especiais (exceto números, vírgula, ponto)
-        if (e.key.length === 1 && !/[0-9.,]/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+        if (
+          e.key.length === 1 &&
+          !/[0-9.,]/.test(e.key) &&
+          !e.ctrlKey &&
+          !e.metaKey
+        ) {
           e.preventDefault();
           return;
         }
@@ -169,7 +184,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const suffixStart = suffix ? value.indexOf(suffix) : value.length;
 
         // BACKSPACE: Proteger prefixo e sufixo
-        if (e.key === 'Backspace') {
+        if (e.key === "Backspace") {
           // Permitir apenas se for Ctrl+A (limpar tudo)
           if (isFullSelection) {
             return;
@@ -188,14 +203,18 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           }
 
           // Bloquear se tentar apagar algo que resulte em remover o sufixo
-          if (suffix && selectionStart === suffixStart && selectionEnd === selectionStart) {
+          if (
+            suffix &&
+            selectionStart === suffixStart &&
+            selectionEnd === selectionStart
+          ) {
             e.preventDefault();
             return;
           }
         }
 
         // DELETE: Proteger prefixo e sufixo
-        if (e.key === 'Delete') {
+        if (e.key === "Delete") {
           // Permitir apenas se for Ctrl+A
           if (isFullSelection) {
             return;
@@ -217,34 +236,46 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // Prevenir digitar números/vírgula/ponto fora da área permitida
         if (e.key.length === 1 && /[0-9.,]/.test(e.key)) {
           // Só pode digitar entre o prefixo e o sufixo
-          if (selectionStart < prefixEnd || (suffix && selectionStart >= suffixStart)) {
+          if (
+            selectionStart < prefixEnd ||
+            (suffix && selectionStart >= suffixStart)
+          ) {
             e.preventDefault();
             return;
           }
         }
 
         // HOME: Mover para depois do prefixo
-        if (e.key === 'Home' && !e.shiftKey) {
+        if (e.key === "Home" && !e.shiftKey) {
           e.preventDefault();
           input.setSelectionRange(prefixEnd, prefixEnd);
           return;
         }
 
         // END: Mover para antes do sufixo
-        if (e.key === 'End' && !e.shiftKey && suffix) {
+        if (e.key === "End" && !e.shiftKey && suffix) {
           e.preventDefault();
           input.setSelectionRange(suffixStart, suffixStart);
           return;
         }
 
         // LEFT ARROW: Não permitir ir antes do prefixo
-        if (e.key === 'ArrowLeft' && selectionStart <= prefixEnd && !e.shiftKey) {
+        if (
+          e.key === "ArrowLeft" &&
+          selectionStart <= prefixEnd &&
+          !e.shiftKey
+        ) {
           e.preventDefault();
           return;
         }
 
         // RIGHT ARROW: Não permitir ir depois do início do sufixo
-        if (e.key === 'ArrowRight' && suffix && selectionEnd >= suffixStart && !e.shiftKey) {
+        if (
+          e.key === "ArrowRight" &&
+          suffix &&
+          selectionEnd >= suffixStart &&
+          !e.shiftKey
+        ) {
           e.preventDefault();
           return;
         }
@@ -281,9 +312,11 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             "peer px-2 py-1 pr-6 file:text-foreground placeholder:text-muted-foreground selection:text-muted-foreground h-9 w-full min-w-0 rounded-md  bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             "focus-visible:ring-0 focus-visible:outline-none focus-visible:border-border",
             "[-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                isHovered ||  inputRef.current === document.activeElement ? "border border-border" : "",
+            isHovered || inputRef.current === document.activeElement
+              ? "border border-border"
+              : "",
             variant === "number-border" && "border border-border",
-           
+
             className
           )}
           onMouseEnter={() => setIsHovered(true)}
@@ -305,7 +338,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             isHovered || inputRef.current === document.activeElement
               ? "opacity-100"
               : "opacity-0",
-              variant === "number-border" && "opacity-100"
+            variant === "number-border" && "opacity-100"
           )}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -346,10 +379,10 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
 
         variant === "light" && [
-          "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2",
+          "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2  focus:border-border! focus-visible:border! ",
         ],
         variant === "modal" && [
-          "text-foreground rounded-md focus-visible:none focus-visible:border-border border",
+          "text-foreground rounded-md border-border border  focus:border-border! outline-none! ring-0! ring-offset-0! focus:!outline-none! focus-visible:!outline-none! focus:!ring-0! focus-visible:!ring-0!",
         ],
         variant === "custom" && [
           "p-0 py-0 px-0 focus-visible:none focus-visible:ring-0 outline-none focus-visible:border-background",

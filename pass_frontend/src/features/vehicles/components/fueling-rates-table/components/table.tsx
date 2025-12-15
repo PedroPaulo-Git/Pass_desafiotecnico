@@ -195,7 +195,7 @@ export function FuelingScrollTable({
       onClickCapture={onClickCapture}
       className={cn(
         "",
-        isGrabbing && "cursor-grabbing select-none [&_*]:pointer-events-none"
+        isGrabbing && "cursor-grabbing select-none **:pointer-events-none"
       )}
     >
       <ScrollArea className="max-w-screen border-x border-border">

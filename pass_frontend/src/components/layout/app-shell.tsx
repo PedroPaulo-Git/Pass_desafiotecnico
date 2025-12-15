@@ -19,7 +19,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <PageTitleProvider>
-      <div className="min-h-screen bg-card flex w-screen ">
+      <div className="min-h-screen bg-sidebar flex w-screen ">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">
           <AppSidebar
@@ -60,7 +60,7 @@ export function AppShell({ children }: AppShellProps) {
         </AnimatePresence>
 
         {/* Main Content */}
-        <div className="w-full md:p-2 ">
+        <div className="w-full md:p-2  ">
           <MainContent
             children={children}
             sidebarWidth={sidebarWidth}

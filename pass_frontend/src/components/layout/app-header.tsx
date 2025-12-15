@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Moon,
@@ -11,11 +12,29 @@ import {
   User,
   Settings,
   LogOut,
+  LayoutDashboard,
+  Activity,
+  BusFront,
+  Package,
+  BedDouble,
+  Ticket,
+  Camera,
+  DollarSign,
+  Map,
+  MapPin,
+  Puzzle,
+  CalendarDays,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme/theme-context";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,6 +53,7 @@ import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { PiFlowArrow } from "react-icons/pi";
 import { HiOutlineSignal } from "react-icons/hi2";
 import { LuLink2 } from "react-icons/lu";
+import { SearchModal } from "../ui/search-modal";
 
 interface AppHeaderProps {
   onMenuClick?: () => void;
@@ -48,6 +68,7 @@ export function AppHeader({
   onToggle,
   currentPageTitle,
 }: AppHeaderProps) {
+  const [openSearchDialog, setOpenSearchDialog] = useState(false);
   const { theme, toggleTheme, pendingTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
 
@@ -67,7 +88,7 @@ export function AppHeader({
   return (
     <header className="sticky top-0 flex h-14 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
       {/* --- LEFT SECTION: Sidebar Toggle & Breadcrumb --- */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1 sm:gap-4">
         {/* Mobile Menu */}
         <Button
           variant="ghost"
@@ -75,7 +96,7 @@ export function AppHeader({
           onClick={onMenuClick}
           className="lg:hidden"
         >
-          <PanelLeft className="h-5 w-5" />
+          <PanelLeft className="h-5 w-5 text-foreground" />
         </Button>
 
         {/* Desktop Sidebar Toggle (Visual match for image) */}
@@ -85,15 +106,12 @@ export function AppHeader({
           onClick={onToggle}
           className="hidden text-muted-foreground lg:flex"
         >
-          <PanelLeft className="h-5 w-5" />
+          <PanelLeft className="h-5 w-5 text-foreground" />
         </Button>
 
         {/* Separator */}
-        <div className="flex h-4 items-center">
-          <Separator
-            orientation="vertical"
-            className="bg-muted w-2 h-5 z-40"
-          />
+        <div className="flex h-4 w-2 items-center">
+          <Separator orientation="vertical" className="bg-muted w-2 h-5 z-40" />
         </div>
 
         {/* Page Title / Breadcrumb */}
@@ -107,13 +125,22 @@ export function AppHeader({
       {/* --- CENTER SECTION: Search Bar --- */}
       <div className="hidden flex-1 items-center justify-center px-4 lg:flex">
         <div className="relative w-full max-w-md">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search  onClick={() => setOpenSearchDialog(true)} className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             variant="modal"
-            placeholder="Buscar..."
+            placeholder={t.common.search + "..."}
+            onClick={() => setOpenSearchDialog(true)}
             className="h-9 w-1/2 rounded-md pl-9 pr-14 text-sm shadow-none focus-visible:ring-1"
           />
-          <kbd className="pointer-events-none absolute right-58 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded bg-card px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <SearchModal
+            openSearchDialog={openSearchDialog}
+            setOpenSearchDialog={setOpenSearchDialog}
+          />
+
+          <kbd
+            className="pointer-events-none absolute border 
+          right-58 top-2.5 inline-flex h-4 select-none items-center gap-1 rounded bg-card px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100"
+          >
             <span className="text-xs">CTRL+K</span>
           </kbd>
         </div>
@@ -121,7 +148,7 @@ export function AppHeader({
 
       {/* --- RIGHT SECTION: Actions & Profile --- */}
       <div className="flex items-center gap-1">
-        <Search className=" flex lg:hidden h-4 w-4 text-muted-foreground mr-3" />
+        <Search  onClick={() => setOpenSearchDialog(true)} className=" flex lg:hidden h-4 w-4 text-muted-foreground mr-3" />
 
         {/* Theme Toggle */}
         <Button
@@ -248,7 +275,7 @@ export function AppHeader({
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 cursor-pointer">
               <AvatarImage src="" alt="JD" />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+              <AvatarFallback className="bg-foreground text-primary-foreground text-xs font-bold">
                 JD
               </AvatarFallback>
             </Avatar>
@@ -256,7 +283,7 @@ export function AppHeader({
           <DropdownMenuContent align="end" className="w-56">
             <div className="flex items-center gap-3 p-3">
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                <AvatarFallback className="bg-foreground text-primary-foreground font-bold">
                   JD
                 </AvatarFallback>
               </Avatar>

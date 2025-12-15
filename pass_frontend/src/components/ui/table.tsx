@@ -265,7 +265,7 @@ function TableCell({
       data-slot="table-cell"
       className={cn(
         // Estilos Base (Sempre aplicados)
-        "align-middle text-nowrap bg-table",
+        "align-middle text-nowrap bg-table text-foreground",
         // Flex cell styling - maintain table-like appearance in flex container
         flexCell && "flex items-center box-border h-12",
         !flexCell && "first:pl-5 sm:first:pl-8",

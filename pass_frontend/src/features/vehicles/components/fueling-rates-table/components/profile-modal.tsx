@@ -74,8 +74,8 @@ export function ProfileModal({
               [&::-webkit-scrollbar-button]:h-0
               [&::-webkit-scrollbar-button]:hidden
             "
-          >
-            <div className="px-2 pb-2">
+           >
+             <div className="px-2 pb-2">
               {filteredProfiles.map((p) => (
                 <button
                   key={p.id}

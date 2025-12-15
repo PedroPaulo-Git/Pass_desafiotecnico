@@ -37,6 +37,7 @@ import {
   BusFront,
 } from "lucide-react";
 import { JSX, useState } from "react";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 export interface RouteItem {
   id: string;
@@ -57,8 +58,12 @@ export function SidebarTasks({
   routeItems,
   setRatesSidebarOpen,
 }: SidebarTasksProps): JSX.Element {
+  const { t } = useI18n();
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [availability, setAvailability] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(routeItems.map((r) => [r.id, true]))
+  );
   return (
     <div
       className={cn(
@@ -73,7 +78,7 @@ export function SidebarTasks({
             <div className="relative">
               {/* <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> */}
               <Input
-                placeholder="Buscar tarifa..."
+                placeholder={`${t.common.search} ${t.tariffs.name}...`}
                 className="pl-3 h-9 w-48 "
                 variant="light"
               />
@@ -88,7 +93,7 @@ export function SidebarTasks({
                   className="h-9 px-2 "
                 >
                   <Plus className="h-4 w-4 mt-0.5" />
-                  Adicionar
+                  {t.common.add}
                 </Button>
               </DialogTrigger>
               <DialogContent showCloseButtonClean={true} showCloseButton={false} className="w-xl max-w-xl rounded-xl">
@@ -99,7 +104,7 @@ export function SidebarTasks({
                     </div>
                     <div>
                       <DialogTitle className="flex items-center gap-2">
-                        Adicionar Rota
+                        {`${t.common.add} Rota`}
                       </DialogTitle>
                       <DialogDescription>
                         Preencha os detalhes abaixo para adicionar uma nova
@@ -168,10 +173,10 @@ export function SidebarTasks({
                       variant="outline"
                       onClick={() => setDialogOpen(false)}
                     >
-                      Cancelar
+                      {t.common.cancel}
                     </Button>
                     <Button onClick={() => setDialogOpen(false)}>
-                      Registrar
+                      {t.common.register}
                     </Button>
                   </div>
                 </div>
@@ -187,8 +192,8 @@ export function SidebarTasks({
               <div
                 key={route.id}
                 className={cn(
-                  " rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer",
-                  index !== 0 && "bg-background hover:bg-inherit"
+                  " rounded-lg border border-border bg-muted hover:bg-muted/50 dark:bg-card transition-colors cursor-pointer",
+                  index !== 0 && "bg-card dark:bg-background hover:bg-inherit"
                 )}
               >
                 {/* Header with switch */}
@@ -196,10 +201,23 @@ export function SidebarTasks({
                   <div className="flex items-center gap-2">
                     <Switch
                       variant="square"
-                      defaultChecked
+                      checked={availability[route.id] ?? true}
+                      onCheckedChange={(v) =>
+                        setAvailability((s) => ({ ...s, [route.id]: !!v }))
+                      }
                       className="scale-100 "
                     />
-                    <span className="text-sm font-medium">{route.title}</span>
+                    <div className="flex items-baseline gap-2">
+                      {/* <span className="text-sm font-medium">{route.title}</span> */}
+                      <span
+                        className={cn(
+                          "text-sm font-semibold",
+                          availability[route.id] ? "" : ""
+                        )}
+                      >
+                        {availability[route.id] ? t.status.LIBERADO : t.status.INDISPONIVEL}
+                      </span>
+                    </div>
                   </div>
 
                   <Popover
@@ -226,9 +244,9 @@ export function SidebarTasks({
                       variant="custom"
                     >
                       <div className="px-2 py-1.5 font-medium text-sm mx-1 ">
-                        Ações
+                        {t.common.actions}
                       </div>
-                      <Button
+                        <Button
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start h-8 px-2 pb-1.5 text-sm border-b rounded-none mx-1"
@@ -237,7 +255,7 @@ export function SidebarTasks({
                           setOpenPopover(null);
                         }}
                       >
-                        Editar
+                        {t.common.edit}
                       </Button>
                       <Button
                         variant="ghost_without_background_hover"
@@ -248,7 +266,7 @@ export function SidebarTasks({
                           setOpenPopover(null);
                         }}
                       >
-                        Excluir
+                        {t.common.delete}
                       </Button>
                     </PopoverContent>
                   </Popover>

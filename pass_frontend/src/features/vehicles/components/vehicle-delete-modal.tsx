@@ -68,7 +68,7 @@ export function ConfirmDeleteVehicleModal() {
       <DialogContent
         showInfo={false}
         showCloseButton={false}
-        className="w-lg p-0 rounded-2xl"
+        className="w-screen sm:w-lg p-0 rounded-2xl"
       >
         <motion.div
           variants={modalVariants}
@@ -77,19 +77,19 @@ export function ConfirmDeleteVehicleModal() {
           exit="exit"
         >
           <DialogHeader className="px-6 py-4 pt-6 max-w-md">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="flex flex-col items-start gap-3">
                 <DialogTitle className="text-lg font-semibold">
                   {data.title ?? t.common.deleteConfirm}
                 </DialogTitle>
-                <DialogDescription className="text-[13px] text-muted-foreground">
+                <DialogDescription className="text-[13px] text-start text-muted-foreground">
                   Essa ação não pode ser desfeita. Isso excluirá o veículo{" "}
                   {vehicleData?.model} {vehicleData?.brand} de nossos
                   servidores.
                 </DialogDescription>
               </div>
             </div>
-            <div className="mt-4 text-sm space-y-1 font-semibold">
+            <div className="flex flex-col items-start text-start mt-4 text-sm space-y-1 font-semibold ">
               <h2 className="">Informações do veículo:</h2>
               <div className="space-y-1">
                 {vehicleData?.plate && (
@@ -108,7 +108,7 @@ export function ConfirmDeleteVehicleModal() {
             </div>
           </DialogHeader>
 
-          <div className="px-6 py-4 flex justify-between items-center gap-3 border-t border-border">
+          <div className="px-6 py-4 flex justify-between items-start gap-3 border-t border-border">
             <Button type="button" variant="outline" onClick={closeModal}>
               {t.common.cancel}
             </Button>

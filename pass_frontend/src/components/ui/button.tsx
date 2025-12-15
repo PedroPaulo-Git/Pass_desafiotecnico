@@ -27,7 +27,7 @@ const buttonVariants = cva(
         modal: "border bg-foreground text-background hover:bg-foreground/90 ",
         modal_white: "border bg-muted text-muted-foreground hover:bg-muted-foreground/90 ",
         table: "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2 ",
-        table_border_cutted: "border rounded-lg bg-input/30 border-input border-dashed px-0 py-2 ",
+        table_border_cutted: "border rounded-md border-dashed  dark:bg-input/30 dark:border-input dark:border-dashed px-0 py-2 ",
         table_add: "bg-table-button text-black hover:bg-table-button/90 rounded-lg ",
 
       },

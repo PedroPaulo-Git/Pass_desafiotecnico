@@ -102,7 +102,7 @@ export default function DashboardPage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight  text-foreground">
             {t.nav.dashboard}
           </h1>
           <p className="text-muted-foreground">{t.home.description}</p>

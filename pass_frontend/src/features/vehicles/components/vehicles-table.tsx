@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Check, Minus } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +89,8 @@ export function VehiclesTable({
   );
   const [selectAll, setSelectAll] = React.useState(false);
 
-  const { dragRef, isGrabbing, onPointerDown, onClickCapture } = useDragToScroll(true);
+  const { dragRef, isGrabbing, onPointerDown, onClickCapture } =
+    useDragToScroll(true);
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -239,7 +240,7 @@ export function VehiclesTable({
   return (
     // Mobile: 100vw - padding (48px)
     // Desktop lg+: 100vw - sidebar (240px) - padding wrapper (16px) - padding main (48px) = ~304px
-    <div className="w-full max-w-[calc(100vw-48px)] lg:max-w-[calc(100vw-306px)] overflow-hidden">
+    <div className="w-full max-w-[calc(100vw-48px)] lg:max-w-[calc(100vw-306px)] overflow-hidden ">
       {/* Table with drag-to-scroll - only on screens smaller than xl */}
       <div
         ref={dragRef}
@@ -247,8 +248,8 @@ export function VehiclesTable({
         onClick={onClickCapture}
         onClickCapture={onClickCapture}
         className={cn(
-          "cursor-grab overflow-x-auto",
-          isGrabbing && "cursor-grabbing select-none [&_*]:pointer-events-none"
+          "cursor-grab overflow-x-auto md:scrollbar-hidden pr-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-6 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-3 [&::-webkit-scrollbar-thumb]:bg-muted! [&::-webkit-scrollbar-thumb]:hover:bg-muted-foreground/80! [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:hidden ",
+          isGrabbing && "cursor-grabbing select-none **:pointer-events-none"
         )}
       >
         <Table className="w-full min-w-max">
@@ -268,20 +269,7 @@ export function VehiclesTable({
                     }`}
                   >
                     {selectAll && (
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 12 12"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="2"
-                      >
-                        <path
-                          d="M2 6L5 9L10 3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <Minus className="h-3 w-3 text-background" />
                     )}
                   </div>
                 </div>
@@ -306,7 +294,7 @@ export function VehiclesTable({
                 sortDirection={sortColumn === "model" ? sortDirection : "none"}
                 onClick={() => handleSort("model")}
               >
-                <SortableHeaderContent columnId="model" label="Título" />
+                <SortableHeaderContent columnId="model" label={t.vehicles.model} />
               </TableHead>
               <TableHead
                 variant="main"
@@ -380,7 +368,6 @@ export function VehiclesTable({
                   label={t.vehicles.createdAt}
                 />
               </TableHead>
-         
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -401,26 +388,11 @@ export function VehiclesTable({
                   variants={rowVariants}
                   initial="hidden"
                   animate="visible"
-                  className="border-t border-border transition-colors group/row hover:bg-muted/50"
-                  onClick={(e: React.MouseEvent) => {
-                    const target = e.target as HTMLElement | null;
-
-                    // If the click started inside the action menu or on an interactive element, ignore.
-                    // if (
-                    //   target &&
-                    //   (target.closest("[data-vehicle-action-menu]") ||
-                    //     target.closest("button") ||
-                    //     target.closest("a") ||
-                    //     target.closest("input") ||
-                    //     target.closest("textarea") ||
-                    //     target.closest("select") ||
-                    //     target.closest("[data-checkbox]"))
-                    // ) {
-                    //   return;
-                    // }
-
-                    // openModal("vehicle-details", { vehicle });
-                  }}
+                  className={cn(
+                    "border-t border-border transition-colors group/row hover:bg-muted/50",
+                    selectedRows.has(vehicle.id) && "bg-muted/50 border-l-2 border-l-primary"
+                  )}
+               
                 >
                   <TableCell variant="compact" firstPadding>
                     <div
@@ -432,39 +404,26 @@ export function VehiclesTable({
                       }}
                     >
                       <div
-                        className={`w-4.5 h-4.5 rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
+                        className={`w-4.5 h-4.5  rounded-sm border border-border bg-background flex items-center justify-center transition-colors ${
                           selectedRows.has(vehicle.id)
-                            ? "bg-primary border-primary"
+                            ? "bg-primary border-primary "
                             : ""
                         }`}
                       >
                         {selectedRows.has(vehicle.id) && (
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 12 12"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="2"
-                          >
-                            <path
-                              d="M2 6L5 9L10 3"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
+                          <Check className="h-3 w-3 text-background" />
                         )}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium" variant="compact">
+                  <TableCell className="font-medium min-w-24 max-w-[100px]" variant="compact">
                     {vehicle.internalId || "-"}
                   </TableCell>
 
                   <TableCell variant="compact">
                     <div>
                       <span className="font-medium">{vehicle.model}</span>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground ">
                         {t.categories[vehicle.category]}{" "}
                         {t.classifications[vehicle.classification]}
                       </p>
@@ -495,7 +454,7 @@ export function VehiclesTable({
                       : "-"}
                   </TableCell>
                   {/* Actions - sticky right, only visible on row hover */}
-                  <td className="sticky right-0 p-0 w-0 min-w-0 max-w-0 overflow-visible">
+                  <td className="sticky -right-2 p-0 w-0 min-w-0 max-w-0 overflow-visible">
                     <div className="absolute right-0 top-0 h-full flex items-center pr-2 pl-4 opacity-0 group-hover/row:opacity-100 transition-opacity z-20 bg-sidebar">
                       <ActionsMenu vehicle={vehicle} />
                     </div>
@@ -529,14 +488,14 @@ export function VehiclesTable({
               console.warn("onPageSizeChange not provided for VehiclesTable");
             }}
           >
-            <SelectTrigger className="h-8 w-[110px]" variant="pagination">
+            <SelectTrigger className="h-8 w-[110px]  text-foreground" variant="pagination">
               {/* Mostrar o texto formatado (ex.: "10 / page") */}
-              <SelectValue>{`${pagination.limit} / page`}</SelectValue>
+              <SelectValue className="text-foreground">{`${pagination.limit} / page`}</SelectValue>
             </SelectTrigger>
             {/* side é aceito; removeu-se o prop 'variant' que causava erro de tipo */}
             <SelectContent side="top">
               {[5, 10, 15, 20, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
+                <SelectItem className="text-foreground" key={pageSize} value={`${pageSize}`}>
                   {pageSize} / page
                 </SelectItem>
               ))}
@@ -546,7 +505,7 @@ export function VehiclesTable({
         {/* Lado Direito: Controles */}
         <div className="flex items-center space-x-6 lg:space-x-8">
           {/* Texto: Página X de Y */}
-          <div className="flex w-[70px] items-center justify-center text-sm font-medium text-nowrap">
+          <div className="flex w-[70px] items-center justify-center text-sm font-medium text-nowrap  text-foreground ">
             Página {pagination.page} de {pagination.totalPages}
           </div>
 
@@ -559,7 +518,7 @@ export function VehiclesTable({
               disabled={pagination.page === 1}
             >
               <span className="sr-only">Go to first page</span>
-              <ChevronFirst className="h-4 w-4" />
+              <ChevronFirst className="h-4 w-4  text-foreground" />
             </Button>
             <Button
               variant="outline"
@@ -568,7 +527,7 @@ export function VehiclesTable({
               disabled={pagination.page === 1}
             >
               <span className="sr-only">Go to previous page</span>
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4  text-foreground" />
             </Button>
             <Button
               variant="outline"
@@ -577,7 +536,7 @@ export function VehiclesTable({
               disabled={pagination.page === pagination.totalPages}
             >
               <span className="sr-only">Go to next page</span>
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4  text-foreground" />
             </Button>
             <Button
               variant="outline"
@@ -586,7 +545,7 @@ export function VehiclesTable({
               disabled={pagination.page === pagination.totalPages}
             >
               <span className="sr-only">Go to last page</span>
-              <ChevronLast className="h-4 w-4" />
+              <ChevronLast className="h-4 w-4  text-foreground" />
             </Button>
           </div>
         </div>

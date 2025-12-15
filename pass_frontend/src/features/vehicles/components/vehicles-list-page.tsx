@@ -194,7 +194,7 @@ export function VehiclesListPage() {
           className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between  px-5 pt-4"
         >
           {/* Left: Icon button + Search + Filter buttons */}
-          <div className="flex items-center gap-2 flex-1 mb-1 z-30 ">
+          <div className="flex items-center gap-2 flex-1  z-30 ">
             <ButtonBot />
             <div
               data-orientation="vertical"
@@ -221,8 +221,8 @@ export function VehiclesListPage() {
               className="gap-1.5 h-9"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Modo</span>
+              <Filter className="h-4 w-4 text-foreground" />
+              <span className="hidden sm:inline text-foreground">Modo</span>
             </Button>
 
             {/* Status Filter Button */}
@@ -231,8 +231,8 @@ export function VehiclesListPage() {
               className="gap-1.5 h-9"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Status</span>
+              <Filter className="h-4 w-4 text-foreground" />
+              <span className="hidden sm:inline text-foreground">Status</span>
             </Button>
           </div>
 
@@ -244,24 +244,24 @@ export function VehiclesListPage() {
               className="gap-1.5 h-9"
               onClick={() => refetch()}
             >
-              <RotateCw className="h-4 w-4" />
-              <span className="hidden sm:inline">Update</span>
+              <RotateCw className="h-4 w-4 text-foreground" />
+              <span className="hidden sm:inline text-foreground">{t.header.update}</span>
             </Button>
 
             {/* Export button with dropdown */}
             <Button variant="outline" className="gap-1.5 h-9">
-              <CloudDownload className="h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-              <ChevronDown className="h-3 w-3" />
+              <CloudDownload className="h-4 w-4 text-foreground" />
+              <span className="hidden sm:inline text-foreground">{t.header.export}</span>
+              <ChevronDown className="h-3 w-3 text-foreground" />
             </Button>
 
             {/* Add button - Primary */}
             <Button
-              className="gap-1.5 h-9"
+              className="gap-1.5 h-9 bg-foreground"
               onClick={() => openModal("vehicle-create")}
             >
               <Plus className="h-4 w-4" />
-              <span>Adicionar</span>
+              <span className="text-background">{t.common.add}</span>
             </Button>
           </div>
         </motion.div>

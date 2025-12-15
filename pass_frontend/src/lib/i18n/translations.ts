@@ -240,6 +240,28 @@ export const translations = {
       activeAlert: "Alerta Ativo",
       days: "Dias",
     },
+    // Tariffs
+    tariffs: {
+      title: "Tarifas",
+      name: "Tarifa",
+      type: "Tipo",
+      expiryDate: "Vencimento",
+      anticipation: "Antecipação",
+      alertDays: "Dias de Antecipação",
+      activeAlert: "Alerta Ativo",
+      days: "Dias",
+    },
+    // Terms
+    terms: {
+      title: "Termos",
+      name: "Termo",
+      type: "Tipo",
+      expiryDate: "Vencimento",
+      anticipation: "Antecipação",
+      alertDays: "Dias de Antecipação",
+      activeAlert: "Alerta Ativo",
+      days: "Dias",
+    },
     // Theme
     theme: {
       light: "Claro",
@@ -503,6 +525,28 @@ export const translations = {
       activeAlert: "Active Alert",
       days: "Days",
     },
+    // Tariffs
+    tariffs: {
+      title: "Tariffs",
+      name: "Tariff",
+      type: "Type",
+      expiryDate: "Expiry Date",
+      anticipation: "Anticipation",
+      alertDays: "Alert Days",
+      activeAlert: "Active Alert",
+      days: "Days",
+    },
+    // Terms
+    terms: {
+      title: "Terms",
+      name: "Term",
+      type: "Type",
+      expiryDate: "Expiry Date",
+      anticipation: "Anticipation",
+      alertDays: "Alert Days",
+      activeAlert: "Active Alert",
+      days: "Days",
+    },
     // Theme
     theme: {
       light: "Light",
@@ -759,6 +803,28 @@ export const translations = {
     documents: {
       title: "Documentación",
       name: "Documento",
+      type: "Tipo",
+      expiryDate: "Vencimiento",
+      anticipation: "Anticipación",
+      alertDays: "Días de Anticipación",
+      activeAlert: "Alerta Activa",
+      days: "Días",
+    },
+    // Tariffs
+    tariffs: {
+      title: "Tarifas",
+      name: "Tarifa",
+      type: "Tipo",
+      expiryDate: "Vencimiento",
+      anticipation: "Anticipación",
+      alertDays: "Días de Anticipación",
+      activeAlert: "Alerta Activa",
+      days: "Días",
+    },
+    // Terms
+    terms: {
+      title: "Términos",
+      name: "Término",
       type: "Tipo",
       expiryDate: "Vencimiento",
       anticipation: "Anticipación",

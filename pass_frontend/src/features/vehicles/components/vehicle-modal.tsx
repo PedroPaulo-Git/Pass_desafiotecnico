@@ -154,7 +154,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const routeItems = [
     {
       id: "1",
-      title: "Disponível",
+      title: t.status.LIBERADO,
       origin: "Aeroporto Galeão, Rio De Janeiro",
       destination: "Búzios, Armação Dos Búzios",
       schedule: "In – 08:30 às 23:30",
@@ -162,7 +162,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     },
     {
       id: "2",
-      title: "Disponível",
+      title: t.status.LIBERADO,
       origin: "Aeroporto Galeão, Rio De Janeiro",
       destination: "Apa Pau, Armação Dos Búzios",
       schedule: "In – 08:30 às 23:30",
@@ -170,7 +170,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     },
     {
       id: "3",
-      title: "Disponível",
+      title: t.status.LIBERADO,
       origin: "Barra, Rio De Janeiro",
       destination: "Búzios, Armação Dos Búzios",
       schedule: "Interhotel – 07:00 às 12:00",
@@ -178,7 +178,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
     },
     {
       id: "4",
-      title: "Disponível",
+      title: t.status.LIBERADO,
       origin: "Barra, Rio De Janeiro",
       destination: "Apa Pau, Armação Dos Búzios",
       schedule: "Interhotel – 07:00 às 12:00",
@@ -477,7 +477,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                 >
                   <div className="flex items-center justify-between px-6 py-6 ">
                     <div className="flex items-center gap-3">
-                      <div className="p-3 bg-background border border-muted rounded-full">
+                      <div className="p-3 bg-background border border-border rounded-full">
                         <BusFront className="h-4 w-4 text-foreground" />
                       </div>
                       <div>
@@ -501,12 +501,12 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                   </div>
                   {/* Tabs Navigation */}
                   <TabsList
-                    className="w-full justify-start rounded-none border-b  bg-transparent h-auto gap-0  "
+                    className="w-full justify-start rounded-none border-b  bg-transparent h-auto gap-0   "
                     modalTabsListStyle
                   >
                     <TabsTrigger
                       value="general"
-                      className="rounded-none py-3"
+                      className="rounded-none py-3 "
                       modalTabsTriggerStyle
                     >
                       <Info className="h-4 w-4 mr-2" />
@@ -544,7 +544,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           modalTabsTriggerStyle
                         >
                           <DollarSign className="h-4 w-4 mr-2" />
-                          Tarifas
+                          {t.tariffs.title}
                         </TabsTrigger>
                         <TabsTrigger
                           value="terms"
@@ -552,7 +552,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                           modalTabsTriggerStyle
                         >
                           <FileText className="h-4 w-4 mr-2" />
-                          Termos
+                          {t.terms.title}
                         </TabsTrigger>
                       </>
                     )}
@@ -571,7 +571,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                   })}
                   className={cn(
                     "px-2",
-                    activeTab === "general" && "pt-10",
+                    activeTab === "general" && "pt-5",
                     activeTab === "fuelings" || activeTab === "rates"
                       ? "px-0 pb-0"
                       : activeTab === "terms"
@@ -606,7 +606,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   {/* Row 1: ID, Created, Identifier, Company, Status */}
                                   <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
                                     <div>
-                                      <label className="text-xs text-foreground ">
+                                      <label className="text-sm text-foreground font-semibold ">
                                         ID
                                       </label>
                                       <p className="text-sm font-medium">
@@ -618,7 +618,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         isCreating ? "col-span-3" : "col-span-3"
                                       }`}
                                     >
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.createdAt}
                                       </label>
                                       <p className="text-sm whitespace-nowrap overflow-x-hidden">
@@ -632,7 +632,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     </div>
                                     {!isCreating ? null : (
                                       <div className="col-span-2 w-full ">
-                                        <label className="text-xs text-foreground">
+                                        <label className="text-sm text-foreground font-semibold">
                                           {t.vehicles.identifier}
                                         </label>
 
@@ -678,7 +678,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         isCreating ? "col-span-3" : "col-span-4"
                                       }`}
                                     >
-                                      <label className="text-sm text-foreground">
+                                      <label className="text-sm font-semibold text-foreground">
                                         {t.vehicles.company}
                                       </label>
                                       <Select
@@ -709,7 +709,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         isCreating ? "col-span-3" : "col-span-4"
                                       }`}
                                     >
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.status}
                                       </label>
                                       <Select
@@ -768,7 +768,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   {/* Row 2: Model, Year, Brand, Category, Classification */}
                                   <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
                                     <div className="col-span-4">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.model}
                                       </label>
                                       <FormInput
@@ -799,7 +799,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       )}
                                     </div>
                                     <div className="col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.year}
                                       </label>
                                       <Input
@@ -813,7 +813,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       />
                                     </div>
                                     <div className="col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.brand}
                                       </label>
                                       <FormInput
@@ -844,7 +844,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       )}
                                     </div>
                                     <div className="col-span-3 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.category}
                                       </label>
                                       <Select
@@ -870,7 +870,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       </Select>
                                     </div>
                                     <div className="col-span-1 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.classification}
                                       </label>
                                       <Select
@@ -898,9 +898,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   </div>
 
                                   {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
-                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
+                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4 ">
                                     <div className="col-span-1 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.capacity}
                                       </label>
                                       <Input
@@ -914,7 +914,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       />
                                     </div>
                                     <div className="col-span-3 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.doors}
                                       </label>
                                       <Input
@@ -930,7 +930,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                                     {/* State Search - placed after Doors for quick lookup */}
                                     <div className="col-span-4">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.searchState}
                                       </label>
                                       <FormInput
@@ -944,7 +944,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     </div>
 
                                     <div className="col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.state}
                                       </label>
                                       <FormInput
@@ -975,7 +975,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     </div>
 
                                     <div className="col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-nowrap text-foreground font-semibold">
                                         {t.vehicles.plateType}
                                       </label>
                                       <Select defaultValue="mercosul">
@@ -997,7 +997,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
                                   <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
                                     <div className="col-span-4 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.plate}
                                       </label>
                                       <FormInput
@@ -1037,7 +1037,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       )}
                                     </div>
                                     <div className="col-span-4 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.renavam}
                                       </label>
                                       <FormInput
@@ -1074,7 +1074,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       )}
                                     </div>
                                     <div className="col-span-4">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.chassis}
                                       </label>
                                       <FormInput
@@ -1110,7 +1110,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       )}
                                     </div>
                                     <div className="col-span-3 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-nowrap text-foreground font-semibold">
                                         {t.vehicles.currentKm}
                                       </label>
                                       <Input
@@ -1125,7 +1125,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       />
                                     </div>
                                     <div className="col-span-1 sm:col-span-2">
-                                      <label className="text-xs text-foreground">
+                                      <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.fuelType}
                                       </label>
                                       <Select
@@ -1366,19 +1366,21 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                           {/* Footer Actions - Dentro da tab Geral */}
                           {isCreating && (
-                            <div className="flex justify-center gap-3 pt-4">
+                            <div className="sticky bottom-0 flex justify-between px-10 py-4 border-t gap-3 pt-4 bg-background">
                               <Button
+                                // variant="secondary"
+                                variant="outline"
                                 type="button"
-                                variant="modal_white"
-                                size="modal"
+                                size="sm"
+                                className="w-28"
                                 onClick={closeModal}
                               >
                                 {t.common.close}
                               </Button>
                               <Button
-                                size="modal"
-                                type="submit"
                                 variant="modal"
+                                type="submit"
+                                className="w-28"
                                 disabled={createVehicle.isPending}
                               >
                                 {createVehicle.isPending
