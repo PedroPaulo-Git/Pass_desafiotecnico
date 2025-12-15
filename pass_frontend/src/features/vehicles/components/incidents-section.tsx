@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 import { RiAlertLine } from "react-icons/ri";
 import { format } from "date-fns";
@@ -63,22 +64,9 @@ export function IncidentsSection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="overflow-hidden w-[90vw] sm:w-[630px] ">
+      <div className="overflow-hidden w-[90vw] sm:w-[630px]  mt-4 ">
         <CollapsibleTrigger asChild>
-          <button
-            type="button"
-            className="w-full flex items-center justify-between p-4 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <RiAlertLine className="h-4 w-4 text-muted-foreground" />
-              <span className="font-semibold">{t.incidents.title}</span>
-            </div>
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
+       
         </CollapsibleTrigger>
         <CollapsibleContent>
           <motion.div
@@ -87,12 +75,12 @@ export function IncidentsSection({
             exit={{ opacity: 0 }}
             className="p-4 pt-0"
           >
-            <Table className="bg-muted/50 rounded-md">
-              <TableHeader>
+            <Table className="">
+              <TableHeader variant="minimal">
                 <TableRow>
-                  <TableHead>{t.incidents.date}</TableHead>
-                  <TableHead>{t.incidents.classification}</TableHead>
-                  <TableHead>{t.incidents.severity}</TableHead>
+                  <TableHead variant="minimal">{t.incidents.date}</TableHead>
+                  <TableHead variant="minimal">{t.incidents.classification}</TableHead>
+                  <TableHead variant="minimal">{t.incidents.severity}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -108,7 +96,7 @@ export function IncidentsSection({
                 ) : (
                   currentIncidents.map((incident: Incident) => (
                     <TableRow key={incident.id}>
-                      <TableCell>
+                      <TableCell >
                         {format(new Date(incident.date), "dd/MM/yyyy")}
                       </TableCell>
                       <TableCell>{incident.classification}</TableCell>
@@ -123,20 +111,17 @@ export function IncidentsSection({
               </TableBody>
             </Table>
 
-            <div className="flex  bg-muted/50 items-center justify-between py-4 px-4 border-t border-border rounded-b-md">
-              <span className="text-sm text-muted-foreground">
-                {incidents.length}
-              </span>
-            </div>
+        
 
-            <div className="flex justify-center mt-4">
-              <span className="text-sm text-muted-foreground">5001</span>
+            <div className="flex justify-center mt-4 border-t border-border sm:pt-10">
+              
               <Button
                 type="button"
-                variant="outline"
-                className="rounded-full bg-transparent border-foreground w-32 md:w-1/6 mx-auto border-2 mt-12 mb-4"
+                // variant="outline"
+                className=""
                 onClick={() => openModal("incident-create", { vehicleId })}
               >
+                  <Plus className=""/>
                 {t.common.add}
               </Button>
             </div>

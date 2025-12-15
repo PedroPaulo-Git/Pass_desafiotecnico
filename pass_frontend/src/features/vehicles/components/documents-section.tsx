@@ -10,6 +10,7 @@ import {
   Copy,
   X,
   AlertTriangle,
+  Plus,
 } from "lucide-react";
 import { RiAlertFill } from "react-icons/ri";
 import { FaRegListAlt } from "react-icons/fa";
@@ -108,7 +109,7 @@ export function DocumentsSection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="">
-      <div className="overflow-hidden w-[90vw] sm:w-[630px]">
+      <div className="overflow-hidden w-[90vw] sm:w-[630px] mt-4">
        
         <CollapsibleContent>
           <motion.div
@@ -173,13 +174,14 @@ export function DocumentsSection({
               </TableBody>
             </Table>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center  mt-4 border-t border-border sm:pt-10">
               <Button
                 type="button"
-                variant="outline"
-                className="rounded-full bg-transparent w-32 md:w-1/6 mx-auto  mt-12 mb-4"
+                // variant="outline"
+                className=""
                 onClick={() => openModal("document-create", { vehicleId })}
               >
+                 <Plus className=""/>
                 {t.common.add}
               </Button>
             </div>
