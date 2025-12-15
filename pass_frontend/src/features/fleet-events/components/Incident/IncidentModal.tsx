@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -76,7 +77,7 @@ export function IncidentModal() {
 
   const onSubmit = async (formData: CreateIncidentInput) => {
     try {
-      await createIncident.mutateAsync({ ...formData, vehicleId });
+      await createIncident.mutateAsync({ ...formData, date: formData.date.toISOString(), vehicleId });
 
       sonnerToast.success(
         t.incidents.messages.createdSuccess ||
@@ -111,7 +112,7 @@ export function IncidentModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="w-full max-w-xl p-0 pt-2">
+      <DialogContent showCloseButton={false} showCloseButtonClean={true} className="w-full max-w-xl p-0 pt-2 rounded-2xl">
         <motion.div
           variants={modalVariants}
           initial="hidden"
@@ -234,30 +235,15 @@ export function IncidentModal() {
                         <Controller
                           control={control}
                           name="date"
-                          render={({ field }) => {
-                            // Convert Date to string for input, and string to Date for form
-                            const stringValue =
-                              field.value instanceof Date
-                                ? field.value.toISOString().split("T")[0]
-                                : (field.value as string) ?? "";
-                            return (
-                              <Input
-                                type={stringValue ? "date" : "text"}
-                                placeholder={t.incidents.date || "Data"}
-                                value={stringValue}
-                                onChange={(e) => {
-                                  const v = e.target.value;
-                                  field.onChange(v ? new Date(v) : undefined);
-                                }}
-                                onFocus={(e) => (e.target.type = "date")}
-                                onBlur={(e) => {
-                                  if (!e.target.value) e.target.type = "text";
-                                  field.onBlur();
-                                }}
-                                className="h-9"
-                              />
-                            );
-                          }}
+                          render={({ field }) => (
+                            <DatePicker
+                              date={field.value ? new Date(field.value) : undefined}
+                              onDateChange={field.onChange}
+                              placeholder={t.incidents.date || "Selecione a data"}
+                              className="w-full"
+                              variant="modal"
+                            />
+                          )}
                         />
                       </div>
                       <div className="mt-auto">
@@ -328,24 +314,27 @@ export function IncidentModal() {
             </Collapsible>
 
             {/* Footer */}
-            <div className="flex justify-center gap-3 pt-4">
-              <Button
-                variant="modal_white"
-                size="modal"
-                type="button"
-                onClick={closeModal}
-              >
-                {t.common.close}
-              </Button>
-              <Button
-                variant="modal"
-                size="modal"
-                type="submit"
-                disabled={isCreatingIncident}
-              >
-                {isCreatingIncident ? t.common.loading : t.common.register}
-              </Button>
-            </div>
+             <div className="flex justify-between gap-3 pt-4 px-4">
+                          <Button
+                            // variant="secondary"
+                            variant="outline"
+                            type="button"
+                            size="sm"
+                            className="w-28"
+                            onClick={closeModal}
+                          >
+                            {t.common.close}
+                          </Button>
+                          <Button
+                            variant="modal"
+                            type="submit"
+                            className="w-28"
+                            disabled={isCreatingIncident}
+                          >
+                            {isCreatingIncident ? t.common.loading : t.common.register}
+                          </Button>
+                        </div>
+           
           </form>
         </motion.div>
       </DialogContent>
