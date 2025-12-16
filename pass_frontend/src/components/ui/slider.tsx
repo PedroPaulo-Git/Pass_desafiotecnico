@@ -11,8 +11,9 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  variant,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: React.ComponentProps<typeof SliderPrimitive.Root> & { variant?: "number-border" }) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -21,6 +22,11 @@ function Slider({
           ? defaultValue
           : [min, max],
     [value, defaultValue, min, max],
+  )
+
+  const thumbClass = cn(
+    'border-primary ring-ring/50 block size-4 shrink-0 border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50',
+    variant === "number-border" ? 'rounded-sm' : 'rounded-full'
   )
 
   return (
@@ -53,7 +59,7 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          className={thumbClass}
         />
       ))}
     </SliderPrimitive.Root>

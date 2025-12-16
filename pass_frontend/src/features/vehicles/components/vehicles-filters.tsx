@@ -91,7 +91,7 @@ export function VehiclesFilters({
                   highlightedIndex === index && "bg-muted/50"
                 )}
                 onMouseEnter={() => setHighlightedIndex(index)}
-              >
+               >
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={filters.category === category}

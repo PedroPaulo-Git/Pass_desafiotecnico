@@ -29,7 +29,7 @@ const buttonVariants = cva(
         table: "border-b-2 dark:bg-[#ffffff26]/30 border-border border px-0 py-2 ",
         table_border_cutted: "border rounded-md border-dashed  dark:bg-input/30 dark:border-input dark:border-dashed px-0 py-2 ",
         table_add: "bg-table-button text-black hover:bg-table-button/90 rounded-lg ",
-
+        collapsible_button:"w-full flex items-center justify-between py-5! px-3 text-sm font-medium ",
       },
       size: {
         modal: "h-11 px-8 rounded-full",
