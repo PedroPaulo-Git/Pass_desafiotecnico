@@ -20,11 +20,11 @@ export function FiltersSidebar({ open, onOpenChange }: FiltersSidebarProps) {
   return (
     <div
       className={cn(
-        "absolute top-0 left-0 h-full bg-background transition-all duration-300 ease-in-out z-50",
-        open ? "w-[340px] shadow-lg" : "w-0 overflow-hidden"
+        "absolute top-0 left-0 h-full bg-background transition-all duration-300 ease-in-out overflow-hidden z-50",
+        open ? "w-[340px] shadow-lg" : "w-0"
       )}
     >
-      <div className="h-full w-[340px] flex flex-col border-r border-border">
+      <div className="flex flex-col h-full w-[340px]  border rounded-tl-2xl">
         <div className="flex items-center justify-between p-4 border-b">
           <div>
             <h3 className="font-semibold">Filtros</h3>
@@ -48,7 +48,7 @@ export function FiltersSidebar({ open, onOpenChange }: FiltersSidebarProps) {
           </div>
         </div>
 
-        <ScrollArea className="flex-1 p-4 transition-opacity duration-300 ease-in-out">
+        <ScrollArea className="flex-1 p-4 transition-all duration-300 ease-in-out">
           <div className="space-y-4">
             {/* Period */}
             <div>
