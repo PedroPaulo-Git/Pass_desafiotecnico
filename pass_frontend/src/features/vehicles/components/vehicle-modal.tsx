@@ -98,6 +98,7 @@ import type {
   FuelType,
 } from "@/types/vehicle";
 import { SidebarTasks } from "./fueling-rates-table/components/sidebar-tasks";
+import { FiltersSidebar } from "./fueling-rates-table/components/filters-sidebar";
 import type { RouteItem } from "./fueling-rates-table/components/sidebar-tasks";
 
 interface VehicleModalProps {
@@ -151,6 +152,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDeletingImages, setIsDeletingImages] = useState(false);
   const [ratesSidebarOpen, setRatesSidebarOpen] = useState(false);
+  const [filtersSidebarOpen, setFiltersSidebarOpen] = useState(false);
 
   // Mock route data for rates sidebar
   const routeItems = [
@@ -457,11 +459,17 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
         <div className=" ">
           {/* Rates Sidebar - absolute overlay covering entire modal */}
           {activeTab === "rates" && (
-            <SidebarTasks
-              ratesSidebarOpen={ratesSidebarOpen}
-              routeItems={routeItems}
-              setRatesSidebarOpen={setRatesSidebarOpen}
-            />
+            <>
+              <SidebarTasks
+                ratesSidebarOpen={ratesSidebarOpen}
+                routeItems={routeItems}
+                setRatesSidebarOpen={setRatesSidebarOpen}
+              />
+              <FiltersSidebar
+                open={filtersSidebarOpen}
+                onOpenChange={setFiltersSidebarOpen}
+              />
+            </>
           )}
 
           {/* Main Modal Content */}
@@ -720,7 +728,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     </div>
                                     <div
                                       className={` w-full ${
-                                        isCreating ? "col-span-3" : "col-span-3 sm:col-span-2"
+                                        isCreating
+                                          ? "col-span-3"
+                                          : "col-span-3 sm:col-span-2"
                                       }`}
                                     >
                                       <label className="text-sm text-foreground font-semibold">
@@ -1016,7 +1026,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                                   {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
                                   <div className="grid grid-cols-6 md:grid-cols-12 gap-4">
-
                                     <div className="col-span-3 sm:col-span-4">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.plate}
@@ -1058,7 +1067,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                                            <div className="col-span-3 sm:col-span-4">
+                                    <div className="col-span-3 sm:col-span-4">
                                       <label className="text-sm text-nowrap text-foreground font-semibold">
                                         {t.vehicles.currentKm}
                                       </label>
@@ -1180,7 +1189,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                            
                                   </div>
 
                                   <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 mt-10">
@@ -1515,6 +1523,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                               onToggleSidebar={() =>
                                 setRatesSidebarOpen(!ratesSidebarOpen)
                               }
+                              onToggleFiltersSidebar={() =>
+                                setFiltersSidebarOpen(!filtersSidebarOpen)
+                              }
+                              filtersOpen={filtersSidebarOpen}
                             />
                           </motion.div>
                         )}

@@ -70,6 +70,7 @@ export function SidebarTasks({
         "absolute top-0 left-0 h-full  bg-background transition-all duration-300 ease-in-out overflow-hidden z-50",
         ratesSidebarOpen ? "w-[340px] " : "w-0"
       )}
+     
     >
       <div className="flex flex-col h-full w-[340px]  border rounded-tl-2xl">
         {/* Search Header */}

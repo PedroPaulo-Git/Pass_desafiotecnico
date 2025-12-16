@@ -13,6 +13,7 @@ interface TableHeaderSectionProps {
   selectedProfile: Profile;
   vehicleId: string;
   onToggleSidebar?: () => void;
+  onToggleFiltersSidebar?: () => void;
   onOpenProfileModal: () => void;
   onAddNew: () => void;
 }
@@ -22,6 +23,7 @@ export function TableHeaderSection({
   selectedProfile,
   vehicleId,
   onToggleSidebar,
+  onToggleFiltersSidebar,
   onOpenProfileModal,
   onAddNew,
 }: TableHeaderSectionProps) {
@@ -75,6 +77,7 @@ export function TableHeaderSection({
           variant="table_border_cutted"
           size="sm"
           className="gap-1.5 h-9"
+          onClick={onToggleFiltersSidebar }
         >
           <Filter className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Filtros</span>

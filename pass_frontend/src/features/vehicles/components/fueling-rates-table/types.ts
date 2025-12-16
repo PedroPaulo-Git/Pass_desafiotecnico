@@ -31,6 +31,8 @@ export interface FuelingRatesTableProps {
   fuelings: Fueling[];
   sidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+  onToggleFiltersSidebar?: () => void;
+  filtersOpen?: boolean;
 }
 
 // Fueling Form props

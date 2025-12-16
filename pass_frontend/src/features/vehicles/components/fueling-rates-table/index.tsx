@@ -84,6 +84,8 @@ export function FuelingRatesTable({
   fuelings,
   sidebarOpen = false,
   onToggleSidebar,
+  onToggleFiltersSidebar,
+  filtersOpen = false,
 }: FuelingRatesTableProps) {
   // Profile states
   const [updateOpen, setUpdateOpen] = useState(false);
@@ -272,7 +274,7 @@ export function FuelingRatesTable({
       <div
         className={cn(
           "transition-all duration-300 ease-in-out flex w-screen lg:w-[67vw] h-[70vh]",
-          sidebarOpen && "ml-[340px] overflow-hidden"
+          (sidebarOpen || filtersOpen) && "ml-[340px] overflow-hidden"
         )}
       >
         {/* Main Content */}
@@ -283,6 +285,7 @@ export function FuelingRatesTable({
             selectedProfile={selectedProfile}
             vehicleId={vehicleId}
             onToggleSidebar={onToggleSidebar}
+            onToggleFiltersSidebar={onToggleFiltersSidebar}
             onOpenProfileModal={() => setUpdateOpen(true)}
             onAddNew={handleAddNew}
           />
