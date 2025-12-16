@@ -29,11 +29,11 @@ export function TableHeaderSection({
   return (
     <div className="flex items-center justify-between px-3 py-2 border-b border-border shrink-0">
       {/* Left side - Panel Toggle & Title */}
-      <div className="flex items-center gap-4">
+      <div className="flex w-full flex-col sm:flex-row items-center mx-auto sm:mx-0 gap-4">
         <div
           onClick={onToggleSidebar}
-          className="flex items-center gap-2 hover:bg-muted/40 pl-1.5 pr-3 py-2.5 rounded-md outline-0 outline-border hover:outline-1 cursor-pointer"
-        >
+          className="flex w-full sm:w-auto border-b sm:border-b-0 items-center gap-2 hover:bg-muted/40 pl-1.5 pr-3 py-2.5 rounded-md outline-0 outline-border hover:outline-1 cursor-pointer"
+         >
           {onToggleSidebar && (
             <Button
               type="button"
@@ -54,11 +54,11 @@ export function TableHeaderSection({
             </p>
           </div>
         </div>
-
-        <div className="h-5 border-l border-border">
+        <div className="h-5 border-l border-border hidden sm:block">
           <Separator orientation="vertical" className="max-h-5" />
         </div>
-
+          <div className="flex gap-10 justify-start items-start">
+   
         <Button
           type="button"
           variant="outline"
@@ -79,24 +79,38 @@ export function TableHeaderSection({
           <Filter className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Filtros</span>
         </Button>
+
+        <Button
+          variant="default"
+          size="default"
+          type="button"
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="flex px-14 sm:hidden "
+        >
+          <span className="">
+            <Plus className="h-4 w-4" />
+          </span>
+        </Button>
+                 
+          </div>
       </div>
 
       {/* Right side - Actions */}
       <div className="flex items-center gap-2 relative">
         {/* Add Button */}
-        <div className="flex rounded-md shadow-sm">
+        <div className="hidden sm:flex rounded-md shadow-sm">
           <Button
             variant="default"
             size="default"
             type="button"
             onClick={() => setShowAddForm(!showAddForm)}
-            className="rounded-r-none border-r-0 pr-3"
+            className="sm:rounded-r-none pr-3 ml-10 "
           >
-            <span className="hidden sm:inline">Adicionar</span>
+            <span className="">Adicionar</span>
           </Button>
           <Button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="rounded-l-none  pl-2 pr-2 border-black"
+            className="hidden sm:block rounded-l-none  pl-2 pr-2 border-black border-l sm:border-l-0"
             variant="default"
             size="default"
           >

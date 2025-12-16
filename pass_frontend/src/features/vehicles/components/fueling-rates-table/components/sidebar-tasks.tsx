@@ -96,7 +96,7 @@ export function SidebarTasks({
                   {t.common.add}
                 </Button>
               </DialogTrigger>
-              <DialogContent showCloseButtonClean={true} showCloseButton={false} className="w-xl max-w-xl rounded-xl">
+              <DialogContent showCloseButtonClean={true} showCloseButton={false} className="w-full sm:w-xl max-w-xl rounded-xl">
                 <DialogHeader >
                   <div className="flex gap-3 items-center py-2">
                     <div className="p-3 bg-background border border-muted rounded-full">
@@ -114,7 +114,7 @@ export function SidebarTasks({
                   </div>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="lg:space-y-6">
                   <div>
                     <label className="text-sm font-medium mb-2 block">
                       Origem
@@ -182,6 +182,8 @@ export function SidebarTasks({
                 </div>
               </DialogContent>
             </Dialog>
+
+            
           </div>
         </div>
 

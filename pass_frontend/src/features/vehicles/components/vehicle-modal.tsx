@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm, UseFormSetError, Controller } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateVehicleInput,
@@ -470,7 +471,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
               initial="hidden"
               animate="visible"
               exit="exit"
-             >
+            >
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -487,8 +488,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                     activeTab === "rates" && "w-screen lg:max-w-[67vw]",
                     activeTab === "terms" && "w-screen max-w-[1000px] "
                   )}
-                 >
-                  <div className="flex items-center justify-between px-6 py-6 ">
+                >
+                  <div className="flex items-center justify-between px-6 pt-6 pb-2 ">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-background border border-border rounded-full">
                         <BusFront className="h-4 w-4 text-foreground" />
@@ -584,14 +585,14 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                   })}
                   className={cn(
                     "px-2 ",
-                    activeTab === "general" && "pt-5 ",
+                    activeTab === "general" && "pt-6 ",
                     activeTab === "fuelings" || activeTab === "rates"
                       ? "px-0 pb-0 "
                       : activeTab === "terms"
                       ? "px-0 pb-0 w-full"
                       : "w-[90vw] max-w-[900px] sm:w-[650px]"
                   )}
-                 >
+                >
                   <AnimatePresence>
                     {/* Tab: Dados Gerais */}
                     <TabsContent value="general" className="" forceMount>
@@ -614,11 +615,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   exit={{ opacity: 0 }}
-                                  className="p-4 pt-0 space-y-4"
+                                  className="p-4 pt-0 space-y-6"
                                 >
                                   {/* Row 1: ID, Created, Identifier, Company, Status */}
-                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                                    <div>
+                                  <div className="grid grid-cols-6 gap-4">
+                                    <div className="col-span-1 w-full ">
                                       <label className="text-sm text-foreground font-semibold ">
                                         ID
                                       </label>
@@ -628,7 +629,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     </div>
                                     <div
                                       className={` w-full ${
-                                        isCreating ? "col-span-3" : "col-span-3"
+                                        isCreating ? "col-span-3" : "col-span-2"
                                       }`}
                                     >
                                       <label className="text-sm text-foreground font-semibold">
@@ -704,7 +705,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         <SelectTrigger className="h-8 ">
                                           <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
-                                        <SelectContent  bg_fill={true}>
+                                        <SelectContent bg_fill={true}>
                                           <SelectItem value="Inbuzios Receptivo">
                                             Inbuzios Receptivo
                                           </SelectItem>
@@ -719,7 +720,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                     </div>
                                     <div
                                       className={` w-full ${
-                                        isCreating ? "col-span-3" : "col-span-4"
+                                        isCreating ? "col-span-3" : "col-span-3 sm:col-span-2"
                                       }`}
                                     >
                                       <label className="text-sm text-foreground font-semibold">
@@ -757,7 +758,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                             }
                                           </SelectValue>
                                         </SelectTrigger>
-                                        <SelectContent  bg_fill={true}>
+                                        <SelectContent bg_fill={true}>
                                           {statuses.map((status) => (
                                             <SelectItem
                                               key={status}
@@ -776,11 +777,8 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                  </div>
 
-                                  {/* Row 2: Model, Year, Brand, Category, Classification */}
-                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                                    <div className="col-span-4">
+                                    <div className="col-span-3 sm:col-span-2">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.model}
                                       </label>
@@ -811,21 +809,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.year}
-                                      </label>
-                                      <Input
-                                        variant="modal"
-                                        type="number"
-                                        {...register("year", {
-                                          valueAsNumber: true,
-                                        })}
-                                        className="h-8"
-                                        onBlur={handleAutoSave}
-                                      />
-                                    </div>
-                                    <div className="col-span-3 sm:col-span-2">
+                                    <div className="col-span-6 sm:col-span-2">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.brand}
                                       </label>
@@ -856,108 +840,25 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                                    <div className="col-span-3 sm:col-span-2">
-                                      <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.category}
-                                      </label>
-                                      <Select
-                                        value={watch("category")}
-                                        onValueChange={(value) => {
-                                          setValue(
-                                            "category",
-                                            value as VehicleCategory
-                                          );
-                                          handleAutoSave();
-                                        }}
-                                      >
-                                        <SelectTrigger className="h-8 ">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent  bg_fill={true}>
-                                          {categories.map((cat) => (
-                                            <SelectItem key={cat} value={cat}>
-                                              {t.categories[cat]}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.classification}
-                                      </label>
-                                      <Select
-                                        value={watch("classification")}
-                                        onValueChange={(value) => {
-                                          setValue(
-                                            "classification",
-                                            value as VehicleClassification
-                                          );
-                                          handleAutoSave();
-                                        }}
-                                      >
-                                        <SelectTrigger className="h-8 ">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent  bg_fill={true}>
-                                          {classifications.map((cls) => (
-                                            <SelectItem key={cls} value={cls}>
-                                              {t.classifications[cls]}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
                                   </div>
 
-                                  {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
-                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4 ">
+                                  {/* Row 2: Model, Year, Brand, Category, Classification */}
+                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
                                     <div className="col-span-1 sm:col-span-2">
                                       <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.capacity}
+                                        {t.vehicles.year}
                                       </label>
                                       <Input
-                                        variant="modal"
+                                        variant="number-border"
                                         type="number"
-                                        {...register("capacity", {
+                                        {...register("year", {
                                           valueAsNumber: true,
                                         })}
                                         className="h-8"
                                         onBlur={handleAutoSave}
                                       />
                                     </div>
-                                    <div className="col-span-3 sm:col-span-2">
-                                      <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.doors}
-                                      </label>
-                                      <Input
-                                        variant="modal"
-                                        type="number"
-                                        {...register("doors", {
-                                          valueAsNumber: true,
-                                        })}
-                                        className="h-8"
-                                        onBlur={handleAutoSave}
-                                      />
-                                    </div>
-
-                                    {/* State Search - placed after Doors for quick lookup */}
-                                    <div className="col-span-4">
-                                      <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.searchState}
-                                      </label>
-                                      <StateSelect
-                                        value={watch("state")}
-                                        onValueChange={(value) => {
-                                          setValue("state", value);
-                                          trigger("state");
-                                          setTimeout(() => handleAutoSave(), 100);
-                                        }}
-                                        disabled={false}
-                                      />
-                                    </div>
-
-                                    <div className="col-span-1 sm:col-span-2 ">
+                                    <div className="col-span-2 sm:col-span-2 ">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.state}
                                       </label>
@@ -989,7 +890,111 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                       )}
                                     </div>
 
-                                    <div className="col-span-3 sm:col-span-2">
+                                    <div className="col-span-3 sm:col-span-4">
+                                      <label className="text-sm text-foreground font-semibold">
+                                        {t.vehicles.category}
+                                      </label>
+                                      <Select
+                                        value={watch("category")}
+                                        onValueChange={(value) => {
+                                          setValue(
+                                            "category",
+                                            value as VehicleCategory
+                                          );
+                                          handleAutoSave();
+                                        }}
+                                      >
+                                        <SelectTrigger className="h-8 ">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent bg_fill={true}>
+                                          {categories.map((cat) => (
+                                            <SelectItem key={cat} value={cat}>
+                                              {t.categories[cat]}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div className="col-span-3 sm:col-span-4">
+                                      <label className="text-sm text-foreground font-semibold">
+                                        {t.vehicles.classification}
+                                      </label>
+                                      <Select
+                                        value={watch("classification")}
+                                        onValueChange={(value) => {
+                                          setValue(
+                                            "classification",
+                                            value as VehicleClassification
+                                          );
+                                          handleAutoSave();
+                                        }}
+                                      >
+                                        <SelectTrigger className="h-8 ">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent bg_fill={true}>
+                                          {classifications.map((cls) => (
+                                            <SelectItem key={cls} value={cls}>
+                                              {t.classifications[cls]}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+
+                                  {/* Row 3: Capacity, Doors, State Search, UF, Plate Type */}
+                                  <div className="grid grid-cols-4 md:grid-cols-12 gap-4 ">
+                                    <div className="col-span-2 sm:col-span-2">
+                                      <label className="text-sm text-foreground font-semibold">
+                                        {t.vehicles.capacity}
+                                      </label>
+                                      <Input
+                                        variant="number-border"
+                                        type="number"
+                                        {...register("capacity", {
+                                          valueAsNumber: true,
+                                        })}
+                                        className="h-8"
+                                        onBlur={handleAutoSave}
+                                      />
+                                    </div>
+                                    <div className="col-span-2 sm:col-span-2">
+                                      <label className="text-sm text-foreground font-semibold">
+                                        {t.vehicles.doors}
+                                      </label>
+                                      <Input
+                                        variant="number-border"
+                                        type="number"
+                                        {...register("doors", {
+                                          valueAsNumber: true,
+                                        })}
+                                        className="h-8"
+                                        onBlur={handleAutoSave}
+                                      />
+                                    </div>
+
+                                    {/* State Search - placed after Doors for quick lookup */}
+                                    <div className="col-span-4">
+                                      <label className="text-sm text-foreground font-semibold">
+                                        {t.vehicles.searchState}
+                                      </label>
+                                      <StateSelect
+                                        value={watch("state")}
+                                        onValueChange={(value) => {
+                                          setValue("state", value);
+                                          trigger("state");
+                                          setTimeout(
+                                            () => handleAutoSave(),
+                                            100
+                                          );
+                                        }}
+                                        disabled={false}
+                                      />
+                                    </div>
+
+                                    <div className="col-span-4 sm:col-span-4">
                                       <label className="text-sm text-nowrap text-foreground font-semibold">
                                         {t.vehicles.plateType}
                                       </label>
@@ -997,7 +1002,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         <SelectTrigger className="h-8 ">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent  bg_fill={true}>
+                                        <SelectContent bg_fill={true}>
                                           <SelectItem value="mercosul">
                                             Mercosul
                                           </SelectItem>
@@ -1010,8 +1015,9 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                   </div>
 
                                   {/* Row 4: Plate, Renavam, Chassis, Current Km, Fuel Type */}
-                                  <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
-                                    <div className="col-span-4 sm:col-span-2">
+                                  <div className="grid grid-cols-6 md:grid-cols-12 gap-4">
+
+                                    <div className="col-span-3 sm:col-span-4">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.plate}
                                       </label>
@@ -1052,7 +1058,54 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                                    <div className="col-span-4 sm:col-span-2">
+                                            <div className="col-span-3 sm:col-span-4">
+                                      <label className="text-sm text-nowrap text-foreground font-semibold">
+                                        {t.vehicles.currentKm}
+                                      </label>
+                                      <Input
+                                        variant="number-border"
+                                        type="number"
+                                        placeholder=""
+                                        {...register("currentKm", {
+                                          valueAsNumber: true,
+                                        })}
+                                        className="h-8"
+                                        onBlur={handleAutoSave}
+                                      />
+                                    </div>
+                                    <div className="col-span-2 sm:col-span-4">
+                                      <label className="text-sm text-foreground font-semibold">
+                                        {t.vehicles.fuelType}
+                                      </label>
+                                      <Select
+                                        value={watch("fuelType")}
+                                        onValueChange={(value) => {
+                                          setValue(
+                                            "fuelType",
+                                            value as FuelType
+                                          );
+                                          handleAutoSave();
+                                        }}
+                                      >
+                                        <SelectTrigger className="h-8">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent bg_fill={true}>
+                                          {fuelTypes.map((fuel) => (
+                                            <SelectItem key={fuel} value={fuel}>
+                                              {t.fuelTypes[fuel]}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                        {errors.fuelType?.message && (
+                                          <span className="text-xs text-destructive">
+                                            {String(errors.fuelType.message)}
+                                          </span>
+                                        )}
+                                      </Select>
+                                    </div>
+
+                                    <div className="col-span-4 sm:col-span-6">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.renavam}
                                       </label>
@@ -1090,7 +1143,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                                    <div className="col-span-4">
+                                    <div className="col-span-6">
                                       <label className="text-sm text-foreground font-semibold">
                                         {t.vehicles.chassis}
                                       </label>
@@ -1127,52 +1180,7 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         </span>
                                       )}
                                     </div>
-                                    <div className="col-span-3 sm:col-span-2">
-                                      <label className="text-sm text-nowrap text-foreground font-semibold">
-                                        {t.vehicles.currentKm}
-                                      </label>
-                                      <Input
-                                        variant="number-border"
-                                        type="number"
-                                        placeholder=""
-                                        {...register("currentKm", {
-                                          valueAsNumber: true,
-                                        })}
-                                        className="h-8"
-                                        onBlur={handleAutoSave}
-                                      />
-                                    </div>
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className="text-sm text-foreground font-semibold">
-                                        {t.vehicles.fuelType}
-                                      </label>
-                                      <Select
-                                        value={watch("fuelType")}
-                                        onValueChange={(value) => {
-                                          setValue(
-                                            "fuelType",
-                                            value as FuelType
-                                          );
-                                          handleAutoSave();
-                                        }}
-                                      >
-                                        <SelectTrigger className="h-8">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent  bg_fill={true}>
-                                          {fuelTypes.map((fuel) => (
-                                            <SelectItem key={fuel} value={fuel}>
-                                              {t.fuelTypes[fuel]}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                        {errors.fuelType?.message && (
-                                          <span className="text-xs text-destructive">
-                                            {String(errors.fuelType.message)}
-                                          </span>
-                                        )}
-                                      </Select>
-                                    </div>
+                            
                                   </div>
 
                                   <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 mt-10">
@@ -1205,7 +1213,10 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                                 <SelectValue placeholder="Caracteristicas" />
                                               )}
                                             </SelectTrigger>
-                                            <SelectContent bg_fill={true} showSearch>
+                                            <SelectContent
+                                              bg_fill={true}
+                                              showSearch
+                                            >
                                               <SelectItem value="Branco">
                                                 Branco
                                               </SelectItem>
@@ -1241,10 +1252,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         )}
                                       />
                                       {errors.color?.message && (
-                                        <p className="text-xs text-destructive">{t.vehicles.validation.colorRequired}</p>
+                                        <p className="text-xs text-destructive">
+                                          {t.vehicles.validation.colorRequired}
+                                        </p>
                                       )}
                                     </div>
-                                    
                                   </div>
                                 </motion.div>
                               </CollapsibleContent>
@@ -1483,7 +1495,11 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
 
                     {/* Tab: Tarifas */}
                     {vehicle && (
-                      <TabsContent className="overflow-x-hidden" value="rates" forceMount>
+                      <TabsContent
+                        className="overflow-x-hidden"
+                        value="rates"
+                        forceMount
+                      >
                         {activeTab === "rates" && (
                           <motion.div
                             key="rates"

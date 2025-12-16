@@ -43,7 +43,7 @@ const createVehicleSchema = z.object({
 
 const vehicleSchemaQuery = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),
-  limit: z.coerce.number().int().positive().min(1).max(100).default(10),
+  limit: z.coerce.number().int().positive().min(1).max(1000).default(10),
   plate: z
     .string()
     .optional()

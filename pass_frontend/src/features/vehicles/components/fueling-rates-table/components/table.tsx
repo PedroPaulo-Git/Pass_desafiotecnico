@@ -221,7 +221,7 @@ export function FuelingScrollTable({
                     selectedRows.size === paginatedData.length
                   }
                   onCheckedChange={toggleAllSelection}
-                  className="translate-y-0.5"
+                  className="translate-y-0.5 bg-background border border-border"
                 />
               </TableHead>
 
@@ -440,7 +440,7 @@ export function FuelingScrollTable({
                     <Checkbox
                       checked={selectedRows.has(period.id)}
                       onCheckedChange={() => toggleRowSelection(period.id)}
-                      className="translate-y-0.5"
+                      className="translate-y-0.5 bg-background border border-border"
                     />
                   </TableCell>
 

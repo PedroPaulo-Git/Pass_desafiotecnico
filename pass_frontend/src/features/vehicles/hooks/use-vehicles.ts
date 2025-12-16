@@ -4,6 +4,8 @@ import type {
   Vehicle,
   PaginatedResponse,
   VehicleFilters,
+  VehicleCategory,
+  VehicleStatus,
 } from "@/types/vehicle";
 
 // Hooks that encapsulate vehicles API calls with react-query.
@@ -92,6 +94,66 @@ export function useDeleteVehicle() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+    },
+  });
+}
+
+export function useVehicleCounts() {
+  return useQuery({
+    queryKey: ["vehicle-counts"],
+    queryFn: async () => {
+      // First, fetch with limit=1 to get the total count
+      const { data: firstData } = await api.get<PaginatedResponse<Vehicle>>(
+        "/vehicles?limit=1"
+      );
+      const total = firstData.total;
+
+      if (total === 0) {
+        return {
+          categories: {
+            ONIBUS: 0,
+            VAN: 0,
+            CARRO: 0,
+            CAMINHAO: 0,
+          },
+          statuses: {
+            LIBERADO: 0,
+            EM_MANUTENCAO: 0,
+            INDISPONIVEL: 0,
+            VENDIDO: 0,
+          },
+        };
+      }
+
+      // Then, fetch all vehicles with the total limit
+      const { data } = await api.get<PaginatedResponse<Vehicle>>(
+        `/vehicles?limit=${total}`
+      );
+
+      const categoryCounts: Record<VehicleCategory, number> = {
+        ONIBUS: 0,
+        VAN: 0,
+        CARRO: 0,
+        CAMINHAO: 0,
+      };
+      const statusCounts: Record<VehicleStatus, number> = {
+        LIBERADO: 0,
+        EM_MANUTENCAO: 0,
+        INDISPONIVEL: 0,
+        VENDIDO: 0,
+      };
+      data.items.forEach((vehicle) => {
+        if (categoryCounts[vehicle.category] !== undefined) {
+          categoryCounts[vehicle.category]++;
+        }
+        if (statusCounts[vehicle.status] !== undefined) {
+          statusCounts[vehicle.status]++;
+        }
+      });
+      return {
+        categories: categoryCounts,
+        statuses: statusCounts,
+      };
     },
   });
 }

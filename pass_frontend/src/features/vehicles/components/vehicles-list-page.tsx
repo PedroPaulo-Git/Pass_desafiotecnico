@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, Plus, AlertCircle, ChevronDown } from "lucide-react";
 
 import { Sparkles, RefreshCw, CloudDownload, RotateCw } from "lucide-react";
-
-import {InlineFuelingForm} from "@/features/fleet-events/components/Fueling/FuelingModal";
 import IncidentModal from "@/features/fleet-events/components/Incident/IncidentModal";
 import DocumentModal from "@/features/fleet-events/components/Documents/DocumentModal";
 
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useModalStore } from "@/store/use-modal-store";
-import { useActiveNavTitle } from "@/hooks/use-active-nav-title";
-import { useVehicles } from "../hooks/use-vehicles";
+import { useVehicles, useVehicleCounts } from "../hooks/use-vehicles";
 import { VehiclesTable } from "./vehicles-table";
 import { VehiclesFilters } from "./vehicles-filters";
 import { VehicleModal } from "./vehicle-modal";
@@ -22,10 +19,13 @@ import { Button } from "@/components/ui/button";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import ButtonBot from "@/components/ui/ButtonBot";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { VehicleFilters } from "@/types/vehicle";
-import { getMockVehiclesPaginated } from "../data/mock-vehicles";
-
-import { ConfirmDeleteVehicleModal } from "./vehicle-delete-modal";
+import type {
+  VehicleFilters,
+  VehicleCategory,
+  VehicleStatus,
+} from "@/types/vehicle";
+import { getMockVehiclesPaginated, mockVehicles } from "../data/mock-vehicles";
+import ConfirmDeleteVehicleModal from "./vehicle-delete-modal";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -44,9 +44,6 @@ export function VehiclesListPage() {
   const { t } = useI18n();
   const { openModal } = useModalStore();
 
-  // Define automaticamente o título da página baseado na rota
-  const { currentTitle } = useActiveNavTitle();
-  const [showFilters, setShowFilters] = useState(false);
   const [showMockData, setShowMockData] = useState(false);
   const [filters, setFilters] = useState<VehicleFilters>({
     page: 1,
@@ -59,6 +56,7 @@ export function VehiclesListPage() {
   const [retryLoading, setRetryLoading] = useState(false);
 
   const { data, isLoading, error, refetch } = useVehicles(filters);
+  const { data: countsData } = useVehicleCounts();
   const { type: modalType } = useModalStore();
 
   const handleSearch = (value: string) => {
@@ -180,6 +178,48 @@ export function VehiclesListPage() {
     ? getMockVehiclesPaginated(filters.page || 1, filters.limit || 10)
     : data;
 
+  // Compute category and status counts from total data
+  const { categoryCounts, statusCounts } = useMemo(() => {
+    if (showMockData) {
+      const catCounts: Record<VehicleCategory, number> = {
+        ONIBUS: 0,
+        VAN: 0,
+        CARRO: 0,
+        CAMINHAO: 0,
+      };
+      const statCounts: Record<VehicleStatus, number> = {
+        LIBERADO: 0,
+        EM_MANUTENCAO: 0,
+        INDISPONIVEL: 0,
+        VENDIDO: 0,
+      };
+      mockVehicles.forEach((vehicle) => {
+        if (catCounts[vehicle.category] !== undefined) {
+          catCounts[vehicle.category]++;
+        }
+        if (statCounts[vehicle.status] !== undefined) {
+          statCounts[vehicle.status]++;
+        }
+      });
+      return { categoryCounts: catCounts, statusCounts: statCounts };
+    } else {
+      return {
+        categoryCounts: countsData?.categories || {
+          ONIBUS: 0,
+          VAN: 0,
+          CARRO: 0,
+          CAMINHAO: 0,
+        },
+        statusCounts: countsData?.statuses || {
+          LIBERADO: 0,
+          EM_MANUTENCAO: 0,
+          INDISPONIVEL: 0,
+          VENDIDO: 0,
+        },
+      };
+    }
+  }, [showMockData, countsData]);
+
   return (
     <>
       <motion.div
@@ -211,29 +251,25 @@ export function VehiclesListPage() {
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-9 h-9 w-52 "
-                variant="light"
               />
             </div>
 
-            {/* Mode Filter Button */}
-            <Button
-              variant="table_border_cutted"
-              className="gap-1.5 h-9"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4 text-foreground" />
-              <span className="hidden sm:inline text-foreground">Modo</span>
-            </Button>
-
-            {/* Status Filter Button */}
-            <Button
-              variant="table_border_cutted"
-              className="gap-1.5 h-9"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4 text-foreground" />
-              <span className="hidden sm:inline text-foreground">Status</span>
-            </Button>
+            {/* Filters */}
+            <VehiclesFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClear={() => {
+                setFilters({
+                  page: 1,
+                  limit: 10,
+                  sortBy: "createdAt",
+                  sortOrder: "desc",
+                });
+                setSearchTerm("");
+              }}
+              categoryCounts={categoryCounts}
+              statusCounts={statusCounts}
+            />
           </div>
 
           {/* Right: Action buttons */}
@@ -245,13 +281,17 @@ export function VehiclesListPage() {
               onClick={() => refetch()}
             >
               <RotateCw className="h-4 w-4 text-foreground" />
-              <span className="hidden sm:inline text-foreground">{t.header.update}</span>
+              <span className="hidden sm:inline text-foreground">
+                {t.header.update}
+              </span>
             </Button>
 
             {/* Export button with dropdown */}
             <Button variant="outline" className="gap-1.5 h-9">
               <CloudDownload className="h-4 w-4 text-foreground" />
-              <span className="hidden sm:inline text-foreground">{t.header.export}</span>
+              <span className="hidden sm:inline text-foreground">
+                {t.header.export}
+              </span>
               <ChevronDown className="h-3 w-3 text-foreground" />
             </Button>
 
@@ -265,33 +305,6 @@ export function VehiclesListPage() {
             </Button>
           </div>
         </motion.div>
-
-        {/* Filters Panel */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <VehiclesFilters
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onClear={() => {
-                  setFilters({
-                    page: 1,
-                    limit: 10,
-                    sortBy: "createdAt",
-                    sortOrder: "desc",
-                  });
-                  setSearchTerm("");
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Table */}
         <motion.div variants={itemVariants}>

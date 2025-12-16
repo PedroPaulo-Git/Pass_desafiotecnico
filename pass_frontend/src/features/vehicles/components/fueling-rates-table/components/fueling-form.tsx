@@ -204,7 +204,7 @@ export function FuelingForm({
   return (
     <form
       onSubmit={handleFormSubmit}
-      className=" min-w-screen pr-2.5 sm:pr-0 sm:min-w-[480px] space-y-2"
+      className=" pr-2.5 sm:pr-0 min-w-[350px] sm:min-w-[550px] space-y-2"
     >
       <div className="py-3 text-sm border-b px-4">Adicionar Período</div>
       {/* Dias Selecionados (Apenas Visual) */}
@@ -231,7 +231,7 @@ export function FuelingForm({
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium ml-1">Dias da Semana</label>
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-4">
               {WEEK_DAYS.map((day, index) => (
                 <DayChip
                   key={index}
@@ -254,6 +254,7 @@ export function FuelingForm({
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium ml-1">Posto</label>
           <Select
+          
             value={watch("provider") ?? ""}
             onValueChange={(value) => setValue("provider", value)}
           >
