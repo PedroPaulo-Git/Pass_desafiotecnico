@@ -3,6 +3,7 @@
 import { type ReactNode } from "react";
 import { AppHeader } from "./app-header";
 import { usePageTitle } from "@/lib/contexts/page-title-context";
+import { usePathname } from "next/navigation";
 
 interface MainContentProps {
   children: ReactNode;
@@ -20,11 +21,15 @@ export function MainContent({
   onToggle,
 }: MainContentProps) {
   const { title } = usePageTitle();
+  const pathname = usePathname();
+  const isTicketRoute = Boolean(
+    pathname && (pathname === "/ticket" || pathname.startsWith("/ticket"))
+  );
 
   return (
     // Main Content
     <div
-      className="flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background"
+      className={isTicketRoute ? "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background" : "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background"}
     >
       {/* Desktop Header */}
       <div className="hidden lg:block rounded-tl-4xl">
@@ -47,7 +52,9 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 ">{children}</main>
+      <main className={isTicketRoute ? "flex-1 p-0" : "flex-1 p-6"}>
+        {children}
+      </main>
     </div>  
   );
 }

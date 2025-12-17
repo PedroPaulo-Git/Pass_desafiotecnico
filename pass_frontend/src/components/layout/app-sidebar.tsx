@@ -90,7 +90,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         { icon: BusFront, label: "Transfer", href: "/vehicles" },
         { icon: Package, label: "Combo", href: "#combo" },
         { icon: BedDouble, label: "Accommodation", href: "#accommodation" },
-        { icon: Ticket, label: "Ticket", href: "#ticket" },
+        { icon: Ticket, label: "Ticket", href: "/ticket" },
         { icon: Camera, label: "Tour", href: "#tour" },
         { icon: Star, label: "Experience", href: "#experience" },
         { icon: Map, label: "Circuit", href: "#circuit" },

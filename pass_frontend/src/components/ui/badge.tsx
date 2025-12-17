@@ -20,6 +20,8 @@ const badgeVariants = cva(
         point: ' px-[3px] py-[3px]  border-0 my-auto ',
         circle:
           'rounded-full bg-primary-foreground border-border p-1.5  m-0 ',
+        ticket:
+          'bg-muted/50 rounded-full ',
     
       },
     },

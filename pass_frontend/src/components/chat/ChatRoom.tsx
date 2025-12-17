@@ -1,24 +1,41 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { io, Socket } from "socket.io-client";
-import {api} from "../../lib/axios";
+import { api } from "../../lib/axios";
+import { toast } from "sonner";
+import { MessageBubbleInner } from "../ui/message-bubble-inner";
+import { ChatInput } from "../ui/chat-input";
 
-type Message = {
+export type Message = {
   id: string;
   content: string;
   sender: string;
   role: string;
+  seen?: boolean;
   createdAt: string;
 };
 
-export default function ChatRoom({ ticketId }: { ticketId: string }) {
+export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBack?: () => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
+  const [connectedRole, setConnectedRole] = useState<string>("agent");
+  const [online, setOnline] = useState<Array<{ uuid: string; role: string }>>(
+    []
+  );
   const socketRef = useRef<Socket | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  
 
-  const uuid = typeof window !== "undefined" ? localStorage.getItem("chat_uuid") || "" : "";
-  const role = typeof window !== "undefined" ? (localStorage.getItem("chat_role") || "agent") : "agent";
+  const uuid =
+    typeof window !== "undefined"
+      ? localStorage.getItem("chat_uuid") || ""
+      : "";
+  const role =
+    typeof window !== "undefined"
+      ? localStorage.getItem("chat_role") || "agent"
+      : "agent";
 
   useEffect(() => {
     (async () => {
@@ -26,17 +43,50 @@ export default function ChatRoom({ ticketId }: { ticketId: string }) {
       setMessages(res.data || []);
     })();
 
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333", { autoConnect: true });
+    const socket = io(
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
+      { autoConnect: true }
+    );
     socketRef.current = socket;
     socket.emit("join", { ticketId, uuid, role });
+    setConnectedRole(role);
 
     socket.on("message:receive", (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
-      setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      setMessages((prev) => [...prev, { ...msg, seen: false }]);
+      setTimeout(
+        () => scrollRef.current?.scrollIntoView({ behavior: "smooth" }),
+        50
+      );
+    });
+
+    socket.on("user:joined", (u: { uuid: string; role: string }) => {
+      setOnline((prev) => {
+        if (prev.find((p) => p.uuid === u.uuid)) return prev;
+        return [...prev, { uuid: u.uuid, role: u.role }];
+      });
+    });
+
+    socket.on("user:left", (u: { uuid?: string }) => {
+      // remove by uuid if provided; otherwise best-effort
+      if (u?.uuid) {
+        setOnline((prev) => prev.filter((p) => p.uuid !== u.uuid));
+      } else {
+        // no uuid provided: clear list (safe fallback)
+        setOnline([]);
+      }
+    });
+
+    socket.on("message:seen", (p: { messageId: string; uuid?: string }) => {
+      if (!p?.messageId) return;
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === p.messageId);
+        if (idx === -1) return prev;
+        return prev.map((m, i) => (i <= idx ? { ...m, seen: true } : m));
+      });
     });
 
     return () => {
-      socket.emit("leave", { ticketId });
+      socket.emit("leave", { ticketId, uuid });
       socket.disconnect();
     };
   }, [ticketId]);
@@ -58,19 +108,84 @@ export default function ChatRoom({ ticketId }: { ticketId: string }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 bg-white">
-        {messages.map((m) => (
-          <div key={m.id} className={`mb-2 ${m.role === "agent" ? "text-left" : "text-right"}`}>
-            <div className="inline-block max-w-[70%] rounded-lg p-2 bg-gray-100">{m.content}</div>
+      <div className="flex-1 overflow-y-auto px-3">
+
+
+        <div className="header sticky top-0 py-2 bg-background z-10">
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {/* Back button visible on mobile only */}
+              {onBack && (
+                <div className="lg:hidden mr-1">
+                  <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
+                <img
+                  data-slot="avatar-image"
+                  className="aspect-square w-10 object-cover mb-1"
+                  alt="avatar image"
+                  src="https://shadcnuikit.com/images/avatars/02.png"
+                />
+              </div>
+              <div className="text-sm font-medium">
+                Chamado {ticketId.substring(0, 6)}
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground flex items-center gap-2">
+              <span>Conectado como: {connectedRole}</span>
+              <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground text-nowrap">
+                Online: {online.length}
+              </span>
+            </div>
           </div>
+        </div>
+        {messages.map((m) => (
+          <MessageBubbleInner
+            key={m.id}
+            message={m}
+            isOwn={m.sender === uuid}
+            onSeen={(id) => {
+              // emit seen if not own
+              if (id && m.sender !== uuid) {
+                try {
+                  socketRef.current?.emit("message:seen", { ticketId, messageId: id, uuid });
+                } catch (e) {
+                  /* ignore */
+                }
+                // mark this and all previous messages as seen
+                setMessages((prev) => {
+                  const idx = prev.findIndex((mm) => mm.id === id);
+                  if (idx === -1) return prev;
+                  return prev.map((mm, i) => (i <= idx ? { ...mm, seen: true } : mm));
+                });
+              }
+            }}
+          />
         ))}
         <div ref={scrollRef} />
       </div>
 
-      <div className="p-3 border-t flex gap-2">
-        <input value={text} onChange={(e) => setText(e.target.value)} className="flex-1 rounded border px-2 py-2" placeholder="Digite uma mensagem" />
-        <button onClick={send} className="btn bg-blue-600 text-white px-4 rounded">Enviar</button>
+      <div className="px-3 w-full">
+          <ChatInput setText={setText} value={text} onSend={send} className=""/>
+        {/* <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="flex-1 rounded border px-2 py-2"
+          placeholder="Digite uma mensagem"
+        />
+        <button
+          onClick={send}
+          className="btn bg-blue-600 text-white px-4 rounded"
+        >
+          Enviar
+        </button> */}
       </div>
+    
     </div>
   );
 }

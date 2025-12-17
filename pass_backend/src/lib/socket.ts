@@ -23,18 +23,50 @@ export function initSocket(server: http.Server) {
         // agents can also join an agents room to receive ticket list updates
         if (role === "agent") socket.join("agents");
         console.log(`${socket.id} joined ${room}`);
+        // notify room that a user joined
+        try {
+          io?.to(room).emit("user:joined", { ticketId, uuid, role });
+        } catch (e) {
+          /* ignore */
+        }
       } catch (e) {
         console.error("join error", e);
       }
     });
 
-    socket.on("leave", ({ ticketId }) => {
+    socket.on("leave", ({ ticketId, uuid }) => {
       if (!ticketId) return;
-      socket.leave(`ticket:${ticketId}`);
+      const room = `ticket:${ticketId}`;
+      socket.leave(room);
+      try {
+        io?.to(room).emit("user:left", { ticketId, uuid });
+      } catch (e) {
+        /* ignore */
+      }
     });
 
     socket.on("disconnect", () => {
-      // noop
+      // Notify rooms that this socket left (best-effort)
+      try {
+        const rooms = Array.from(socket.rooms || []);
+        rooms.forEach((r) => {
+          if (r.startsWith("ticket:")) {
+            io?.to(r).emit("user:left", { ticketId: r.split(":")[1] });
+          }
+        });
+      } catch (e) {
+        /* ignore */
+      }
+    });
+
+    socket.on("message:seen", ({ ticketId, messageId, uuid }) => {
+      try {
+        if (!ticketId || !messageId) return;
+        const room = `ticket:${ticketId}`;
+        io?.to(room).emit("message:seen", { messageId, uuid });
+      } catch (e) {
+        console.error("message:seen error", e);
+      }
     });
   });
 

@@ -30,8 +30,10 @@ const buttonVariants = cva(
         table_border_cutted: "border rounded-md border-dashed  dark:bg-input/30 dark:border-input dark:border-dashed px-0 py-2 ",
         table_add: "bg-table-button text-black hover:bg-table-button/90 rounded-lg ",
         collapsible_button:"w-full flex items-center justify-between py-5! px-3 text-sm font-medium ",
+        circle_ticket: " rounded-full bg-primary/10 text-primary hover:bg-primary/20 border ",
       },
       size: {
+        circle_ticket: "size-9",
         modal: "h-11 px-8 rounded-full",
         default: "h-9 px-4 py-2 has-[>svg]:px-3 ",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",

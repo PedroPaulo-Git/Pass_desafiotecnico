@@ -299,16 +299,7 @@ export function AppHeader({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Quick role toggle for chat (agent/client) */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setChatRole(chatRole === "agent" ? "client" : "agent")}
-          className="text-muted-foreground"
-          title={`Role: ${chatRole}`}
-        >
-          <span className="text-xs font-medium">{chatRole === "agent" ? "AG" : "CL"}</span>
-        </Button>
+        {/* role toggle moved to profile dropdown */}
 
         {/* User Avatar Dropdown */}
         <DropdownMenu>
@@ -338,6 +329,21 @@ export function AppHeader({
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <User className="h-4 w-4" />
               <span>Conta</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={() => {
+                const newRole = chatRole === "agent" ? "client" : "agent";
+                setChatRole(newRole);
+                try {
+                  window.dispatchEvent(new CustomEvent("chat_role_change", { detail: { role: newRole } }));
+                } catch (e) {
+                  // ignore in non-browser environments
+                }
+              }}
+            >
+              <Ticket className="h-4 w-4" />
+              <span>Entrar como {chatRole === "agent" ? "Cliente" : "Agente"}</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <Settings className="h-4 w-4" />
