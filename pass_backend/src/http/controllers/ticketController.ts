@@ -10,7 +10,7 @@ export class TicketController {
     return reply.status(201).send(ticket);
   }
 
-  async listTickets(request: FastifyRequest, reply: FastifyReply) {
+  async listTickets(_request: FastifyRequest, reply: FastifyReply) {
     const tickets = await listTicketsService();
     return reply.status(200).send(tickets);
   }
