@@ -21,7 +21,7 @@ const badgeVariants = cva(
         circle:
           'rounded-full bg-primary-foreground border-border p-1.5  m-0 ',
         ticket:
-          'bg-muted/50 rounded-full ',
+          'bg-muted/50 rounded-full  ',
     
       },
     },

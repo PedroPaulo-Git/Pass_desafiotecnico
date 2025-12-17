@@ -17,7 +17,7 @@ export type Message = {
   createdAt: string;
 };
 
-export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBack?: () => void }) {
+export default function ChatRoom({ ticketId, onBack, mode = "real", onSwitchToReal, backendAvailable = false, useRealApi = false }: { ticketId: string; onBack?: () => void; mode?: "mock" | "real"; onSwitchToReal?: (mockId: string) => Promise<void>; backendAvailable?: boolean; useRealApi?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [connectedRole, setConnectedRole] = useState<string>("agent");
@@ -38,25 +38,37 @@ export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBac
       : "agent";
 
   useEffect(() => {
+    let mounted = true;
+
+    if (mode === "mock") {
+      // load messages from localStorage for mock mode
+      try {
+        const raw = localStorage.getItem(`mock_chat:${ticketId}:messages`);
+        const msgs = raw ? JSON.parse(raw) : [];
+        if (mounted) setMessages(msgs);
+      } catch (e) {
+        if (mounted) setMessages([]);
+      }
+
+      return () => {
+        mounted = false;
+      };
+    }
+
     (async () => {
       const res = await api.get(`/tickets/${ticketId}/messages`);
+      if (!mounted) return;
       setMessages(res.data || []);
     })();
 
-    const socket = io(
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
-      { autoConnect: true }
-    );
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333", { autoConnect: true });
     socketRef.current = socket;
     socket.emit("join", { ticketId, uuid, role });
     setConnectedRole(role);
 
     socket.on("message:receive", (msg: Message) => {
       setMessages((prev) => [...prev, { ...msg, seen: false }]);
-      setTimeout(
-        () => scrollRef.current?.scrollIntoView({ behavior: "smooth" }),
-        50
-      );
+      setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
     });
 
     socket.on("user:joined", (u: { uuid: string; role: string }) => {
@@ -67,11 +79,9 @@ export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBac
     });
 
     socket.on("user:left", (u: { uuid?: string }) => {
-      // remove by uuid if provided; otherwise best-effort
       if (u?.uuid) {
         setOnline((prev) => prev.filter((p) => p.uuid !== u.uuid));
       } else {
-        // no uuid provided: clear list (safe fallback)
         setOnline([]);
       }
     });
@@ -86,13 +96,41 @@ export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBac
     });
 
     return () => {
-      socket.emit("leave", { ticketId, uuid });
+      try {
+        socket.emit("leave", { ticketId, uuid });
+      } catch {}
       socket.disconnect();
+      mounted = false;
     };
-  }, [ticketId]);
+  }, [ticketId, mode]);
 
   const send = async () => {
     if (!text.trim()) return;
+
+    if (mode === "mock") {
+      // append to localStorage-backed mock chat
+      try {
+        const m = {
+          id: `m-${crypto.randomUUID()}`,
+          content: text,
+          sender: uuid,
+          role,
+          seen: false,
+          createdAt: new Date().toISOString(),
+        };
+        const raw = localStorage.getItem(`mock_chat:${ticketId}:messages`);
+        const arr = raw ? JSON.parse(raw) : [];
+        arr.push(m);
+        localStorage.setItem(`mock_chat:${ticketId}:messages`, JSON.stringify(arr));
+        setMessages((prev) => [...prev, m]);
+        setText("");
+        setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      } catch (e) {
+        console.error(e);
+      }
+      return;
+    }
+
     try {
       await api.post(`/tickets/${ticketId}/messages`, {
         ticketId,
@@ -114,7 +152,7 @@ export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBac
         <div className="header sticky top-0 py-2 bg-background z-10">
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
               {/* Back button visible on mobile only */}
               {onBack && (
                 <div className="lg:hidden mr-1">
@@ -138,9 +176,20 @@ export default function ChatRoom({ ticketId, onBack }: { ticketId: string; onBac
             </div>
             <div className="text-xs text-muted-foreground flex items-center gap-2">
               <span>Conectado como: {connectedRole}</span>
-              <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground text-nowrap">
-                Online: {online.length}
-              </span>
+              <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground text-nowrap">Online: {online.length}</span>
+              {mode === "mock" && backendAvailable && !useRealApi && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    if (onSwitchToReal) {
+                      await onSwitchToReal(ticketId);
+                    }
+                  }}
+                >
+                  Switch to real
+                </Button>
+              )}
             </div>
           </div>
         </div>

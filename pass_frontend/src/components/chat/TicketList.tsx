@@ -156,7 +156,7 @@ export default function TicketList({
               onClick={() => onOpen(ticket.id)}
               className={`${
                 isActive ? "bg-muted" : ""
-              } p-2.5 cursor-pointer hover:bg-muted/50 rounded-lg flex justify-between items-center`}
+              } p-2.5 py-4 cursor-pointer hover:bg-muted/50 rounded-lg flex justify-between items-center border-b`}
             >
               <div>
                 <div className="text-sm font-medium flex items-center gap-2">
@@ -167,7 +167,7 @@ export default function TicketList({
                     src="https://shadcnuikit.com/images/avatars/02.png"
                   />
 
-                  <span className="flex flex-col text-nowrap mb-auto gap-2">
+                  <span className="flex flex-col text-nowrap mb-auto gap-1">
                     <span className="text-fo">
                       {ticket.title ||
                         `Chamado N.º${ticket.id.substring(0, 6)}`}
@@ -176,10 +176,10 @@ export default function TicketList({
                     {ticket.status === "OPEN" && (
                       <Badge
                         variant="ticket"
-                        className="bg-muted-foreground/10 text-green-500 border border-green-600 "
+                        className="bg-muted-foreground/10 text-green-500 text-[10px] border border-green-600 "
                       >
                         {/* {capitalize(ticket.status)} */}
-                        <span className="px-3">Aberto</span>
+                        <span className="px-3 ">Aberto</span>
                       </Badge>
                     )}
                     {ticket.status === "CLOSED" && (
