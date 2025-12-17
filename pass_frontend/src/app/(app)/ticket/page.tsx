@@ -48,16 +48,12 @@ export default function TicketPage() {
   // poll backend availability
   useEffect(() => {
     let mounted = true;
-    const apiUrl = process?.env?.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
     async function checkBackend() {
       try {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), 2500);
-        const res = await fetch(`${apiUrl}/tickets`, { signal: controller.signal });
-        clearTimeout(id);
+        const res = await api.get(`/tickets`, { timeout: 2500 });
         if (!mounted) return;
-        setBackendAvailable(res.ok);
+        setBackendAvailable(Boolean(res && res.status >= 200 && res.status < 300));
       } catch (e) {
         if (!mounted) return;
         setBackendAvailable(false);

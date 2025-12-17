@@ -61,7 +61,8 @@ export default function ChatRoom({ ticketId, onBack, mode = "real", onSwitchToRe
       setMessages(res.data || []);
     })();
 
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333", { autoConnect: true });
+    const socketBase = (api && (api.defaults as any)?.baseURL) || (typeof window !== "undefined" ? window.location.origin : "");
+    const socket = io(socketBase, { autoConnect: true });
     socketRef.current = socket;
     socket.emit("join", { ticketId, uuid, role });
     setConnectedRole(role);
