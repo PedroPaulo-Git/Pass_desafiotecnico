@@ -474,7 +474,7 @@ export function FuelingScrollTable({
                         setPeriodPopoverOpen(open ? period.id : null)
                       }
                       modal={true}
-                    >
+                     >
                       <PopoverTrigger asChild>
                         <button
                           type="button"

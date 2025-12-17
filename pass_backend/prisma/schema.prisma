@@ -150,3 +150,27 @@ model VehicleDocument {
 
   @@map("vehicle_documents")
 }
+
+// --- SUPPORT CHAT (MVP) ---
+model Ticket {
+  id        String    @id @default(uuid())
+  title     String?
+  status    String    @default("OPEN")
+  clientUuid String
+  messages  Message[]
+  createdAt DateTime  @default(now())
+
+  @@map("tickets")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  sender    String
+  role      String
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}

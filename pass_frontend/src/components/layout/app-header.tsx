@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Moon,
@@ -84,6 +84,29 @@ export function AppHeader({
   // Encontra o label da linguagem atual para exibir no botão
   const currentLanguageLabel =
     languages.find((l) => l.value === language)?.label || "English";
+
+  const [chatRole, setChatRole] = useState<string>(() => {
+    try {
+      return typeof window !== "undefined" ? localStorage.getItem("chat_role") || "agent" : "agent";
+    } catch {
+      return "agent";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("chat_role", chatRole);
+      if (!localStorage.getItem("chat_uuid")) {
+        try {
+          localStorage.setItem("chat_uuid", crypto.randomUUID());
+        } catch {
+          // noop in environments without crypto
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [chatRole]);
 
   return (
     <header className="sticky top-0 flex h-14 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
@@ -275,6 +298,17 @@ export function AppHeader({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Quick role toggle for chat (agent/client) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setChatRole(chatRole === "agent" ? "client" : "agent")}
+          className="text-muted-foreground"
+          title={`Role: ${chatRole}`}
+        >
+          <span className="text-xs font-medium">{chatRole === "agent" ? "AG" : "CL"}</span>
+        </Button>
 
         {/* User Avatar Dropdown */}
         <DropdownMenu>

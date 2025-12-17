@@ -14,6 +14,8 @@ import { fuelingRoutes } from "./http/routes/fueling.routes";
 import { incidentRoutes } from "./http/routes/incident.routes";
 import { vehicleDocumentRoutes } from "./http/routes/vehicleDocument.routes";
 import { vehicleImageRoutes } from "./http/routes/vehicleImage.routes";
+import { ticketRoutes } from "./http/routes/ticket.routes";
+import { initSocket } from "./lib/socket";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -133,6 +135,7 @@ app.register(fuelingRoutes, { prefix: "/fuelings" });
 app.register(incidentRoutes, { prefix: "/incidents" });
 app.register(vehicleDocumentRoutes, { prefix: "/documents" });
 app.register(vehicleImageRoutes, { prefix: "/images" });
+app.register(ticketRoutes, { prefix: "/tickets" });
 
 // Iniciar servidor
 const start = async () => {
@@ -141,6 +144,16 @@ const start = async () => {
     const host = process.env.HOST || "0.0.0.0";
 
     await app.listen({ port, host });
+    // Initialize Socket.IO on the underlying http server
+    try {
+      // app.server is the underlying http.Server created by Fastify
+      if ((app as any)?.server) {
+        initSocket((app as any).server);
+        console.log("Socket.IO initialized");
+      }
+    } catch (e) {
+      console.error("Error initializing socket.io", e);
+    }
     console.log(`🚀 Servidor rodando em http://${host}:${port}`);
   } catch (err) {
     // Ensure the error is visible in consoles used by tools like `tsx`

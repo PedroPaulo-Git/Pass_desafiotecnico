@@ -28,7 +28,7 @@ export function DatePicker({
   className,
   variant = "default",
 }: DatePickerProps) {
-  const isModal = variant === "modal";
+  const isModal = variant === "modal" ;
 
   return (
     <Popover modal={true}>
