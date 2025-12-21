@@ -4,8 +4,17 @@ import { Plus } from "lucide-react";
 import { BiSupport } from "react-icons/bi";
 import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
-import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, pointerWithin } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  pointerWithin,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { FilterHeader } from "@/components/support/FilterHeader";
 import { Toolbar } from "@/components/support/Toolbar";
 import { TicketRow } from "@/components/support/TicketRow";
@@ -13,6 +22,7 @@ import { SortableTicketRow } from "@/components/support/SortableTicketRow";
 import { DroppableLane } from "@/components/support/DroppableLane";
 import { ticketAPI } from "@/components/support/api/ticketAPI";
 import { TicketData } from "@/components/support/types";
+import Link from "next/link";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
@@ -31,7 +41,7 @@ export function SupportTicketPage() {
         const data = await ticketAPI.getAll();
         setTickets(data);
       } catch (error) {
-        console.error('Failed to load tickets:', error);
+        console.error("Failed to load tickets:", error);
       } finally {
         setLoading(false);
       }
@@ -50,9 +60,7 @@ export function SupportTicketPage() {
   const statusCounts = useMemo(() => {
     const total = tickets.length;
     const abertos = tickets.filter((t) => t.status === "Aberto").length;
-    const andamento = tickets.filter(
-      (t) => t.status === "Em Andamento"
-    ).length;
+    const andamento = tickets.filter((t) => t.status === "Em Andamento").length;
     const resolvidos = tickets.filter(
       (t) => t.status === "Resolvido" || t.status === "Fechado"
     ).length;
@@ -106,19 +114,19 @@ export function SupportTicketPage() {
     // Adicionar listener para rotação baseada na posição do mouse
     const handleMouseMove = (e: MouseEvent) => {
       const centerX = window.innerWidth / 2;
-      const offsetX =   centerX - e.clientX;
+      const offsetX = centerX - e.clientX;
       const maxTilt = 5; // Máximo de inclinação em graus
       const tilt = (offsetX / centerX) * maxTilt;
       setRotation(tilt);
     };
     mouseMoveRef.current = handleMouseMove;
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     // Remover listener do mouse
     if (mouseMoveRef.current) {
-      window.removeEventListener('mousemove', mouseMoveRef.current);
+      window.removeEventListener("mousemove", mouseMoveRef.current);
       mouseMoveRef.current = null;
     }
     setDraggedTicket(null); // Limpar o overlay
@@ -152,16 +160,17 @@ export function SupportTicketPage() {
 
     try {
       // Atualizar via API
-      const updatedTicket = await ticketAPI.updatePriority(ticketId, newPriority);
+      const updatedTicket = await ticketAPI.updatePriority(
+        ticketId,
+        newPriority
+      );
 
       // Atualizar estado local
       setTickets((prevTickets) =>
-        prevTickets.map((t) =>
-          t.id === ticketId ? updatedTicket : t
-        )
+        prevTickets.map((t) => (t.id === ticketId ? updatedTicket : t))
       );
     } catch (error) {
-      console.error('Failed to update ticket priority:', error);
+      console.error("Failed to update ticket priority:", error);
       // Reverter mudança em caso de erro
       // Por simplicidade, não implementei rollback aqui
     }
@@ -188,7 +197,7 @@ export function SupportTicketPage() {
           <Button className="bg-foreground text-background font-semibold">
             <span className="flex items-center">
               <Plus className="w-4 h-4 mr-2" />
-              Novo Chamado
+              <Link href="/ticket"> Novo Chamado </Link>
             </span>
           </Button>
         </div>
@@ -254,7 +263,9 @@ export function SupportTicketPage() {
                     <DroppableLane
                       key={priority}
                       priority={priority}
-                      tickets={filteredTickets.filter((ticket) => ticket.priority === priority)}
+                      tickets={filteredTickets.filter(
+                        (ticket) => ticket.priority === priority
+                      )}
                       draggedTicketId={draggedTicket?.id || null}
                     />
                   ))}
@@ -265,7 +276,9 @@ export function SupportTicketPage() {
                   {draggedTicket ? (
                     <div
                       className="shadow-2xl opacity-90 cursor-grabbing"
-                      style={{ transform: `rotate(${rotation}deg) scale(1.05)` }}
+                      style={{
+                        transform: `rotate(${rotation}deg) scale(1.05)`,
+                      }}
                     >
                       <TicketRow viewMode="lanes" data={draggedTicket} />
                     </div>
