@@ -25,11 +25,14 @@ export function MainContent({
   const isTicketRoute = Boolean(
     pathname && (pathname === "/ticket" || pathname.startsWith("/ticket"))
   );
+  const isSupportRoute = Boolean(
+    pathname && (pathname === "/support" || pathname.startsWith("/support"))
+  );
 
   return (
     // Main Content
     <div
-      className={isTicketRoute ? "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background" : "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background"}
+      className={ "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background"}
     >
       {/* Desktop Header */}
       <div className="hidden lg:block rounded-tl-4xl">
@@ -52,7 +55,7 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <main className={isTicketRoute ? "flex-1 p-0" : "flex-1 p-6"}>
+      <main className={isTicketRoute || isSupportRoute ? "flex-1 p-0" : "flex-1 p-6"}>
         {children}
       </main>
     </div>  

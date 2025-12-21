@@ -25,9 +25,11 @@ import {
   Package, 
   Puzzle, 
   Settings, 
-  Ticket
+  Ticket, 
 
 } from "lucide-react";
+import { BiSupport } from "react-icons/bi";
+
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { Button } from "@/components/ui/button";
@@ -45,15 +47,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// React Icons para ícones exatos das imagens
-import { BsGrid } from "react-icons/bs";
-import { TbActivity } from "react-icons/tb";
-import { RiBusLine, RiCompassLine, RiTicketLine, RiSettings4Line, RiHotelLine } from "react-icons/ri";
-import { MdOutlineTour } from "react-icons/md";
-import { IoGitBranchOutline } from "react-icons/io5";
-import { PiFlowArrow, PiMapPinArea } from "react-icons/pi";
+
 import { LuCalendarDays, LuFileText } from "react-icons/lu";
-import { FiDollarSign } from "react-icons/fi";
 
 interface AppSidebarProps {
   isCollapsed: boolean;
@@ -91,6 +86,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         { icon: Package, label: "Combo", href: "#combo" },
         { icon: BedDouble, label: "Accommodation", href: "#accommodation" },
         { icon: Ticket, label: "Ticket", href: "/ticket" },
+         { icon: BiSupport, label: "Support", href: "/support" },
         { icon: Camera, label: "Tour", href: "#tour" },
         { icon: Star, label: "Experience", href: "#experience" },
         { icon: Map, label: "Circuit", href: "#circuit" },
