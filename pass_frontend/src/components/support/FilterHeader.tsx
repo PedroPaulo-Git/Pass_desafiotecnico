@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
-import { Search, Calendar as CalendarIcon } from "lucide-react";
+import { Search, XIcon,Calendar as CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
 import { DatePickerRange } from "@/components/ui/data-picker-range";
@@ -40,12 +41,11 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
         {/* Busca Principal */}
         <div className="flex-1 w-full space-y-2">
           <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2">
-           Buscar Chamado
+            Buscar Chamado
           </label>
           <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
-            
               placeholder="Pesquise por ID, título ou nome do cliente..."
               className="pl-9 bg-muted border border-border text-foreground placeholder:text-muted-foreground h-11"
               value={search}
@@ -60,7 +60,7 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             Módulo
           </label>
           <Select value={moduleFilter} onValueChange={setModuleFilter}>
-            <SelectTrigger  className="w-full justify-between bg-muted text-foreground h-11">
+            <SelectTrigger className="w-full justify-between bg-muted text-foreground h-11">
               <SelectValue placeholder="Selecione o módulo" />
             </SelectTrigger>
             <SelectContent bg_fill showSearch>
@@ -87,8 +87,14 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
         </div>
 
         {/* Botão Principal */}
-        <Button onClick={onClearFilters} className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 h-11 px-8 font-semibold">
-          Limpar Filtros
+       
+        <Button
+          variant="outline_text"
+          className="w-full md:w-auto  h-12 px-8 font-semibold "
+ onClick={onClearFilters}
+        >
+          <XIcon className="w-4 h-4 " /> Limpar filtros{" "}
+
         </Button>
       </div>
     </div>

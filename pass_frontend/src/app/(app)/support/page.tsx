@@ -253,9 +253,6 @@ export function SupportTicketPage() {
                 collisionDetection={pointerWithin}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
-                activationConstraint={{
-                  distance: 5, // Ativar drag após mover 5px
-                }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 ">
                   {/* Lanes por prioridade */}
