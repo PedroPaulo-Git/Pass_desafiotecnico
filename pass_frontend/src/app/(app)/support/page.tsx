@@ -11,17 +11,13 @@ import {
   DragOverlay,
   pointerWithin,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { FilterHeader } from "@/components/support/FilterHeader";
 import { Toolbar } from "@/components/support/Toolbar";
 import { TicketRow } from "@/components/support/TicketRow";
-import { SortableTicketRow } from "@/components/support/SortableTicketRow";
 import { DroppableLane } from "@/components/support/DroppableLane";
 import { ticketAPI } from "@/components/support/api/ticketAPI";
 import { TicketData } from "@/components/support/types";
+import { TicketDialog } from "@/components/support/supportComponents/TicketDialog";
 import Link from "next/link";
 
 // --- Componente Principal da Página ---
@@ -33,6 +29,10 @@ export function SupportTicketPage() {
   const [viewMode, setViewMode] = useState<"list" | "grid" | "lanes">("list");
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Dialog state
+  const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -235,7 +235,7 @@ export function SupportTicketPage() {
             {viewMode === "list" && (
               <div className="space-y-1">
                 {filteredTickets.map((ticket) => (
-                  <TicketRow viewMode="list" key={ticket.id} data={ticket} />
+                  <TicketRow viewMode="list" key={ticket.id} data={ticket} onClick={() => { setSelectedTicket(ticket); setIsDialogOpen(true); }} />
                 ))}
               </div>
             )}
@@ -243,7 +243,7 @@ export function SupportTicketPage() {
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTickets.map((ticket) => (
-                  <TicketRow viewMode="grid" key={ticket.id} data={ticket} />
+                  <TicketRow viewMode="grid" key={ticket.id} data={ticket} onClick={() => { setSelectedTicket(ticket); setIsDialogOpen(true); }} />
                 ))}
               </div>
             )}
@@ -264,6 +264,7 @@ export function SupportTicketPage() {
                         (ticket) => ticket.priority === priority
                       )}
                       draggedTicketId={draggedTicket?.id || null}
+                      onTicketClick={(ticket) => { setSelectedTicket(ticket); setIsDialogOpen(true); }}
                     />
                   ))}
                 </div>
@@ -286,6 +287,11 @@ export function SupportTicketPage() {
           </>
         )}
       </div>
+         <TicketDialog
+        ticket={selectedTicket}
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
     </div>
   );
 }

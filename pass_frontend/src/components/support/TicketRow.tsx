@@ -30,9 +30,10 @@ import {
 interface TicketRowProps {
   data: TicketData;
   viewMode?: "list" | "grid" | "lanes";
+  onClick?: () => void;
 }
 
-export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode }) => {
+export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick }) => {
   const isAssigned = !!data.assignedTo;
   const statusIcon = getStatusIconAndColor(data.status);
   const statusBorder = getStatusBorderColor(data.status);
@@ -55,7 +56,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode }) => {
 
   return (
     <div
-      className={`group border border-border border-l-4 ${borderColor} relative bg-muted/40 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm`}
+      className={`group border border-border border-l-4 ${borderColor} relative bg-muted/40 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm `+(viewMode === "lanes" ? "cursor-grab" : "cursor-pointer")}
+      onClick={onClick}
     >
       <div
         className={`flex flex-col items-start gap-4 justify-between ${
@@ -94,29 +96,41 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode }) => {
               </Badge>
             </div>
 
-            <h3 className="text-foreground font-semibold text-sm md:text-base leading-tight transition-colors cursor-pointer">
+            <h3 className="text-foreground font-semibold text-sm md:text-base leading-tight transition-colors ">
               {data.title}
             </h3>
 
-            <p className={`text-foreground/50 text-xs flex items-center gap-2 ${viewMode === "lanes" ? "flex-wrap" : ""}` }>
-              <span className="text-muted-foreground">{data.clientName}</span>
+            <p
+              className={`text-foreground/50 text-xs flex items-center gap-2 ${
+                viewMode === "lanes" ? "flex-wrap" : ""
+              }`}
+            >
+              <span className="flex text-center justify-center items-center gap-2 text-muted-foreground">
+                {/* <Avatar className="h-6 w-6 border border-zinc-700">
+                  <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">
+                    {data.assignedTo?.avatarFallback}
+                  </AvatarFallback>
+                </Avatar> */}
+                {data.clientName}
+              </span>
               <span>•</span>
               <span className="bg-background px-1.5 py-0.5 rounded text-muted-foreground border border-border">
                 {data.module}
               </span>
             </p>
+
+
           </div>
+          
         </div>
 
         {/* Coluna 2: Metadados (Atribuição e Tempo) */}
         <div
           className={`flex items-center flex-wrap  mx-auto justify-center w-full gap-4 
              lg:w-auto mt-2 lg:mt-0 lg:justify-end border-t lg:border-t-0 border-border pt-3 
-             lg:pt-0 ${
-               viewMode === "grid"
-                 ? "lg:gap-8"
-                 : "flex-wrap"
-             } ${viewMode === "lanes" ? "flex-nowrap  lg:gap-6" : "flex-wrap"}`}
+             lg:pt-0 ${viewMode === "grid" ? "lg:gap-8" : "flex-wrap"} ${
+            viewMode === "lanes" ? "flex-nowrap  lg:gap-6" : "flex-wrap"
+          }`}
         >
           {/* Atribuído a */}
           <div className="flex flex-col gap-1 min-w-[120px]">
@@ -203,14 +217,13 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode }) => {
 
           {/* Botão de Ação */}
 
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-8 w-8 border-border bg-background text-foreground transition-colors"
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8 border-border bg-background text-foreground transition-colors"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </div>

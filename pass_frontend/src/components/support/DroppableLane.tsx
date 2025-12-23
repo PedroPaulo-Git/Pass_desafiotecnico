@@ -13,12 +13,14 @@ interface DroppableLaneProps {
   priority: string;
   tickets: TicketData[];
   draggedTicketId?: string | null;
+  onTicketClick?: (ticket: TicketData) => void;
 }
 
 export const DroppableLane: React.FC<DroppableLaneProps> = ({
   priority,
   tickets,
   draggedTicketId,
+  onTicketClick,
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: priority,
@@ -47,9 +49,9 @@ export const DroppableLane: React.FC<DroppableLaneProps> = ({
         items={visibleTickets.map((ticket) => ticket.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-0 min-h-[200px] max-h-[55vh] overflow-y-auto overflow-x-hidden">
+        <div className="space-y-0 min-h-[200px] max-h-[55vh] overflow-y-auto overflow-x-hidden ">
           {visibleTickets.map((ticket) => (
-            <SortableTicketRow key={ticket.id} ticket={ticket} />
+            <SortableTicketRow key={ticket.id} ticket={ticket} onClick={() => onTicketClick?.(ticket)} />
           ))}
         </div>
       </SortableContext>
