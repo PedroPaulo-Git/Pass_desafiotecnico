@@ -6,6 +6,8 @@ import {
   Clock,
   UserPlus,
   ArrowRight,
+  AlertCircle,
+  Eye,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TicketData } from "./types";
+import { TicketData, Priority } from "./types";
 import {
   getPriorityStyles,
   getStatusStyles,
@@ -25,6 +27,7 @@ import {
   getStatusIconAndColor,
   getStatusBorderColor,
   getPriorityBorderColor,
+  getStatusContainerClass,
 } from "./helpers";
 
 interface TicketRowProps {
@@ -35,18 +38,20 @@ interface TicketRowProps {
 
 export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick }) => {
   const isAssigned = !!data.assignedTo;
-  const statusIcon = getStatusIconAndColor(data.status);
-  const statusBorder = getStatusBorderColor(data.status);
-  let IconComponent, iconClass, borderColor, effectivePriority;
+  let IconComponent = AlertCircle;
+  let iconClass = "bg-background border-border text-foreground/50";
+  let borderColor = "border-l-purple-400";
+  let effectivePriority: Priority = "Baixa";
 
-  if (statusIcon) {
-    IconComponent = statusIcon.icon;
-    iconClass = statusIcon.className;
-    borderColor = statusBorder;
-    // Usar prioridade do ticket quando disponível (especialmente no modo lanes após drag-and-drop)
-    effectivePriority = data.priority || getPriorityFromCategory(data.category);
+  if (data.status === "Resolvido" || data.status === "Fechado") {
+    const statusIcon = getStatusIconAndColor(data.status);
+    if (statusIcon) {
+      IconComponent = statusIcon.icon;
+      iconClass = getStatusContainerClass(data.status);
+      borderColor = getStatusBorderColor(data.status)!;
+      effectivePriority = data.priority || getPriorityFromCategory(data.category);
+    }
   } else {
-    // Usar prioridade do ticket quando disponível, senão derivar da categoria
     effectivePriority = data.priority || getPriorityFromCategory(data.category);
     borderColor = getPriorityBorderColor(effectivePriority);
     const categoryIcon = getCategoryIconAndColor(data.category);
@@ -56,7 +61,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
 
   return (
     <div
-      className={`group border border-border border-l-4 ${borderColor} relative bg-muted/40 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm `+(viewMode === "lanes" ? "cursor-grab" : "cursor-pointer")}
+      className={`group border border-border border-l-4 ${borderColor} relative bg-muted/20 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm `+(viewMode === "lanes" ? "cursor-grab" : "cursor-pointer")}
       onClick={onClick}
     >
       <div
@@ -96,7 +101,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
               </Badge>
             </div>
 
-            <h3 className="text-foreground font-semibold text-sm md:text-base leading-tight transition-colors ">
+            <h3 className="text-foreground font-semibold leading-tight transition-colors ">
               {data.title}
             </h3>
 
@@ -128,8 +133,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
         <div
           className={`flex items-center flex-wrap  mx-auto justify-center w-full gap-4 
              lg:w-auto mt-2 lg:mt-0 lg:justify-end border-t lg:border-t-0 border-border pt-3 
-             lg:pt-0 ${viewMode === "grid" ? "lg:gap-8" : "flex-wrap"} ${
-            viewMode === "lanes" ? "flex-nowrap  lg:gap-6" : "flex-wrap"
+             lg:pt-0 ${viewMode === "grid" ? "lg:gap-0" : "flex-wrap"} ${
+            viewMode === "lanes" ? "flex-nowrap  lg:gap-0" : "flex-wrap"
           }`}
         >
           {/* Atribuído a */}
@@ -217,13 +222,13 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
 
           {/* Botão de Ação */}
 
-          <Button
+          {/* <Button
             size="icon"
             variant="outline"
             className="h-8 w-8 border-border bg-background text-foreground transition-colors"
           >
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+            
+          </Button> */}
         </div>
       </div>
     </div>

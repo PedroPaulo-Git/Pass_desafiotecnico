@@ -15,6 +15,12 @@
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
   }
+
+  /* Aumentar o peso de todos os text-sm */
+  .text-sm {
+    font-weight: 550 !important;
+    font-size: 13px !important;
+  }
 }
 /* Theme transition layers */
 .theme-layer-base {

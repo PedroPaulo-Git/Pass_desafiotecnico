@@ -71,6 +71,7 @@ export const translations = {
       slots: "Horários",
       perimeters: "Perímetros",
       guidelines: "Diretrizes",
+      support: "Suporte",
     },
     // Home
     home: {
@@ -388,6 +389,7 @@ export const translations = {
       slots: "Slots",
       perimeters: "Perimeters",
       guidelines: "Guidelines",
+      support: "Support",
     },
     // Home
     home: {
@@ -704,6 +706,7 @@ export const translations = {
       slots: "Horarios",
       perimeters: "Perímetros",
       guidelines: "Directrices",
+      support: "Soporte",
     },
     // Home
     home: {

@@ -18,10 +18,12 @@ import { DroppableLane } from "@/components/support/DroppableLane";
 import { ticketAPI } from "@/components/support/api/ticketAPI";
 import { TicketData } from "@/components/support/types";
 import { TicketDialog } from "@/components/support/supportComponents/TicketDialog";
+import { useActiveNavTitle } from "@/hooks/use-active-nav-title";
 import Link from "next/link";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
+   const { currentTitle } = useActiveNavTitle();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [moduleFilter, setModuleFilter] = useState("Todos os Módulos");
@@ -178,9 +180,9 @@ export function SupportTicketPage() {
 
   return (
     <div className="text-foreground font-sans">
-      <div className="mx-auto max-w-[95%]  pt-6 ">
+      <div className="mx-auto max-w-[95%]   ">
         {/* Header com Título da Seção */}
-        <div className="flex items-center justify-between mb-6 ">
+        {/* <div className="flex items-center justify-between mb-6 ">
           <div className="flex items-center gap-3">
             <div className="bg-purple-600 p-2 rounded-lg">
               <BiSupport className="w-6 h-6 text-white" />
@@ -200,7 +202,7 @@ export function SupportTicketPage() {
               <Link href="/ticket"> Novo Chamado </Link>
             </span>
           </Button>
-        </div>
+        </div> */}
 
         {/* Filtros */}
         <FilterHeader

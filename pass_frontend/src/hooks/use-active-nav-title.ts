@@ -22,6 +22,7 @@ export function useActiveNavTitle() {
     "/combo": "Combo",
     "/accommodation": "Accommodation", 
     "/ticket": "Ticket",
+    "/support": t.nav.support || "Suporte",
     "/tour": "Tour",
     "/experience": "Experience",
     "/circuit": "Circuit",

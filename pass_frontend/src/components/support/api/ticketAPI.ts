@@ -88,7 +88,7 @@ export const ticketAPI = {
   getById: (id: string): Promise<TicketData | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const ticket = MOCK_TICKETS.find(t => t.id === id) || null;
+        const ticket = MOCK_TICKETS.find((t) => t.id === id) || null;
         resolve(ticket);
       }, 50);
     });
@@ -98,15 +98,15 @@ export const ticketAPI = {
   updatePriority: (id: string, newPriority: string): Promise<TicketData> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const ticketIndex = MOCK_TICKETS.findIndex(t => t.id === id);
+        const ticketIndex = MOCK_TICKETS.findIndex((t) => t.id === id);
         if (ticketIndex === -1) {
-          reject(new Error('Ticket not found'));
+          reject(new Error("Ticket not found"));
           return;
         }
 
         MOCK_TICKETS[ticketIndex] = {
           ...MOCK_TICKETS[ticketIndex],
-          priority: newPriority as any
+          priority: newPriority as any,
         };
 
         resolve(MOCK_TICKETS[ticketIndex]);
@@ -115,12 +115,12 @@ export const ticketAPI = {
   },
 
   // Create new ticket
-  create: (ticket: Omit<TicketData, 'id'>): Promise<TicketData> => {
+  create: (ticket: Omit<TicketData, "id">): Promise<TicketData> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const newTicket: TicketData = {
           ...ticket,
-          id: Date.now().toString()
+          id: Date.now().toString(),
         };
         MOCK_TICKETS.push(newTicket);
         resolve(newTicket);
@@ -132,15 +132,15 @@ export const ticketAPI = {
   update: (id: string, updates: Partial<TicketData>): Promise<TicketData> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const ticketIndex = MOCK_TICKETS.findIndex(t => t.id === id);
+        const ticketIndex = MOCK_TICKETS.findIndex((t) => t.id === id);
         if (ticketIndex === -1) {
-          reject(new Error('Ticket not found'));
+          reject(new Error("Ticket not found"));
           return;
         }
 
         MOCK_TICKETS[ticketIndex] = {
           ...MOCK_TICKETS[ticketIndex],
-          ...updates
+          ...updates,
         };
 
         resolve(MOCK_TICKETS[ticketIndex]);
@@ -152,9 +152,9 @@ export const ticketAPI = {
   delete: (id: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const ticketIndex = MOCK_TICKETS.findIndex(t => t.id === id);
+        const ticketIndex = MOCK_TICKETS.findIndex((t) => t.id === id);
         if (ticketIndex === -1) {
-          reject(new Error('Ticket not found'));
+          reject(new Error("Ticket not found"));
           return;
         }
 
@@ -162,5 +162,5 @@ export const ticketAPI = {
         resolve();
       }, 150);
     });
-  }
+  },
 };

@@ -1,5 +1,5 @@
 import { Priority, Status } from "./types";
-import { AlertCircle, CheckCircle2, HelpCircle, UserPlus } from "lucide-react";
+import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle } from "lucide-react";
 
 // --- Helpers de Estilo ---
 export const getPriorityStyles = (p: Priority) => {
@@ -75,23 +75,52 @@ export const getPriorityFromCategory = (category: string): Priority => {
 
 export const getStatusIconAndColor = (status: Status) => {
   switch (status) {
+    case "Aberto":
+      return {
+        icon: AlertCircle,
+        color: "text-yellow-500",
+      };
+    case "Em Andamento":
+      return {
+        icon: Play,
+        color: "text-purple-400",
+      };
     case "Resolvido":
       return {
         icon: CheckCircle2,
-        className: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500",
+        color: "text-emerald-400",
       };
     case "Fechado":
       return {
-        icon: CheckCircle2,
-        className: "bg-background border-border text-foreground/50",
+        icon: XCircle,
+        color: "text-foreground/50",
       };
     default:
       return null;
   }
 };
 
+export const getStatusContainerClass = (status: Status) => {
+  switch (status) {
+    case "Aberto":
+      return "bg-yellow-500/10 border-yellow-500/20 text-yellow-500";
+    case "Em Andamento":
+      return "bg-purple-500/10 border-purple-500/20 text-purple-400";
+    case "Resolvido":
+      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+    case "Fechado":
+      return "bg-background border-border text-foreground/50";
+    default:
+      return "bg-background border-border text-foreground/50";
+  }
+};
+
 export const getStatusBorderColor = (status: Status) => {
   switch (status) {
+    case "Aberto":
+      return "border-l-yellow-500";
+    case "Em Andamento":
+      return "border-l-purple-500";
     case "Resolvido":
       return "border-l-emerald-500";
     case "Fechado":
