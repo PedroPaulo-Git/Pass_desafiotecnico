@@ -44,7 +44,7 @@ export const UserInfoPopover: React.FC<UserInfoPopoverProps> = ({ data }) => {
           {/* Card interno estilizado como na imagem */}
           <div className="flex gap-4 p-4 rounded-xl  bg-muted/20 border border-border/20">
             {/* Coluna do Avatar */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="h-12 w-12 rounded-full bg-muted/20 flex items-center justify-center text-muted-foreground">
                 <LuUser className="h-6 w-6" />
               </div>

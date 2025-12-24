@@ -12,7 +12,7 @@ let MOCK_TICKETS: TicketData[] = [
     priority: "Alta",
     status: "Em Andamento",
     createdAt: new Date(2025, 11, 21, 9, 30), // Hoje
-    assignedTo: { id: "dev1", name: "Carlos Dev", avatarFallback: "CD" },
+    assignedTo: { id: "dev1", name: "Carlos Dev", avatarFallback: "CD", role: "Desenvolvedor Sênior", email: "carlos@empresa.com", phone: "(11) 99999-1111" },
     attachmentCount: 2,
     messageCount: 5,
   },
@@ -41,7 +41,7 @@ let MOCK_TICKETS: TicketData[] = [
     status: "Resolvido",
     createdAt: new Date(2025, 11, 19), // 19/12/2025
     responseTime: "45min",
-    assignedTo: { id: "dev2", name: "Amanda Tech", avatarFallback: "AT" },
+    assignedTo: { id: "dev2", name: "Amanda Tech", avatarFallback: "AT", role: "Analista de Suporte", email: "amanda@empresa.com", phone: "(11) 99999-2222" },
     attachmentCount: 1,
     messageCount: 12,
   },
@@ -55,7 +55,7 @@ let MOCK_TICKETS: TicketData[] = [
     priority: "Média",
     status: "Em Andamento",
     createdAt: new Date(2025, 11, 18), // 18/12/2025
-    assignedTo: { id: "dev1", name: "Carlos Dev", avatarFallback: "CD" },
+    assignedTo: { id: "dev1", name: "Carlos Dev", avatarFallback: "CD", role: "Desenvolvedor Sênior", email: "carlos@empresa.com", phone: "(11) 99999-1111" },
     attachmentCount: 3,
     messageCount: 4,
   },
@@ -69,7 +69,7 @@ let MOCK_TICKETS: TicketData[] = [
     priority: "Baixa",
     status: "Fechado",
     createdAt: new Date(2025, 11, 15), // 15/12/2025
-    assignedTo: { id: "dev3", name: "Junior Front", avatarFallback: "JF" },
+    assignedTo: { id: "dev3", name: "Junior Front", avatarFallback: "JF", role: "Desenvolvedor Frontend", email: "junior@empresa.com", phone: "(11) 99999-3333" },
     attachmentCount: 1,
     messageCount: 2,
   },

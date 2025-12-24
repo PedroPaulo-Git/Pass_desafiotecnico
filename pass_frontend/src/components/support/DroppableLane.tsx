@@ -21,6 +21,18 @@ export const DroppableLane: React.FC<DroppableLaneProps> = ({
   tickets,
   onTicketClick,
 }) => {
+  const getCounterStyles = (p: string) => {
+    switch (p) {
+      case "Alta":
+        return "bg-red-200 text-red-600 dark:bg-red-900/30 dark:text-red-400";
+      case "Média":
+        return "bg-yellow-200 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case "Baixa":
+        return "bg-blue-200 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
+      default:
+        return "bg-border text-foreground";
+    }
+  };
   const { setNodeRef, isOver } = useDroppable({
     id: priority,
     data: {
@@ -47,7 +59,7 @@ export const DroppableLane: React.FC<DroppableLaneProps> = ({
       >
         <h3 className="font-bold text-sm text-center flex items-center justify-center gap-2">
           {priority}
-          <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+          <span className={`ml-2 ${getCounterStyles(priority)} px-1.5 py-0.5 rounded-full text-[10px]`}>
             {tickets.length}
           </span>
         </h3>

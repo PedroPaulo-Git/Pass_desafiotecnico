@@ -31,14 +31,11 @@ import Link from "next/link";
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
   const { currentTitle } = useActiveNavTitle();
-  const [search, setSearch] = useState(() => localStorage.getItem('supportSearch') || "");
-  const [statusFilter, setStatusFilter] = useState(() => localStorage.getItem('supportStatusFilter') || "Todos");
-  const [moduleFilter, setModuleFilter] = useState(() => localStorage.getItem('supportModuleFilter') || "Todos os Módulos");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    const saved = localStorage.getItem('supportDateRange');
-    return saved ? JSON.parse(saved) : undefined;
-  });
-  const [viewMode, setViewMode] = useState<"list" | "grid" | "lanes">(() => (localStorage.getItem('supportViewMode') as "list" | "grid" | "lanes") || "list");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Todos");
+  const [moduleFilter, setModuleFilter] = useState("Todos os Módulos");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "lanes">("list");
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [activeTicket, setActiveTicket] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +51,21 @@ export function SupportTicketPage() {
     }),
     useSensor(TouchSensor)
   );
+
+  // Load filters from localStorage after component mounts
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSearch(localStorage.getItem('supportSearch') || "");
+      setStatusFilter(localStorage.getItem('supportStatusFilter') || "Todos");
+      setModuleFilter(localStorage.getItem('supportModuleFilter') || "Todos os Módulos");
+      const savedDateRange = localStorage.getItem('supportDateRange');
+      if (savedDateRange) {
+        setDateRange(JSON.parse(savedDateRange));
+      }
+      setViewMode((localStorage.getItem('supportViewMode') as "list" | "grid" | "lanes") || "list");
+    }
+  }, []);
+
   // Load initial data
   useEffect(() => {
     const loadTickets = async () => {
