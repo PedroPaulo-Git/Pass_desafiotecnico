@@ -39,7 +39,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         onValueChange={setStatusFilter}
         className="w-auto"
       >
-        <TabsList className="flex items-center gap-2 p-1 bg-background rounded-lg border border-border overflow-x-auto max-w-full h-auto">
+        <TabsList className="flex items-center gap-1 p-1 bg-background rounded-lg border border-border overflow-x-auto max-w-full h-auto">
           <TabsTrigger
             value="Todos"
             className={`h-8 text-xs font-medium rounded-md px-3 py-1.5 ${
@@ -93,11 +93,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </span>
           </TabsTrigger>
 
-          <Separator orientation="vertical" className="h-4 mx-2" />
+          <Separator orientation="vertical" className="h-4 mr-2" />
           <div className="flex items-center gap-3">
             <span className="text-foreground/90 text-xs">
               Visualização:{" "}
-              <span className="text-foreground/50 font-medium">
+              <span className="text-foreground/50 font-medium ml-1">
                 {viewModeLabels[viewMode]}
               </span>
             </span>

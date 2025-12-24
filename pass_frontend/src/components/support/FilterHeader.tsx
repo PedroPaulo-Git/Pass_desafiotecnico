@@ -71,9 +71,9 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
               <SelectTrigger className="w-full justify-between pl-3 text-foreground h-11 border-input hover:bg-input/50  shadow-sm border-0 rounded-md dark:bg-input/30 bg-border">
                 <SelectValue placeholder="Selecione o módulo" />
               </SelectTrigger>
-              <SelectContent bg_fill showSearch className="">
+              <SelectContent showSearch className="bg-popover">
                 {modules.map((module) => (
-                  <SelectItem key={module} value={module}>
+                  <SelectItem className="bg-popove" key={module} value={module}>
                     {module}
                   </SelectItem>
                 ))}

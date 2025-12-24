@@ -14,6 +14,7 @@ import {
 import { FilterHeader } from "@/components/support/FilterHeader";
 import { Toolbar } from "@/components/support/Toolbar";
 import { TicketRow } from "@/components/support/TicketRow";
+import { TicketRowSkeleton } from "@/components/support/TicketRow";
 import { DroppableLane } from "@/components/support/DroppableLane";
 import { ticketAPI } from "@/components/support/api/ticketAPI";
 import { TicketData } from "@/components/support/types";
@@ -23,7 +24,7 @@ import Link from "next/link";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
-   const { currentTitle } = useActiveNavTitle();
+  const { currentTitle } = useActiveNavTitle();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [moduleFilter, setModuleFilter] = useState("Todos os Módulos");
@@ -226,18 +227,43 @@ export function SupportTicketPage() {
         />
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Carregando tickets...</p>
+          viewMode === "list" ? (
+            <div className="space-y-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TicketRowSkeleton key={i} viewMode="list" />
+              ))}
             </div>
-          </div>
+          ) : viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <TicketRowSkeleton key={i} viewMode="grid" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4">
+              {["Baixa", "Média", "Alta"].map((priority) => (
+                <div key={priority} className="space-y-1">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <TicketRowSkeleton key={`${priority}-${i}`} viewMode="lanes" />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )
         ) : (
           <>
             {viewMode === "list" && (
               <div className="space-y-1">
                 {filteredTickets.map((ticket) => (
-                  <TicketRow viewMode="list" key={ticket.id} data={ticket} onClick={() => { setSelectedTicket(ticket); setIsDialogOpen(true); }} />
+                  <TicketRow
+                    viewMode="list"
+                    key={ticket.id}
+                    data={ticket}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setIsDialogOpen(true);
+                    }}
+                  />
                 ))}
               </div>
             )}
@@ -245,7 +271,15 @@ export function SupportTicketPage() {
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTickets.map((ticket) => (
-                  <TicketRow viewMode="grid" key={ticket.id} data={ticket} onClick={() => { setSelectedTicket(ticket); setIsDialogOpen(true); }} />
+                  <TicketRow
+                    viewMode="grid"
+                    key={ticket.id}
+                    data={ticket}
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setIsDialogOpen(true);
+                    }}
+                  />
                 ))}
               </div>
             )}
@@ -266,7 +300,10 @@ export function SupportTicketPage() {
                         (ticket) => ticket.priority === priority
                       )}
                       draggedTicketId={draggedTicket?.id || null}
-                      onTicketClick={(ticket) => { setSelectedTicket(ticket); setIsDialogOpen(true); }}
+                      onTicketClick={(ticket) => {
+                        setSelectedTicket(ticket);
+                        setIsDialogOpen(true);
+                      }}
                     />
                   ))}
                 </div>
@@ -289,7 +326,7 @@ export function SupportTicketPage() {
           </>
         )}
       </div>
-         <TicketDialog
+      <TicketDialog
         ticket={selectedTicket}
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

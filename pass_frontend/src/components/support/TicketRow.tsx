@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   MessageSquare,
   Paperclip,
@@ -8,8 +8,15 @@ import {
   ArrowRight,
   AlertCircle,
   Eye,
+  User,
+  ChevronDownCircleIcon,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
+import { IoMdCopy } from "react-icons/io";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { LuUserRoundSearch } from "react-icons/lu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +25,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TicketData, Priority } from "./types";
 import {
   getPriorityStyles,
@@ -29,6 +41,8 @@ import {
   getPriorityBorderColor,
   getStatusContainerClass,
 } from "./helpers";
+import { Separator } from "../ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TicketRowProps {
   data: TicketData;
@@ -36,8 +50,23 @@ interface TicketRowProps {
   onClick?: () => void;
 }
 
-export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick }) => {
+export const TicketRow: React.FC<TicketRowProps> = ({
+  data,
+  viewMode,
+  onClick,
+}) => {
   const isAssigned = !!data.assignedTo;
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(data.ticketNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
   let IconComponent = AlertCircle;
   let iconClass = "bg-background border-border text-foreground/50";
   let borderColor = "border-l-purple-400";
@@ -49,7 +78,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
       IconComponent = statusIcon.icon;
       iconClass = getStatusContainerClass(data.status);
       borderColor = getStatusBorderColor(data.status)!;
-      effectivePriority = data.priority || getPriorityFromCategory(data.category);
+      effectivePriority =
+        data.priority || getPriorityFromCategory(data.category);
     }
   } else {
     effectivePriority = data.priority || getPriorityFromCategory(data.category);
@@ -61,31 +91,96 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
 
   return (
     <div
-      className={`group border border-border border-l-4 ${borderColor} relative bg-muted/20 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm `+(viewMode === "lanes" ? "cursor-grab" : "cursor-pointer")}
-      onClick={onClick}
+      className={
+        `group border border-border border-l-4 ${borderColor} relative bg-muted/20 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm ` +
+        (viewMode === "lanes" ? "cursor-grab" : "")
+      }
     >
       <div
-        className={`flex flex-col items-start gap-4 justify-between ${
+        className={`flex flex-col items-start gap-4 justify-between h-full ${
           viewMode === "grid" || viewMode === "lanes"
             ? "lg:items-start flex-col"
             : "lg:items-center lg:flex-row"
         }`}
       >
         {/* Coluna 1: Info Principal do Ticket */}
-        <div className="flex items-start gap-4 flex-1">
+        <div className="flex items-start 2xl:gap-4 gap-2 flex-1 w-full">
           {/* Ícone Indicativo de Status/Prioridade */}
-          <div className={`mt-1 p-2 rounded-full border ${iconClass}`}>
+          <div className={`mt-1 2xl:p-2 p-1 rounded-full border ${iconClass}`}>
             <IconComponent className="w-5 h-5" />
           </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-foreground/50 text-xs font-mono">
-                {data.ticketNumber}
+          <div className="flex flex-col space-y-1 w-full">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={copyToClipboard}
+                    className="flex items-center text-[10px] 2xl:text-xs text-muted-foreground cursor-pointer border-none bg-transparent p-0 max-w-[110px]"
+                  >
+                    {data.ticketNumber}{" "}
+                    <IoMdCopy className="ml-1 mb-0.5 w-3 h-3 border-border" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{copied ? "Copiado!" : "Clique para copiar"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <h3 className="text-foreground font-semibold leading-tight transition-colors text-md ">
+              {data.title}
+            </h3>
+
+            <p
+              className={`text-foreground/50 text-xs flex-wrap flex items-center gap-2 ${
+                viewMode === "lanes" ? "flex-wrap" : ""
+              }`}
+            >
+              <span className="flex text-center justify-center items-center gap-2 text-muted-foreground">
+                {data.clientName}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs  
+              inline-flex items-center justify-center rounded-md
+               border font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 
+               [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 
+               focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40
+                aria-invalid:border-destructive overflow-hidden [a&]:hover:bg-primary/90 py-1
+                 bg-gray-100 dark:bg-gray-950/30 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-800 
+                 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900/40 transition-colors"
+                    >
+                      <LuUserRoundSearch className="w-2 h-2" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium leading-none">
+                          Informações do Usuário
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Nome: {data.clientName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Categoria: {data.category}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Status: {data.status}
+                        </p>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </span>
+            </p>
+
+            <div className="flex w-full gap-2 items-center mt-auto">
               <Badge
                 variant="outline"
-                className={`text-[10px] px-2 h-5 border rounded-full ${getPriorityStyles(
+                className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
                   effectivePriority
                 )}`}
               >
@@ -93,143 +188,191 @@ export const TicketRow: React.FC<TicketRowProps> = ({ data, viewMode, onClick })
               </Badge>
               <Badge
                 variant="outline"
-                className={`text-[10px] px-2 h-5 border rounded-full ${getStatusStyles(
+                className={`text-[11px] px-2 h-6 border rounded-md ${getStatusStyles(
                   data.status
                 )}`}
               >
                 {data.status}
               </Badge>
+              {viewMode !== "lanes" && viewMode !== "list" && (
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
+                  }}
+                  className=" flex text-foreground border border-border bg-background w-9 h-9 hover:bg-accent/10 p-0 ml-auto"
+                >
+                  <Eye className="w-5 h-5" />
+                </Button>
+              )}
             </div>
-
-            <h3 className="text-foreground font-semibold leading-tight transition-colors ">
-              {data.title}
-            </h3>
-
-            <p
-              className={`text-foreground/50 text-xs flex items-center gap-2 ${
-                viewMode === "lanes" ? "flex-wrap" : ""
-              }`}
-            >
-              <span className="flex text-center justify-center items-center gap-2 text-muted-foreground">
-                {/* <Avatar className="h-6 w-6 border border-zinc-700">
-                  <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">
-                    {data.assignedTo?.avatarFallback}
-                  </AvatarFallback>
-                </Avatar> */}
-                {data.clientName}
-              </span>
-              <span>•</span>
-              <span className="bg-background px-1.5 py-0.5 rounded text-muted-foreground border border-border">
-                {data.module}
-              </span>
-            </p>
-
-
           </div>
-          
         </div>
 
         {/* Coluna 2: Metadados (Atribuição e Tempo) */}
-        <div
-          className={`flex items-center flex-wrap  mx-auto justify-center w-full gap-4 
+        {viewMode === "list" && (
+          <div
+            className={`flex items-center flex-wrap mx-auto 2xl:mx-0 2xl:ml-12 justify-center w-full gap-4 
              lg:w-auto mt-2 lg:mt-0 lg:justify-end border-t lg:border-t-0 border-border pt-3 
-             lg:pt-0 ${viewMode === "grid" ? "lg:gap-0" : "flex-wrap"} ${
-            viewMode === "lanes" ? "flex-nowrap  lg:gap-0" : "flex-wrap"
-          }`}
-        >
-          {/* Atribuído a */}
-          <div className="flex flex-col gap-1 min-w-[120px]">
-            <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider">
-              Responsável
-            </span>
-            {isAssigned ? (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6 border border-zinc-700">
-                  <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">
-                    {data.assignedTo?.avatarFallback}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-muted-foreground text-xs font-medium">
-                  {data.assignedTo?.name}
-                </span>
-              </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-0 text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
-              >
-                <UserPlus className="w-3 h-3" /> Assumir
-              </Button>
-            )}
-          </div>
+             lg:pt-0 
+            
+            `}
+          >
+            {/* Atribuído a */}
+            <div className="flex flex-col gap-1 min-w-[120px]">
+              <span className="text-[10px]  uppercase font-bold text-foreground/80 tracking-wider">
+                Responsável
+              </span>
+              {isAssigned ? (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6 border border-zinc-700">
+                    <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">
+                      {data.assignedTo?.avatarFallback}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-muted-foreground text-xs font-medium">
+                    {data.assignedTo?.name}
+                  </span>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-0 text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
+                >
+                  <UserPlus className="w-3 h-3" /> Assumir
+                </Button>
+              )}
+            </div>
 
-          {/* Data e Tempo */}
-          <div className="flex flex-col gap-1 min-w-[100px]">
-            <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider">
-              Abertura
-            </span>
-            <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-              <Clock className="w-3 h-3" />
-              {data.createdAt instanceof Date
-                ? data.createdAt.toLocaleDateString()
-                : data.createdAt}
+            {/* Data e Tempo */}
+            <div className="flex flex-col gap-1 min-w-[100px] mb-1">
+              <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider mb-1">
+                Abertura
+              </span>
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                <Clock className="w-3 h-3" />
+                {data.createdAt instanceof Date
+                  ? data.createdAt.toLocaleDateString()
+                  : data.createdAt}
+              </div>
+            </div>
+
+            {/* Métricas Rápidas */}
+            <div className="flex items-center gap-3 border-l border-border pl-4">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div
+                      className={`flex items-center gap-1 text-xs ${
+                        data.messageCount > 0
+                          ? "text-foreground"
+                          : "text-muted-foreground/60"
+                      }`}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>{data.messageCount}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Mensagens no chat</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div
+                      className={`flex items-center gap-1 text-xs ${
+                        data.attachmentCount > 0
+                          ? "text-foreground"
+                          : "text-muted-foreground/60"
+                      }`}
+                    >
+                      <Paperclip className="w-4 h-4" />
+                      <span>{data.attachmentCount}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Anexos/Evidências</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+              className=" flex text-foreground border border-border bg-background w-9 h-9 hover:bg-accent/10 p-0"
+            >
+              <Eye className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const TicketRowSkeleton: React.FC<{ viewMode?: "list" | "grid" | "lanes" }> = ({ viewMode = "list" }) => {
+  return (
+    <div
+      className={
+        `group border border-border border-l-4 border-l-muted-400 relative bg-muted/20 rounded-lg p-4 py-8 mb-3 shadow-sm`
+      }
+    >
+      <div
+        className={`flex flex-col items-start gap-4 justify-between h-full ${
+          viewMode === "grid" || viewMode === "lanes"
+            ? "lg:items-start flex-col"
+            : "lg:items-center lg:flex-row"
+        }`}
+      >
+        {/* Coluna 1: Info Principal do Ticket */}
+        <div className="flex items-start gap-4 flex-1 w-full">
+          {/* Ícone Indicativo de Status/Prioridade */}
+          <Skeleton className="mt-1 w-10 h-10 rounded-full border" />
+
+          <div className="flex flex-col space-y-1 w-full">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+
+            <div className="flex gap-2 items-center mt-auto">
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-16" />
             </div>
           </div>
-
-          {/* Métricas Rápidas */}
-          <div className="flex items-center gap-3 border-l border-border pl-4">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div
-                    className={`flex items-center gap-1 text-xs ${
-                      data.messageCount > 0
-                        ? "text-foreground"
-                        : "text-muted-foreground/60"
-                    }`}
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span>{data.messageCount}</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Mensagens no chat</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div
-                    className={`flex items-center gap-1 text-xs ${
-                      data.attachmentCount > 0
-                        ? "text-foreground"
-                        : "text-muted-foreground/60"
-                    }`}
-                  >
-                    <Paperclip className="w-4 h-4" />
-                    <span>{data.attachmentCount}</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Anexos/Evidências</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-
-          {/* Botão de Ação */}
-
-          {/* <Button
-            size="icon"
-            variant="outline"
-            className="h-8 w-8 border-border bg-background text-foreground transition-colors"
-          >
-            
-          </Button> */}
         </div>
+
+        {/* Coluna 2: Metadados (Atribuição e Tempo) */}
+        {viewMode === "list" && (
+          <div
+            className={`flex items-center flex-wrap justify-center w-full gap-10 
+             lg:w-auto mt-2 lg:mt-0 lg:justify-end border-t lg:border-t-0 border-border pt-3 
+             lg:pt-0`}
+          >
+            {/* Atribuído a */}
+            <div className="flex flex-col gap-1 min-w-[120px]">
+              <Skeleton className="h-3 w-16 mb-1" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+
+            {/* Data e Tempo */}
+            <div className="flex flex-col gap-1 min-w-[100px] mb-1">
+              <Skeleton className="h-3 w-12 mb-1" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+
+            {/* Métricas Rápidas */}
+            <div className="flex items-center gap-3 border-l border-border pl-4">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-4" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

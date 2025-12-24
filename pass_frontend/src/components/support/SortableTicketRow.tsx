@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TicketRow } from "./TicketRow";
 import { TicketData } from "./types";
-import { MoreVertical } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SortableTicketRowProps {
@@ -40,17 +40,15 @@ export const SortableTicketRow: React.FC<SortableTicketRowProps> = ({
       {" "}
       {/* Container extra com padding para compensar o scale */}
       {/* Handle de dialog - ícone que abre dialog */}
-      <div
-        className="absolute top-4 right-4 z-10 cursor-pointer p-1 rounded"
-        onMouseEnter={() => setIsHoveringIcon(true)}
-        onMouseLeave={() => setIsHoveringIcon(false)}
+      <Button
         onClick={(e) => {
           e.stopPropagation();
           onClick?.();
         }}
+        className="absolute bottom-6 right-6 z-10 flex text-foreground border border-border bg-background w-9 h-9 hover:bg-accent/10 p-0"
       >
-        <MoreVertical className="w-4 h-4 text-muted-foreground" />
-      </div>
+        <Eye className="w-5 h-5" />
+      </Button>
       <div
         ref={setNodeRef}
         style={style}
