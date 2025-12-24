@@ -4,6 +4,13 @@ import { LayoutGrid, List, Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/animated-tab";
 import { Separator } from "../ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { PiFunnelX } from "react-icons/pi";
 
 interface ToolbarProps {
   statusFilter: string;
@@ -16,6 +23,7 @@ interface ToolbarProps {
   };
   viewMode: "list" | "grid" | "lanes";
   setViewMode: (mode: "list" | "grid" | "lanes") => void;
+  onClearFilters: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -24,6 +32,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   statusCounts,
   viewMode,
   setViewMode,
+  onClearFilters,
 }) => {
   const viewModeLabels = {
     list: "Lista",
@@ -130,6 +139,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           </div>
         </TabsList>
       </Tabs>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div 
+              onClick={onClearFilters}
+              className="p-0 border-0 bg- text-foreground hover:bg-muted h-6 w-6 cursor-pointer flex items-center justify-center rounded-md"
+            >
+              <div className="w-6 h-6">
+                <PiFunnelX className="w-full h-full text-muted-foreground  hover:text-foreground " />
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Limpar filtros</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };

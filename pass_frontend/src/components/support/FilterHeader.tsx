@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
 import { DatePickerRange } from "@/components/ui/data-picker-range";
+import { PiFunnelX } from "react-icons/pi";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import Link from "next/link";
 
 interface FilterHeaderProps {
@@ -64,16 +71,17 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
 
           {/* Filtro de Categoria/Módulo */}
           <div className="w-full md:w-[200px] space-y-2">
-            <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2">
+            <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2 ">
               Módulo
             </label>
             <Select value={moduleFilter} onValueChange={setModuleFilter}>
-              <SelectTrigger className="w-full justify-between pl-3 text-foreground h-11 border-input hover:bg-input/50  shadow-sm border-0 rounded-md dark:bg-input/30 bg-border">
+              <SelectTrigger className="w-full justify-between pl-3 text-foreground 
+              h-11 border-input hover:bg-input/50  shadow-sm border-0 rounded-md dark:bg-input/30 bg-border m-0">
                 <SelectValue placeholder="Selecione o módulo" />
               </SelectTrigger>
               <SelectContent showSearch className="bg-popover">
                 {modules.map((module) => (
-                  <SelectItem className="bg-popove" key={module} value={module}>
+                  <SelectItem className="bg-popover text-foreground" key={module} value={module}>
                     {module}
                   </SelectItem>
                 ))}
@@ -86,12 +94,15 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2">
               Período de Abertura
             </label>
-            <DatePickerRange
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-              placeholder="Selecione o período"
-              className="h-11 bg-border border-0 "
-            />
+            <div className="flex gap-2">
+              <DatePickerRange
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                placeholder="Selecione o período"
+                className="h-11 bg-border border-0 flex-1"
+              />
+             
+            </div>
           </div>
 
           {/* Botão Principal */}

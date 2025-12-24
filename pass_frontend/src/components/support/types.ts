@@ -6,6 +6,19 @@ export interface Developer {
   id: string;
   name: string;
   avatarFallback: string;
+  role: string;
+  email: string;
+  phone: string;
+}
+
+export interface User {
+  name: string;
+  category: string; // e.g., "Adulto"
+  cpf: string;
+  birthDate: string;
+  nationality: string;
+  email: string;
+  telefone: string;
 }
 
 export interface TicketData {
@@ -15,6 +28,7 @@ export interface TicketData {
   category: string; // ex: Bug, Feature, Acesso
   module: string; // ex: Financeiro, Login
   clientName: string;
+  user?: User; // Informações detalhadas do usuário
   priority: Priority;
   status: Status;
   createdAt: string | Date;

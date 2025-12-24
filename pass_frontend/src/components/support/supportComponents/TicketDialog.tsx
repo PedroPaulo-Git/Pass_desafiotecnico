@@ -281,7 +281,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Telefone
                         </label>
-                        <p className="text-sm">+55 11 99999-9999</p>
+                        <p className="text-sm">{ticket.user?.telefone || "+55 11 99999-9999"}</p>
                       </span>
                     </div>
                     <div className="flex gap-2 ">
@@ -291,7 +291,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Email
                         </label>
-                        <p className="text-sm">email@exemplo.com</p>
+                        <p className="text-sm">{ticket.user?.email || "email@exemplo.com"}</p>
                       </span>
                     </div>
                   </div>

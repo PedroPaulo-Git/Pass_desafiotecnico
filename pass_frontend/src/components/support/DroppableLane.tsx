@@ -12,49 +12,62 @@ import { getPriorityStyles } from "./helpers";
 interface DroppableLaneProps {
   priority: string;
   tickets: TicketData[];
-  draggedTicketId?: string | null;
   onTicketClick?: (ticket: TicketData) => void;
+  // draggedTicketId NÃO é mais necessário aqui para filtragem
 }
 
 export const DroppableLane: React.FC<DroppableLaneProps> = ({
   priority,
   tickets,
-  draggedTicketId,
   onTicketClick,
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: priority,
+    data: {
+      type: "Column",
+      priority,
+    },
   });
-
-  // Filtrar o ticket que está sendo arrastado (ele será mostrado no DragOverlay)
-  const visibleTickets = draggedTicketId
-    ? tickets.filter((ticket) => ticket.id !== draggedTicketId)
-    : tickets;
 
   return (
     <div
       ref={setNodeRef}
-      className={`w-full rounded-lg transition-colors overflow-x-hidden ${getPriorityStyles(
-        priority as any
-      )}`}
+      className={`
+        w-full rounded-xl transition-colors duration-300 flex flex-col h-full
+        ${getPriorityStyles(priority as any)}
+        ${isOver ? "bg-accent/40 ring-2 ring-primary/20" : ""}
+      `}
     >
-      <h3
-        className={`font-semibold text-sm mb-3 text-center py-2  rounded-t-lg ${getPriorityStyles(
-          priority as any
-        )}`}
+      {/* Header Fixo */}
+      <div
+        className={`
+        p-3 rounded-t-xl bg-background/50 backdrop-blur-sm
+        sticky top-0 z-10
+      `}
       >
-        {priority}
-      </h3>
-      <SortableContext
-        items={visibleTickets.map((ticket) => ticket.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        <div className="space-y-0 min-h-[200px] max-h-[55vh] overflow-y-auto overflow-x-hidden ">
-          {visibleTickets.map((ticket) => (
-            <SortableTicketRow key={ticket.id} ticket={ticket} onClick={() => onTicketClick?.(ticket)} />
+        <h3 className="font-bold text-sm text-center flex items-center justify-center gap-2">
+          {priority}
+          <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+            {tickets.length}
+          </span>
+        </h3>
+      </div>
+
+      {/* Área de Scroll - Conteúdo */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-2 min-h-[150px]">
+        <SortableContext
+          items={tickets.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {tickets.map((ticket) => (
+            <SortableTicketRow
+              key={ticket.id}
+              ticket={ticket}
+              onClick={() => onTicketClick?.(ticket)}
+            />
           ))}
-        </div>
-      </SortableContext>
+        </SortableContext>
+      </div>
     </div>
   );
 };
