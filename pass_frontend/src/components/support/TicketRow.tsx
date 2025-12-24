@@ -81,7 +81,9 @@ export const TicketRow: React.FC<TicketRowProps> = ({
     if (statusIcon) {
       IconComponent = statusIcon.icon;
       iconClass = getStatusContainerClass(data.status);
-      gradientClass = "bg-gradient-to-b from-green-400 to-green-600";
+      if (data.status === "Resolvido") {
+        gradientClass = "bg-gradient-to-b from-green-400 to-green-600";
+      }
       effectivePriority =
         data.priority || getPriorityFromCategory(data.category);
     }
