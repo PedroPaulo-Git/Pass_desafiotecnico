@@ -426,7 +426,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
               </div>
               {/* Actions */}
               <div className="pt-2 space-y-3 mt-auto">
-                <Button className="w-full bg-blue-500 text-foreground" variant="default">
+                <Button className="w-full bg-foreground text-background " variant="default">
                   <Download className="w-4 h-4 mr-2" />
                   Baixar Relatório
                 </Button>
