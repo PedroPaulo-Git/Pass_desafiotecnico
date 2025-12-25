@@ -121,7 +121,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         initial={false}
         animate={{ width: isCollapsed ? 64 : 240 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="left-0 top-0 z-40 h-screen bg-sidebar flex flex-col "
+        className="left-0 top-0 z-40 h-full bg-sidebar flex flex-col "
       >
         {/* --- HEADER (LOGO & DROPDOWN) --- */}
         <div className="flex h-[65px] items-center px-2 border-b border-sidebar-border shrink-0">

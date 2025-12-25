@@ -25,6 +25,7 @@ import { DroppableLane } from "@/components/support/DroppableLane";
 import { ticketAPI } from "@/components/support/api/ticketAPI";
 import { Priority, TicketData } from "@/components/support/types";
 import { TicketDialog } from "@/components/support/supportComponents/TicketDialog";
+import { CreateTicketDialog } from "@/components/support/supportComponents/CreateTicketDialog";
 import { useActiveNavTitle } from "@/hooks/use-active-nav-title";
 import Link from "next/link";
 import { startOfDay, subYears } from "date-fns";
@@ -47,6 +48,7 @@ export function SupportTicketPage() {
   // Dialog state
   const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -308,6 +310,14 @@ export function SupportTicketPage() {
   return (
     <div className="text-foreground font-sans">
       <div className="mx-auto max-w-[95%]   ">
+        <div className="flex justify-end my-4">
+          <Button className="bg-foreground text-background font-semibold" onClick={() => setIsCreateDialogOpen(true)}>
+            <span className="flex items-center">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Chamado
+            </span>
+          </Button>
+        </div>
 
         {/* Filtros */}
         <FilterHeader
@@ -440,8 +450,18 @@ export function SupportTicketPage() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
       />
+      <CreateTicketDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onCreate={(newTicket) => {
+          setTickets(prev => [newTicket, ...prev]);
+          setIsCreateDialogOpen(false);
+        }}
+      />
     </div>
   );
 }
+
+
 
 export default SupportTicketPage;

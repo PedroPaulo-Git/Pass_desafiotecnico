@@ -1,6 +1,8 @@
 // --- Tipos de Dados Baseados na sua Estrutura ---
-export type Priority = "Alta" | "Média" | "Baixa";
+export type Priority = "Alta" | "Média" | "Baixa" ;
 export type Status = "Aberto" | "Em Andamento" | "Resolvido" | "Fechado";
+export type Category = "Bug" | "Acesso" | "Dúvida" | "Visual";
+export type Module = "Financeiro" | "Admin" | "Checkout" | "Integração" | "Frontend";
 
 export interface Developer {
   id: string;
@@ -25,8 +27,8 @@ export interface TicketData {
   id: string;
   ticketNumber: string; // ex: TKT-1024
   title: string;
-  category: string; // ex: Bug, Feature, Acesso
-  module: string; // ex: Financeiro, Login
+  category: Category; // ex: Bug, Feature, Acesso
+  module: Module; // ex: Financeiro, Login
   clientName: string;
   user?: User; // Informações detalhadas do usuário
   priority: Priority;

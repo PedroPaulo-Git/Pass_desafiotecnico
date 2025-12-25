@@ -69,7 +69,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="p-0 gap-0 overflow-hidden border-border bg-card flex flex-col rounded-lg"
+        className="p-0 h-[90vh] gap-0 overflow-hidden border-border bg-card flex flex-col rounded-lg"
       >
         {/* --- CONTENT SCROLL AREA --- */}
         <div className="flex-1 min-h-full ">

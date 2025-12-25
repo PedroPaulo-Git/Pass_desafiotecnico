@@ -51,12 +51,6 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
   const defaultPlaceholder = `${format(lastYear, "d 'de' MMM. yyyy", { locale: ptBR })} - ${format(today, "d 'de' MMM. yyyy", { locale: ptBR })}`;
   return (
     <div className="flex flex-col mt-4 gap-10 items-center">
-      <Button className="bg-foreground text-background font-semibold ml-auto">
-        <span className="flex items-center">
-          <Plus className="w-4 h-4 mr-2" />
-          <Link href="/ticket"> Novo Chamado </Link>
-        </span>
-      </Button>
       <div className="bg-card/60 p-6 rounded-xl border mb-6 shadow-sm w-[80%] mx-auto border-border/50">
         <div className="flex flex-col md:flex-row gap-6 items-end ">
           {/* Busca Principal */}
