@@ -27,14 +27,18 @@ import { Priority, TicketData } from "@/components/support/types";
 import { TicketDialog } from "@/components/support/supportComponents/TicketDialog";
 import { useActiveNavTitle } from "@/hooks/use-active-nav-title";
 import Link from "next/link";
+import { startOfDay, subYears } from "date-fns";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
   const { currentTitle } = useActiveNavTitle();
+  const today = new Date();
+  const lastYear = subYears(today, 1);
+  const defaultDateRange = { from: startOfDay(lastYear), to: startOfDay(today) };
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [moduleFilter, setModuleFilter] = useState("Todos os Módulos");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultDateRange);
   const [viewMode, setViewMode] = useState<"list" | "grid" | "lanes">("list");
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [activeTicket, setActiveTicket] = useState<TicketData | null>(null);
@@ -58,10 +62,7 @@ export function SupportTicketPage() {
       setSearch(localStorage.getItem('supportSearch') || "");
       setStatusFilter(localStorage.getItem('supportStatusFilter') || "Todos");
       setModuleFilter(localStorage.getItem('supportModuleFilter') || "Todos os Módulos");
-      const savedDateRange = localStorage.getItem('supportDateRange');
-      if (savedDateRange) {
-        setDateRange(JSON.parse(savedDateRange));
-      }
+      setDateRange(defaultDateRange);
       setViewMode((localStorage.getItem('supportViewMode') as "list" | "grid" | "lanes") || "list");
     }
   }, []);
@@ -96,14 +97,6 @@ export function SupportTicketPage() {
   }, [moduleFilter]);
 
   useEffect(() => {
-    if (dateRange) {
-      localStorage.setItem('supportDateRange', JSON.stringify(dateRange));
-    } else {
-      localStorage.removeItem('supportDateRange');
-    }
-  }, [dateRange]);
-
-  useEffect(() => {
     localStorage.setItem('supportViewMode', viewMode);
   }, [viewMode]);
 
@@ -111,8 +104,10 @@ export function SupportTicketPage() {
     setSearch("");
     setStatusFilter("Todos");
     setModuleFilter("Todos os Módulos");
-    setDateRange(undefined);
+    setDateRange(defaultDateRange);
   };
+
+  const hasActiveFilters = search !== "" || statusFilter !== "Todos" || moduleFilter !== "Todos os Módulos" || dateRange !== undefined;
 
   const statusCounts = useMemo(() => {
     const total = tickets.length;
@@ -334,6 +329,7 @@ export function SupportTicketPage() {
           viewMode={viewMode}
           setViewMode={setViewMode}
           onClearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
         />
 
         {loading ? (

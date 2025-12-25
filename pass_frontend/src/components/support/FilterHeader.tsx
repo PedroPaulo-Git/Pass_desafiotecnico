@@ -1,11 +1,9 @@
-"use client";
 import React from "react";
-import { Search, XIcon, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { Search, XIcon, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
-import { DatePickerRange } from "@/components/ui/data-picker-range";
 import { PiFunnelX } from "react-icons/pi";
 import {
   Select,
@@ -21,6 +19,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from "next/link";
+import { CustomDateRangePicker } from "./CustomDateRangePicker";
+import { dateRangePresets } from "./date-range-presets";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
+import { subYears } from "date-fns";
 
 interface FilterHeaderProps {
   search: string;
@@ -43,6 +46,9 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
   setModuleFilter,
   onClearFilters,
 }) => {
+  const today = new Date();
+  const lastYear = subYears(today, 1);
+  const defaultPlaceholder = `${format(lastYear, "d 'de' MMM. yyyy", { locale: ptBR })} - ${format(today, "d 'de' MMM. yyyy", { locale: ptBR })}`;
   return (
     <div className="flex flex-col mt-4 gap-10 items-center">
       <Button className="bg-foreground text-background font-semibold ml-auto">
@@ -55,7 +61,7 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
         <div className="flex flex-col md:flex-row gap-6 items-end ">
           {/* Busca Principal */}
           <div className="flex-1 w-full space-y-2">
-            <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
               Buscar Chamado
             </label>
             <div className="relative">
@@ -71,7 +77,7 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
 
           {/* Filtro de Categoria/Módulo */}
           <div className="w-full md:w-[200px] space-y-2">
-            <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2 ">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2 ">
               Módulo
             </label>
             <Select value={moduleFilter} onValueChange={setModuleFilter}>
@@ -91,17 +97,17 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
 
           {/* Filtro de Data */}
           <div className="w-full md:w-60 space-y-2">
-            <label className="text-xs font-bold text-foreground/75 uppercase tracking-wider flex items-center gap-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
               Período de Abertura
             </label>
             <div className="flex gap-2">
-              <DatePickerRange
+              <CustomDateRangePicker
                 dateRange={dateRange}
                 setDateRange={setDateRange}
-                placeholder="Selecione o período"
-                className="h-11 bg-border border-0 flex-1"
-              />
-             
+                presets={dateRangePresets}
+                placeholder={defaultPlaceholder}
+                className="flex-1"
+              />   
             </div>
           </div>
 
