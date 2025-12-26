@@ -129,7 +129,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 <Button
                   variant={viewMode === "list" ? "secondary" : "ghost"}
                   size="icon"
-                  className={`h-7 w-7 ${viewMode === "list" ? "bg-foreground text-background shadow-sm" : "hover:bg-muted/50"}`}
+                  className={`h-7 w-7 ${viewMode === "list" ? "bg-foreground text-background shadow-sm hover:text-background hover:bg-foreground" : ""}`}
                   onClick={() => setViewMode("list")}
                 >
                   <List className="w-4 h-4" />
@@ -137,7 +137,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 <Button
                   variant={viewMode === "grid" ? "secondary" : "ghost"}
                   size="icon"
-                  className={`h-7 w-7 ${viewMode === "grid" ? "bg-foreground text-background shadow-sm" : "hover:bg-muted/50"}`}
+                  className={`h-7 w-7 ${viewMode === "grid" ? "bg-foreground text-background shadow-sm hover:text-background hover:bg-foreground" : ""}`}
                   onClick={() => setViewMode("grid")}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -145,7 +145,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 <Button
                   variant={viewMode === "lanes" ? "secondary" : "ghost"}
                   size="icon"
-                  className={`h-7 w-7 ${viewMode === "lanes" ? "bg-foreground text-background shadow-sm" : "hover:bg-muted/50"}`}
+                  className={`h-7 w-7 ${viewMode === "lanes" ? "bg-foreground text-background shadow-sm hover:text-background hover:bg-foreground" : ""}`}
                   onClick={() => setViewMode("lanes")}
                 >
                   <Columns className="w-4 h-4" />

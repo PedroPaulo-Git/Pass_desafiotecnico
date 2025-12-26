@@ -32,32 +32,38 @@ export function MainContent({
   return (
     // Main Content
     <div
-      className={ "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm bg-background"}
+      className={
+        "flex flex-col w-full h-full duration-200 ease-in-out md:rounded-2xl shadow-sm "
+      }
     >
       {/* Desktop Header */}
-      <div className="hidden lg:block rounded-tl-4xl">
-        <AppHeader 
-          isCollapsed={isCollapsed} 
-          onToggle={onToggle} 
+      <div className="hidden lg:block sticky top-0  bg-sidebar z-50">
+        <AppHeader
+          isCollapsed={isCollapsed}
+          onToggle={onToggle}
           currentPageTitle={title}
         />
       </div>
 
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <AppHeader 
-          showMenuButton 
-          onMenuClick={onOpenMobileMenu} 
-          isCollapsed={isCollapsed} 
-          onToggle={onToggle} 
+        <AppHeader
+          showMenuButton
+          onMenuClick={onOpenMobileMenu}
+          isCollapsed={isCollapsed}
+          onToggle={onToggle}
           currentPageTitle={title}
         />
       </div>
 
-      {/* Main Content Area */}
-      <main className={isTicketRoute || isSupportRoute ? "flex-1 p-0" : "flex-1 p-6"}>
-        {children}
-      </main>
-    </div>  
+        {/* Main Content Area */}
+        <main
+          className={` bg-background ${
+            isTicketRoute || isSupportRoute ? "flex-1 p-0  " : "flex-1 p-6"
+          }`}
+        >
+          {children}
+        </main>
+    </div>
   );
 }

@@ -109,7 +109,7 @@ export function AppHeader({
   }, [chatRole]);
 
   return (
-    <header className="sticky top-0 flex h-14 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl">
+    <header className="sticky top-0 flex h-14 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl bg-background">
       {/* --- LEFT SECTION: Sidebar Toggle & Breadcrumb --- */}
       <div className="flex items-center gap-1 sm:gap-4">
         {/* Mobile Menu */}

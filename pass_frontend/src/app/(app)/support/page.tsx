@@ -254,62 +254,9 @@ export function SupportTicketPage() {
     }
   };
 
-  // const handleDragEnd = async (event: DragEndEvent) => {
-  //   // Remover listener do mouse
-  //   if (mouseMoveRef.current) {
-  //     window.removeEventListener("mousemove", mouseMoveRef.current);
-  //     mouseMoveRef.current = null;
-  //   }
-  //   setDraggedTicket(null); // Limpar o overlay
-  //   setRotation(0); // Resetar rotação
-
-  //   const { active, over } = event;
-
-  //   if (!over) return;
-
-  //   const ticketId = active.id as string;
-  //   const destinationId = over.id as string;
-
-  //   // Verificar se o destino é uma das lanes de prioridade
-  //   const priorityLanes = ["Baixa", "Média", "Alta"];
-  //   let newPriority = destinationId;
-
-  //   // Se o destino não é uma lane diretamente, verificar se é um ticket
-  //   if (!priorityLanes.includes(destinationId)) {
-  //     // Encontrar qual lane contém o ticket de destino
-  //     const destinationTicket = tickets.find((t) => t.id === destinationId);
-  //     if (destinationTicket) {
-  //       newPriority = destinationTicket.priority;
-  //     } else {
-  //       return; // Destino inválido
-  //     }
-  //   }
-
-  //   // Verificar se a prioridade mudou
-  //   const ticket = tickets.find((t) => t.id === ticketId);
-  //   if (!ticket || ticket.priority === newPriority) return;
-
-  //   try {
-  //     // Atualizar via API
-  //     const updatedTicket = await ticketAPI.updatePriority(
-  //       ticketId,
-  //       newPriority
-  //     );
-
-  //     // Atualizar estado local
-  //     setTickets((prevTickets) =>
-  //       prevTickets.map((t) => (t.id === ticketId ? updatedTicket : t))
-  //     );
-  //   } catch (error) {
-  //     console.error("Failed to update ticket priority:", error);
-  //     // Reverter mudança em caso de erro
-  //     // Por simplicidade, não implementei rollback aqui
-  //   }
-  // };
-
   return (
-    <div className="text-foreground font-sans">
-      <div className="mx-auto max-w-[95%]   ">
+    <div className="text-foreground font-sans max-h-[92vh] overflow-y-auto ">
+      <div className="mx-auto max-w-[95%] overflow-y-auto   ">
         <div className="flex justify-end my-4">
           <Button className="bg-foreground text-background font-semibold" onClick={() => setIsCreateDialogOpen(true)}>
             <span className="flex items-center">

@@ -121,7 +121,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         initial={false}
         animate={{ width: isCollapsed ? 64 : 240 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="left-0 top-0 z-40 h-full bg-sidebar flex flex-col "
+        className="left-0 top-0 z-40 h-[100vh] bg-sidebar flex flex-col  "
       >
         {/* --- HEADER (LOGO & DROPDOWN) --- */}
         <div className="flex h-[65px] items-center px-2 border-b border-sidebar-border shrink-0">
@@ -195,7 +195,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         </div>
 
         {/* --- NAVIGATION --- */}
-        <nav className="flex-1 overflow-y-auto py-5 pr-2 pl-4 space-y-8 scrollbar-hidden">
+        <nav className="flex-1 overflow-y-auto py-5 pr-2 pl-4 space-y-8 scrollbar-hidden h-full ">
           {navGroups.map((group, groupIndex) => (
             <div key={groupIndex}>
               {/* Título do Grupo */}
@@ -205,7 +205,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                 </div>
               )}
 
-              <div className="space-y-1">
+              <div className="space-y-1 ">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -215,7 +215,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-2.5 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                            "flex items-center  gap-2.5 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150 ",
                             isActive
                               ? "bg-sidebar-accent text-sidebar-accent-foreground font-bold "
                               : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
@@ -233,7 +233,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="truncate"
+                              className="truncate "
                             >
                               {item.label}
                             </motion.span>
@@ -251,10 +251,11 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
               </div>
             </div>
           ))}
+             
         </nav>
 
         {/* --- FOOTER (COLLAPSE BUTTON) --- */}
-        <div className="border-t border-sidebar-border p-2 mt-auto">
+     <div className="border-t border-sidebar-border p-2 mt-auto">
           <Button
             variant="ghost"
             size="sm"
