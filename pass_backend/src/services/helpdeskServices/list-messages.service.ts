@@ -29,7 +29,6 @@ export const listMessagesService = async (helpdeskId: string) => {
   ];
 
   let response = null;
-  let usedPrefix = '';
 
   for (const prefix of prefixes) {
     console.log(`🔍 Trying prefix: ${prefix}`);
@@ -41,7 +40,6 @@ export const listMessagesService = async (helpdeskId: string) => {
     try {
       response = await s3Client.send(command);
       if (response.Contents && response.Contents.length > 0) {
-        usedPrefix = prefix;
         console.log(`✅ Found ${response.Contents.length} objects with prefix: ${prefix}`);
         break;
       }
