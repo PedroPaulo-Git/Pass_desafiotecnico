@@ -14,8 +14,10 @@ import { fuelingRoutes } from "./http/routes/fueling.routes";
 import { incidentRoutes } from "./http/routes/incident.routes";
 import { vehicleDocumentRoutes } from "./http/routes/vehicleDocument.routes";
 import { vehicleImageRoutes } from "./http/routes/vehicleImage.routes";
-import { ticketRoutes } from "./http/routes/ticket.routes";
+import { helpdeskRoutes } from "./http/routes/helpdesk.routes";
+import { userRoutes } from "./http/routes/user.routes";
 import { initSocket } from "./lib/socket";
+import { ensureBucketExists } from "./lib/minio";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -23,6 +25,17 @@ const app = fastify().withTypeProvider<ZodTypeProvider>();
 app.register(cors, {
   origin: true, // Em produção, especifique os domínios permitidos
 });
+
+// Ensure MinIO buckets exist (async, non-blocking)
+(async () => {
+  try {
+    await ensureBucketExists(process.env.MINIO_BUCKET || "pass-vehicles");
+    await ensureBucketExists(process.env.MINIO_BUCKET_HELPDESK || "helpdesk");
+    console.log("MinIO buckets verified/created");
+  } catch (error) {
+    console.warn("MinIO not available at startup - buckets will be checked on first use:", (error as Error).message);
+  }
+})();
 
 // Configuração dos validadores e serializadores Zod
 app.setValidatorCompiler(validatorCompiler);
@@ -135,7 +148,8 @@ app.register(fuelingRoutes, { prefix: "/fuelings" });
 app.register(incidentRoutes, { prefix: "/incidents" });
 app.register(vehicleDocumentRoutes, { prefix: "/documents" });
 app.register(vehicleImageRoutes, { prefix: "/images" });
-app.register(ticketRoutes, { prefix: "/tickets" });
+app.register(helpdeskRoutes, { prefix: "/helpdesk" });
+app.register(userRoutes, { prefix: "/users" });
 
 // Iniciar servidor
 const start = async () => {

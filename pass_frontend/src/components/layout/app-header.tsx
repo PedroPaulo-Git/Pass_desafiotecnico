@@ -25,6 +25,8 @@ import {
   Puzzle,
   CalendarDays,
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+
 import { useTheme } from "@/lib/theme/theme-context";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Language } from "@/lib/i18n/translations";
-// React Icons para o grid de apps
 import { BsGrid3X3Gap, BsPeople } from "react-icons/bs";
 import { RiBusLine, RiStore2Line } from "react-icons/ri";
 import { TbChartBar } from "react-icons/tb";
@@ -71,6 +72,7 @@ export function AppHeader({
   const [openSearchDialog, setOpenSearchDialog] = useState(false);
   const { theme, toggleTheme, pendingTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
+  const { currentUser, switchRole, getRoleLabel, logout, isLoggedIn } = useAuth();
 
   // Usa o tema pendente (se existir) para o ícone mudar imediatamente
   const displayTheme = pendingTheme || theme;
@@ -84,29 +86,6 @@ export function AppHeader({
   // Encontra o label da linguagem atual para exibir no botão
   const currentLanguageLabel =
     languages.find((l) => l.value === language)?.label || "English";
-
-  const [chatRole, setChatRole] = useState<string>(() => {
-    try {
-      return typeof window !== "undefined" ? localStorage.getItem("chat_role") || "agent" : "agent";
-    } catch {
-      return "agent";
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("chat_role", chatRole);
-      if (!localStorage.getItem("chat_uuid")) {
-        try {
-          localStorage.setItem("chat_uuid", crypto.randomUUID());
-        } catch {
-          // noop in environments without crypto
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-  }, [chatRole]);
 
   return (
     <header className="sticky top-0 flex h-14 w-full items-center justify-between border-b border-border px-4 rounded-t-2xl bg-background">
@@ -301,13 +280,12 @@ export function AppHeader({
 
         {/* role toggle moved to profile dropdown */}
 
-        {/* User Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage src="" alt="JD" />
+              <AvatarImage src="" alt={currentUser?.name || "User"} />
               <AvatarFallback className="bg-foreground text-primary-foreground text-xs font-bold">
-                JD
+                {currentUser?.name?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
@@ -315,13 +293,16 @@ export function AppHeader({
             <div className="flex items-center gap-3 p-3">
               <Avatar className="h-10 w-10">
                 <AvatarFallback className="bg-foreground text-primary-foreground font-bold">
-                  JD
+                  {currentUser?.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Jonathan Doe</span>
+                <span className="text-sm font-medium">{currentUser?.name || "Usuário"}</span>
                 <span className="text-xs text-muted-foreground">
-                  jondoe@example.com
+                  {currentUser?.email || "usuario@example.com"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Role: {getRoleLabel(currentUser?.role || "CLIENT")}
                 </span>
               </div>
             </div>
@@ -330,27 +311,38 @@ export function AppHeader({
               <User className="h-4 w-4" />
               <span>Conta</span>
             </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <Ticket className="h-4 w-4" />
+              <span>Trocar Role</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               className="gap-2 cursor-pointer"
-              onClick={() => {
-                const newRole = chatRole === "agent" ? "client" : "agent";
-                setChatRole(newRole);
-                try {
-                  window.dispatchEvent(new CustomEvent("chat_role_change", { detail: { role: newRole } }));
-                } catch (e) {
-                  // ignore in non-browser environments
-                }
-              }}
+              onClick={() => switchRole("CLIENT")}
             >
-              <Ticket className="h-4 w-4" />
-              <span>Entrar como {chatRole === "agent" ? "Cliente" : "Agente"}</span>
+              <User className="h-4 w-4" />
+              <span>Entrar como Cliente</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={() => switchRole("ADMIN")}
+            >
+              <Settings className="h-4 w-4" />
+              <span>Entrar como Admin</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={() => switchRole("DEVELOPER")}
+            >
+              <Activity className="h-4 w-4" />
+              <span>Entrar como Developer</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <Settings className="h-4 w-4" />
               <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+            <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive" onClick={logout}>
               <LogOut className="h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

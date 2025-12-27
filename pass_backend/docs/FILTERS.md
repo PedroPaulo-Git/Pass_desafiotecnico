@@ -196,7 +196,51 @@ GET /documents?expiringWithinDays=15&activeAlert=true&sortBy=expiryDate&sortOrde
 GET /images?vehicleId=...&sortBy=url&sortOrder=asc
 ```
 
-## Boas Práticas Internas
+## 6. Helpdesk (`GET /helpdesk`)
+### Query Params
+| Param            | Tipo   | Descrição | Exemplo |
+|------------------|--------|-----------|---------|
+| `page`           | number | Página atual | `page=1` |
+| `limit`          | number | Itens por página (1-100) | `limit=20` |
+| `status`         | enum   | Status do chamado | `status=ABERTO` |
+| `priority`       | enum   | Prioridade | `priority=ALTA` |
+| `category`       | enum   | Categoria | `category=BUG` |
+| `clientId`       | uuid   | Filtrar por cliente | `clientId=uuid-aqui` |
+| `assignedUserId` | uuid   | Filtrar por usuário responsável | `assignedUserId=uuid-aqui` |
+| `sortBy`         | enum   | Campo de ordenação | `sortBy=createdAt` |
+| `sortOrder`      | enum   | Direção (`asc` ou `desc`) | `sortOrder=desc` |
+
+### Enums Disponíveis
+- **Status**: `ABERTO`, `EM_ANALISE`, `EM_ANDAMENTO`, `AGUARDANDO_USUARIO`, `RESOLVIDO`, `ENCERRADO`
+- **Priority**: `BAIXA`, `MEDIA`, `ALTA`, `CRITICA`
+- **Category**: `BUG`, `AGENDAMENTO`, `TREINAMENTO`, `PERFORMANCE`, `AJUSTE_MELHORIA`, `OUTRO`
+- **SortBy**: `createdAt`, `updatedAt`, `lastMessageAt`, `priority`
+
+### Ordenação
+- Default: `sortBy=createdAt&sortOrder=desc`
+- Quando `sortBy=createdAt`: `[{ createdAt: desc }, { id: desc }]` para estabilidade
+- Quando `sortBy=lastMessageAt`: ordena por última mensagem, útil para chamados ativos
+
+### Exemplo
+```
+GET /helpdesk?page=1&limit=10&status=ABERTO&priority=ALTA&category=BUG&sortBy=createdAt&sortOrder=desc
+```
+
+### Endpoints Relacionados e Bodies Necessários
+- `POST /helpdesk` - Criar chamado  
+  **Body**: `{ clientId: string(uuid), userId?: string(uuid), title: string, description: string, category: enum, priority?: enum, module?: enum, environment?: enum, attachments?: string[](urls) }`
+
+- `PUT /helpdesk/:id` - Atualizar chamado  
+  **Body**: `{ assignedUserId?: string(uuid), status?: enum, priority?: enum }`
+
+- `DELETE /helpdesk/:id` - Deletar chamado  
+  **Body**: Nenhum
+
+- `POST /helpdesk/:id/messages` - Enviar mensagem  
+  **Body**: `{ authorId: string(uuid), authorType: "user"|"support", message: string, createdAt: string(datetime), attachments?: string[](paths) }`
+
+- `GET /helpdesk/:id/messages` - Listar mensagens do chamado  
+  **Body**: Nenhum (query params não aplicáveis)
 - Construir `where` incremental: adicionar apenas campos presentes para evitar filtros vazios.
 - Evitar spreads em unions do Prisma quando o tipo pode não ser objeto (ex: `DateTimeFilter`). Construir objeto explicitamente.
 - Usar arrays em `orderBy` para ordenar por múltiplos campos quando estabilidade temporal importa.

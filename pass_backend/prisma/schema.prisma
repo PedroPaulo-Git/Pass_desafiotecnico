@@ -46,6 +46,43 @@ enum SeverityLevel {
   GRAVE
 }
 
+enum HelpdeskCategory {
+  BUG
+  AGENDAMENTO
+  TREINAMENTO
+  PERFORMANCE
+  AJUSTE_MELHORIA
+  OUTRO
+}
+
+enum HelpdeskPriority {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum HelpdeskStatus {
+  ABERTO
+  EM_ANALISE
+  EM_ANDAMENTO
+  AGUARDANDO_USUARIO
+  RESOLVIDO
+  ENCERRADO
+}
+
+enum HelpdeskModule {
+  AGENDAMENTO
+  TREINAMENTOS
+  FINANCEIRO
+  USUARIOS
+}
+
+enum HelpdeskEnvironment {
+  WEB
+  MOBILE
+}
+
 // --- MODELS ---
 
 model Vehicle {
@@ -151,26 +188,42 @@ model VehicleDocument {
   @@map("vehicle_documents")
 }
 
-// --- SUPPORT CHAT (MVP) ---
-model Ticket {
-  id        String    @id @default(uuid())
-  title     String?
-  status    String    @default("OPEN")
-  clientUuid String
-  messages  Message[]
-  createdAt DateTime  @default(now())
+// --- SUPPORT HELPDESK ---
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@map("tickets")
+  @@map("users")
 }
 
-model Message {
-  id        String   @id @default(uuid())
-  content   String   @db.Text
-  sender    String
-  role      String
-  ticketId  String
-  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+enum UserRole {
+  CLIENT
+  ADMIN
+  DEVELOPER
+}
 
-  @@map("messages")
+model HELPDESK {
+  id             String              @id @default(uuid())
+  ticketNumber   String?             @unique // Ex: TKT-2025-001
+  clientId       String              // UUID do cliente (userId de um User com role CLIENT)
+  userId         String?             // UUID do usuário que criou (opcional)
+  assignedUserId String?             // UUID do suporte responsável (userId de um User com role DEVELOPER)
+  title          String
+  description    String              @db.Text
+  category       HelpdeskCategory
+  priority       HelpdeskPriority    @default(BAIXA)
+  status         HelpdeskStatus      @default(ABERTO)
+  module         HelpdeskModule?
+  environment    HelpdeskEnvironment @default(WEB)
+  bucketPath     String              // Caminho raiz no bucket (ex: /helpdesk/client_123/ticket_456)
+  lastMessageAt  DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  closedAt       DateTime?
+
+  @@map("helpdesk")
 }

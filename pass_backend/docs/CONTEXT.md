@@ -164,7 +164,17 @@ Controller → Service → Prisma
 - **Validations:** Zod schemas for create/update/query (url required, vehicleId via nested route)
 - **Filters:** vehicleId, url, pagination; sorting by `id` or `url` with `sortOrder`
 - **Notes:** Metadata only (no file storage), stable default sorting `id desc`
-
+### ✅ Helpdesk (Complete)
+- **CRUD:** create, read (by id), list (paginated + filtered), update, delete
+- **Messages:** create message (bucket storage), list messages (from bucket)
+- **Validations:** Zod schemas for create/update/query/messageBucket
+- **Filters:** status, priority, category, clientId, assignedUserId
+- **Business Rules:**
+  - One open ticket per client
+  - Messages stored in MinIO bucket with JSON files
+  - Bucket path: `/helpdesk/client_{clientId}/ticket_{id}/`
+  - Automatic bucket creation on first use
+  - Status update closes ticket when "ENCERRADO"
 ---
 
 ## Checklist - Next Steps
@@ -190,6 +200,14 @@ Controller → Service → Prisma
 - [x] Create `vehicleImageController.ts`
 - [x] Create `vehicleImage.routes.ts`
 - [x] Metadata CRUD (no file upload yet)
+
+### Helpdesk Module
+- [x] Create `helpdeskSchema.ts` and `messageBucketSchema.ts`
+- [x] Create `helpdeskServices/` (create, list, update, delete, messages)
+- [x] Create `helpdeskController.ts`
+- [x] Create `helpdesk.routes.ts`
+- [x] MinIO bucket integration for messages/attachments
+- [x] Filters: status, priority, category, clientId, assignedUserId
 
 ### Refinements
 - [ ] Vehicle update: conditional unique check (only if field changed)
@@ -218,6 +236,13 @@ Controller → Service → Prisma
 - Belongs to Vehicle
 - Alert system: expiryDate, alertDays, activeAlert
 
+### HELPDESK
+- Client-based ticketing system
+- Bucket storage for messages and attachments
+- Status workflow: ABERTO → EM_ANALISE → EM_ANDAMENTO → AGUARDANDO_USUARIO → RESOLVIDO → ENCERRADO
+- Categories: BUG, AGENDAMENTO, TREINAMENTO, etc.
+- Priorities: BAIXA, MEDIA, ALTA, CRITICA
+
 ---
 
 ## Enums
@@ -226,3 +251,8 @@ Controller → Service → Prisma
 - VehicleCategory: ONIBUS, VAN, CARRO, CAMINHAO
 - VehicleClassification: PREMIUM, BASIC, EXECUTIVO
 - SeverityLevel: BAIXA, MEDIA, ALTA, GRAVE
+- HelpdeskCategory: BUG, AGENDAMENTO, TREINAMENTO, PERFORMANCE, AJUSTE_MELHORIA, OUTRO
+- HelpdeskPriority: BAIXA, MEDIA, ALTA, CRITICA
+- HelpdeskStatus: ABERTO, EM_ANALISE, EM_ANDAMENTO, AGUARDANDO_USUARIO, RESOLVIDO, ENCERRADO
+- HelpdeskModule: AGENDAMENTO, TREINAMENTOS, FINANCEIRO, USUARIOS
+- HelpdeskEnvironment: WEB, MOBILE
