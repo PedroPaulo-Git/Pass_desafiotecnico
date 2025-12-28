@@ -2,11 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,9 +20,7 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
@@ -35,13 +29,12 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "../pass_schemas/src/**/*.ts"
+    "../pass_schemas/src/**/*.ts",
+    "../pass_schemas/dist/**/*.ts",
+    "../pass_schemas/dist/**/*.ts",
+    "../pass_schemas/dist/*.js",
+     "../pass_schemas/dist/*.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    ".next"
-  ],
-  "references": [
-    { "path": "../pass_schemas" }
-  ]
+  "exclude": ["node_modules", ".next"],
+  "references": [{ "path": "../pass_schemas" }]
 }
