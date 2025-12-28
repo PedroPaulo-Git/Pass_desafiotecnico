@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=pass_frontend",
-    "build": "npm run build --workspace=pass_schemas && npm run build --workspace=pass_frontend",
+    "build": "npm run build -w pass_schemas && npm run build -w pass_frontend",
     "build:schemas": "npm run build --workspace=pass_schemas",
     "build:frontend": "npm run build --workspace=pass_frontend",
     "start": "npm run start --workspace=pass_frontend"
