@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { AppError } from "@/utils/AppError";
 
 export const deleteHelpdeskService = async (id: string) => {
-  const helpdesk = await prisma.HELPDESK.findUnique({ where: { id } });
+  const helpdesk = await prisma.helpdesk.findUnique({ where: { id } });
   if (!helpdesk) {
     throw new AppError("Helpdesk not found", 404, "HELPDESK_NOT_FOUND", { id });
   }
@@ -17,7 +17,7 @@ export const deleteHelpdeskService = async (id: string) => {
   }
 
   try {
-    await prisma.HELPDESK.delete({ where: { id } });
+    await prisma.helpdesk.delete({ where: { id } });
 
     // Optionally, delete from bucket, but for now, keep for audit
 

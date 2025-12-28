@@ -206,7 +206,7 @@ enum UserRole {
   DEVELOPER
 }
 
-model HELPDESK {
+model Helpdesk {
   id             String              @id @default(uuid())
   ticketNumber   String?             @unique // Ex: TKT-2025-001
   clientId       String              // UUID do cliente (userId de um User com role CLIENT)

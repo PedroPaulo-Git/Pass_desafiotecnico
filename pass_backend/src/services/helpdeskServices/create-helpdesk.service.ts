@@ -33,7 +33,7 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
   }
 
   // Enforce one open ticket per client
-  const existing = await prisma.HELPDESK.findFirst({
+    const existing = await prisma.helpdesk.findFirst({
     where: { clientId: input.clientId, status: { not: "ENCERRADO" } },
   });
   if (existing) {
@@ -46,7 +46,7 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
 
   // Generate ticket number
   const currentYear = new Date().getFullYear();
-  const lastTicket = await prisma.HELPDESK.findFirst({
+    const lastTicket = await prisma.helpdesk.findFirst({
     where: { ticketNumber: { startsWith: `TKT-${currentYear}-` } },
     orderBy: { ticketNumber: 'desc' },
   });
@@ -113,7 +113,7 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
   }
 
   try {
-    const helpdesk = await prisma.HELPDESK.create({
+      const helpdesk = await prisma.helpdesk.create({
       data: {
         ticketNumber,
         clientId: input.clientId,

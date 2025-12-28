@@ -5,7 +5,7 @@ import { AppError } from "@/utils/AppError";
 import { MessageBucket, CreateMessageInput } from "@pass/schemas/messageBucketSchema";
 
 export const createMessageService = async (helpdeskId: string, messageData: CreateMessageInput) => {
-  const helpdesk = await prisma.HELPDESK.findUnique({ where: { id: helpdeskId } });
+  const helpdesk = await prisma.helpdesk.findUnique({ where: { id: helpdeskId } });
   if (!helpdesk) {
     throw new AppError("Helpdesk not found", 404, "HELPDESK_NOT_FOUND", { id: helpdeskId });
   }
@@ -83,7 +83,7 @@ export const createMessageService = async (helpdeskId: string, messageData: Crea
 
   // Update lastMessageAt
   try {
-    await prisma.HELPDESK.update({
+    await prisma.helpdesk.update({
       where: { id: helpdeskId },
       data: { lastMessageAt: new Date() },
     });

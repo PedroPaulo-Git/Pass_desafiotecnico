@@ -6,7 +6,7 @@ export const listMessagesService = async (helpdeskId: string) => {
   // First, get bucketPath from DB
   const { PrismaClient } = await import("@prisma/client");
   const prisma = new PrismaClient();
-  const helpdesk = await prisma.HELPDESK.findUnique({
+    const helpdesk = await prisma.helpdesk.findUnique({
     where: { id: helpdeskId },
   });
   if (!helpdesk) {

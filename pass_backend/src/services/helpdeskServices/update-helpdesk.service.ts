@@ -3,7 +3,7 @@ import { UpdateHelpdeskInput } from "@pass/schemas/helpdeskSchema";
 import { AppError } from "@/utils/AppError";
 
 export const updateHelpdeskService = async (id: string, input: UpdateHelpdeskInput) => {
-  const helpdesk = await prisma.HELPDESK.findUnique({ where: { id } });
+  const helpdesk = await prisma.helpdesk.findUnique({ where: { id } });
   if (!helpdesk) {
     throw new AppError("Helpdesk not found", 404, "HELPDESK_NOT_FOUND", { id });
   }
@@ -34,7 +34,7 @@ export const updateHelpdeskService = async (id: string, input: UpdateHelpdeskInp
   }
 
   try {
-    const updated = await prisma.HELPDESK.update({
+    const updated = await prisma.helpdesk.update({
       where: { id },
       data: updateData,
     });
