@@ -34,13 +34,26 @@ const s3Client = new S3Client({
   },
   forcePathStyle: true,
 });
+// Diagnostic info (avoid printing secrets)
+console.log("[MINIO CLIENT] endpoint:", endpoint);
+console.log("[MINIO CLIENT] region:", process.env.MINIO_REGION || "us-east-1");
+console.log("[MINIO CLIENT] accessKey:", accessKey ? `${accessKey.slice(0, 3)}***` : "(none)");
 export const ensureBucketExists = async (bucketName: string) => {
   try {
+    console.log(`[MINIO] checking bucket exists: ${bucketName}`);
     await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+    console.log(`[MINIO] bucket exists: ${bucketName}`);
   } catch (error: any) {
-    if (error.name === "NotFound") {
-      await s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
-      console.log(`Bucket ${bucketName} created`);
+    console.warn(`[MINIO] head bucket error for ${bucketName}:`, error?.name ?? error);
+    if (error?.name === "NotFound" || error?.$metadata?.httpStatusCode === 404) {
+      try {
+        console.log(`[MINIO] creating bucket: ${bucketName}`);
+        await s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
+        console.log(`[MINIO] Bucket ${bucketName} created`);
+      } catch (createErr) {
+        console.error(`[MINIO] create bucket failed for ${bucketName}:`, createErr);
+        throw createErr;
+      }
     } else {
       throw error;
     }

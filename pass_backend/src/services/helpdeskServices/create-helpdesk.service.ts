@@ -80,6 +80,7 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
   // Ensure bucket exists (log full error for debugging)
   try {
     await ensureBucketExists(bucketName);
+    console.log("createHelpdeskService: Bucket ensured:", bucketName);
   } catch (error) {
     console.error("createHelpdeskService: ensureBucketExists error:", error);
     throw new AppError("MinIO storage unavailable", 503, "STORAGE_UNAVAILABLE", {
