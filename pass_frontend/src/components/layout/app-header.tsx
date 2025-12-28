@@ -72,7 +72,8 @@ export function AppHeader({
   const [openSearchDialog, setOpenSearchDialog] = useState(false);
   const { theme, toggleTheme, pendingTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
-  const { currentUser, switchRole, getRoleLabel, logout, isLoggedIn } = useAuth();
+  const { currentUser, switchRole, getRoleLabel, logout, isLoggedIn } =
+    useAuth();
 
   // Usa o tema pendente (se existir) para o ícone mudar imediatamente
   const displayTheme = pendingTheme || theme;
@@ -297,7 +298,9 @@ export function AppHeader({
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{currentUser?.name || "Usuário"}</span>
+                <span className="text-sm font-medium">
+                  {currentUser?.name || "Usuário"}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   {currentUser?.email || "usuario@example.com"}
                 </span>
@@ -311,38 +314,28 @@ export function AppHeader({
               <User className="h-4 w-4" />
               <span>Conta</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2 cursor-pointer">
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchRole("CLIENT")}>
               <Ticket className="h-4 w-4" />
-              <span>Trocar Role</span>
+              <span>Trocar para Cliente</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchRole("ADMIN")}>
+              <Settings className="h-4 w-4" />
+              <span>Trocar para Admin</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchRole("DEVELOPER")}>
+              <Activity className="h-4 w-4" />
+              <span>Trocar para Developer</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => switchRole("CLIENT")}
-            >
-              <User className="h-4 w-4" />
-              <span>Entrar como Cliente</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => switchRole("ADMIN")}
-            >
-              <Settings className="h-4 w-4" />
-              <span>Entrar como Admin</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => switchRole("DEVELOPER")}
-            >
-              <Activity className="h-4 w-4" />
-              <span>Entrar como Developer</span>
-            </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <Settings className="h-4 w-4" />
               <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive" onClick={logout}>
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+              onClick={logout}
+            >
               <LogOut className="h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

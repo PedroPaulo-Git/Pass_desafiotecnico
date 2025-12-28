@@ -94,13 +94,13 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
               Período de Abertura
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-hidden ">
               <CustomDateRangePicker
                 dateRange={dateRange}
                 setDateRange={setDateRange}
                 presets={dateRangePresets}
                 placeholder={defaultPlaceholder}
-                className="flex-1"
+                className="flex-1 "
               />   
             </div>
           </div>

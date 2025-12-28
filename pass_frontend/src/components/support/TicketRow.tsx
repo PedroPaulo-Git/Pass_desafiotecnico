@@ -52,6 +52,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   viewMode,
   onClick,
 }) => {
+  console.log("Rendering TicketRow for ticket:", data);
   const isAssigned = !!data.assignedTo;
   const [copied, setCopied] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -105,7 +106,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   return (
     <div
       className={
-        `group border border-border relative bg-muted/20 hover:bg-muted-foreground/5 rounded-lg p-4 mb-3 transition-all shadow-sm ` +
+        `group border border-border relative bg-background hover:bg-muted rounded-lg p-4 mb-3 transition-all shadow-sm ` +
         (viewMode === "lanes" ? "cursor-grab" : "")
       }
     >
@@ -163,17 +164,18 @@ export const TicketRow: React.FC<TicketRowProps> = ({
               </h3>
             </TicketInfoPopover>
 
-            <p
+            <span
               className={`text-foreground/50 text-xs flex-wrap flex items-center gap-2 ${
                 viewMode === "lanes" ? "flex-wrap" : ""
               }`}
             >
               <span className="flex text-left justify-center items-center gap-2 text-muted-foreground">
-                {data.clientName}
+                <p >{data.clientName}</p>
+                
                 <Separator orientation="vertical" className="h-4" />
                 <UserInfoPopover data={data} />
               </span>
-            </p>
+            </span>
 
             <div className="flex w-full gap-2 items-center mt-auto">
               <Badge

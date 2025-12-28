@@ -1,0 +1,81 @@
+// src/features/helpdesk/api/helpdeskMockData.ts
+import { Helpdesk } from "../types/helpdesk";
+
+export const MOCK_HELPDESK: Helpdesk[] = [
+  {
+    id: "mock-1",
+    ticketNumber: "TKT-2025-001",
+    clientId: "550e8400-e29b-41d4-a716-446655440000", // UUID do João Silva (CLIENT)
+    userId: null,
+    assignedUserId: null,
+    title: "Problema com login no sistema",
+    description: "Usuário não consegue fazer login após reset de senha. Sistema retorna erro 500.",
+    category: "BUG",
+    priority: "ALTA",
+    status: "ABERTO",
+    module: "USUARIOS",
+    environment: "WEB",
+    bucketPath: "helpdesk/client_550e8400-e29b-41d4-a716-446655440000/ticket_mock-1",
+    lastMessageAt: "2025-12-27T10:30:00.000Z",
+    createdAt: "2025-12-27T09:00:00.000Z",
+    updatedAt: "2025-12-27T10:30:00.000Z",
+    closedAt: null,
+  },
+  {
+    id: "mock-2",
+    ticketNumber: "TKT-2025-002",
+    clientId: "550e8400-e29b-41d4-a716-446655440000", // Mesmo cliente
+    userId: null,
+    assignedUserId: "550e8400-e29b-41d4-a716-446655440002", // Carlos Developer
+    title: "Solicitação de novo relatório financeiro",
+    description: "Cliente precisa de um novo relatório mostrando custos por categoria de veículo.",
+    category: "AJUSTE_MELHORIA",
+    priority: "MEDIA",
+    status: "EM_ANDAMENTO",
+    module: "FINANCEIRO",
+    environment: "WEB",
+    bucketPath: "helpdesk/client_550e8400-e29b-41d4-a716-446655440000/ticket_mock-2",
+    lastMessageAt: "2025-12-26T16:45:00.000Z",
+    createdAt: "2025-12-26T14:20:00.000Z",
+    updatedAt: "2025-12-26T16:45:00.000Z",
+    closedAt: null,
+  },
+  {
+    id: "mock-3",
+    ticketNumber: "TKT-2025-003",
+    clientId: "550e8400-e29b-41d4-a716-446655440000", // Mesmo cliente
+    userId: null,
+    assignedUserId: "550e8400-e29b-41d4-a716-446655440002", // Carlos Developer
+    title: "API de agendamento retornando timeout",
+    description: "Integração com sistema de agendamento está lenta, causando timeouts frequentes.",
+    category: "PERFORMANCE",
+    priority: "CRITICA",
+    status: "RESOLVIDO",
+    module: "AGENDAMENTO",
+    environment: "WEB",
+    bucketPath: "helpdesk/client_550e8400-e29b-41d4-a716-446655440000/ticket_mock-3",
+    lastMessageAt: "2025-12-25T11:15:00.000Z",
+    createdAt: "2025-12-24T08:30:00.000Z",
+    updatedAt: "2025-12-25T11:15:00.000Z",
+    closedAt: "2025-12-25T11:15:00.000Z",
+  },
+  {
+    id: "mock-4",
+    ticketNumber: "TKT-2025-004",
+    clientId: "550e8400-e29b-41d4-a716-446655440003", // Outro cliente
+    userId: null,
+    assignedUserId: null,
+    title: "Dúvida sobre configuração de veículos",
+    description: "Como configurar corretamente os campos de classificação e categoria dos veículos?",
+    category: "TREINAMENTO",
+    priority: "BAIXA",
+    status: "AGUARDANDO_USUARIO",
+    module: null,
+    environment: "WEB",
+    bucketPath: "helpdesk/client_550e8400-e29b-41d4-a716-446655440003/ticket_mock-4",
+    lastMessageAt: "2025-12-26T09:20:00.000Z",
+    createdAt: "2025-12-25T15:10:00.000Z",
+    updatedAt: "2025-12-26T09:20:00.000Z",
+    closedAt: null,
+  },
+];
