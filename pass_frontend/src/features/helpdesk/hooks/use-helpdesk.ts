@@ -162,17 +162,72 @@ export function useUpdateHelpdesk() {
         return helpdeskMockAPI.update(id, updates);
       }
     },
-    onSuccess: (data) => {
-      // Invalidate specific ticket and list queries
-      queryClient.invalidateQueries({ queryKey: ["helpdesk"] });
-      queryClient.invalidateQueries({ queryKey: ["helpdesk", data.id] });
+    onMutate: async ({ id, updates }: { id: string; updates: UpdateHelpdeskInput }) => {
+      await queryClient.cancelQueries({ queryKey: ["helpdesk"], exact: false });
+
+      // Snapshot previous values for rollback
+      const previousQueries = queryClient.getQueriesData({ queryKey: ["helpdesk"], exact: false });
+
+      // Optimistically update all cached helpdesk queries (lists and single ticket)
+      previousQueries.forEach(([key, value]) => {
+        try {
+          // If this cached value is a paginated response with items
+          if (value && typeof value === "object" && (value as any).items) {
+            const pag = value as any;
+            const newItems = pag.items.map((it: any) => (it.id === id ? { ...it, ...updates } : it));
+            queryClient.setQueryData(key as any, { ...pag, items: newItems });
+          } else if (value && typeof value === "object" && (value as any).id) {
+            // Single ticket cached under ['helpdesk', id]
+            const ticket = value as any;
+            if (ticket.id === id) {
+              queryClient.setQueryData(key as any, { ...ticket, ...updates });
+            }
+          }
+        } catch (e) {
+          // ignore individual cache update errors
+        }
+      });
+
+      // Also update the specific ticket cache
+      const ticketData = queryClient.getQueryData(["helpdesk", id]);
+      if (ticketData) {
+        queryClient.setQueryData(["helpdesk", id], { ...ticketData, ...updates } as any);
+      }
+
+      return { previousQueries };
+    },
+    onSuccess: (data, variables, context: any) => {
+      // Ensure server response is reflected and then refetch/validate
+      queryClient.setQueryData(["helpdesk", data.id], data as any);
+      queryClient.getQueriesData({ queryKey: ["helpdesk"], exact: false }).forEach(([key, value]) => {
+        if (value && typeof value === "object" && (value as any).items) {
+          const pag = value as any;
+          const newItems = pag.items.map((it: any) => (it.id === data.id ? data : it));
+          queryClient.setQueryData(key as any, { ...pag, items: newItems });
+        }
+      });
 
       toast.success("Chamado atualizado com sucesso!");
     },
-    onError: (error) => {
+    onError: (error, variables, context: any) => {
+      // Rollback: restore previous queries snapshot if available
+      if (context?.previousQueries && Array.isArray(context.previousQueries)) {
+        context.previousQueries.forEach(([key, value]: any) => {
+          try {
+            queryClient.setQueryData(key, value);
+          } catch (e) {
+            // ignore individual restore errors
+          }
+        });
+      }
+
       toast.error(
         `Erro ao atualizar chamado: ${error instanceof Error ? error.message : "Erro desconhecido"}`
       );
+    },
+    onSettled: () => {
+      // After mutation settles, refetch to ensure server is source of truth
+      queryClient.invalidateQueries({ queryKey: ["helpdesk"], exact: false });
     },
   });
 }

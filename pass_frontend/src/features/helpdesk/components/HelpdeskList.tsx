@@ -130,7 +130,9 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       module: ticket.module ? (moduleMap[ticket.module] || "Admin") : "Admin",
       clientName: clientsMap[ticket.clientId]?.name || "Cliente",
       priority: priorityMap[ticket.priority] || "Baixa",
+      priorityApi: ticket.priority,
       status: statusMap[ticket.status] || "Aberto",
+      statusApi: ticket.status,
       createdAt: ticket.createdAt,
       assignedUserId: ticket.assignedUserId || null,
       assignedTo: ticket.assignedUserId && assignedMap[ticket.assignedUserId]
@@ -164,7 +166,7 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       limit: backendData.limit,
       totalPages: backendData.totalPages,
     };
-  }, [backendData, clientsMap]);
+  }, [backendData, clientsMap, assignedMap]);
 
   // Local tickets state so we can reorder/update for DnD lanes view
   const [tickets, setTickets] = useState<TicketData[] | null>(ticketData?.items ?? null);
@@ -204,9 +206,16 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
     const incoming = ticketData.items;
     setTickets((prev) => {
       if (!prev) return incoming;
+      // If length differs, replace
       if (prev.length !== incoming.length) return incoming;
-      for (let i = 0; i < prev.length; i++) {
-        if (prev[i].id !== incoming[i]?.id) return incoming;
+      // If any item content changed (not just ids), replace to reflect optimistic updates
+      try {
+        const prevStr = JSON.stringify(prev);
+        const incomingStr = JSON.stringify(incoming);
+        if (prevStr !== incomingStr) return incoming;
+      } catch (e) {
+        // Fallback conservative: replace
+        return incoming;
       }
       return prev;
     });
@@ -299,7 +308,9 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
   };
 
   // Show skeleton while loading or before tickets have been hydrated
-  if (isLoading || tickets === null) {
+  const anyUserLoading = clientQueries.some((q) => q.isLoading) || assignedQueries.some((q) => q.isLoading);
+
+  if (isLoading || anyUserLoading || tickets === null) {
     return (
       <div className="space-y-4">
         <div className="grid gap-4">

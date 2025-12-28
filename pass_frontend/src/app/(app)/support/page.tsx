@@ -106,6 +106,7 @@ export function SupportTicketPage() {
               Novo Chamado
             </span>
           </Button>
+          
         </div>
         <FilterHeader
           search={search}

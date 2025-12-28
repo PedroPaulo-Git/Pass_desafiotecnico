@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Eye,
   User,
+  Edit3,
   ChevronDownCircleIcon,
   ChevronDown,
   ChevronRight,
@@ -28,6 +29,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TicketData, Priority } from "./types";
+import type { HelpdeskStatus, HelpdeskPriority } from "@/features/helpdesk/types/helpdesk";
 import {
   getPriorityStyles,
   getStatusStyles,
@@ -42,6 +44,7 @@ import { UserInfoPopover } from "./supportComponents/UserInfoPopover";
 import { AssignedUserPopover } from "./supportComponents/AssignedUserPopover";
 import { AssignUserPopover } from "./supportComponents/AssignUserPopover";
 import { TicketInfoPopover } from "./supportComponents/TicketInfoPopover";
+import StatusPriorityPopover from "./supportComponents/StatusPriorityPopover";
 
 interface TicketRowProps {
   data: TicketData;
@@ -80,39 +83,48 @@ export const TicketRow: React.FC<TicketRowProps> = ({
     updateMutation.mutate({ id: data.id, updates: { assignedUserId: developer.id } });
   };
 
-  const handleStatusChange = (newStatus: string) => {
-    if (!newStatus || (updateMutation as any).isLoading) return;
-    updateMutation.mutate({ id: data.id, updates: { status: newStatus } });
+  const handleStatusChange = (apiStatus: HelpdeskStatus) => {
+    if (!apiStatus || (updateMutation as any).isLoading) return;
+    updateMutation.mutate({ id: data.id, updates: { status: apiStatus } });
+  };
+
+  const handlePriorityChange = (apiPriority: HelpdeskPriority) => {
+    if (!apiPriority || (updateMutation as any).isLoading) return;
+    updateMutation.mutate({ id: data.id, updates: { priority: apiPriority } });
   };
   let IconComponent = AlertCircle;
   let iconClass = "bg-background border-border text-foreground/50";
   let gradientClass = "bg-gradient-to-b from-gray-400 to-gray-600";
   let effectivePriority: Priority = "Baixa";
 
-  if (data.status === "Resolvido" || data.status === "Fechado") {
+  // Determine effective priority and default left-strip gradient based on priority
+  effectivePriority = data.priority || getPriorityFromCategory(data.category);
+  if (effectivePriority === "Alta") {
+    gradientClass = "bg-gradient-to-b from-red-400 to-red-600";
+  } else if (effectivePriority === "Média") {
+    gradientClass = "bg-gradient-to-b from-yellow-400 to-yellow-600";
+  } else if (effectivePriority === "Baixa") {
+    gradientClass = "bg-gradient-to-b from-blue-400 to-blue-600";
+  }
+
+  // If we have a status, prefer status icon/container for the avatar, but
+  // override the left strip only for resolved/closed statuses per design.
+  if (data.status) {
     const statusIcon = getStatusIconAndColor(data.status);
     if (statusIcon) {
       IconComponent = statusIcon.icon;
       iconClass = getStatusContainerClass(data.status);
-      if (data.status === "Resolvido") {
-        gradientClass = "bg-gradient-to-b from-green-400 to-green-600";
-      }
-      effectivePriority =
-        data.priority || getPriorityFromCategory(data.category);
+    }
+
+    if (data.status === "Resolvido") {
+      gradientClass = "bg-gradient-to-b from-green-400 to-green-600";
+    } else if (data.status === "Fechado") {
+      gradientClass = "bg-gradient-to-b from-gray-400 to-gray-600";
     }
   } else {
-    effectivePriority = data.priority || getPriorityFromCategory(data.category);
     const categoryIcon = getCategoryIconAndColor(data.category);
     IconComponent = categoryIcon.icon;
     iconClass = categoryIcon.className;
-    // Set gradient based on priority
-    if (effectivePriority === "Alta") {
-      gradientClass = "bg-gradient-to-b from-red-400 to-red-600";
-    } else if (effectivePriority === "Média") {
-      gradientClass = "bg-gradient-to-b from-yellow-400 to-yellow-600";
-    } else if (effectivePriority === "Baixa") {
-      gradientClass = "bg-gradient-to-b from-blue-400 to-blue-600";
-    }
   }
 
   return (
@@ -207,19 +219,23 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                  >
                    {data.status}
                  </Badge>
-                 {(currentUser?.role === "ADMIN" ||
-                   (currentUser?.role === "DEVELOPER" && data.assignedTo?.id === currentUser?.id)) && (
-                   <select
-                     className="text-xs bg-transparent border border-border rounded px-2 h-6"
-                     value={data.status}
-                     onChange={(e) => handleStatusChange(e.target.value)}
-                   >
-                     <option value="Aberto">Aberto</option>
-                     <option value="Em Andamento">Em Andamento</option>
-                     <option value="Resolvido">Resolvido</option>
-                     <option value="Fechado">Fechado</option>
-                   </select>
-                 )}
+                {(currentUser?.role === "ADMIN" ||
+                  (currentUser?.role === "DEVELOPER" && data.assignedTo?.id === currentUser?.id)) && (
+                  currentUser?.role === "ADMIN" ? (
+                    <StatusPriorityPopover
+                      data={data}
+                      onStatusChange={handleStatusChange}
+                      onPriorityChange={handlePriorityChange}
+                    />
+                  ) : (
+                    <StatusPriorityPopover
+                      data={data}
+                      onStatusChange={handleStatusChange}
+                      onPriorityChange={() => {}}
+                      showPriority={false}
+                    />
+                  )
+                )}
                </div>
               {viewMode !== "lanes" && viewMode !== "list" && (
                 <Button
