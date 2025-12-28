@@ -53,8 +53,23 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
     }))
   });
 
+  // Fetch assigned users data (developers/admins assigned to tickets)
+  const assignedUserIds = backendData?.items
+    ? [...new Set(backendData.items.map(t => t.assignedUserId).filter(Boolean))]
+    : [];
+
+  const assignedQueries = useQueries({
+    queries: assignedUserIds.map(id => ({
+      queryKey: ["user", id],
+      queryFn: () => getUserById(id as string),
+      staleTime: 5 * 60 * 1000,
+    }))
+  });
+
   // Create a map of clientId to user data
   const clientDataIds = clientQueries.map((q) => q.data?.id ?? "").join(",");
+
+  const assignedDataIds = assignedQueries.map((q) => q.data?.id ?? "").join(",");
 
   const clientsMap = React.useMemo(() => {
     return clientQueries.reduce((acc, query, index) => {
@@ -64,6 +79,15 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       return acc;
     }, {} as Record<string, any>);
   }, [clientIds.join(","), clientDataIds]);
+
+  const assignedMap = React.useMemo(() => {
+    return assignedQueries.reduce((acc, query, index) => {
+      if (query.data) {
+        acc[assignedUserIds[index] != null ? assignedUserIds[index] : ""] = query.data;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+  }, [assignedUserIds.join(","), assignedDataIds]);
 
   const mapHelpdeskToTicketData = (ticket: Helpdesk): TicketData => {
     const categoryMap: Record<string, TicketData['category']> = {
@@ -108,7 +132,22 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       priority: priorityMap[ticket.priority] || "Baixa",
       status: statusMap[ticket.status] || "Aberto",
       createdAt: ticket.createdAt,
-      assignedTo: null, // TODO: buscar assigned user
+      assignedUserId: ticket.assignedUserId || null,
+      assignedTo: ticket.assignedUserId && assignedMap[ticket.assignedUserId]
+        ? {
+            id: assignedMap[ticket.assignedUserId].id,
+            name: assignedMap[ticket.assignedUserId].name,
+            avatarFallback: (assignedMap[ticket.assignedUserId].name || "")
+              .split(" ")
+              .map((s: string) => s[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase(),
+            role: assignedMap[ticket.assignedUserId].role || "DEVELOPER",
+            email: assignedMap[ticket.assignedUserId].email || "",
+            phone: assignedMap[ticket.assignedUserId].phone || "",
+          }
+        : null,
       attachmentCount: 0, // TODO: contar anexos
       messageCount: 0, // TODO: contar mensagens
     };
@@ -178,8 +217,16 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
     } catch (e) {
       // ignore
     }
+    
   }, [ticketData]);
 
+  console.log(tickets)
+  console.log("clientsMap:", clientsMap);
+  console.log("assignedMap:", assignedMap);
+  console.log("clientIds:", clientIds);
+  console.log("clientDataIds:", clientDataIds);
+  console.log("backendData:", backendData);
+  console.log("ticketData:", ticketData);
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

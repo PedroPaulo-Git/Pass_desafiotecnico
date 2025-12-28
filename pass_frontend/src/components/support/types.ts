@@ -35,7 +35,8 @@ export interface TicketData {
   status: Status;
   createdAt: string | Date;
   responseTime?: string; // ex: "2h"
-  assignedTo?: Developer | null;
+  assignedUserId?: string | null;
+  assignedTo?: Developer | null; // Informações do desenvolvedor atribuído
   attachmentCount: number;
   messageCount: number;
 }

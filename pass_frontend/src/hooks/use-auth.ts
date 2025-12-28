@@ -80,13 +80,55 @@ export function useAuth() {
     }
   }, [currentUser]);
 
+  // Sincronizar mudanças de auth entre instâncias do hook (mesma aba ou outras abas)
+  useEffect(() => {
+    const handleAuthChanged = () => {
+      try {
+        const storedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          setCurrentUser(user);
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (err) {
+        console.error("Erro ao sincronizar usuário a partir do localStorage:", err);
+      }
+    };
+
+    const handleStorage = (ev: StorageEvent) => {
+      if (ev.key === STORAGE_KEYS.CURRENT_USER) {
+        handleAuthChanged();
+      }
+    };
+
+    window.addEventListener("auth:changed", handleAuthChanged);
+    window.addEventListener("storage", handleStorage as any);
+
+    return () => {
+      window.removeEventListener("auth:changed", handleAuthChanged);
+      window.removeEventListener("storage", handleStorage as any);
+    };
+  }, []);
+
   const login = (user: User) => {
     setCurrentUser(user);
+    try {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+    } catch (err) {
+      /* ignore */
+    }
+    window.dispatchEvent(new Event("auth:changed"));
   };
 
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    } catch (err) {
+      /* ignore */
+    }
+    window.dispatchEvent(new Event("auth:changed"));
   };
 
   const switchRole = async (role: UserRole) => {
@@ -110,6 +152,12 @@ export function useAuth() {
 
         console.log("✅ Role atualizada no backend");
         setCurrentUser(user);
+        try {
+          localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+        } catch (err) {
+          /* ignore */
+        }
+        window.dispatchEvent(new Event("auth:changed"));
       } catch (error) {
         console.warn("⚠️ Erro ao trocar role no backend:", (error as Error).message);
         // Não fazer fallback, manter usuário atual

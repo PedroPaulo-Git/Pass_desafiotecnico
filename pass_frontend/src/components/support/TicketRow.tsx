@@ -18,6 +18,8 @@ import { IoMdCopy } from "react-icons/io";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { useUpdateHelpdesk } from "@/features/helpdesk/hooks/use-helpdesk";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -54,8 +56,13 @@ export const TicketRow: React.FC<TicketRowProps> = ({
 }) => {
   console.log("Rendering TicketRow for ticket:", data);
   const isAssigned = !!data.assignedTo;
+  console.log("isAssigned---------:", isAssigned);
+  console.log("data.assignedTo:-----------", data);
   const [copied, setCopied] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const { currentUser } = useAuth();
+  const updateMutation = useUpdateHelpdesk();
 
   const copyToClipboard = async () => {
     try {
@@ -68,9 +75,14 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   };
 
   const handleAssign = (developer: any) => {
-    // In a real app, this would update the ticket data via API
-    console.log("Assigning developer:", developer);
-    // For demo purposes, we'll just log it
+    if (!developer) return;
+    if ((updateMutation as any).isLoading) return;
+    updateMutation.mutate({ id: data.id, updates: { assignedUserId: developer.id } });
+  };
+
+  const handleStatusChange = (newStatus: string) => {
+    if (!newStatus || (updateMutation as any).isLoading) return;
+    updateMutation.mutate({ id: data.id, updates: { status: newStatus } });
   };
   let IconComponent = AlertCircle;
   let iconClass = "bg-background border-border text-foreground/50";
@@ -177,23 +189,38 @@ export const TicketRow: React.FC<TicketRowProps> = ({
               </span>
             </span>
 
-            <div className="flex w-full gap-2 items-center mt-auto">
-              <Badge
-                variant="outline"
-                className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
-                  effectivePriority
-                )}`}
-              >
-                {effectivePriority}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`text-[11px] px-2 h-6 border rounded-md ${getStatusStyles(
-                  data.status
-                )}`}
-              >
-                {data.status}
-              </Badge>
+              <div className="flex w-full gap-2 items-center mt-auto">
+               <Badge
+                 variant="outline"
+                 className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
+                   effectivePriority
+                 )}`}
+               >
+                 {effectivePriority}
+               </Badge>
+               <div className="flex items-center gap-2">
+                 <Badge
+                   variant="outline"
+                   className={`text-[11px] px-2 h-6 border rounded-md ${getStatusStyles(
+                     data.status
+                   )}`}
+                 >
+                   {data.status}
+                 </Badge>
+                 {(currentUser?.role === "ADMIN" ||
+                   (currentUser?.role === "DEVELOPER" && data.assignedTo?.id === currentUser?.id)) && (
+                   <select
+                     className="text-xs bg-transparent border border-border rounded px-2 h-6"
+                     value={data.status}
+                     onChange={(e) => handleStatusChange(e.target.value)}
+                   >
+                     <option value="Aberto">Aberto</option>
+                     <option value="Em Andamento">Em Andamento</option>
+                     <option value="Resolvido">Resolvido</option>
+                     <option value="Fechado">Fechado</option>
+                   </select>
+                 )}
+               </div>
               {viewMode !== "lanes" && viewMode !== "list" && (
                 <Button
                   onClick={(e) => {
@@ -223,7 +250,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
               <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider">
                 Responsável
               </span>
-              {isAssigned ? (
+               {isAssigned ? (
                 <AssignedUserPopover data={data}>
                   <div className="flex items-center gap-2 cursor-pointer">
                     <Avatar className="h-6 w-6 border border-zinc-700">
@@ -236,17 +263,21 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                     </span>
                   </div>
                 </AssignedUserPopover>
-              ) : (
-                <AssignUserPopover data={data} onAssign={handleAssign}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-0 text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
-                  >
-                    <UserPlus className="w-3 h-3" /> Assumir
-                  </Button>
-                </AssignUserPopover>
-              )}
+               ) : (
+                 currentUser?.role === "ADMIN" ? (
+                   <AssignUserPopover data={data} onAssign={handleAssign}>
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       className="h-6 px-0 text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
+                     >
+                       <UserPlus className="w-3 h-3" /> Atribuir
+                     </Button>
+                   </AssignUserPopover>
+                 ) : (
+                   <div className="text-muted-foreground text-xs">Nenhum desenvolvedor assumiu este ticket</div>
+                 )
+               )}
             </div>
 
             {/* Data e Tempo */}
