@@ -22,8 +22,8 @@ function buildEndpoint(endpoint: string, port?: string, ssl = false) {
 
 const endpoint = buildEndpoint(rawEndpoint, port, useSsl);
 
-const accessKey = process.env.MINIO_ROOT_USER || process.env.MINIO_ACCESS_KEY || "minioadmin";
-const secretKey = process.env.MINIO_ROOT_PASSWORD || process.env.MINIO_SECRET_KEY || "minioadmin123";
+const accessKey = process.env.MINIO_ROOT_USER || "minioadmin";
+const secretKey = process.env.MINIO_ROOT_PASSWORD || "minioadmin123";
 
 const s3Client = new S3Client({
   endpoint,

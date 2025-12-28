@@ -18,6 +18,45 @@ import { helpdeskRoutes } from "./http/routes/helpdesk.routes";
 import { userRoutes } from "./http/routes/user.routes";
 import { initSocket } from "./lib/socket";
 import { ensureBucketExists } from "./lib/minio";
+import dns from "dns/promises";
+
+async function debugMinioConnectivity() {
+  try {
+    const raw = process.env.MINIO_ENDPOINT || "minio";
+    const port = process.env.MINIO_PORT || "9000";
+    const useSsl = String(process.env.MINIO_USE_SSL).toLowerCase() === "true";
+    const endpoint = (() => {
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return `${useSsl ? "https" : "http"}://${raw}${port ? `:${port}` : ""}`;
+    })();
+
+    console.log("[MINIO DEBUG] endpoint:", endpoint);
+    console.log("[MINIO DEBUG] useSsl:", useSsl);
+    // DNS lookup
+    const hostname = new URL(endpoint).hostname;
+    try {
+      const res = await dns.lookup(hostname);
+      console.log("[MINIO DEBUG] DNS lookup:", hostname, JSON.stringify(res));
+    } catch (dnsErr) {
+      console.warn("[MINIO DEBUG] DNS lookup failed:", hostname, (dnsErr as Error).message);
+    }
+
+    // Try fetching health endpoint
+    try {
+      const healthUrl = new URL(endpoint);
+      healthUrl.pathname = "/minio/health/live";
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 3000);
+      const resp = await fetch(healthUrl.href, { signal: controller.signal });
+      clearTimeout(id);
+      console.log("[MINIO DEBUG] health fetch status:", resp.status);
+    } catch (fetchErr) {
+      console.warn("[MINIO DEBUG] health fetch failed:", (fetchErr as Error).message);
+    }
+  } catch (err) {
+    console.error("[MINIO DEBUG] unexpected error:", err);
+  }
+}
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -29,6 +68,10 @@ app.register(cors, {
 // Ensure MinIO buckets exist (async, non-blocking)
 (async () => {
   try {
+    // Run connectivity debug before attempting bucket creation
+    if (process.env.NODE_ENV !== "production") {
+      await debugMinioConnectivity();
+    }
     await ensureBucketExists(process.env.MINIO_BUCKET || "pass-vehicles");
     await ensureBucketExists(process.env.MINIO_BUCKET_HELPDESK || "helpdesk");
     console.log("MinIO buckets verified/created");
