@@ -33,9 +33,12 @@ export interface TicketData {
   user?: User; // Informações detalhadas do usuário
   priority: Priority;
   status: Status;
+  statusApi?: string;
   createdAt: string | Date;
+  priorityApi?: string;
   responseTime?: string; // ex: "2h"
-  assignedTo?: Developer | null;
+  assignedUserId?: string | null;
+  assignedTo?: Developer | null; // Informações do desenvolvedor atribuído
   attachmentCount: number;
   messageCount: number;
 }

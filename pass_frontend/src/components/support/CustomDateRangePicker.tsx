@@ -64,7 +64,7 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
           }
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          <span>
+          <span className="max-w-[90%] overflow-hidden ">
             {dateRange?.from && dateRange?.to
               ? `${format(dateRange.from, "d 'de' MMM.", {
                   locale: ptBR,

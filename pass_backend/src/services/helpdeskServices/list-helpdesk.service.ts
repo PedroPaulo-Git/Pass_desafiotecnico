@@ -23,9 +23,9 @@ export const listHelpdeskService = async (query: HelpdeskQuery) => {
 
   const orderBy: any = { [sortBy]: sortOrder };
 
-  const total = await prisma.hELPDESK.count({ where });
+  const total = await prisma.HELPDESK.count({ where });
 
-  const helpdesks = await prisma.hELPDESK.findMany({
+  const helpdesks = await prisma.HELPDESK.findMany({
     where,
     orderBy,
     skip: (page - 1) * limit,

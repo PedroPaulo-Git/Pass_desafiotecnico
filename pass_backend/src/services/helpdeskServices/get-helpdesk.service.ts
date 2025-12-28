@@ -6,7 +6,7 @@ export const getHelpdeskService = async (id: string) => {
     throw new AppError("Helpdesk ID is required", 400, "HELPDESK_ID_REQUIRED");
   }
 
-  const helpdesk = await prisma.hELPDESK.findUnique({
+  const helpdesk = await prisma.HELPDESK.findUnique({
     where: { id },
   });
 

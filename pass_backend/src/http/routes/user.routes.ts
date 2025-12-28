@@ -1,11 +1,13 @@
 import { FastifyInstance } from "fastify";
 import { createUserController } from "@/http/controllers/userControllers/create-user.controller";
+import { authUserController } from "@/http/controllers/userControllers/auth-user.controller";
 import { listUserController } from "@/http/controllers/userControllers/list-user.controller";
 import { getUserController } from "@/http/controllers/userControllers/get-user.controller";
 import { updateUserController } from "@/http/controllers/userControllers/update-user.controller";
 import { deleteUserController } from "@/http/controllers/userControllers/delete-user.controller";
 
 export async function userRoutes(app: FastifyInstance) {
+  app.post("/auth", authUserController);
   app.post("/", createUserController);
   app.get("/", listUserController);
   app.get("/:id", getUserController);
