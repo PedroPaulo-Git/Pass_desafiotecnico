@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { randomUUID } from "crypto";
 import { CreateHelpdeskInput } from "@pass/schemas/helpdeskSchema";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client, ensureBucketExists } from "@/lib/minio";
@@ -59,7 +60,7 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
 
   const ticketNumber = `TKT-${currentYear}-${ticketSequence.toString().padStart(3, '0')}`;
 
-  const ticketId = crypto.randomUUID();
+  const ticketId = randomUUID();
   const bucketPath = `helpdesk/client_${input.clientId}/ticket_${ticketId}`;
   const bucketName = process.env.MINIO_BUCKET_HELPDESK || "helpdesk";
 
@@ -76,12 +77,13 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
     }
   }
 
-  // Ensure bucket exists
+  // Ensure bucket exists (log full error for debugging)
   try {
     await ensureBucketExists(bucketName);
   } catch (error) {
+    console.error("createHelpdeskService: ensureBucketExists error:", error);
     throw new AppError("MinIO storage unavailable", 503, "STORAGE_UNAVAILABLE", {
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 
@@ -102,14 +104,19 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
   };
 
   try {
-    await s3Client.send(new PutObjectCommand({
-      Bucket: bucketName,
-      Key: `${bucketPath}/ticket.json`,
-      Body: JSON.stringify(ticketJson),
-      ContentType: "application/json",
-    }));
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: `${bucketPath}/ticket.json`,
+        Body: JSON.stringify(ticketJson),
+        ContentType: "application/json",
+      })
+    );
   } catch (error) {
-    throw new AppError("Failed to create ticket in bucket", 500, "BUCKET_ERROR", { error });
+    console.error("createHelpdeskService: PutObjectCommand failed:", error);
+    throw new AppError("Failed to create ticket in bucket", 500, "BUCKET_ERROR", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   try {
@@ -131,16 +138,17 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
 
     return helpdesk;
   } catch (error) {
+    console.error("createHelpdeskService: prisma.helpdesk.create failed:", error);
     // Handle Prisma unique constraint errors
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       throw new AppError("Ticket number already exists", 409, "TICKET_NUMBER_CONFLICT", {
         ticketNumber,
-        error: error.message
+        error: error.message,
       });
     }
 
     throw new AppError("Failed to create helpdesk ticket", 500, "HELPDESK_CREATION_FAILED", {
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
