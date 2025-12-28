@@ -169,6 +169,7 @@ const start = async () => {
       console.error("Error initializing socket.io", e);
     }
     console.log(`🚀 Servidor rodando em http://${host}:${port}`);
+    console.log(`📦 Ambiente minio: ${process.env.MINIO_ENDPOINT || "development"}`);
   } catch (err) {
     // Ensure the error is visible in consoles used by tools like `tsx`
     console.error("Erro ao iniciar servidor:", err);
