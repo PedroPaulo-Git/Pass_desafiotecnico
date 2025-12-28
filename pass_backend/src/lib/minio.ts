@@ -4,19 +4,35 @@ import {
   HeadBucketCommand,
 } from "@aws-sdk/client-s3";
 
-// const endpoint = process.env.MINIO_ENDPOINT || "http://localhost";
+const rawEndpoint = process.env.MINIO_ENDPOINT || "localhost";
 const port = process.env.MINIO_PORT || "9000";
-// const fullEndpoint = port && port !== "80" && port !== "443" ? `${endpoint}:${port}` : endpoint;
-//`` ${process.env.MINIO_ENDPOINT}:${port}
+const useSsl = String(process.env.MINIO_USE_SSL).toLowerCase() === "true";
+
+function buildEndpoint(endpoint: string, port?: string, ssl = false) {
+  let e = endpoint;
+  if (!/^https?:\/\//i.test(e)) {
+    e = `${ssl ? "https" : "http"}://${e}`;
+  }
+  // Only append port if it's not the default for the protocol
+  if (port && !e.match(/:\d+$/)) {
+    e = `${e}:${port}`;
+  }
+  return e;
+}
+
+const endpoint = buildEndpoint(rawEndpoint, port, useSsl);
+
+const accessKey = process.env.MINIO_ROOT_USER || process.env.MINIO_ACCESS_KEY || "minioadmin";
+const secretKey = process.env.MINIO_ROOT_PASSWORD || process.env.MINIO_SECRET_KEY || "minioadmin123";
+
 const s3Client = new S3Client({
-  //   endpoint: fullEndpoint,
-  endpoint:`http://minio:${port}` || "http://minio:9000" ,
-  region: "us-east-1", // MinIO default
+  endpoint,
+  region: process.env.MINIO_REGION || "us-east-1",
   credentials: {
-    accessKeyId: process.env.MINIO_ACCESS_KEY || "minioadmin",
-    secretAccessKey: process.env.MINIO_SECRET_KEY || "minioadmin123",
+    accessKeyId: accessKey,
+    secretAccessKey: secretKey,
   },
-  forcePathStyle: true, // Required for MinIO
+  forcePathStyle: true,
 });
 export const ensureBucketExists = async (bucketName: string) => {
   try {
