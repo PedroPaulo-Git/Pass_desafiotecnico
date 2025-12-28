@@ -9,13 +9,15 @@ const port = process.env.MINIO_PORT || "9000";
 const useSsl = String(process.env.MINIO_USE_SSL).toLowerCase() === "true";
 
 function buildEndpoint(endpoint: string, port?: string, ssl = false) {
-  let e = endpoint;
-  if (!/^https?:\/\//i.test(e)) {
+  // Normalize and avoid appending a port when the provided endpoint already contains a scheme
+  let e = endpoint.replace(/\/$/, "");
+  const hadScheme = /^https?:\/\//i.test(e);
+  if (!hadScheme) {
     e = `${ssl ? "https" : "http"}://${e}`;
-  }
-  // Only append port if it's not the default for the protocol
-  if (port && !e.match(/:\d+$/)) {
-    e = `${e}:${port}`;
+    // Only append port when the original input did NOT include a scheme
+    if (port && !e.match(/:\\d+$/)) {
+      e = `${e}:${port}`;
+    }
   }
   return e;
 }
