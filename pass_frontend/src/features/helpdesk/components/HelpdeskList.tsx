@@ -108,9 +108,9 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
 
     const statusMap: Record<string, TicketData['status']> = {
       "ABERTO": "Aberto",
-      "EM_ANALISE": "Em Andamento",
+      "EM_ANALISE": "Em Análise",
       "EM_ANDAMENTO": "Em Andamento",
-      "AGUARDANDO_USUARIO": "Em Andamento",
+      "AGUARDANDO_USUARIO": "Aguardando Usuário",
       "RESOLVIDO": "Resolvido",
       "ENCERRADO": "Fechado"
     };

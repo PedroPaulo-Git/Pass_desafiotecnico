@@ -18,8 +18,11 @@ interface ToolbarProps {
   statusCounts: {
     total: number;
     abertos: number;
+    emAnalise: number;
     andamento: number;
+    aguardandoUsuario: number;
     resolvidos: number;
+    fechados: number;
   };
   viewMode: "list" | "grid" | "lanes";
   setViewMode: (mode: "list" | "grid" | "lanes") => void;
@@ -80,6 +83,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               </span>
             </TabsTrigger>
             <TabsTrigger
+              value="Em Análise"
+              className={`h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap shrink-0 ${
+                statusFilter === "Em Análise"
+                  ? "bg-blue-500/10 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-500/20"
+                  : "text-muted-foreground hover:bg-blue-500/5 hover:text-blue-600 border border-transparent"
+              } transition-all`}
+            >
+              Em Análise{" "}
+              <span className="ml-2 bg-blue-200 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-full text-[11px]">
+                {statusCounts.emAnalise}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
               value="Em Andamento"
               className={`h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap shrink-0 ${
                 statusFilter === "Em Andamento"
@@ -93,6 +109,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               </span>
             </TabsTrigger>
             <TabsTrigger
+              value="Aguardando Usuário"
+              className={`h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap shrink-0 ${
+                statusFilter === "Aguardando Usuário"
+                  ? "bg-orange-500/10 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-500/20"
+                  : "text-muted-foreground hover:bg-orange-500/5 hover:text-orange-600 border border-transparent"
+              } transition-all`}
+            >
+              Aguardando Usuário{" "}
+              <span className="ml-2 bg-orange-200 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-1 rounded-full text-[11px]">
+                {statusCounts.aguardandoUsuario}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
               value="Resolvidos"
               className={`h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap shrink-0 ${
                 statusFilter === "Resolvidos"
@@ -103,6 +132,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               Resolvidos{" "}
               <span className="ml-2 bg-emerald-200 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-full text-[11px]">
                 {statusCounts.resolvidos}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="Fechados"
+              className={`h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap shrink-0 ${
+                statusFilter === "Fechados"
+                  ? "bg-gray-500/10 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border border-gray-500/20"
+                  : "text-muted-foreground hover:bg-gray-500/5 hover:text-gray-600 border border-transparent"
+              } transition-all`}
+            >
+              Fechados{" "}
+              <span className="ml-2 bg-gray-200 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 px-2 py-1 rounded-full text-[11px]">
+                {statusCounts.fechados}
               </span>
             </TabsTrigger>
           </div>

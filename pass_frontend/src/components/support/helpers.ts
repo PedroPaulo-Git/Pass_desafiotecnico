@@ -1,5 +1,7 @@
 import { Priority, Status } from "./types";
-import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle, Eye, UserCheck, FileText, Search, Clock, User } from "lucide-react";
+import { IoTimerOutline } from "react-icons/io5";
+
 
 // --- Helpers de Estilo ---
 export const getPriorityStyles = (p: Priority) => {
@@ -80,10 +82,20 @@ export const getStatusIconAndColor = (status: Status) => {
         icon: AlertCircle,
         color: "text-yellow-500",
       };
+    case "Em Análise":
+      return {
+        icon: Search,
+        color: "text-blue-500",
+      };
     case "Em Andamento":
       return {
-        icon: Play,
+        icon: IoTimerOutline,
         color: "text-purple-400",
+      };
+    case "Aguardando Usuário":
+      return {
+        icon: User,
+        color: "text-orange-500",
       };
     case "Resolvido":
       return {
@@ -104,8 +116,12 @@ export const getStatusContainerClass = (status: Status) => {
   switch (status) {
     case "Aberto":
       return "bg-yellow-500/10 border-yellow-500/20 text-yellow-500";
+    case "Em Análise":
+      return "bg-blue-500/10 border-blue-500/20 text-blue-500";
     case "Em Andamento":
       return "bg-purple-500/10 border-purple-500/20 text-purple-400";
+    case "Aguardando Usuário":
+      return "bg-orange-500/10 border-orange-500/20 text-orange-500";
     case "Resolvido":
       return "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
     case "Fechado":
@@ -119,8 +135,12 @@ export const getStatusBorderColor = (status: Status) => {
   switch (status) {
     case "Aberto":
       return "border-l-yellow-500";
+    case "Em Análise":
+      return "border-l-blue-500";
     case "Em Andamento":
       return "border-l-purple-500";
+    case "Aguardando Usuário":
+      return "border-l-orange-500";
     case "Resolvido":
       return "border-l-emerald-500";
     case "Fechado":
@@ -134,8 +154,12 @@ export const getStatusStyles = (s: Status) => {
   switch (s) {
     case "Aberto":
       return "text-yellow-500 border-yellow-500 bg-yellow-500/10";
+    case "Em Análise":
+      return "text-blue-500 border-blue-500 bg-blue-500/10";
     case "Em Andamento":
       return "text-purple-400 border-purple-500/30 bg-purple-500/10";
+    case "Aguardando Usuário":
+      return "text-orange-500 border-orange-500 bg-orange-500/10";
     case "Resolvido":
       return "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
     case "Fechado":

@@ -1,6 +1,6 @@
 // --- Tipos de Dados Baseados na sua Estrutura ---
 export type Priority = "Alta" | "Média" | "Baixa" ;
-export type Status = "Aberto" | "Em Andamento" | "Resolvido" | "Fechado";
+export type Status = "Aberto" | "Em Análise" | "Em Andamento" | "Aguardando Usuário" | "Resolvido" | "Fechado";
 export type Category = "Bug" | "Acesso" | "Dúvida" | "Visual";
 export type Module = "Financeiro" | "Admin" | "Checkout" | "Integração" | "Frontend";
 

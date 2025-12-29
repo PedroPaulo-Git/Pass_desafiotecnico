@@ -130,8 +130,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   return (
     <div
       className={
-        `group border border-border relative bg-background hover:bg-muted rounded-lg p-4 mb-3 transition-all shadow-sm ` +
-        (viewMode === "lanes" ? "cursor-grab" : "")
+        `group border border-border relative bg-background/50  rounded-lg p-4 mb-3 transition-all shadow-sm ` +
+        (viewMode === "lanes" ? "cursor-grab hover:bg-background/60" : "hover:bg-muted")
       }
     >
       <div
