@@ -88,7 +88,7 @@ export function CreateHelpdeskDialog({
       });
     } catch (error) {
       // Show error toast with the exact message from the API
-      const errorMessage = error?.response?.data?.message || (error instanceof Error ? error.message : "Erro desconhecido ao criar chamado");
+      const errorMessage = (error as any)?.response?.data?.message || (error instanceof Error ? error.message : "Erro desconhecido ao criar chamado");
       toast.error(errorMessage);
       console.error("Error creating ticket:", error);
     }

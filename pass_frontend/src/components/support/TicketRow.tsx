@@ -92,7 +92,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
     if (!apiPriority || (updateMutation as any).isLoading) return;
     updateMutation.mutate({ id: data.id, updates: { priority: apiPriority } });
   };
-  let IconComponent = AlertCircle;
+  let IconComponent: React.ComponentType<any> = AlertCircle;
   let iconClass = "bg-background border-border text-foreground/50";
   let gradientClass = "bg-gradient-to-b from-gray-400 to-gray-600";
   let effectivePriority: Priority = "Baixa";
