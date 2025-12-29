@@ -6,20 +6,13 @@ import { s3Client, ensureBucketExists } from "@/lib/minio";
 import { AppError } from "@/utils/AppError";
 
 export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
-  // Validate client exists and has CLIENT role
+  // Validate client exists
   const client = await prisma.user.findUnique({
     where: { id: input.clientId },
   });
 
   if (!client) {
     throw new AppError("Client not found", 404, "CLIENT_NOT_FOUND", { clientId: input.clientId });
-  }
-
-  if (client.role !== "CLIENT") {
-    throw new AppError("User is not a client", 400, "INVALID_CLIENT_ROLE", {
-      clientId: input.clientId,
-      role: client.role
-    });
   }
 
   // Validate userId if provided
@@ -33,16 +26,19 @@ export const createHelpdeskService = async (input: CreateHelpdeskInput) => {
     }
   }
 
-  // Enforce one open ticket per client
+  // Enforce that all tickets must be RESOLVIDO or ENCERRADO to create new one (only for CLIENT and DEVELOPER)
+  if (client.role !== "ADMIN") {
     const existing = await prisma.helpdesk.findFirst({
-    where: { clientId: input.clientId, status: { not: "ENCERRADO" } },
-  });
-  if (existing) {
-    throw new AppError("Client already has an open ticket", 409, "TICKET_ALREADY_OPEN", {
-      clientId: input.clientId,
-      existingTicketId: existing.id,
-      existingTicketNumber: existing.ticketNumber
+      where: { clientId: input.clientId, status: { notIn: ["RESOLVIDO", "ENCERRADO"] } },
     });
+    if (existing) {
+      throw new AppError("You already have unresolved tickets. Please resolve or close all existing tickets before creating a new one.", 409, "UNRESOLVED_TICKETS_EXIST", {
+        clientId: input.clientId,
+        existingTicketId: existing.id,
+        existingTicketNumber: existing.ticketNumber,
+        existingStatus: existing.status
+      });
+    }
   }
 
   // Generate ticket number
