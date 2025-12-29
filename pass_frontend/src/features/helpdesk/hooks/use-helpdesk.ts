@@ -113,13 +113,9 @@ export function useCreateHelpdesk() {
 
   return useMutation({
     mutationFn: async (ticket: CreateHelpdeskInput) => {
-      // Try real API first, fallback to mock on error
+      // For create, don't fallback to mock on error - let the error propagate
       if (backendStatus === "online") {
-        try {
-          return await helpdeskAPI.create(ticket);
-        } catch (error) {
-          return helpdeskMockAPI.create(ticket);
-        }
+        return await helpdeskAPI.create(ticket);
       } else {
         return helpdeskMockAPI.create(ticket);
       }
@@ -151,13 +147,9 @@ export function useUpdateHelpdesk() {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: UpdateHelpdeskInput }) => {
-      // Try real API first, fallback to mock on error
+      // For update, don't fallback to mock on error - let the error propagate
       if (backendStatus === "online") {
-        try {
-          return await helpdeskAPI.update(id, updates);
-        } catch (error) {
-          return helpdeskMockAPI.update(id, updates);
-        }
+        return await helpdeskAPI.update(id, updates);
       } else {
         return helpdeskMockAPI.update(id, updates);
       }
@@ -240,13 +232,9 @@ export function useDeleteHelpdesk() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Try real API first, fallback to mock on error
+      // For delete, don't fallback to mock on error - let the error propagate
       if (backendStatus === "online") {
-        try {
-          return await helpdeskAPI.delete(id);
-        } catch (error) {
-          return helpdeskMockAPI.delete(id);
-        }
+        return await helpdeskAPI.delete(id);
       } else {
         return helpdeskMockAPI.delete(id);
       }

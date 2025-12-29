@@ -72,7 +72,7 @@ export function AppHeader({
   const [openSearchDialog, setOpenSearchDialog] = useState(false);
   const { theme, toggleTheme, pendingTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
-  const { currentUser, switchRole, getRoleLabel, logout, isLoggedIn } =
+  const { currentUser, switchUser, getRoleLabel, logout, isLoggedIn } =
     useAuth();
 
   // Usa o tema pendente (se existir) para o ícone mudar imediatamente
@@ -314,17 +314,17 @@ export function AppHeader({
               <User className="h-4 w-4" />
               <span>Conta</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchRole("CLIENT")}>
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchUser("CLIENT")}>
               <Ticket className="h-4 w-4" />
-              <span>Trocar para Cliente</span>
+              <span>Entrar como Cliente</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchRole("ADMIN")}>
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchUser("ADMIN")}>
               <Settings className="h-4 w-4" />
-              <span>Trocar para Admin</span>
+              <span>Entrar como Admin</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchRole("DEVELOPER")}>
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => switchUser("DEVELOPER")}>
               <Activity className="h-4 w-4" />
-              <span>Trocar para Developer</span>
+              <span>Entrar como Developer</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 cursor-pointer">

@@ -23,6 +23,7 @@ import {
 import { useCreateHelpdesk } from "../hooks/use-helpdesk";
 import { CreateHelpdeskInput, Helpdesk, HelpdeskModule } from "../types/helpdesk";
 import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 interface CreateHelpdeskDialogProps {
   isOpen: boolean;
@@ -86,7 +87,9 @@ export function CreateHelpdeskDialog({
         environment: "WEB",
       });
     } catch (error) {
-      // Error is handled by the mutation's onError
+      // Show error toast with the exact message from the API
+      const errorMessage = error?.response?.data?.message || (error instanceof Error ? error.message : "Erro desconhecido ao criar chamado");
+      toast.error(errorMessage);
       console.error("Error creating ticket:", error);
     }
   };

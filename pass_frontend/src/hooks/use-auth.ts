@@ -15,7 +15,14 @@ export interface User {
 }
 
 const STORAGE_KEYS = {
-  CURRENT_USER: "fleet_current_user",
+  CURRENT_USER_ROLE: "fleet_current_user_role",
+} as const;
+
+// Usuários pré-definidos para cada role
+const PREDEFINED_USERS = {
+  CLIENT: { name: "João Cliente", email: "client@fleet.com" },
+  ADMIN: { name: "Maria Admin", email: "admin@fleet.com" },
+  DEVELOPER: { name: "Pedro Developer", email: "developer@fleet.com" },
 } as const;
 
 export function useAuth() {
@@ -26,21 +33,16 @@ export function useAuth() {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Tentar carregar do localStorage primeiro
-        const storedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-        if (storedUser) {
-          const user = JSON.parse(storedUser);
-          setCurrentUser(user);
-          setIsLoading(false);
-          return;
-        }
+        // Tentar carregar a role do localStorage
+        const storedRole = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ROLE) as UserRole | null;
+        const defaultRole: UserRole = storedRole || "CLIENT";
 
-        // Tentar autenticar no backend com dados padrão
-        console.log("🔄 Tentando conectar com backend...");
+        console.log(`🔄 Tentando conectar com backend como ${defaultRole}...`);
+        const userData = PREDEFINED_USERS[defaultRole];
         const apiUser = await authUser({
-          name: "Usuário Demo",
-          email: "demo@fleet.com",
-          role: "CLIENT" as UserRole,
+          name: userData.name,
+          email: userData.email,
+          role: defaultRole,
         });
 
         const user: User = {
@@ -65,29 +67,42 @@ export function useAuth() {
     initializeAuth();
   }, []);
 
-  // Salvar usuário no localStorage quando mudar
+  // Salvar a role no localStorage quando mudar
   useEffect(() => {
     try {
-      if (currentUser) {
-        const userToSave = {
-          ...currentUser,
-          updatedAt: new Date().toISOString(),
-        };
-        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(userToSave));
+      if (currentUser?.role) {
+        localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ROLE, currentUser.role);
       }
     } catch (error) {
-      console.error("Erro ao salvar usuário no localStorage:", error);
+      console.error("Erro ao salvar role no localStorage:", error);
     }
-  }, [currentUser]);
+  }, [currentUser?.role]);
 
   // Sincronizar mudanças de auth entre instâncias do hook (mesma aba ou outras abas)
   useEffect(() => {
     const handleAuthChanged = () => {
       try {
-        const storedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-        if (storedUser) {
-          const user = JSON.parse(storedUser);
-          setCurrentUser(user);
+        const storedRole = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ROLE) as UserRole | null;
+        if (storedRole && PREDEFINED_USERS[storedRole]) {
+          // Re-autenticar com a nova role se necessário
+          const userData = PREDEFINED_USERS[storedRole];
+          authUser({
+            name: userData.name,
+            email: userData.email,
+            role: storedRole,
+          }).then(apiUser => {
+            const user: User = {
+              id: apiUser.id,
+              name: apiUser.name,
+              email: apiUser.email,
+              role: apiUser.role,
+              createdAt: apiUser.createdAt,
+              updatedAt: apiUser.updatedAt,
+            };
+            setCurrentUser(user);
+          }).catch(err => {
+            console.warn("Erro ao re-autenticar:", err);
+          });
         } else {
           setCurrentUser(null);
         }
@@ -97,7 +112,7 @@ export function useAuth() {
     };
 
     const handleStorage = (ev: StorageEvent) => {
-      if (ev.key === STORAGE_KEYS.CURRENT_USER) {
+      if (ev.key === STORAGE_KEYS.CURRENT_USER_ROLE) {
         handleAuthChanged();
       }
     };
@@ -114,7 +129,7 @@ export function useAuth() {
   const login = (user: User) => {
     setCurrentUser(user);
     try {
-      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ROLE, user.role);
     } catch (err) {
       /* ignore */
     }
@@ -124,44 +139,43 @@ export function useAuth() {
   const logout = () => {
     setCurrentUser(null);
     try {
-      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ROLE);
     } catch (err) {
       /* ignore */
     }
     window.dispatchEvent(new Event("auth:changed"));
   };
 
-  const switchRole = async (role: UserRole) => {
-    if (currentUser) {
+  const switchUser = async (role: UserRole) => {
+    try {
+      console.log(`🔄 Trocando para usuário ${role}...`);
+      const userData = PREDEFINED_USERS[role];
+      const apiUser = await authUser({
+        name: userData.name,
+        email: userData.email,
+        role,
+      });
+
+      const user: User = {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email,
+        role: apiUser.role,
+        createdAt: apiUser.createdAt,
+        updatedAt: apiUser.updatedAt,
+      };
+
+      console.log("✅ Usuário trocado:", user.name);
+      setCurrentUser(user);
       try {
-        console.log(`🔄 Trocando role para ${role} no backend...`);
-        const updatedUser = await authUser({
-          email: currentUser.email,
-          name: currentUser.name,
-          role,
-        });
-
-        const user: User = {
-          id: updatedUser.id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          createdAt: updatedUser.createdAt,
-          updatedAt: updatedUser.updatedAt,
-        };
-
-        console.log("✅ Role atualizada no backend");
-        setCurrentUser(user);
-        try {
-          localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-        } catch (err) {
-          /* ignore */
-        }
-        window.dispatchEvent(new Event("auth:changed"));
-      } catch (error) {
-        console.warn("⚠️ Erro ao trocar role no backend:", (error as Error).message);
-        // Não fazer fallback, manter usuário atual
+        localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ROLE, role);
+      } catch (err) {
+        /* ignore */
       }
+      window.dispatchEvent(new Event("auth:changed"));
+    } catch (error) {
+      console.warn("⚠️ Erro ao trocar usuário:", (error as Error).message);
+      // Não fazer fallback, manter usuário atual
     }
   };
 
@@ -183,7 +197,7 @@ export function useAuth() {
     isLoading,
     login,
     logout,
-    switchRole,
+    switchUser,
     getRoleLabel,
     isLoggedIn: !!currentUser,
   };
