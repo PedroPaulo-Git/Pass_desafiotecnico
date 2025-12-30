@@ -54,7 +54,7 @@ export function BackendStatus({ allowToggle = false, initialVisible = true }: { 
   if (!visible) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full">
       <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
         <Badge variant={statusInfo.variant} className={statusInfo.className}>
           <div className="flex items-center gap-1">

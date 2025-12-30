@@ -23,9 +23,15 @@ export const createHelpdeskSchema = z.object({
 });
 
 export const updateHelpdeskSchema = z.object({
-  assignedUserId: z.string().uuid().optional(),
-  status: helpdeskStatusSchema.optional(),
-  priority: helpdeskPrioritySchema.optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  priority: z.string().optional(),
+  status: z.string().optional(),
+  module: z.string().optional(),
+  environment: z.string().optional(),
+  assignedUserId: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
 });
 
 export const helpdeskQuerySchema = z.object({

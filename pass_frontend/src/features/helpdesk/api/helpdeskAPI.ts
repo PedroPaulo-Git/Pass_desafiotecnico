@@ -53,7 +53,9 @@ export const helpdeskAPI = {
 
   // Update helpdesk ticket
   async update(id: string, updates: UpdateHelpdeskInput): Promise<Helpdesk> {
+    console.log("🔄 Making update request to:", `/helpdesk/${id}`, updates);
     const { data } = await api.put<Helpdesk>(`/helpdesk/${id}`, updates);
+    console.log("✅ Update successful:", data);
     return data;
   },
 

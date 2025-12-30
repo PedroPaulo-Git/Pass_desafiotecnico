@@ -27,8 +27,12 @@ export interface TicketData {
   id: string;
   ticketNumber: string; // ex: TKT-1024
   title: string;
+  description: string;
   category: Category; // ex: Bug, Feature, Acesso
+  categoryApi?: string; // valor original do backend
   module: Module; // ex: Financeiro, Login
+  moduleApi?: string; // valor original do backend
+  environment: "WEB" | "MOBILE";
   clientName: string;
   user?: User; // Informações detalhadas do usuário
   priority: Priority;

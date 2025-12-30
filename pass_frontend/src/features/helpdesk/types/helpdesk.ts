@@ -46,6 +46,12 @@ export interface UpdateHelpdeskInput {
   assignedUserId?: string;
   status?: HelpdeskStatus;
   priority?: HelpdeskPriority;
+  title?: string;
+  description?: string;
+  category?: HelpdeskCategory;
+  module?: HelpdeskModule;
+  environment?: HelpdeskEnvironment;
+  attachments?: string[];
 }
 
 export interface HelpdeskFilters {

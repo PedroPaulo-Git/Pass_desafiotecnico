@@ -48,16 +48,16 @@ export const StatusPriorityPopover: React.FC<Props> = ({ data, onStatusChange, o
   };
 
   return (
-    <Popover>
+    <Popover modal={true}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="h-6 px-2 flex items-center gap-2">
             <Edit3 className="w-4 h-4 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="p-3 ">
+      <PopoverContent className="p-3" side="bottom" align="end">
         <div className="space-y-2 p-2 w-40 ">
-          {currentUser?.role === "ADMIN" && (
+          {!(currentUser?.role === "CLIENT" && (data.status === "Resolvido" || data.status === "Fechado")) && (
             <div>
               <label className="text-xs font-medium text-muted-foreground">Status</label>
               <Select
@@ -76,7 +76,7 @@ export const StatusPriorityPopover: React.FC<Props> = ({ data, onStatusChange, o
             </div>
           )}
 
-          {showPriority && (
+          {showPriority && !(currentUser?.role === "CLIENT" && (data.status === "Resolvido" || data.status === "Fechado")) && (
             <div>
               <label className="text-xs font-medium text-muted-foreground">Prioridade</label>
               <Select

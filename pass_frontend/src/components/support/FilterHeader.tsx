@@ -34,6 +34,7 @@ interface FilterHeaderProps {
   moduleFilter: string;
   setModuleFilter: (value: string) => void;
   onClearFilters: () => void;
+  onClickNewTicket: () => void;
 }
 
 export const FilterHeader: React.FC<FilterHeaderProps> = ({
@@ -45,17 +46,20 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
   moduleFilter,
   setModuleFilter,
   onClearFilters,
+  onClickNewTicket,
 }) => {
   const today = new Date();
   const lastYear = subYears(today, 1);
-  const defaultPlaceholder = `${format(lastYear, "d 'de' MMM. yyyy", { locale: ptBR })} - ${format(today, "d 'de' MMM. yyyy", { locale: ptBR })}`;
+  const defaultPlaceholder = `${format(lastYear, "d 'de' MMM. yyyy", {
+    locale: ptBR,
+  })} - ${format(today, "d 'de' MMM. yyyy", { locale: ptBR })}`;
   return (
     <div className="flex flex-col mt-4 gap-10 items-center">
       <div className="bg-card/60 p-6 rounded-xl border mb-6 shadow-sm w-[80%] mx-auto border-border/50">
-        <div className="flex flex-col md:flex-row gap-6 items-end ">
+        <div className="flex flex-col md:flex-row flex-wrap gap-6 items-end ">
           {/* Busca Principal */}
-          <div className="flex-1 w-full space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <div className="flex-1 space-y-2 ">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2 text-nowrap">
               Buscar Chamado
             </label>
             <div className="relative">
@@ -70,21 +74,31 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
           </div>
 
           {/* Filtro de Categoria/Módulo */}
-          <div className="w-full md:w-[200px] space-y-2">
+          <div className="flex-1 w-full md:w-50 space-y-2">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2 ">
               Módulo
             </label>
             <Select value={moduleFilter} onValueChange={setModuleFilter}>
-              <SelectTrigger className="w-full justify-between pl-3 text-foreground 
-              h-11 border-input hover:bg-input/50  shadow-sm border-0 rounded-md dark:bg-input/30 bg-border m-0">
+              <SelectTrigger
+                className="w-full justify-between pl-3 text-foreground 
+              h-11 border-input hover:bg-input/50  shadow-sm border-0 rounded-md dark:bg-input/30 bg-border m-0"
+              >
                 <SelectValue placeholder="Todos os módulos" />
               </SelectTrigger>
               <SelectContent showSearch className="bg-popover">
-                <SelectItem className="bg-popover text-foreground" key="todos" value="todos">
+                <SelectItem
+                  className="bg-popover text-foreground"
+                  key="todos"
+                  value="todos"
+                >
                   Todos os módulos
                 </SelectItem>
                 {modules.map((module) => (
-                  <SelectItem className="bg-popover text-foreground" key={module} value={module}>
+                  <SelectItem
+                    className="bg-popover text-foreground"
+                    key={module}
+                    value={module}
+                  >
                     {module}
                   </SelectItem>
                 ))}
@@ -93,7 +107,8 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
           </div>
 
           {/* Filtro de Data */}
-          <div className="w-full md:w-60 space-y-2">
+
+          <div className="flex-1  space-y-2 w-full md:w-50 ">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
               Período de Abertura
             </label>
@@ -104,9 +119,21 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
                 presets={dateRangePresets}
                 placeholder={defaultPlaceholder}
                 className="flex-1 "
-              />   
+              />
             </div>
           </div>
+          <Button
+            className="bg-purple-500 dark:bg-purple-500 text-foreground font-semibold h-11 p-0 px-2"
+            onClick={onClickNewTicket}
+          >
+            <span className="flex items-center px-6">
+              <Search className="w-4 h-4 mr-2" />
+              Buscar
+            </span>
+            <span className=" border-l border-foreground/20 h-full flex items-center pl-2 ">
+              <Plus className="w-4 h-4 " />
+            </span>
+          </Button>
 
           {/* Botão Principal */}
         </div>

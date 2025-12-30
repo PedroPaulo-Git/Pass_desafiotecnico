@@ -29,7 +29,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TicketData, Priority } from "./types";
-import type { HelpdeskStatus, HelpdeskPriority } from "@/features/helpdesk/types/helpdesk";
+import type {
+  HelpdeskStatus,
+  HelpdeskPriority,
+} from "@/features/helpdesk/types/helpdesk";
 import {
   getPriorityStyles,
   getStatusStyles,
@@ -80,7 +83,10 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   const handleAssign = (developer: any) => {
     if (!developer) return;
     if ((updateMutation as any).isLoading) return;
-    updateMutation.mutate({ id: data.id, updates: { assignedUserId: developer.id } });
+    updateMutation.mutate({
+      id: data.id,
+      updates: { assignedUserId: developer.id },
+    });
   };
 
   const handleStatusChange = (apiStatus: HelpdeskStatus) => {
@@ -131,7 +137,9 @@ export const TicketRow: React.FC<TicketRowProps> = ({
     <div
       className={
         `group border border-border relative bg-background/50  rounded-lg p-4 mb-3 transition-all shadow-sm ` +
-        (viewMode === "lanes" ? "cursor-grab hover:bg-background/60" : "hover:bg-muted")
+        (viewMode === "lanes"
+          ? "cursor-grab hover:bg-background/60"
+          : "hover:bg-muted")
       }
     >
       <div
@@ -160,7 +168,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 <TooltipTrigger asChild>
                   <button
                     onClick={copyToClipboard}
-                    className="flex items-center text-[10px] 2xl:text-xs text-muted-foreground cursor-pointer border-none bg-transparent p-0 max-w-[110px]"
+                    className="flex items-center text-[10px] 2xl:text-xs text-muted-foreground cursor-pointer border-none bg-transparent p-0 max-w-27.5"
                   >
                     {data.ticketNumber}{" "}
                     {copied ? (
@@ -175,80 +183,94 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <TicketInfoPopover
-              data={data}
-              effectivePriority={effectivePriority}
-              IconComponent={IconComponent}
-              iconClass={iconClass}
-              open={isPopoverOpen}
-              onOpenChange={setIsPopoverOpen}
-            >
-              <h3 className="text-foreground font-semibold leading-tight transition-colors text-md hover:text-foreground/80 cursor-pointer">
-                {data.title}
-              </h3>
-            </TicketInfoPopover>
-
-            <span
-              className={`text-foreground/50 text-xs flex-wrap flex items-center gap-2 ${
-                viewMode === "lanes" ? "flex-wrap" : ""
+            <div
+              className={`flex gap-3 max-w-100 ${
+                viewMode !== "list" ? "flex-col" : ""
               }`}
             >
-              <span className="flex text-left justify-center items-center gap-2 text-muted-foreground">
-                <p >{data.clientName}</p>
-                
-                <Separator orientation="vertical" className="h-4" />
-                <UserInfoPopover data={data} />
-              </span>
-            </span>
+              <div
+                className={` flex flex-col ${viewMode !== "list" ? "" : ""}`}
+              >
+                <TicketInfoPopover
+                  data={data}
+                  effectivePriority={effectivePriority}
+                  IconComponent={IconComponent}
+                  iconClass={iconClass}
+                  open={isPopoverOpen}
+                  onOpenChange={setIsPopoverOpen}
+                >
+                  <h3
+                    className={`text-foreground  overflow-x-hidden text-ellipsis whitespace-nowrap font-semibold leading-tight transition-colors text-md 
+                    hover:text-foreground/80 cursor-pointer ${
+                      viewMode !== "list"
+                        ? "sm:max-w-45"
+                        : "sm:max-w-25"
+                    }`}
+                  >
+                    {data.title}
+                  </h3>
+                </TicketInfoPopover>
 
-              <div className="flex w-full gap-2 items-center mt-auto">
-               <Badge
-                 variant="outline"
-                 className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
-                   effectivePriority
-                 )}`}
-               >
-                 {effectivePriority}
-               </Badge>
-               <div className="flex items-center gap-2">
-                 <Badge
-                   variant="outline"
-                   className={`text-[11px] px-2 h-6 border rounded-md ${getStatusStyles(
-                     data.status
-                   )}`}
-                 >
-                   {data.status}
-                 </Badge>
-                {(currentUser?.role === "ADMIN" ||
-                  (currentUser?.role === "DEVELOPER" && data.assignedTo?.id === currentUser?.id)) && (
-                  currentUser?.role === "ADMIN" ? (
+                <span
+                  className={`text-foreground/50 text-xs flex-wrap flex items-center gap-2 ${
+                    viewMode === "lanes" ? "flex-wrap" : ""
+                  }`}
+                >
+                  <span className="flex text-left text-nowrap justify-center items-center gap-2 text-muted-foreground">
+                    <p>{data.clientName}</p>
+
+                    <Separator orientation="vertical" className="h-4" />
+                  </span>
+                </span>
+              </div>
+
+              <div
+                className={`flex flex-wrap gap-2 items-center mt-auto my-auto w-full ${
+                  viewMode !== "list" ? "flex-nowrap" : ""
+                }`}
+              >
+                <UserInfoPopover data={data} />
+                {!(currentUser?.role === "CLIENT" && (data.status === "Fechado" || data.status === "Resolvido")) && (
+                  <Badge
+                    variant="outline"
+                    className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
+                      effectivePriority
+                    )}`}
+                  >
+                    {effectivePriority}
+                  </Badge>
+                )}
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className={`text-[11px] px-2 h-6 border rounded-md ${getStatusStyles(
+                      data.status
+                    )}`}
+                  >
+                    {data.status}
+                  </Badge>
+                  {!(currentUser?.role === "CLIENT" && (data.status === "Resolvido" || data.status === "Fechado")) && (
                     <StatusPriorityPopover
                       data={data}
                       onStatusChange={handleStatusChange}
                       onPriorityChange={handlePriorityChange}
                     />
-                  ) : (
-                    <StatusPriorityPopover
-                      data={data}
-                      onStatusChange={handleStatusChange}
-                      onPriorityChange={() => {}}
-                      showPriority={false}
-                    />
-                  )
+                  )}
+                </div>
+                {viewMode !== "lanes" && viewMode !== "list" && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClick?.();
+                    }}
+                    className=" flex text-foreground border border-border bg-background w-9 h-9 hover:bg-accent/10 p-0 ml-auto"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </Button>
                 )}
-               </div>
-              {viewMode !== "lanes" && viewMode !== "list" && (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClick?.();
-                  }}
-                  className=" flex text-foreground border border-border bg-background w-9 h-9 hover:bg-accent/10 p-0 ml-auto"
-                >
-                  <Eye className="w-5 h-5" />
-                </Button>
-              )}
+              </div>
             </div>
+           
           </div>
         </div>
 
@@ -262,53 +284,54 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             `}
           >
             {/* Atribuído a */}
-            <div className="flex flex-col gap-1 min-w-[120px]">
-              <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider">
-                Responsável
-              </span>
-               {isAssigned ? (
-                <AssignedUserPopover data={data}>
-                  <div className="flex items-center gap-2 cursor-pointer">
-                    <Avatar className="h-6 w-6 border border-zinc-700">
-                      <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">
-                        {data.assignedTo?.avatarFallback}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-muted-foreground text-xs font-medium">
-                      {data.assignedTo?.name}
-                    </span>
+            <div className="flex justify-start gap-2">
+              <div className="flex flex-col gap-1 justify-start min-w-40">
+                <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider">
+                  Responsável
+                </span>
+                {isAssigned ? (
+                  <AssignedUserPopover data={data}>
+                    <div className="flex items-center gap-2 cursor-pointer">
+                      <Avatar className="h-6 w-6 border border-zinc-700">
+                        <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">
+                          {data.assignedTo?.avatarFallback}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-muted-foreground text-xs font-medium">
+                        {data.assignedTo?.name}
+                      </span>
+                    </div>
+                  </AssignedUserPopover>
+                ) : currentUser?.role === "ADMIN" || currentUser?.role === "DEVELOPER" ? (
+                  <AssignUserPopover data={data} onAssign={handleAssign}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-0! text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
+                    >
+                      <UserPlus className="w-3 h-3" /> Atribuir
+                    </Button>
+                  </AssignUserPopover>
+                ) : (
+                  <div className="text-muted-foreground text-xs">
+                    Nenhum desenvolvedor assumiu este ticket
                   </div>
-                </AssignedUserPopover>
-               ) : (
-                 currentUser?.role === "ADMIN" ? (
-                   <AssignUserPopover data={data} onAssign={handleAssign}>
-                     <Button
-                       variant="ghost"
-                       size="sm"
-                       className="h-6 px-0 text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
-                     >
-                       <UserPlus className="w-3 h-3" /> Atribuir
-                     </Button>
-                   </AssignUserPopover>
-                 ) : (
-                   <div className="text-muted-foreground text-xs">Nenhum desenvolvedor assumiu este ticket</div>
-                 )
-               )}
-            </div>
+                )}
+              </div>
 
-            {/* Data e Tempo */}
-            <div className="flex flex-col gap-1 min-w-[100px] mb-1">
-              <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider mb-1">
-                Abertura
-              </span>
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                <Clock className="w-3 h-3" />
-                {data.createdAt instanceof Date
-                  ? data.createdAt.toLocaleDateString()
-                  : data.createdAt}
+              {/* Data e Tempo */}
+              <div className="flex flex-col gap-1 mb-1 min-w-25">
+                <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider mb-1">
+                  Abertura
+                </span>
+                <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <Clock className="w-3 h-3" />
+                  {data.createdAt instanceof Date
+                    ? data.createdAt.toLocaleDateString("pt-BR")
+                    : new Date(data.createdAt).toLocaleDateString("pt-BR")}
+                </div>
               </div>
             </div>
-
             {/* Métricas Rápidas */}
             <div className="flex items-center gap-3 border-l border-border pl-4">
               <TooltipProvider>
@@ -407,13 +430,13 @@ export const TicketRowSkeleton: React.FC<{
              lg:pt-0`}
           >
             {/* Atribuído a */}
-            <div className="flex flex-col gap-1 min-w-[120px]">
+            <div className="flex flex-col gap-1 min-w-30">
               <Skeleton className="h-3 w-16 mb-1" />
               <Skeleton className="h-6 w-20" />
             </div>
 
             {/* Data e Tempo */}
-            <div className="flex flex-col gap-1 min-w-[100px] mb-1">
+            <div className="flex flex-col gap-1 min-w-25 mb-1">
               <Skeleton className="h-3 w-12 mb-1" />
               <Skeleton className="h-4 w-24" />
             </div>

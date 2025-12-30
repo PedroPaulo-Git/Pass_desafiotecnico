@@ -147,10 +147,13 @@ export function useUpdateHelpdesk() {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: UpdateHelpdeskInput }) => {
+      console.log("🔍 Backend status:", backendStatus);
       // For update, don't fallback to mock on error - let the error propagate
       if (backendStatus === "online") {
+        console.log("📡 Calling real API");
         return await helpdeskAPI.update(id, updates);
       } else {
+        console.log("🎭 Using mock API");
         return helpdeskMockAPI.update(id, updates);
       }
     },
@@ -202,6 +205,7 @@ export function useUpdateHelpdesk() {
       toast.success("Chamado atualizado com sucesso!");
     },
     onError: (error, variables, context: any) => {
+      console.error("❌ Update failed:", error, "variables:", variables);
       // Rollback: restore previous queries snapshot if available
       if (context?.previousQueries && Array.isArray(context.previousQueries)) {
         context.previousQueries.forEach(([key, value]: any) => {

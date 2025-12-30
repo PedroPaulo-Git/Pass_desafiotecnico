@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { GiHistogram } from "react-icons/gi";
 import { TbHistoryToggle } from "react-icons/tb";
 import {
@@ -47,18 +47,290 @@ import {
   Play,
   XCircle,
 } from "lucide-react";
+import StatusPriorityPopover from "./StatusPriorityPopover";
+import { AssignUserPopover } from "./AssignUserPopover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type {
+  HelpdeskStatus,
+  HelpdeskPriority,
+  HelpdeskCategory,
+  HelpdeskModule,
+  HelpdeskEnvironment,
+} from "@/features/helpdesk/types/helpdesk";
+import { useAuth } from "@/hooks/use-auth";
+import { DialogTitle } from "@/components/ui/dialog";
 
 interface TicketDialogProps {
   ticket: TicketData | null;
   isOpen: boolean;
   onClose: () => void;
+  onUpdateStatus?: (id: string, status: HelpdeskStatus) => void;
+  onUpdatePriority?: (id: string, priority: HelpdeskPriority) => void;
+  onUpdateAssignedUser?: (id: string, userId: string) => void;
+  onUpdateTitle?: (id: string, title: string) => void;
+  onUpdateDescription?: (id: string, description: string) => void;
+  onUpdateCategory?: (id: string, category: HelpdeskCategory) => void;
+  onUpdateModule?: (id: string, module: HelpdeskModule) => void;
+  onUpdateEnvironment?: (id: string, environment: HelpdeskEnvironment) => void;
 }
 
 export const TicketDialog: React.FC<TicketDialogProps> = ({
-  ticket,
+  ticket: initialTicket,
   isOpen,
   onClose,
+  onUpdateStatus,
+  onUpdatePriority,
+  onUpdateAssignedUser,
+  onUpdateTitle,
+  onUpdateDescription,
+  onUpdateCategory,
+  onUpdateModule,
+  onUpdateEnvironment,
 }) => {
+  const { currentUser } = useAuth();
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState("");
+
+  // Estado local para atualização otimista
+  const [ticket, setTicket] = useState<TicketData | null>(initialTicket);
+
+  // Atualizar estado local quando initialTicket muda
+  useEffect(() => {
+    setTicket(initialTicket);
+  }, [initialTicket]);
+
+  // Funções de atualização com otimização
+  const handleUpdateCategory = async (
+    id: string,
+    category: HelpdeskCategory
+  ) => {
+    if (
+      !ticket ||
+      (currentUser?.role === "CLIENT" &&
+        (ticket.status === "Resolvido" || ticket.status === "Fechado"))
+    )
+      return;
+
+    // Atualização otimista - atualizar estado local imediatamente
+    const categoryMap: Record<string, TicketData["category"]> = {
+      BUG: "Bug",
+      AGENDAMENTO: "Acesso",
+      TREINAMENTO: "Dúvida",
+      PERFORMANCE: "Visual",
+      AJUSTE_MELHORIA: "Visual",
+      OUTRO: "Dúvida",
+    };
+
+    setTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            category: categoryMap[category] || prev.category,
+            categoryApi: category,
+          }
+        : null
+    );
+
+    try {
+      await onUpdateCategory?.(id, category);
+    } catch (error) {
+      // Em caso de erro, reverter a mudança
+      setTicket(initialTicket);
+      console.error("Erro ao atualizar categoria:", error);
+    }
+  };
+
+  const handleUpdateModule = async (id: string, module: HelpdeskModule) => {
+    if (
+      !ticket ||
+      (currentUser?.role === "CLIENT" &&
+        (ticket.status === "Resolvido" || ticket.status === "Fechado"))
+    )
+      return;
+
+    // Atualização otimista
+    const moduleMap: Record<string, TicketData["module"]> = {
+      AGENDAMENTO: "Financeiro",
+      TREINAMENTOS: "Admin",
+      FINANCEIRO: "Financeiro",
+      USUARIOS: "Admin",
+    };
+
+    setTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            module: moduleMap[module] || prev.module,
+            moduleApi: module,
+          }
+        : null
+    );
+
+    try {
+      await onUpdateModule?.(id, module);
+    } catch (error) {
+      // Em caso de erro, reverter a mudança
+      setTicket(initialTicket);
+      console.error("Erro ao atualizar módulo:", error);
+    }
+  };
+
+  const handleUpdateEnvironment = async (
+    id: string,
+    environment: HelpdeskEnvironment
+  ) => {
+    if (
+      !ticket ||
+      (currentUser?.role === "CLIENT" &&
+        (ticket.status === "Resolvido" || ticket.status === "Fechado"))
+    )
+      return;
+
+    // Atualização otimista
+    setTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            environment: environment,
+          }
+        : null
+    );
+
+    try {
+      await onUpdateEnvironment?.(id, environment);
+    } catch (error) {
+      // Em caso de erro, reverter a mudança
+      setTicket(initialTicket);
+      console.error("Erro ao atualizar ambiente:", error);
+    }
+  };
+
+  const handleUpdateDescription = async (id: string, description: string) => {
+    if (
+      !ticket ||
+      (currentUser?.role === "CLIENT" &&
+        (ticket.status === "Resolvido" || ticket.status === "Fechado"))
+    )
+      return;
+
+    // Atualização otimista
+    setTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            description: description,
+          }
+        : null
+    );
+
+    try {
+      await onUpdateDescription?.(id, description);
+    } catch (error) {
+      // Em caso de erro, reverter a mudança
+      setTicket(initialTicket);
+      console.error("Erro ao atualizar descrição:", error);
+    }
+  };
+
+  const handleUpdateTitle = async (id: string, title: string) => {
+    if (
+      !ticket ||
+      (currentUser?.role === "CLIENT" &&
+        (ticket.status === "Resolvido" || ticket.status === "Fechado"))
+    )
+      return;
+
+    // Atualização otimista
+    setTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            title: title,
+          }
+        : null
+    );
+
+    try {
+      await onUpdateTitle?.(id, title);
+    } catch (error) {
+      // Em caso de erro, reverter a mudança
+      setTicket(initialTicket);
+      console.error("Erro ao atualizar título:", error);
+    }
+  };
+
+  const handleSaveTitle = async () => {
+    const trimmedTitle = editedTitle.trim();
+    console.log(
+      "🎯 handleSaveTitle called with:",
+      trimmedTitle,
+      "current:",
+      ticket?.title
+    );
+    if (
+      trimmedTitle &&
+      trimmedTitle !== ticket?.title &&
+      trimmedTitle.length >= 1
+    ) {
+      console.log("📤 Calling handleUpdateTitle with valid title");
+      await handleUpdateTitle(ticket!.id, trimmedTitle);
+    } else {
+      console.log("❌ Title validation failed:", {
+        trimmedTitle,
+        current: ticket?.title,
+        length: trimmedTitle.length,
+      });
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleClick = () => {
+    if (
+      !(
+        currentUser?.role === "CLIENT" &&
+        (ticket?.status === "Resolvido" || ticket?.status === "Fechado")
+      )
+    ) {
+      setEditedTitle(ticket?.title || "");
+      setIsEditingTitle(true);
+    }
+  };
+
+  const handleSaveDescription = async () => {
+    const trimmedDescription = editedDescription.trim();
+    if (trimmedDescription && trimmedDescription !== ticket?.description) {
+      await handleUpdateDescription(ticket!.id, trimmedDescription);
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionClick = () => {
+    if (
+      !(
+        currentUser?.role === "CLIENT" &&
+        (ticket?.status === "Resolvido" || ticket?.status === "Fechado")
+      )
+    ) {
+      setEditedDescription(ticket?.description || "");
+      setIsEditingDescription(true);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(ticket?.ticketNumber || "");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
   if (!ticket) return null;
 
   const effectivePriority =
@@ -66,10 +338,10 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
   const categoryIcon = getCategoryIconAndColor(ticket.category);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        showCloseButton={false}
-        className="p-0 h-[90vh] gap-0 overflow-hidden border-border bg-card flex flex-col rounded-lg"
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent
+        side="right"
+        className="p-0 h-full w-full  sm:max-w-3xl overflow-hidden border-border bg-card flex flex-col"
       >
         {/* --- CONTENT SCROLL AREA --- */}
         <div className="flex-1 min-h-full ">
@@ -80,7 +352,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
               <div className="pt-4 border-b border-border bg-card shrink-0">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 px-4 ">
                   <div>
-                    <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                    <div className="text-xl font-semibold flex items-center gap-2">
                       {categoryIcon.icon && (
                         <div
                           className={`mt-1 p-2 rounded-full border ${getPriorityStyles(
@@ -90,14 +362,49 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           <categoryIcon.icon className={` w-5 h-5`} />
                         </div>
                       )}
-                      {ticket.title}
-                    </DialogTitle>
+                      {isEditingTitle ? (
+                        <input
+                          type="text"
+                          value={editedTitle}
+                          onChange={(e) => setEditedTitle(e.target.value)}
+                          onBlur={handleSaveTitle}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveTitle();
+                            if (e.key === "Escape") setIsEditingTitle(false);
+                          }}
+                          className="text-xl font-semibold bg-transparent border-none outline-none focus:ring-2 focus:ring-primary rounded px-1 flex-1"
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          onClick={handleTitleClick}
+                          className={`cursor-pointer hover:text-primary transition-colors flex-1 ${
+                            !(
+                              currentUser?.role === "CLIENT" &&
+                              (ticket?.status === "Resolvido" ||
+                                ticket?.status === "Fechado")
+                            )
+                              ? "hover:underline"
+                              : ""
+                          }`}
+                        >
+                          {ticket.title}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                       <span className="text-sm">
                         <span className="font-medium">Código do ticket: </span>
                         <span className="font-semibold">
                           {ticket.ticketNumber}
                         </span>
+                        <button
+                          onClick={copyToClipboard}
+                          className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                          title="Copiar código do ticket"
+                        >
+                          📋
+                        </button>
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-3">
@@ -111,8 +418,11 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       </Badge>
                       <span className="flex items-center text-center gap-1 text-xs text-muted-foreground">
                         <CalendarDays className="w-4 h-4 mb-0.5" />
-                        {ticket.createdAt instanceof Date &&
-                          ticket.createdAt.toLocaleDateString("pt-BR")}
+                        {ticket.createdAt instanceof Date
+                          ? ticket.createdAt.toLocaleDateString("pt-BR")
+                          : new Date(ticket.createdAt).toLocaleDateString(
+                              "pt-BR"
+                            )}
                       </span>
                     </div>
                   </div>
@@ -201,21 +511,108 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                     <div className="flex gap-2 ">
                       <Tag className="w-3 h-3 mt-1 text-violet-600" />
 
-                      <span className="mt-0.5 text-sm font-medium">
+                      <span className="mt-0.5 text-sm font-medium flex-1">
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Categoria
                         </label>
-                        <p> {ticket.category}</p>
+                        <Select
+                          value={ticket?.categoryApi || ""}
+                          onValueChange={(value) =>
+                            handleUpdateCategory(ticket!.id, value as any)
+                          }
+                          disabled={
+                            !currentUser ||
+                            (currentUser?.role === "CLIENT" &&
+                              (ticket?.status === "Resolvido" ||
+                                ticket?.status === "Fechado"))
+                          }
+                        >
+                          <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BUG">Bug</SelectItem>
+                            <SelectItem value="AGENDAMENTO">
+                              Agendamento
+                            </SelectItem>
+                            <SelectItem value="TREINAMENTO">
+                              Treinamento
+                            </SelectItem>
+                            <SelectItem value="PERFORMANCE">
+                              Performance
+                            </SelectItem>
+                            <SelectItem value="AJUSTE_MELHORIA">
+                              Ajuste/Melhoria
+                            </SelectItem>
+                            <SelectItem value="OUTRO">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </span>
                     </div>
                     <div className="flex gap-2 ">
                       <Package className="w-3 h-3 mt-1 text-violet-600" />
 
-                      <span className="mt-0.5 text-sm font-medium">
+                      <span className="mt-0.5 text-sm font-medium flex-1">
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Módulo
                         </label>
-                        <p> {ticket.module}</p>
+                        <Select
+                          value={ticket?.moduleApi || ""}
+                          onValueChange={(value) =>
+                            handleUpdateModule(ticket!.id, value as any)
+                          }
+                          disabled={
+                            !currentUser ||
+                            (currentUser?.role === "CLIENT" &&
+                              (ticket?.status === "Resolvido" ||
+                                ticket?.status === "Fechado"))
+                          }
+                        >
+                          <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
+                            <SelectValue placeholder="Selecione um módulo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AGENDAMENTO">
+                              Agendamento
+                            </SelectItem>
+                            <SelectItem value="TREINAMENTOS">
+                              Treinamentos
+                            </SelectItem>
+                            <SelectItem value="FINANCEIRO">
+                              Financeiro
+                            </SelectItem>
+                            <SelectItem value="USUARIOS">Usuários</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </span>
+                    </div>
+                    <div className="flex gap-2 ">
+                      <Play className="w-3 h-3 mt-1 text-violet-600" />
+
+                      <span className="mt-0.5 text-sm font-medium flex-1">
+                        <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                          Ambiente
+                        </label>
+                        <Select
+                          value={ticket?.environment || ""}
+                          onValueChange={(value) =>
+                            handleUpdateEnvironment(ticket!.id, value as any)
+                          }
+                          disabled={
+                            !currentUser ||
+                            (currentUser?.role === "CLIENT" &&
+                              (ticket?.status === "Resolvido" ||
+                                ticket?.status === "Fechado"))
+                          }
+                        >
+                          <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
+                            <SelectValue placeholder="Selecione um ambiente" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="WEB">Web</SelectItem>
+                            <SelectItem value="MOBILE">Mobile</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </span>
                     </div>
                     <Separator
@@ -226,15 +623,45 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                     <div className="md:col-span-2 flex gap-2 ">
                       <FileText className="w-3 h-3 mt-1 text-violet-600" />
 
-                      <span className="mt-0.5 text-sm font-medium">
+                      <span className="mt-0.5 text-sm font-medium flex-1">
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Descrição / Assunto
                         </label>
-                        <p className="text-foreground/90 leading-relaxed">
-                          {ticket.title} - Este ticket refere-se a uma
-                          solicitação de suporte.
-                          {/* Aqui entraria a descrição longa se existisse no tipo */}
-                        </p>
+                        {isEditingDescription ? (
+                          <textarea
+                            value={editedDescription}
+                            onChange={(e) =>
+                              setEditedDescription(e.target.value)
+                            }
+                            onBlur={handleSaveDescription}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSaveDescription();
+                              }
+                              if (e.key === "Escape")
+                                setIsEditingDescription(false);
+                            }}
+                            className="w-full text-foreground/90 leading-relaxed bg-transparent border-none outline-none focus:ring-2 focus:ring-primary rounded px-1 resize-none"
+                            rows={3}
+                            autoFocus
+                          />
+                        ) : (
+                          <p
+                            onClick={handleDescriptionClick}
+                            className={`text-foreground/90 leading-relaxed cursor-pointer hover:text-primary transition-colors ${
+                              !(
+                                currentUser?.role === "CLIENT" &&
+                                (ticket?.status === "Resolvido" ||
+                                  ticket?.status === "Fechado")
+                              )
+                                ? "hover:underline"
+                                : ""
+                            }`}
+                          >
+                            {ticket.description || "Sem descrição"}
+                          </p>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -281,7 +708,9 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Telefone
                         </label>
-                        <p className="text-sm">{ticket.user?.telefone || "+55 11 99999-9999"}</p>
+                        <p className="text-sm">
+                          {ticket.user?.telefone || "+55 11 99999-9999"}
+                        </p>
                       </span>
                     </div>
                     <div className="flex gap-2 ">
@@ -291,7 +720,9 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                           Email
                         </label>
-                        <p className="text-sm">{ticket.user?.email || "email@exemplo.com"}</p>
+                        <p className="text-sm">
+                          {ticket.user?.email || "email@exemplo.com"}
+                        </p>
                       </span>
                     </div>
                   </div>
@@ -378,7 +809,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
               <div className="bg-muted/30 border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
                 <div className="mb-4">
                   <h4 className="flex gap-2 text-sm font-semibold text-foreground mb-1">
-                    <User className="w-4 h-4 text-muted-foreground" /> 
+                    <User className="w-4 h-4 text-muted-foreground" />
                     Responsável
                   </h4>
                   <p className="text-xs text-muted-foreground">
@@ -402,6 +833,22 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       </p>
                     </div>
                   </div>
+                ) : currentUser?.role === "ADMIN" ||
+                  currentUser?.role === "DEVELOPER" ? (
+                  <AssignUserPopover
+                    data={ticket}
+                    onAssign={(user) =>
+                      onUpdateAssignedUser?.(ticket.id, user.id)
+                    }
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-0 text-muted-foreground hover:text-purple-400 hover:bg-transparent text-xs justify-start gap-1"
+                    >
+                      <User className="w-3 h-3" /> Atribuir
+                    </Button>
+                  </AssignUserPopover>
                 ) : (
                   <div className="text-sm text-muted-foreground italic flex items-center gap-2">
                     <User className="w-4 h-4" /> Não atribuído
@@ -415,18 +862,41 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                     {ticket.status} desde a abertura
                   </p>
                 </div>
-                {(() => {
-                  const statusIcon = getStatusIconAndColor(ticket.status);
-                  return statusIcon ? (
-                    <statusIcon.icon className={`w-6 h-6 ${statusIcon.color}`} />
-                  ) : (
-                    <CheckCircle2 className="w-6 h-6 text-muted-foreground" />
-                  );
-                })()}
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const statusIcon = getStatusIconAndColor(ticket.status);
+                    return statusIcon ? (
+                      <statusIcon.icon
+                        className={`w-6 h-6 ${statusIcon.color}`}
+                      />
+                    ) : (
+                      <CheckCircle2 className="w-6 h-6 text-muted-foreground" />
+                    );
+                  })()}
+
+                  {!(
+                    currentUser?.role === "CLIENT" &&
+                    (ticket?.status === "Resolvido" ||
+                      ticket?.status === "Fechado")
+                  ) && (
+                    <StatusPriorityPopover
+                      data={ticket}
+                      onStatusChange={(status) =>
+                        onUpdateStatus?.(ticket.id, status)
+                      }
+                      onPriorityChange={(priority) =>
+                        onUpdatePriority?.(ticket.id, priority)
+                      }
+                    />
+                  )}
+                </div>
               </div>
               {/* Actions */}
               <div className="pt-2 space-y-3 mt-auto">
-                <Button className="w-full bg-foreground text-background " variant="default">
+                <Button
+                  className="w-full bg-foreground text-background "
+                  variant="default"
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Baixar Relatório
                 </Button>
@@ -438,7 +908,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };

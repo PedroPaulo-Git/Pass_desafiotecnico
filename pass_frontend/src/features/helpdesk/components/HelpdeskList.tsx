@@ -126,8 +126,12 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       id: ticket.id,
       ticketNumber: ticket.ticketNumber || "",
       title: ticket.title,
+      description: ticket.description,
+      environment: ticket.environment,
       category: categoryMap[ticket.category] || "Dúvida",
+      categoryApi: ticket.category || "", // valor original do backend
       module: ticket.module ? (moduleMap[ticket.module] || "Admin") : "Admin",
+      moduleApi: ticket.module || "", // valor original do backend
       clientName: clientsMap[ticket.clientId]?.name || "Cliente",
       priority: priorityMap[ticket.priority] || "Baixa",
       priorityApi: ticket.priority,
@@ -324,7 +328,7 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 ">
         <BackendStatus />
         <Card className="border-red-200">
           <CardContent className="pt-6">
@@ -344,8 +348,8 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
   }
 
   return (
-    <div className="space-y-4">
-      <BackendStatus allowToggle={status === "online"} />
+    <div className="space-y-4 ">
+      {/* <BackendStatus allowToggle={status === "online"} /> */}
 
       {(tickets?.length ?? 0) === 0 ? (
         <Card>
@@ -377,7 +381,7 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
           )}
 
           {viewMode === "grid" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
               {tickets?.map((ticket) => (
                 <TicketRow
                   key={ticket.id}

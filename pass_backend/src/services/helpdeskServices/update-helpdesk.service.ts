@@ -28,7 +28,17 @@ export const updateHelpdeskService = async (id: string, input: UpdateHelpdeskInp
     }
   }
 
-  const updateData: any = { ...input };
+  const updateData: any = {};
+  if (input.title !== undefined) updateData.title = input.title;
+  if (input.description !== undefined) updateData.description = input.description;
+  if (input.category !== undefined) updateData.category = input.category;
+  if (input.priority !== undefined) updateData.priority = input.priority;
+  if (input.status !== undefined) updateData.status = input.status;
+  if (input.module !== undefined) updateData.module = input.module;
+  if (input.environment !== undefined) updateData.environment = input.environment;
+  if (input.assignedUserId !== undefined) updateData.assignedUserId = input.assignedUserId;
+  if (input.attachments !== undefined) updateData.attachments = input.attachments;
+  
   if (input.status === "ENCERRADO") {
     updateData.closedAt = new Date();
   }
@@ -38,7 +48,6 @@ export const updateHelpdeskService = async (id: string, input: UpdateHelpdeskInp
       where: { id },
       data: updateData,
     });
-
     return updated;
   } catch (error) {
     throw new AppError("Failed to update helpdesk ticket", 500, "HELPDESK_UPDATE_FAILED", {

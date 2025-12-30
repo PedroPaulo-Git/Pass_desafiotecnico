@@ -52,8 +52,12 @@ export const CreateTicketDialog: React.FC<CreateTicketDialogProps> = ({
         Math.floor(Math.random() * 1000)
       ).padStart(3, "0")}`,
       title: title.trim(),
+      description: "", // Adicionando descrição vazia
       category: category as Category,
+      categoryApi: category as Category, // Valor original do backend
       module: module as Module,
+      moduleApi: module as Module, // Valor original do backend
+      environment: "WEB" as const, // Adicionando ambiente padrão
       clientName: clientName.trim(),
       priority: priority as Priority,
       status: "Aberto" as const,
@@ -224,11 +228,11 @@ export const CreateTicketDialog: React.FC<CreateTicketDialogProps> = ({
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="min-w-[100px]"
+                className="min-w-25"
               >
                 {t.common.close}
               </Button>
-              <Button type="submit" variant="modal" className="min-w-[100px]">
+              <Button type="submit" variant="modal" className="min-w-25">
                 {t.common.save}
               </Button>
             </div>

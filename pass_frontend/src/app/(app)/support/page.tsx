@@ -12,10 +12,12 @@ import { FilterHeader } from "@/components/support/FilterHeader";
 import { DateRange } from "react-day-picker";
 import {Button} from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useUpdateHelpdesk } from "@/features/helpdesk/hooks/use-helpdesk";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
   const { currentUser } = useAuth();
+  const updateMutation = useUpdateHelpdesk();
   const [filters, setFilters] = useState<HelpdeskFilters>({
     page: 1,
     limit: 10,
@@ -102,16 +104,43 @@ export function SupportTicketPage() {
     setIsDialogOpen(true);
   }, []);
 
+  const handleUpdateStatus = useCallback((id: string, status: any) => {
+    updateMutation.mutate({ id, updates: { status } });
+  }, [updateMutation]);
+
+  const handleUpdatePriority = useCallback((id: string, priority: any) => {
+    updateMutation.mutate({ id, updates: { priority } });
+  }, [updateMutation]);
+
+  const handleUpdateAssignedUser = useCallback((id: string, assignedUserId: string) => {
+    updateMutation.mutate({ id, updates: { assignedUserId } });
+  }, [updateMutation]);
+
+  const handleUpdateTitle = useCallback((id: string, title: string) => {
+    updateMutation.mutate({ id, updates: { title } });
+  }, [updateMutation]);
+
+  const handleUpdateDescription = useCallback((id: string, description: string) => {
+    updateMutation.mutate({ id, updates: { description } });
+  }, [updateMutation]);
+
+  const handleUpdateCategory = useCallback((id: string, category: any) => {
+    updateMutation.mutate({ id, updates: { category } });
+  }, [updateMutation]);
+
+  const handleUpdateModule = useCallback((id: string, module: any) => {
+    updateMutation.mutate({ id, updates: { module } });
+  }, [updateMutation]);
+
+  const handleUpdateEnvironment = useCallback((id: string, environment: any) => {
+    updateMutation.mutate({ id, updates: { environment } });
+  }, [updateMutation]);
+
   return (
-    <div className="text-foreground font-sans max-h-[92vh] overflow-y-auto">
-      <div className="mx-auto max-w-[95%] overflow-y-auto">
+    <div className="text-foreground font-sans  overflow-y-hidden">
+      <div className="mx-auto max-w-[80vw] p-6 overflow-y-auto">
           <div className="flex justify-end my-4">
-          <Button className="bg-foreground text-background font-semibold" onClick={() => setIsCreateDialogOpen(true)}>
-            <span className="flex items-center">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Chamado
-            </span>
-          </Button>
+      
           
         </div>
         <FilterHeader
@@ -123,6 +152,7 @@ export function SupportTicketPage() {
           moduleFilter={moduleFilter}
           setModuleFilter={setModuleFilter}
           onClearFilters={handleClearFilters}
+          onClickNewTicket={() => setIsCreateDialogOpen(true)}
         />
         <Toolbar
           statusFilter={statusFilter}
@@ -144,6 +174,14 @@ export function SupportTicketPage() {
           ticket={selectedTicket}
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
+          onUpdateStatus={handleUpdateStatus}
+          onUpdatePriority={handleUpdatePriority}
+          onUpdateAssignedUser={handleUpdateAssignedUser}
+          onUpdateTitle={handleUpdateTitle}
+          onUpdateDescription={handleUpdateDescription}
+          onUpdateCategory={handleUpdateCategory}
+          onUpdateModule={handleUpdateModule}
+          onUpdateEnvironment={handleUpdateEnvironment}
         />
 
         <CreateHelpdeskDialog
