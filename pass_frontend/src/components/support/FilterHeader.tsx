@@ -123,14 +123,14 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             </div>
           </div>
           <Button
-            className="bg-purple-500 dark:bg-purple-500 text-foreground font-semibold h-11 p-0 px-2"
+            className="bg-purple-500 dark:bg-purple-500 hover:bg-purple-600 dark:hover:bg-purple-600 text-white font-semibold h-11 p-0 px-2"
             onClick={onClickNewTicket}
           >
             <span className="flex items-center px-6">
               <Search className="w-4 h-4 mr-2" />
               Buscar
             </span>
-            <span className=" border-l border-foreground/20 h-full flex items-center pl-2 ">
+            <span className=" border-l border-white h-full flex items-center pl-2 ">
               <Plus className="w-4 h-4 " />
             </span>
           </Button>

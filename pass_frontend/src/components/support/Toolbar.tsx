@@ -69,7 +69,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 size="icon"
                 className={`h-7 w-7 ${
                   viewMode === "list"
-                    ? "bg-purple-500 text-foreground shadow-sm hover:text-foreground/80 hover:bg-purple-600"
+                    ? "bg-purple-500 text-white shadow-sm hover:text-gray-100 hover:bg-purple-600"
                     : ""
                 }`}
                 onClick={() => setViewMode("list")}
@@ -81,7 +81,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 size="icon"
                 className={`h-7 w-7 ${
                   viewMode === "grid"
-                    ? "bg-purple-500 text-foreground shadow-sm hover:text-foreground/80 hover:bg-purple-600"
+                    ? "bg-purple-500 text-white shadow-sm hover:text-gray-100 hover:bg-purple-600"
                     : ""
                 }`}
                 onClick={() => setViewMode("grid")}
@@ -93,7 +93,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 size="icon"
                 className={`h-7 w-7 ${
                   viewMode === "lanes"
-                    ? "bg-purple-500 text-foreground shadow-sm hover:text-foreground/80 hover:bg-purple-600"
+                    ? "bg-purple-500 text-white shadow-sm hover:text-gray-100 hover:bg-purple-600"
                     : ""
                 }`}
                 onClick={() => setViewMode("lanes")}
@@ -165,7 +165,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 border-0 border-l border-l-border! rounded-l-none "
+                className="h-9 w-9 bg-muted/50 shadow-sm border-0 border-l border-l-border! rounded-l-none "
               >
                 <ChevronDown className="w-4 h-4" />
               </Button>
@@ -177,9 +177,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Todos")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Todos"
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted/50"
-                  } shadow-sm transition-all`}
+                      ? "shadow-sm bg-muted text-foreground"
+                      : " text-muted-foreground hover:bg-muted/50"
+                  } transition-all`}
                 >
                   Todos{" "}
                   <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
@@ -191,8 +191,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Abertos")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Abertos"
-                      ? "bg-yellow-500/10 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-500/20"
-                      : "text-muted-foreground hover:bg-yellow-500/5 hover:text-yellow-600 border border-transparent"
+                      ? "shadow-sm hover:bg-yellow-500/10 hover:text-yellow-700 bg-yellow-500/10 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-500/20"
+                      : "  text-muted-foreground hover:bg-yellow-500/5 hover:text-yellow-600 border border-transparent"
                   } transition-all`}
                 >
                   Abertos{" "}
@@ -205,7 +205,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Em Análise")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Em Análise"
-                      ? "bg-blue-500/10 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-500/20"
+                      ? "bg-blue-500/10 hover:bg-blue-500/10 hover:text-blue-600 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-500/20"
                       : "text-muted-foreground hover:bg-blue-500/5 hover:text-blue-600 border border-transparent"
                   } transition-all`}
                 >
@@ -219,7 +219,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Em Andamento")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Em Andamento"
-                      ? "bg-purple-500/10 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-500/20"
+                      ? "bg-purple-500/10 hover:bg-purple-500/10 hover:text-purple-600 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-500/20"
                       : "text-muted-foreground hover:bg-purple-500/5 hover:text-purple-600 border border-transparent"
                   } transition-all`}
                 >
@@ -233,7 +233,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Aguardando Usuário")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Aguardando Usuário"
-                      ? "bg-orange-500/10 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-500/20"
+                      ? "bg-orange-500/10 hover:bg-orange-500/10 hover:text-orange-600 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-500/20"
                       : "text-muted-foreground hover:bg-orange-500/5 hover:text-orange-600 border border-transparent"
                   } transition-all`}
                 >
@@ -247,7 +247,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Resolvidos")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Resolvidos"
-                      ? "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-500/20"
+                      ? "bg-emerald-500/10 hover:bg-emerald-500/10 hover:text-emerald-600 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-500/20"
                       : "text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 border border-transparent"
                   } transition-all`}
                 >
@@ -261,7 +261,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={() => setStatusFilter("Fechados")}
                   className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
                     statusFilter === "Fechados"
-                      ? "bg-gray-500/10 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border border-gray-500/20"
+                      ? "bg-gray-500/10 hover:bg-gray-500/10 hover:text-gray-600 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border border-gray-500/20"
                       : "text-muted-foreground hover:bg-gray-500/5 hover:text-gray-600 border border-transparent"
                   } transition-all`}
                 >

@@ -45,9 +45,13 @@ import { Separator } from "../ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserInfoPopover } from "./supportComponents/UserInfoPopover";
 import { AssignedUserPopover } from "./supportComponents/AssignedUserPopover";
-import { AssignUserPopover } from "./supportComponents/AssignUserPopover";
+import { AssignUserPopover } from "./supportComponents/AssignDeveloperPopover";
 import { TicketInfoPopover } from "./supportComponents/TicketInfoPopover";
 import StatusPriorityPopover from "./supportComponents/StatusPriorityPopover";
+import {
+  useTicketUpdates,
+  type UseTicketUpdatesProps,
+} from "./supportComponents/useTicketUpdates";
 
 interface TicketRowProps {
   data: TicketData;
@@ -70,6 +74,12 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   const { currentUser } = useAuth();
   const updateMutation = useUpdateHelpdesk();
 
+  const { handleStatusChange, handlePriorityChange, handleAssign } =
+    useTicketUpdates({
+      initialTicket: data,
+      updateMutation,
+    });
+
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(data.ticketNumber);
@@ -80,24 +90,6 @@ export const TicketRow: React.FC<TicketRowProps> = ({
     }
   };
 
-  const handleAssign = (developer: any) => {
-    if (!developer) return;
-    if ((updateMutation as any).isLoading) return;
-    updateMutation.mutate({
-      id: data.id,
-      updates: { assignedUserId: developer.id },
-    });
-  };
-
-  const handleStatusChange = (apiStatus: HelpdeskStatus) => {
-    if (!apiStatus || (updateMutation as any).isLoading) return;
-    updateMutation.mutate({ id: data.id, updates: { status: apiStatus } });
-  };
-
-  const handlePriorityChange = (apiPriority: HelpdeskPriority) => {
-    if (!apiPriority || (updateMutation as any).isLoading) return;
-    updateMutation.mutate({ id: data.id, updates: { priority: apiPriority } });
-  };
   let IconComponent: React.ComponentType<any> = AlertCircle;
   let iconClass = "bg-background border-border text-foreground/50";
   let gradientClass = "bg-gradient-to-b from-gray-400 to-gray-600";
@@ -202,9 +194,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                   <h3
                     className={`text-foreground  overflow-x-hidden text-ellipsis whitespace-nowrap font-semibold leading-tight transition-colors text-md 
                     hover:text-foreground/80 cursor-pointer ${
-                      viewMode !== "list"
-                        ? "sm:max-w-45"
-                        : "sm:max-w-25"
+                      viewMode !== "list" ? "sm:max-w-45" : "sm:max-w-25"
                     }`}
                   >
                     {data.title}
@@ -218,8 +208,6 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 >
                   <span className="flex text-left text-nowrap justify-center items-center gap-2 text-muted-foreground">
                     <p>{data.clientName}</p>
-
-                    <Separator orientation="vertical" className="h-4" />
                   </span>
                 </span>
               </div>
@@ -230,7 +218,10 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 }`}
               >
                 <UserInfoPopover data={data} />
-                {!(currentUser?.role === "CLIENT" && (data.status === "Fechado" || data.status === "Resolvido")) && (
+                {!(
+                  currentUser?.role === "CLIENT" &&
+                  (data.status === "Fechado" || data.status === "Resolvido")
+                ) && (
                   <Badge
                     variant="outline"
                     className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
@@ -249,7 +240,10 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                   >
                     {data.status}
                   </Badge>
-                  {!(currentUser?.role === "CLIENT" && (data.status === "Resolvido" || data.status === "Fechado")) && (
+                  {!(
+                    currentUser?.role === "CLIENT" &&
+                    (data.status === "Resolvido" || data.status === "Fechado")
+                  ) && (
                     <StatusPriorityPopover
                       data={data}
                       onStatusChange={handleStatusChange}
@@ -270,7 +264,6 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 )}
               </div>
             </div>
-           
           </div>
         </div>
 
@@ -302,7 +295,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                       </span>
                     </div>
                   </AssignedUserPopover>
-                ) : currentUser?.role === "ADMIN" || currentUser?.role === "DEVELOPER" ? (
+                ) : currentUser?.role === "ADMIN" ||
+                  currentUser?.role === "DEVELOPER" ? (
                   <AssignUserPopover data={data} onAssign={handleAssign}>
                     <Button
                       variant="ghost"
@@ -333,8 +327,9 @@ export const TicketRow: React.FC<TicketRowProps> = ({
               </div>
             </div>
             {/* Métricas Rápidas */}
-            <div className="flex items-center gap-3 border-l border-border pl-4">
-              <TooltipProvider>
+            {/*  <div className="flex items-center gap-3 border-l border-border pl-4">
+
+           <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
                     <div
@@ -372,9 +367,9 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                     <p>Anexos/Evidências</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
+              </TooltipProvider> 
             </div>
-
+*/}
             <Button
               onClick={(e) => {
                 e.stopPropagation();

@@ -13,11 +13,13 @@ import { DateRange } from "react-day-picker";
 import {Button} from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useUpdateHelpdesk } from "@/features/helpdesk/hooks/use-helpdesk";
+import { useSetPageTitle } from "@/lib/contexts/page-title-context";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
   const { currentUser } = useAuth();
   const updateMutation = useUpdateHelpdesk();
+  useSetPageTitle("Suporte");
   const [filters, setFilters] = useState<HelpdeskFilters>({
     page: 1,
     limit: 10,

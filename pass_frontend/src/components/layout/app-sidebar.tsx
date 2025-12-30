@@ -14,19 +14,18 @@ import {
   Star,
   BusFront,
   Activity,
-  BedDouble, 
-  CalendarDays, 
-  Camera, 
-  DollarSign, 
-  FileText, 
-  LayoutDashboard, 
-  Map, 
-  MapPin, 
-  Package, 
-  Puzzle, 
-  Settings, 
-  Ticket, 
-
+  BedDouble,
+  CalendarDays,
+  Camera,
+  DollarSign,
+  FileText,
+  LayoutDashboard,
+  Map,
+  MapPin,
+  Package,
+  Puzzle,
+  Settings,
+  Ticket,
 } from "lucide-react";
 import { BiSupport } from "react-icons/bi";
 
@@ -86,7 +85,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         { icon: Package, label: "Combo", href: "#combo" },
         { icon: BedDouble, label: "Accommodation", href: "#accommodation" },
         { icon: Ticket, label: "Ticket", href: "/ticket" },
-         { icon: BiSupport, label: "Support", href: "/support" },
+        { icon: BiSupport, label: "Support", href: "/support" },
         { icon: Camera, label: "Tour", href: "#tour" },
         { icon: Star, label: "Experience", href: "#experience" },
         { icon: Map, label: "Circuit", href: "#circuit" },
@@ -109,9 +108,7 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
     },
     {
       title: "Organization",
-      items: [
-        { icon: Settings, label: "Settings", href: "#settings" },
-      ],
+      items: [{ icon: Settings, label: "Settings", href: "#settings" }],
     },
   ];
 
@@ -150,7 +147,8 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                     className="flex flex-col items-start"
                   >
                     <span className="text-sm font-semibold text-sidebar-foreground truncate max-w-[120px]">
-                      {companies.find((c) => c.id === selectedCompanyId)?.name ?? "Company"}
+                      {companies.find((c) => c.id === selectedCompanyId)
+                        ?.name ?? "Company"}
                     </span>
                   </motion.span>
                   <ChevronsUpDown className="w-4 h-4 text-muted-foreground group-hover:text-sidebar-foreground" />
@@ -207,7 +205,9 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
 
               <div className="space-y-1 ">
                 {group.items.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
 
                   return (
                     <Tooltip key={item.href}>
@@ -224,7 +224,9 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                           <item.icon
                             className={cn(
                               "h-4 w-4 shrink-0",
-                              isActive ? "text-foreground" : "text-muted-foreground",
+                              isActive
+                                ? "text-foreground"
+                                : "text-muted-foreground",
                               isCollapsed && "mx-auto"
                             )}
                           />
@@ -251,11 +253,10 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
               </div>
             </div>
           ))}
-             
         </nav>
 
         {/* --- FOOTER (COLLAPSE BUTTON) --- */}
-     <div className="border-t border-sidebar-border p-2 mt-auto">
+        <div className="border-t border-sidebar-border p-2 mt-auto">
           <Button
             variant="ghost"
             size="sm"

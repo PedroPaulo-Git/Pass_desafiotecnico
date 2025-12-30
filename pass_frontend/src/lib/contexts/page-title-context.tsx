@@ -63,6 +63,7 @@ export function useAutoPageTitle() {
         "/reports": "Relatórios",
         "/analytics": "Análises",
         "/settings": "Configurações",
+        "/support": "Suporte",
       };
       
       const title = titleMap[pathname] || "";
