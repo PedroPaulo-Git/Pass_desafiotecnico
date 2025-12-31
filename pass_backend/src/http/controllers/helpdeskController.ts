@@ -22,7 +22,8 @@ export class HelpdeskController {
   }
 
   async listHelpdesks(request: FastifyRequest, reply: FastifyReply) {
-    const query = helpdeskQuerySchema.parse(request.query);
+    // Manual validation to avoid Zod stripping unknown fields
+    const query = request.query as any;
     const result = await listHelpdeskService(query);
     return reply.status(200).send(result);
   }

@@ -44,6 +44,8 @@ export const helpdeskQuerySchema = z.object({
   category: helpdeskCategorySchema.optional(),
   clientId: z.string().uuid().optional(),
   assignedUserId: z.string().uuid().optional(),
+  module: helpdeskModuleSchema.optional(),
+  search: z.string().optional(),
 });
 
 export const helpdeskSchema = z.object({
