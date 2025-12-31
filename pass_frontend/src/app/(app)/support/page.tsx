@@ -10,7 +10,7 @@ import { TicketData } from "@/components/support/types";
 import { Toolbar } from "@/components/support/Toolbar";
 import { FilterHeader } from "@/components/support/FilterHeader";
 import { DateRange } from "react-day-picker";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useUpdateHelpdesk } from "@/features/helpdesk/hooks/use-helpdesk";
 import { useSetPageTitle } from "@/lib/contexts/page-title-context";
@@ -27,16 +27,33 @@ export function SupportTicketPage() {
     sortOrder: "desc",
   });
 
-  // Memoize filters to prevent unnecessary re-renders (defined after toolbar state)
-
   // Estados para Toolbar e FilterHeader
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [viewMode, setViewMode] = useState<"list" | "grid" | "lanes">("list");
   const [search, setSearch] = useState("");
-  const [dateRange, setDateRange ] = useState<DateRange | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [moduleFilter, setModuleFilter] = useState("todos");
 
-  // Memoize filters to prevent unnecessary re-renders
+  // Estados temporários para filtros (inicializados com os valores atuais)
+  const [tempSearch, setTempSearch] = useState(search);
+  const [tempModuleFilter, setTempModuleFilter] = useState(moduleFilter);
+
+  // Sincronizar valores temporários quando os valores reais mudam
+  React.useEffect(() => {
+    setTempSearch(search);
+  }, [search]);
+
+  React.useEffect(() => {
+    setTempModuleFilter(moduleFilter);
+  }, [moduleFilter]);
+
+  const handleSearch = useCallback(() => {
+    // Aplicar todos os filtros de uma vez
+    console.log("Aplicando filtros:", { tempSearch, tempModuleFilter });
+    setSearch(tempSearch);
+    setModuleFilter(tempModuleFilter);
+    console.log("Filtros aplicados com sucesso");
+  }, [tempSearch, tempModuleFilter]);
   const memoizedFilters = React.useMemo(() => {
     const statusMap: Record<string, any> = {
       Todos: undefined,
@@ -48,22 +65,23 @@ export function SupportTicketPage() {
       Fechados: "ENCERRADO",
     };
 
-    return ({
+    const result: HelpdeskFilters = {
       ...filters,
       status: statusMap[statusFilter as string],
+      module: moduleFilter !== "todos" ? moduleFilter as any : undefined,
       search,
-      dateRange,
-      moduleFilter,
-    });
+    };
+
+    console.log("Memoized filters updated:", result);
+    return result;
   }, [
     filters.page,
     filters.limit,
     filters.sortBy,
     filters.sortOrder,
     statusFilter,
-    search,
-    dateRange,
     moduleFilter,
+    search,
   ]);
 
   // Mock status counts (deve vir do backend depois)
@@ -79,11 +97,12 @@ export function SupportTicketPage() {
 
   const modules = ["Financeiro", "Admin", "Checkout", "Integração", "Frontend"];
 
-  const handleClearFilters = useCallback(() => {
-    setStatusFilter("todos");
+  const handleClearFilters = useCallback(() => {    console.log("Limpando todos os filtros");    setStatusFilter("todos");
     setSearch("");
+    setTempSearch("");
     setDateRange(undefined);
     setModuleFilter("todos");
+    setTempModuleFilter("todos");
   }, []);
 
   const hasActiveFilters = Boolean(
@@ -106,45 +125,66 @@ export function SupportTicketPage() {
     setIsDialogOpen(true);
   }, []);
 
-  const handleUpdateStatus = useCallback((id: string, status: any) => {
-    updateMutation.mutate({ id, updates: { status } });
-  }, [updateMutation]);
+  const handleUpdateStatus = useCallback(
+    (id: string, status: any) => {
+      updateMutation.mutate({ id, updates: { status } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdatePriority = useCallback((id: string, priority: any) => {
-    updateMutation.mutate({ id, updates: { priority } });
-  }, [updateMutation]);
+  const handleUpdatePriority = useCallback(
+    (id: string, priority: any) => {
+      updateMutation.mutate({ id, updates: { priority } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdateAssignedUser = useCallback((id: string, assignedUserId: string) => {
-    updateMutation.mutate({ id, updates: { assignedUserId } });
-  }, [updateMutation]);
+  const handleUpdateAssignedUser = useCallback(
+    (id: string, assignedUserId: string) => {
+      updateMutation.mutate({ id, updates: { assignedUserId } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdateTitle = useCallback((id: string, title: string) => {
-    updateMutation.mutate({ id, updates: { title } });
-  }, [updateMutation]);
+  const handleUpdateTitle = useCallback(
+    (id: string, title: string) => {
+      updateMutation.mutate({ id, updates: { title } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdateDescription = useCallback((id: string, description: string) => {
-    updateMutation.mutate({ id, updates: { description } });
-  }, [updateMutation]);
+  const handleUpdateDescription = useCallback(
+    (id: string, description: string) => {
+      updateMutation.mutate({ id, updates: { description } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdateCategory = useCallback((id: string, category: any) => {
-    updateMutation.mutate({ id, updates: { category } });
-  }, [updateMutation]);
+  const handleUpdateCategory = useCallback(
+    (id: string, category: any) => {
+      updateMutation.mutate({ id, updates: { category } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdateModule = useCallback((id: string, module: any) => {
-    updateMutation.mutate({ id, updates: { module } });
-  }, [updateMutation]);
+  const handleUpdateModule = useCallback(
+    (id: string, module: any) => {
+      updateMutation.mutate({ id, updates: { module } });
+    },
+    [updateMutation]
+  );
 
-  const handleUpdateEnvironment = useCallback((id: string, environment: any) => {
-    updateMutation.mutate({ id, updates: { environment } });
-  }, [updateMutation]);
+  const handleUpdateEnvironment = useCallback(
+    (id: string, environment: any) => {
+      updateMutation.mutate({ id, updates: { environment } });
+    },
+    [updateMutation]
+  );
 
   return (
-    <div className="text-foreground font-sans  overflow-y-hidden">
+    <div className="text-foreground overflow-y-hidden">
       <div className="mx-auto max-w-[80vw] p-6 overflow-y-auto">
-          <div className="flex justify-end my-4">
-      
-          
-        </div>
+        <div className="flex justify-end my-4"></div>
         <FilterHeader
           search={search}
           setSearch={setSearch}
@@ -155,6 +195,11 @@ export function SupportTicketPage() {
           setModuleFilter={setModuleFilter}
           onClearFilters={handleClearFilters}
           onClickNewTicket={() => setIsCreateDialogOpen(true)}
+          onSearch={handleSearch}
+          tempSearch={tempSearch}
+          setTempSearch={setTempSearch}
+          tempModuleFilter={tempModuleFilter}
+          setTempModuleFilter={setTempModuleFilter}
         />
         <Toolbar
           statusFilter={statusFilter}

@@ -64,6 +64,8 @@ export interface HelpdeskFilters {
   category?: HelpdeskCategory;
   clientId?: string;
   assignedUserId?: string;
+  module?: HelpdeskModule;
+  search?: string;
 }
 
 export interface PaginatedHelpdeskResponse {

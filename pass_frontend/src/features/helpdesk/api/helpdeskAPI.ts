@@ -24,6 +24,8 @@ export const helpdeskAPI = {
     if (filters.category) params.append("category", filters.category);
     if (filters.clientId) params.append("clientId", filters.clientId);
     if (filters.assignedUserId) params.append("assignedUserId", filters.assignedUserId);
+    if (filters.module) params.append("module", filters.module);
+    if (filters.search) params.append("search", filters.search);
 
     const { data } = await api.get<{ data: Helpdesk[], pagination: { page: number, limit: number, total: number, totalPages: number } }>(
       `/helpdesk?${params.toString()}`
@@ -88,6 +90,18 @@ export const helpdeskMockAPI = {
     }
     if (filters.assignedUserId) {
       filteredItems = filteredItems.filter(item => item.assignedUserId === filters.assignedUserId);
+    }
+    if (filters.module) {
+      filteredItems = filteredItems.filter(item => item.module === filters.module);
+    }
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filteredItems = filteredItems.filter(item =>
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm) ||
+        item.ticketNumber?.toLowerCase().includes(searchTerm) ||
+        item.id.toLowerCase().includes(searchTerm)
+      );
     }
 
     // Apply sorting

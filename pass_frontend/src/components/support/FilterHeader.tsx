@@ -35,6 +35,12 @@ interface FilterHeaderProps {
   setModuleFilter: (value: string) => void;
   onClearFilters: () => void;
   onClickNewTicket: () => void;
+  onSearch?: () => void;
+  // Estados temporários
+  tempSearch: string;
+  setTempSearch: (value: string) => void;
+  tempModuleFilter: string;
+  setTempModuleFilter: (value: string) => void;
 }
 
 export const FilterHeader: React.FC<FilterHeaderProps> = ({
@@ -47,6 +53,11 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
   setModuleFilter,
   onClearFilters,
   onClickNewTicket,
+  onSearch,
+  tempSearch,
+  setTempSearch,
+  tempModuleFilter,
+  setTempModuleFilter,
 }) => {
   const today = new Date();
   const lastYear = subYears(today, 1);
@@ -67,8 +78,8 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
               <Input
                 placeholder="Pesquise por ID, título ou nome do cliente..."
                 className="pl-9 dark:bg-input/30 bg-border border-0  text-foreground placeholder:text-muted-foreground h-11 "
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={tempSearch}
+                onChange={(e) => setTempSearch(e.target.value)}
               />
             </div>
           </div>
@@ -78,7 +89,7 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2 ">
               Módulo
             </label>
-            <Select value={moduleFilter} onValueChange={setModuleFilter}>
+            <Select value={tempModuleFilter} onValueChange={setTempModuleFilter}>
               <SelectTrigger
                 className="w-full justify-between pl-3 text-foreground 
               h-11 border-input hover:bg-input/50  shadow-sm border-0 rounded-md dark:bg-input/30 bg-border m-0"
@@ -122,19 +133,29 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
               />
             </div>
           </div>
-          <Button
-            className="bg-purple-500 dark:bg-purple-500 hover:bg-purple-600 dark:hover:bg-purple-600 text-white font-semibold h-11 p-0 px-2"
-            onClick={onClickNewTicket}
-          >
-            <span className="flex items-center px-6">
+          <Button className="bg-purple-500 dark:bg-purple-500 hover:bg-purple-600 dark:hover:bg-purple-600 text-white font-semibold h-11 p-0 px-2">
+            <span
+              className="flex items-center px-6 hover:bg-purple-700 dark:hover:bg-purple-700 cursor-pointer transition-colors"
+              onClick={onSearch}
+            >
               <Search className="w-4 h-4 mr-2" />
               Buscar
             </span>
-            <span className=" border-l border-white h-full flex items-center pl-2 ">
-              <Plus className="w-4 h-4 " />
-            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className=" border-l border-white/20 h-full flex items-center pl-3 pr-1 hover:bg-purple-700 dark:hover:bg-purple-700 cursor-pointer transition-colors">
+                    <div onClick={onClickNewTicket}>
+                      <Plus className="w-4 h-4" />
+                    </div>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Criar novo chamado</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </Button>
-
           {/* Botão Principal */}
         </div>
       </div>
