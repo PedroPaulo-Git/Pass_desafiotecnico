@@ -183,7 +183,7 @@ export function SupportTicketPage() {
 
   return (
     <div className="text-foreground overflow-y-hidden">
-      <div className="mx-auto max-w-[80vw] p-6 overflow-y-auto">
+      <div className="mx-auto lg:max-w-[80vw] max-w-full p-6 overflow-y-auto">
         <div className="flex justify-end my-4"></div>
         <FilterHeader
           search={search}
@@ -210,12 +210,16 @@ export function SupportTicketPage() {
           onClearFilters={handleClearFilters}
           hasActiveFilters={hasActiveFilters}
         />
+        <div className="">
+
+     
         <HelpdeskList
           filters={memoizedFilters}
           onCreateClick={() => setIsCreateDialogOpen(true)}
           onTicketClick={handleTicketClick}
           viewMode={viewMode}
         />
+           </div>
 
         <TicketDialog
           ticket={selectedTicket}

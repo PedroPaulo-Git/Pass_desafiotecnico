@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppSidebar } from "./app-sidebar";
 import { AppHeader } from "./app-header";
@@ -14,12 +14,20 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   const sidebarWidth = isCollapsed ? 64 : 240;
 
   return (
     <PageTitleProvider>
-      <div className="min-h-screen bg-sidebar flex w-screen overflow-hidden">
+      <div className="min-h-screen bg-sidebar flex w-screen">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">
           <AppSidebar
@@ -49,7 +57,7 @@ export function AppShell({ children }: AppShellProps) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="fixed inset-y-0 left-0 z-50 lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 lg:hidden overflow-y-auto"
             >
               <AppSidebar
                 isCollapsed={false}
@@ -60,7 +68,7 @@ export function AppShell({ children }: AppShellProps) {
         </AnimatePresence>
 
         {/* Main Content */}
-        <div className="w-full md:p-2  ">
+        <div className="w-full md:p-2" style={{ marginLeft: isDesktop ? sidebarWidth : 0 }}>
           <MainContent
             children={children}
             sidebarWidth={sidebarWidth}

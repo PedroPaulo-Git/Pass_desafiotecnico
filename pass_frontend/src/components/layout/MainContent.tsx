@@ -59,7 +59,7 @@ export function MainContent({
         {/* Main Content Area */}
         <main
           className={` bg-background ${
-            isTicketRoute || isSupportRoute ? "flex-1 p-0  " : "flex-1 p-6"
+            isTicketRoute || isSupportRoute ? "flex-1 p-0 " : "flex-1 p-6"
           }`}
         >
           {children}

@@ -59,9 +59,9 @@ export const TicketInfoPopover: React.FC<TicketInfoPopoverProps> = ({
               <p className="flex items-center gap-1 text-xs text-muted-foreground/80">
                 {" "}
                 <Clock className="w-3 h-3 text-muted-foreground/70" />
-                {data.createdAt instanceof Date
-                  ? data.createdAt.toLocaleDateString()
-                  : data.createdAt}
+                   {data.createdAt instanceof Date
+                    ? data.createdAt.toLocaleDateString("pt-BR")
+                    : new Date(data.createdAt).toLocaleDateString("pt-BR")}
               </p>
             </div>
           </div>

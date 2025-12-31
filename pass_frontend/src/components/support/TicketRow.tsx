@@ -64,10 +64,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   viewMode,
   onClick,
 }) => {
-  console.log("Rendering TicketRow for ticket:", data);
   const isAssigned = !!data.assignedTo;
-  console.log("isAssigned---------:", isAssigned);
-  console.log("data.assignedTo:-----------", data);
   const [copied, setCopied] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -160,7 +157,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 <TooltipTrigger asChild>
                   <button
                     onClick={copyToClipboard}
-                    className="flex items-center text-[10px] 2xl:text-xs text-muted-foreground cursor-pointer border-none bg-transparent p-0 max-w-27.5"
+                    className="flex items-center mb-0 text-[10px] 2xl:text-xs text-muted-foreground cursor-pointer border-none bg-transparent p-0 max-w-27.5"
                   >
                     {data.ticketNumber}{" "}
                     {copied ? (
@@ -192,7 +189,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                   onOpenChange={setIsPopoverOpen}
                 >
                   <h3
-                    className={`text-foreground  overflow-x-hidden text-ellipsis whitespace-nowrap font-semibold leading-tight transition-colors text-md 
+                    className={`text-foreground overflow-x-hidden text-ellipsis whitespace-nowrap leading-tight
+                       transition-colors text-normal font-medium
                     hover:text-foreground/80 cursor-pointer ${
                       viewMode !== "list" ? "sm:max-w-45" : "sm:max-w-25"
                     }`}
@@ -279,7 +277,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             {/* Atribuído a */}
             <div className="flex justify-start gap-2">
               <div className="flex flex-col gap-1 justify-start min-w-40">
-                <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider">
+                <span className="text-xs font-semibold text-foreground/80 tracking-wider">
                   Responsável
                 </span>
                 {isAssigned ? (
@@ -315,7 +313,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
 
               {/* Data e Tempo */}
               <div className="flex flex-col gap-1 mb-1 min-w-25">
-                <span className="text-[10px] uppercase font-bold text-foreground/80 tracking-wider mb-1">
+                <span className="text-xs font-semibold text-foreground/80 tracking-wider mb-1">
                   Abertura
                 </span>
                 <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
@@ -391,7 +389,7 @@ export const TicketRowSkeleton: React.FC<{
 }> = ({ viewMode = "list" }) => {
   return (
     <div
-      className={`group border border-border relative bg-muted/20 rounded-lg p-4 py-8 mb-3 shadow-sm`}
+      className={`group border border-border relative bg-muted/20 rounded-lg p-4 py-2.5 mb-3 shadow-sm`}
     >
       <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all duration-200 bg-linear-to-b from-gray-400 to-gray-600"></div>
       <div

@@ -97,7 +97,7 @@ export const StatusPriorityPopover: React.FC<Props> = ({
                     placeholder={data.status}
                   />
                 </SelectTrigger>
-                <SelectContent className="bg-popover">
+                <SelectContent showSearch={true} className="bg-popover">
                   {STATUS_OPTIONS.map((opt) => (
                     <SelectItem
                       className="bg-popover hover:bg-accent/40"
@@ -132,7 +132,7 @@ export const StatusPriorityPopover: React.FC<Props> = ({
                   <SelectTrigger size="sm">
                     <SelectValue placeholder={data.priority} />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover">
+                  <SelectContent showSearch={true} className="bg-popover">
                     {PRIORITY_OPTIONS.map((opt) => (
                       <SelectItem
                         className="bg-popover hover:bg-accent/40"
