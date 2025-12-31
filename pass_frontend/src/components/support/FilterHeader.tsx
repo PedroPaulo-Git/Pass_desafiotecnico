@@ -133,9 +133,9 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
               />
             </div>
           </div>
-          <Button className="bg-purple-500 dark:bg-purple-500 hover:bg-purple-600 dark:hover:bg-purple-600 text-white font-semibold h-11 p-0 px-2">
+          <Button className="bg-purple-500 gap-0 dark:bg-purple-500 hover:bg-purple-500  text-white font-semibold h-11 p-0! px-0!">
             <span
-              className="flex items-center px-6 hover:bg-purple-700 dark:hover:bg-purple-700 cursor-pointer transition-colors"
+              className="flex items-center px-6 hover:bg-purple-600 h-full w-full cursor-pointer transition-colors rounded-l-lg"
               onClick={onSearch}
             >
               <Search className="w-4 h-4 mr-2" />
@@ -144,7 +144,8 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className=" border-l border-white/20 h-full flex items-center pl-3 pr-1 hover:bg-purple-700 dark:hover:bg-purple-700 cursor-pointer transition-colors">
+                  <span className=" border-l border-white/20 h-full w-full flex items-center px-3  hover:bg-purple-700
+                  rounded-r-lg dark:hover:bg-purple-700 cursor-pointer transition-colors">
                     <div onClick={onClickNewTicket}>
                       <Plus className="w-4 h-4" />
                     </div>

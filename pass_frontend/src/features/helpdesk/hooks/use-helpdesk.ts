@@ -52,7 +52,7 @@ export function useHelpdeskWithRoleFilters(additionalFilters: HelpdeskFilters = 
           const result = await helpdeskAPI.getAll(roleBasedFilters);
           return result;
         } catch (error) {
-          console.log("useHelpdeskWithRoleFilters - API call failed, falling back to mock:", error.message);
+          console.log("useHelpdeskWithRoleFilters - API call failed, falling back to mock:", (error as Error).message);
           return helpdeskMockAPI.getAll(roleBasedFilters);
         }
       } else {
