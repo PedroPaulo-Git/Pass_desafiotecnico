@@ -258,7 +258,7 @@
 }
 
 @theme inline {
-  --font-sans: "Plus Jakarta Sans", "Inter", "Inter Fallback", system-ui,
+  --font-sans: var(--font-geist-sans), "Inter", "Inter Fallback", system-ui,
     sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
   --color-background: var(--background);

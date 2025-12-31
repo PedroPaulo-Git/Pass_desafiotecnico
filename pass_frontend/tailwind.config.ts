@@ -19,7 +19,7 @@ module.exports = {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Plus Jakarta Sans',
+  				'var(--font-geist-sans)',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
