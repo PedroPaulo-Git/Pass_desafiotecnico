@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   createHelpdeskSchema,
-  helpdeskQuerySchema,
 } from "@pass/schemas/helpdeskSchema";
 import { createMessageSchema } from "@pass/schemas/messageBucketSchema";
 import {
