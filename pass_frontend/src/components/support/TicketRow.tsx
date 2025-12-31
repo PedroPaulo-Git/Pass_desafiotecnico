@@ -389,7 +389,7 @@ export const TicketRowSkeleton: React.FC<{
 }> = ({ viewMode = "list" }) => {
   return (
     <div
-      className={`group border border-border relative bg-muted/20 rounded-lg p-4 py-2.5 mb-3 shadow-sm`}
+      className={`group border border-border relative bg-muted/20 rounded-lg p-4 py-3.5 mb-3 shadow-sm`}
     >
       <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all duration-200 bg-linear-to-b from-gray-400 to-gray-600"></div>
       <div
@@ -402,15 +402,15 @@ export const TicketRowSkeleton: React.FC<{
         {/* Coluna 1: Info Principal do Ticket */}
         <div className="flex items-start gap-4 flex-1 w-full">
           {/* Ícone Indicativo de Status/Prioridade */}
-          <Skeleton className="mt-1 w-10 h-10 rounded-full border" />
+          <Skeleton className="mt-1 w-10 h-10 rounded-full border bg-muted-foreground/50" />
 
           <div className="flex flex-col space-y-1 w-full">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-4 w-3/4 bg-muted-foreground/50" />
+            <Skeleton className="h-3 w-1/2 bg-muted-foreground/50" />
 
             <div className="flex gap-2 items-center mt-auto">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-6 w-20 bg-muted-foreground/50" />
+              <Skeleton className="h-6 w-16 bg-muted-foreground/50" />
             </div>
           </div>
         </div>
@@ -424,20 +424,20 @@ export const TicketRowSkeleton: React.FC<{
           >
             {/* Atribuído a */}
             <div className="flex flex-col gap-1 min-w-30">
-              <Skeleton className="h-3 w-16 mb-1" />
-              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-3 w-16 mb-1 bg-muted-foreground/50" />
+              <Skeleton className="h-6 w-20 bg-muted-foreground/50" />
             </div>
 
             {/* Data e Tempo */}
             <div className="flex flex-col gap-1 min-w-25 mb-1">
-              <Skeleton className="h-3 w-12 mb-1" />
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-12 mb-1 bg-muted-foreground/50" />
+              <Skeleton className="h-4 w-24 bg-muted-foreground/50" />
             </div>
 
             {/* Métricas Rápidas */}
             <div className="flex items-center gap-3 border-l border-border pl-4">
-              <Skeleton className="h-4 w-4" />
-              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-4 bg-muted-foreground/50" />
+              <Skeleton className="h-4 w-4 bg-muted-foreground/50" />
             </div>
           </div>
         )}

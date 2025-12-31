@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -64,6 +64,13 @@ const companies = [
 export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
   const pathname = usePathname();
   const { t } = useI18n();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simular loading do sidebar
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [selectedCompanyId, setSelectedCompanyId] = useState(
     companies.find((c) => c.active)?.id ?? companies[0].id
@@ -193,66 +200,90 @@ export function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
         </div>
 
         {/* --- NAVIGATION --- */}
-        <nav className="flex-1 overflow-y-auto py-5 pr-2 pl-4 space-y-8 scrollbar-hidden h-full ">
-          {navGroups.map((group, groupIndex) => (
-            <div key={groupIndex}>
-              {/* Título do Grupo */}
-              {!isCollapsed && (
-                <div className="first:mt-1.5 mb-1.5 px-2 text-[11px] font-bold tracking-wide text-muted-foreground">
-                  {group.title}
+        <nav className="flex-1 overflow-y-auto py-5 pr-2 pl-4 space-y-8 scrollbar-hidden ">
+          {isLoading ? (
+            // Skeleton loading
+            <div className="space-y-8">
+              {Array.from({ length: 4 }).map((_, groupIndex) => (
+                <div key={groupIndex}>
+                  {!isCollapsed && (
+                    <div className="first:mt-1.5 mb-1.5 px-2 h-3 bg-muted-foreground/50 animate-pulse rounded w-16"></div>
+                  )}
+                  <div className="space-y-1">
+                    {Array.from({ length: 3 }).map((_, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className={cn(
+                          "flex items-center gap-2.5 rounded-md px-3.5 py-2",
+                          isCollapsed ? "justify-center" : ""
+                        )}
+                      >
+                        <div className="h-4 w-4 bg-muted-foreground/50 animate-pulse rounded shrink-0"></div>
+                        {!isCollapsed && (
+                          <div className="h-3 bg-muted-foreground/50 animate-pulse rounded flex-1"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-
-              <div className="space-y-1 ">
-                {group.items.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
-
-                  return (
-                    <Tooltip key={item.href}>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={item.href}
-                          className={cn(
-                            "flex items-center  gap-2.5 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150 ",
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground font-bold "
-                              : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          )}
-                        >
-                          <item.icon
-                            className={cn(
-                              "h-4 w-4 shrink-0",
-                              isActive
-                                ? "text-foreground"
-                                : "text-muted-foreground",
-                              isCollapsed && "mx-auto"
-                            )}
-                          />
-                          {!isCollapsed && (
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              className="truncate "
-                            >
-                              {item.label}
-                            </motion.span>
-                          )}
-                        </Link>
-                      </TooltipTrigger>
-                      {/* {isCollapsed && (
-                        <TooltipContent side="right" sideOffset={8} className="bg-foreground text-background text-xs">
-                          {item.label}
-                        </TooltipContent>
-                      )} */}
-                    </Tooltip>
-                  );
-                })}
-              </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            navGroups.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                {/* Título do Grupo */}
+                {!isCollapsed && (
+                  <div className="first:mt-1.5 mb-1.5 px-2 text-[11px] font-bold tracking-wide text-muted-foreground">
+                    {group.title}
+                  </div>
+                )}
+
+                <div className="space-y-1 ">
+                  {group.items.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      pathname.startsWith(`${item.href}/`);
+
+                    return (
+                      <Tooltip key={item.href}>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "flex items-center  gap-2.5 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150 ",
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-bold "
+                                : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                            )}
+                          >
+                            <item.icon
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                isActive
+                                  ? "text-foreground"
+                                  : "text-muted-foreground",
+                                isCollapsed && "mx-auto"
+                              )}
+                            />
+                            {!isCollapsed && (
+                              <span className="truncate">
+                                {item.label}
+                              </span>
+                            )}
+                          </Link>
+                        </TooltipTrigger>
+                        {/* {isCollapsed && (
+                          <TooltipContent side="right" sideOffset={8} className="bg-foreground text-background text-xs">
+                            {item.label}
+                          </TooltipContent>
+                        )} */}
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
         </nav>
 
         {/* --- FOOTER (COLLAPSE BUTTON) --- */}

@@ -6,7 +6,14 @@ import { TicketRow, TicketRowSkeleton } from "@/components/support/TicketRow";
 import { TicketData } from "@/components/support/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, ChevronFirst, ChevronLeft, ChevronRight, ChevronLast } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useHelpdeskWithRoleFilters } from "../hooks/use-helpdesk";
 import { BackendStatus } from "./BackendStatus";
 import { useBackendStatus } from "../hooks/use-backend-status";
@@ -34,9 +41,11 @@ interface HelpdeskListProps {
   onCreateClick?: () => void;
   onTicketClick?: (ticket: TicketData) => void;
   viewMode?: "list" | "grid" | "lanes";
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
-export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewMode = "list" }: HelpdeskListProps) {
+export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewMode = "list", onPageChange, onPageSizeChange }: HelpdeskListProps) {
   const { currentUser } = useAuth();
   const { data: backendData, isLoading, error, refetch: refetchBackend } = useHelpdeskWithRoleFilters(filters);
   const { status } = useBackendStatus();
@@ -317,10 +326,24 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
   if (isLoading || anyUserLoading || tickets === null) {
     return (
       <div className="space-y-4">
-        <div className="grid gap-4">
+        <div className="grid gap-0.5 py-1.5">
           {Array.from({ length: 3 }).map((_, i) => (
             <TicketRowSkeleton key={i} viewMode={viewMode} />
           ))}
+        </div>
+        {/* Pagination Skeleton */}
+        <div className="sm:flex sm:flex-row gap-4 flex flex-col items-center justify-between px-5 py-4 border-t border-border">
+          <div className="h-4 w-32 bg-muted-foreground/50 animate-pulse rounded"></div>
+          <div className="h-8 w-[110px] bg-muted-foreground/50 animate-pulse rounded"></div>
+          <div className="flex items-center space-x-6 lg:space-x-8">
+            <div className="h-4 w-[70px] bg-muted-foreground/50 animate-pulse rounded"></div>
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-muted-foreground/50 animate-pulse rounded"></div>
+              <div className="h-8 w-8 bg-muted-foreground/50 animate-pulse rounded"></div>
+              <div className="h-8 w-8 bg-muted-foreground/50 animate-pulse rounded"></div>
+              <div className="h-8 w-8 bg-muted-foreground/50 animate-pulse rounded"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -424,13 +447,86 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
         </>
       )}
 
-      {ticketData && ticketData.totalPages > 1 && (
-        <div className="flex justify-center mt-6">
-          <div className="text-sm text-muted-foreground">
-            Página {ticketData.page} de {ticketData.totalPages} • Total: {ticketData.total} chamados
+      {/* Footer de Paginação */}
+      <div className="sm:flex sm:flex-row gap-4 flex flex-col items-center justify-between px-5 py-4 border-t border-border">
+        {/* Lado Esquerdo: Texto de Seleção */}
+        <div className="text-sm text-muted-foreground">
+          0 de {ticketData?.total || 0} chamado(s) selecionado(s).
+        </div>
+
+        {/* Dropdown: Linhas por página */}
+        <div className="flex items-center space-x-2 h-8 bg-background">
+          <Select
+            value={`${ticketData?.limit || 10}`}
+            onValueChange={(value) => {
+              if (typeof onPageSizeChange === "function") {
+                onPageSizeChange(Number(value));
+                return;
+              }
+              console.warn("onPageSizeChange not provided for HelpdeskList");
+            }}
+          >
+            <SelectTrigger className="h-8 w-[110px] text-foreground" variant="pagination">
+              <SelectValue className="text-foreground">{`${ticketData?.limit || 10} / page`}</SelectValue>
+            </SelectTrigger>
+            <SelectContent bg_fill={true} side="top">
+              {[5, 10, 15, 20, 50].map((pageSize) => (
+                <SelectItem className="text-foreground" key={pageSize} value={`${pageSize}`}>
+                  {pageSize} / page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Lado Direito: Controles */}
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          {/* Texto: Página X de Y */}
+          <div className="flex w-[70px] items-center justify-center text-sm font-medium text-nowrap text-foreground">
+            Página {ticketData?.page || 1} de {ticketData?.totalPages || 1}
+          </div>
+
+          {/* Botões de Navegação (Primeira, Anterior, Próxima, Última) */}
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0 lg:flex"
+              onClick={() => onPageChange?.(1)}
+              disabled={(ticketData?.page || 1) === 1}
+            >
+              <span className="sr-only">Go to first page</span>
+              <ChevronFirst className="h-4 w-4 text-foreground" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => onPageChange?.((ticketData?.page || 1) - 1)}
+              disabled={(ticketData?.page || 1) === 1}
+            >
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft className="h-4 w-4 text-foreground" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => onPageChange?.((ticketData?.page || 1) + 1)}
+              disabled={(ticketData?.page || 1) === (ticketData?.totalPages || 1)}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight className="h-4 w-4 text-foreground" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0 lg:flex"
+              onClick={() => onPageChange?.(ticketData?.totalPages || 1)}
+              disabled={(ticketData?.page || 1) === (ticketData?.totalPages || 1)}
+            >
+              <span className="sr-only">Go to last page</span>
+              <ChevronLast className="h-4 w-4 text-foreground" />
+            </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

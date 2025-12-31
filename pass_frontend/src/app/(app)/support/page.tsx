@@ -54,6 +54,15 @@ export function SupportTicketPage() {
     setModuleFilter(tempModuleFilter);
     console.log("Filtros aplicados com sucesso");
   }, [tempSearch, tempModuleFilter]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  }, []);
+
+  const handlePageSizeChange = useCallback((limit: number) => {
+    setFilters(prev => ({ ...prev, limit, page: 1 })); // Reset to page 1 when changing limit
+  }, []);
+
   const memoizedFilters = React.useMemo(() => {
     const statusMap: Record<string, any> = {
       Todos: undefined,
@@ -218,6 +227,8 @@ export function SupportTicketPage() {
           onCreateClick={() => setIsCreateDialogOpen(true)}
           onTicketClick={handleTicketClick}
           viewMode={viewMode}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
         />
            </div>
 
