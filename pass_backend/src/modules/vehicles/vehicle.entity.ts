@@ -34,10 +34,10 @@ export class Vehicle {
   @Column({ nullable: true })
   color: string;
 
-  @Column({ type: 'enum', enum: VehicleCategory })
+  @Column({ type: 'enum', enum: VehicleCategory, enumName: 'VehicleCategory' })
   category: VehicleCategory;
 
-  @Column({ type: 'enum', enum: VehicleClassification })
+  @Column({ type: 'enum', enum: VehicleClassification, enumName: 'VehicleClassification' })
   classification: VehicleClassification;
 
   @Column()
@@ -46,7 +46,7 @@ export class Vehicle {
   @Column({ default: 1 })
   doors: number;
 
-  @Column({ type: 'enum', enum: FuelType, name: 'fuel_type' })
+  @Column({ type: 'enum', enum: FuelType, name: 'fuel_type', enumName: 'FuelType' })
   fuelType: FuelType;
 
   @Column({ nullable: true })
@@ -55,7 +55,7 @@ export class Vehicle {
   @Column({ default: 0, name: 'current_km' })
   currentKm: number;
 
-  @Column({ type: 'enum', enum: VehicleStatus, default: VehicleStatus.LIBERADO })
+  @Column({ type: 'enum', enum: VehicleStatus, default: VehicleStatus.LIBERADO, enumName: 'VehicleStatus' })
   status: VehicleStatus;
 
   @Column({ name: 'company_name', nullable: true })
