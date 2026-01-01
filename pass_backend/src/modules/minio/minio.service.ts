@@ -45,6 +45,8 @@ export class MinioService implements OnModuleInit {
     }
 
     this.logger.log(`Final MinIO Client Endpoint: ${endpoint}`);
+    this.logger.log(`MinIO AccessKey starts with: ${accessKey?.substring(0, 3)}...`);
+    this.logger.log(`MinIO Use SSL: ${endpoint.startsWith('https')}`);
 
     this.s3Client = new S3Client({
       endpoint,
@@ -61,29 +63,35 @@ export class MinioService implements OnModuleInit {
     const vehiclesBucket = this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles';
     const helpdeskBucket = this.configService.get<string>('MINIO_BUCKET_HELPDESK') || 'helpdesk';
 
+    this.logger.log('--- MINIO BUCKET INITIALIZATION ---');
     await this.ensureBucketExists(vehiclesBucket);
     await this.ensureBucketExists(helpdeskBucket);
+    this.logger.log('-----------------------------------');
   }
 
   async ensureBucketExists(bucketName: string) {
     try {
-      this.logger.debug(`Checking if bucket exists: ${bucketName}`);
+      this.logger.debug(`[MINIO DEBUG] Sending HeadBucketCommand for: ${bucketName}`);
       await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-      this.logger.log(`Bucket exists: ${bucketName}`);
+      this.logger.log(`[MINIO SUCCESS] Bucket exists: ${bucketName}`);
     } catch (error: any) {
+      this.logger.error(`[MINIO ERROR] Failed checking bucket "${bucketName}"`);
+      this.logger.error(`[MINIO ERROR] Name: ${error?.name}`);
+      this.logger.error(`[MINIO ERROR] Message: ${error?.message}`);
+      this.logger.error(`[MINIO ERROR] HTTP Status: ${error?.$metadata?.httpStatusCode}`);
+      
       if (error?.name === 'NotFound' || error?.$metadata?.httpStatusCode === 404) {
         try {
-          this.logger.log(`Bucket not found. Creating bucket: ${bucketName}`);
+          this.logger.log(`[MINIO] Bucket not found. Creating bucket: ${bucketName}`);
           await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
-          this.logger.log(`Bucket created: ${bucketName}`);
-        } catch (createError) {
-          this.logger.error(`Failed to create bucket ${bucketName}`, createError);
+          this.logger.log(`[MINIO] Bucket created successfully: ${bucketName}`);
+        } catch (createError: any) {
+          this.logger.error(`[MINIO FATAL] Failed to create bucket ${bucketName}`);
+          this.logger.error(`[MINIO FATAL] Create Error: ${createError?.message}`);
         }
       } else {
-        // Fallback for other errors (e.g. connection refused)
-        this.logger.error(`Error checking bucket ${bucketName}`, error);
-        if (error.code === 'ECONNREFUSED') {
-             this.logger.error(`Connection refused to MinIO endpoint. Please check if MinIO is running and reachable.`);
+        if (error?.$metadata?.httpStatusCode === 502) {
+          this.logger.error(`[MINIO ADVICE] 502 Bad Gateway detected! This means the MinIO service at the endpoint is either down or not accepting requests on the expected port.`);
         }
       }
     }
