@@ -8,6 +8,7 @@ import { IncidentsModule } from './modules/incidents/incidents.module';
 import { HelpdeskModule } from './modules/helpdesk/helpdesk.module';
 import { VehicleDocumentsModule } from './modules/vehicle-documents/vehicle-documents.module';
 import { MinioModule } from './modules/minio/minio.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -55,7 +56,7 @@ import { MinioModule } from './modules/minio/minio.module';
     VehicleDocumentsModule,
     MinioModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
