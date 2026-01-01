@@ -84,3 +84,19 @@ export interface BackendStatusInfo {
   lastChecked: Date | null;
   error?: string;
 }
+
+// Message Types
+export interface HelpdeskMessage {
+  AuthorId: string;
+  AuthorType: "user" | "support";
+  Message: string;
+  CreatedAt: string;
+  Attachments: string[];
+}
+
+export interface CreateMessageInput {
+  authorId: string;
+  authorType: "user" | "support";
+  message: string;
+  attachments?: string[];
+}

@@ -70,6 +70,7 @@ import type {
 import { useAuth } from "@/hooks/use-auth";
 import { useTicketUpdates } from "./useTicketUpdates";
 import { DialogTitle } from "@/components/ui/dialog";
+import { TicketMessages } from "./TicketMessages";
 
 interface TicketDialogProps {
   ticket: TicketData | null;
@@ -336,6 +337,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           </TabsTrigger>
                           <TabsTrigger
                             supportTab={true}
+                            value="mensagens"
+                            className="text-sm font-medium px-3 py-1.5"
+                          >
+                            <MessageSquare className="w-4 h-4 mb-0.5 mr-1 text-inherit" />
+                            Mensagens
+                          </TabsTrigger>
+                          <TabsTrigger
+                            supportTab={true}
                             value="historico"
                             className="text-sm font-medium px-3 py-1.5"
                           >
@@ -351,306 +360,285 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                             Anexos ({ticket.attachmentCount})
                           </TabsTrigger>
                         </TabsList>
+
+                        {/* LEFT CONTENT AREA */}
+                        <div className="flex-1 overflow-auto scrollbar-hidden pb-4">
+                          <TabsContent value="info" className="px-4 flex flex-col gap-4 mt-4">
+                            {/* Card 1: Dados do Ticket */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 30 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                delay: 0.1,
+                                duration: 0.4,
+                                ease: [0.25, 0.46, 0.45, 0.94],
+                              }}
+                              className="bg-muted/30 border border-border rounded-xl py-4 px-6 shadow-sm hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Layers className="w-4 h-4 text-violet-600" />
+                                  <h3 className="text-sm font-semibold text-foreground">
+                                    Dados do Ticket
+                                  </h3>
+                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs bg-violet-100 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400"
+                                >
+                                  Detalhes Técnicos
+                                </Badge>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 space-y-3 gap-x-8 p-4 bg-muted/20 rounded-lg border border-border/30">
+                                <div className="flex gap-2">
+                                  <Tag className="w-3 h-3 mt-1 text-violet-600" />
+                                  <span className="mt-0.5 text-sm font-medium flex-1">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Categoria
+                                    </label>
+                                    <Select
+                                      value={ticket?.categoryApi || ""}
+                                      onValueChange={(value) =>
+                                        handleUpdateCategory(ticket!.id, value as any)
+                                      }
+                                      disabled={
+                                        !currentUser ||
+                                        (currentUser?.role === "CLIENT" &&
+                                          (ticket?.status === "Resolvido" ||
+                                            ticket?.status === "Fechado"))
+                                      }
+                                    >
+                                      <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
+                                        <SelectValue placeholder="Selecione uma categoria" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-popover">
+                                        <SelectItem className="bg-popover" value="BUG">
+                                          Bug
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="AGENDAMENTO">
+                                          Agendamento
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="TREINAMENTO">
+                                          Treinamento
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="PERFORMANCE">
+                                          Performance
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="AJUSTE_MELHORIA">
+                                          Ajuste/Melhoria
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="OUTRO">
+                                          Outro
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Package className="w-3 h-3 mt-1 text-violet-600" />
+                                  <span className="mt-0.5 text-sm font-medium flex-1">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Módulo
+                                    </label>
+                                    <Select
+                                      value={ticket?.moduleApi || ""}
+                                      onValueChange={(value) =>
+                                        handleUpdateModule(ticket!.id, value as any)
+                                      }
+                                      disabled={
+                                        !currentUser ||
+                                        (currentUser?.role === "CLIENT" &&
+                                          (ticket?.status === "Resolvido" ||
+                                            ticket?.status === "Fechado"))
+                                      }
+                                    >
+                                      <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
+                                        <SelectValue placeholder="Selecione um módulo" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-popover">
+                                        <SelectItem className="bg-popover" value="AGENDAMENTO">
+                                          Agendamento
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="TREINAMENTOS">
+                                          Treinamentos
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="FINANCEIRO">
+                                          Financeiro
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="USUARIOS">
+                                          Usuários
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Play className="w-3 h-3 mt-1 text-violet-600" />
+                                  <span className="mt-0.5 text-sm font-medium flex-1">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Ambiente
+                                    </label>
+                                    <Select
+                                      value={ticket?.environment || ""}
+                                      onValueChange={(value) =>
+                                        handleUpdateEnvironment(ticket!.id, value as any)
+                                      }
+                                      disabled={
+                                        !currentUser ||
+                                        (currentUser?.role === "CLIENT" &&
+                                          (ticket?.status === "Resolvido" ||
+                                            ticket?.status === "Fechado"))
+                                      }
+                                    >
+                                      <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
+                                        <SelectValue placeholder="Selecione um ambiente" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-popover">
+                                        <SelectItem className="bg-popover" value="WEB">
+                                          Web
+                                        </SelectItem>
+                                        <SelectItem className="bg-popover" value="MOBILE">
+                                          Mobile
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </span>
+                                </div>
+                                <Separator
+                                  orientation="horizontal"
+                                  className="md:col-span-2 bg-border/50"
+                                />
+
+                                <div className="md:col-span-2 flex gap-2">
+                                  <FileText className="w-3 h-3 mt-1 text-violet-600" />
+                                  <span className="mt-0.5 text-sm font-medium flex-1">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Descrição / Assunto
+                                    </label>
+                                    {isEditingDescription ? (
+                                      <textarea
+                                        value={editedDescription}
+                                        onChange={(e) => setEditedDescription(e.target.value)}
+                                        onBlur={saveDescription}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            saveDescription();
+                                          }
+                                          if (e.key === "Escape") cancelEditingDescription();
+                                        }}
+                                        className="w-full text-foreground/90 leading-relaxed bg-transparent border-none outline-none focus:ring-1 focus:ring-border/80 transition-all rounded px-1 resize-none"
+                                        rows={3}
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      <p
+                                        onClick={startEditingDescription}
+                                        className={`text-foreground/90 leading-relaxed cursor-pointer hover:text-primary transition-colors ${
+                                          !(
+                                            currentUser?.role === "CLIENT" &&
+                                            (ticket?.status === "Resolvido" ||
+                                              ticket?.status === "Fechado")
+                                          )
+                                            ? "hover:underline"
+                                            : ""
+                                        }`}
+                                      >
+                                        {ticket.description || "Sem descrição"}
+                                      </p>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            </motion.div>
+
+                            {/* Card 2: Dados do Cliente */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 30 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                delay: 0.2,
+                                duration: 0.4,
+                                ease: [0.25, 0.46, 0.45, 0.94],
+                              }}
+                              className="bg-muted/30 border border-border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex justify-between items-center mb-4">
+                                <div className="flex items-center gap-2">
+                                  <User className="w-4 h-4 text-blue-600" />
+                                  <h3 className="text-sm font-semibold text-foreground">
+                                    Dados do Cliente
+                                  </h3>
+                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
+                                >
+                                  Informações do Cliente
+                                </Badge>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 space-y-3 gap-x-8 p-4 bg-muted/20 rounded-lg border border-border/30">
+                                <div className="flex gap-2">
+                                  <User className="w-3 h-3 mt-1 text-blue-600" />
+                                  <span className="mt-0.5 text-sm font-medium">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Nome do Cliente
+                                    </label>
+                                    <p>{ticket.clientName}</p>
+                                  </span>
+                                </div>
+                                <Separator
+                                  orientation="horizontal"
+                                  className="md:col-span-2 bg-border/50"
+                                />
+
+                                <div className="flex gap-2">
+                                  <Phone className="w-3 h-3 mt-1 text-blue-600" />
+                                  <span className="mt-0.5 text-sm font-medium">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Telefone
+                                    </label>
+                                    <p className="text-sm">
+                                      {ticket.user?.telefone || "+55 11 99999-9999"}
+                                    </p>
+                                  </span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Mail className="w-3 h-3 mt-1 text-blue-600" />
+                                  <span className="mt-0.5 text-sm font-medium">
+                                    <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                                      Email
+                                    </label>
+                                    <p className="text-sm">
+                                      {ticket.user?.email || "email@exemplo.com"}
+                                    </p>
+                                  </span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          </TabsContent>
+
+                          <TabsContent value="mensagens" className="px-4 mt-4 h-full">
+                            <TicketMessages ticketId={ticket.id} />
+                          </TabsContent>
+
+                          <TabsContent value="historico" className="px-4 mt-4">
+                            <div className="text-center py-10 text-muted-foreground italic">
+                              Em breve: Histórico de alterações do ticket.
+                            </div>
+                          </TabsContent>
+
+                          <TabsContent value="anexos" className="px-4 mt-4">
+                             <div className="text-center py-10 text-muted-foreground italic">
+                              Em breve: Gerenciamento de arquivos e anexos.
+                            </div>
+                          </TabsContent>
+                        </div>
                       </Tabs>
                     </motion.div>
 
-                    {/* LEFT CONTENT*/}
-                    <div className="px-4 flex flex-col gap-4">
-                      {/* Card 1: Dados do Ticket */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: 0.1,
-                          duration: 0.4,
-                          ease: [0.25, 0.46, 0.45, 0.94]
-                        }}
-                        whileHover={{
-                          transition: { duration: 0.2 }
-                        }}
-                        className="bg-muted/30 border border-border rounded-xl py-4 px-6 shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex justify-between items-center mb-3">
-                          <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-violet-600" />
-                            <h3 className="text-sm font-semibold text-foreground">
-                              Dados do Ticket
-                            </h3>
-                          </div>
-                          <Badge
-                            variant="secondary"
-                            className="text-xs bg-violet-100 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400"
-                          >
-                            Detalhes Técnicos
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 space-y-3 gap-x-8 p-4 bg-muted/20 rounded-lg border border-border/30">
-                          <div className="flex gap-2">
-                            <Tag className="w-3 h-3 mt-1 text-violet-600" />
-
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Categoria
-                              </label>
-                              <Select
-                                value={ticket?.categoryApi || ""}
-                                onValueChange={(value) =>
-                                  handleUpdateCategory(ticket!.id, value as any)
-                                }
-                                disabled={
-                                  !currentUser ||
-                                  (currentUser?.role === "CLIENT" &&
-                                    (ticket?.status === "Resolvido" ||
-                                      ticket?.status === "Fechado"))
-                                }
-                              >
-                                <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
-                                  <SelectValue placeholder="Selecione uma categoria" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-popover">
-                                  <SelectItem className="bg-popover" value="BUG">
-                                    Bug
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="AGENDAMENTO"
-                                  >
-                                    Agendamento
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="TREINAMENTO"
-                                  >
-                                    Treinamento
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="PERFORMANCE"
-                                  >
-                                    Performance
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="AJUSTE_MELHORIA"
-                                  >
-                                    Ajuste/Melhoria
-                                  </SelectItem>
-                                  <SelectItem className="bg-popover" value="OUTRO">
-                                    Outro
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Package className="w-3 h-3 mt-1 text-violet-600" />
-
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Módulo
-                              </label>
-                              <Select
-                                value={ticket?.moduleApi || ""}
-                                onValueChange={(value) =>
-                                  handleUpdateModule(ticket!.id, value as any)
-                                }
-                                disabled={
-                                  !currentUser ||
-                                  (currentUser?.role === "CLIENT" &&
-                                    (ticket?.status === "Resolvido" ||
-                                      ticket?.status === "Fechado"))
-                                }
-                              >
-                                <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
-                                  <SelectValue placeholder="Selecione um módulo" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-popover">
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="AGENDAMENTO"
-                                  >
-                                    Agendamento
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="TREINAMENTOS"
-                                  >
-                                    Treinamentos
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="FINANCEIRO"
-                                  >
-                                    Financeiro
-                                  </SelectItem>
-                                  <SelectItem className="bg-popover" value="USUARIOS">
-                                    Usuários
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Play className="w-3 h-3 mt-1 text-violet-600" />
-
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Ambiente
-                              </label>
-                              <Select
-                                value={ticket?.environment || ""}
-                                onValueChange={(value) =>
-                                  handleUpdateEnvironment(ticket!.id, value as any)
-                                }
-                                disabled={
-                                  !currentUser ||
-                                  (currentUser?.role === "CLIENT" &&
-                                    (ticket?.status === "Resolvido" ||
-                                      ticket?.status === "Fechado"))
-                                }
-                              >
-                                <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
-                                  <SelectValue placeholder="Selecione um ambiente" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-popover">
-                                  <SelectItem className="bg-popover" value="WEB">
-                                    Web
-                                  </SelectItem>
-                                  <SelectItem className="bg-popover" value="MOBILE">
-                                    Mobile
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </span>
-                          </div>
-                          <Separator
-                            orientation="horizontal"
-                            className="md:col-span-2 bg-border/50"
-                          />
-
-                          <div className="md:col-span-2 flex gap-2">
-                            <FileText className="w-3 h-3 mt-1 text-violet-600" />
-
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Descrição / Assunto
-                              </label>
-                              {isEditingDescription ? (
-                                <textarea
-                                  value={editedDescription}
-                                  onChange={(e) =>
-                                    setEditedDescription(e.target.value)
-                                  }
-                                  onBlur={saveDescription}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
-                                      e.preventDefault();
-                                      saveDescription();
-                                    }
-                                    if (e.key === "Escape")
-                                      cancelEditingDescription();
-                                  }}
-                                  className="w-full  text-foreground/90 leading-relaxed bg-transparent
-                                   border-none outline-none focus:ring-1 focus:ring-border/80 transition-all rounded px-1 resize-none"
-                                  rows={3}
-                                  autoFocus
-                                />
-                              ) : (
-                                <p
-                                  onClick={startEditingDescription}
-                                  className={`text-foreground/90  leading-relaxed cursor-pointer hover:text-primary transition-colors ${
-                                    !(
-                                      currentUser?.role === "CLIENT" &&
-                                      (ticket?.status === "Resolvido" ||
-                                        ticket?.status === "Fechado")
-                                    )
-                                      ? "hover:underline"
-                                      : ""
-                                  }`}
-                                >
-                                  {ticket.description || "Sem descrição"}
-                                </p>
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>
-
-                      {/* Card 2: Dados do Cliente */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: 0.2,
-                          duration: 0.4,
-                          ease: [0.25, 0.46, 0.45, 0.94]
-                        }}
-                        whileHover={{
-                          transition: { duration: 0.2 }
-                        }}
-                        className="bg-muted/30 border border-border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
-                      >
-                    
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-blue-600" />
-                            <h3 className="text-sm font-semibold text-foreground">
-                              Dados do Cliente
-                            </h3>
-                          </div>
-                          <span className="text-xs font-medium text-blue-600"></span>
-                          <Badge
-                            variant="secondary"
-                            className="text-xs bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
-                          >
-                            Informações do Cliente
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 space-y-3 gap-x-8 p-4 bg-muted/20 rounded-lg border border-border/30">
-                          <div className="flex gap-2">
-                            <User className="w-3 h-3 mt-1 text-blue-600" />
-
-                            <span className="mt-0.5 text-sm font-medium">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Nome do Cliente
-                              </label>
-                              <p>{ticket.clientName}</p>
-                            </span>
-                          </div>
-                          <Separator
-                            orientation="horizontal"
-                            className="md:col-span-2 bg-border/50"
-                          />
-
-                          <div className="flex gap-2">
-                            <Phone className="w-3 h-3 mt-1 text-blue-600" />
-
-                            <span className="mt-0.5 text-sm font-medium">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Telefone
-                              </label>
-                              <p className="text-sm">
-                                {ticket.user?.telefone || "+55 11 99999-9999"}
-                              </p>
-                            </span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Mail className="w-3 h-3 mt-1 text-blue-600" />
-
-                            <span className="mt-0.5 text-sm font-medium">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
-                                Email
-                              </label>
-                              <p className="text-sm">
-                                {ticket.user?.email || "email@exemplo.com"}
-                              </p>
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </div>
                   </div>
 
                   {/* RIGHT COLUMN (SIDEBAR) */}

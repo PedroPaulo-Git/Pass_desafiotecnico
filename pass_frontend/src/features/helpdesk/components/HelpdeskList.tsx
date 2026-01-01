@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { TicketRow, TicketRowSkeleton } from "@/components/support/TicketRow";
 import { TicketData } from "@/components/support/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -394,27 +395,47 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
         <>
           {viewMode === "list" && (
             <div className="space-y-4">
-              {tickets?.map((ticket) => (
-                <TicketRow
-                  key={ticket.id}
-                  data={ticket}
-                  viewMode="list"
-                  onClick={() => onTicketClick?.(ticket)}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {tickets?.map((ticket) => (
+                  <motion.div
+                    key={ticket.id}
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  >
+                    <TicketRow
+                      data={ticket}
+                      viewMode="list"
+                      onClick={() => onTicketClick?.(ticket)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
 
           {viewMode === "grid" && (
             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
-              {tickets?.map((ticket) => (
-                <TicketRow
-                  key={ticket.id}
-                  data={ticket}
-                  viewMode="grid"
-                  onClick={() => onTicketClick?.(ticket)}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {tickets?.map((ticket) => (
+                  <motion.div
+                    key={ticket.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <TicketRow
+                      data={ticket}
+                      viewMode="grid"
+                      onClick={() => onTicketClick?.(ticket)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
 

@@ -65,6 +65,16 @@ export const helpdeskAPI = {
   async delete(id: string): Promise<void> {
     await api.delete(`/helpdesk/${id}`);
   },
+
+  // --- Messages ---
+  async getMessages(helpdeskId: string): Promise<any[]> {
+    const { data } = await api.get<any[]>(`/helpdesk/${helpdeskId}/messages`);
+    return data;
+  },
+
+  async sendMessage(helpdeskId: string, input: any): Promise<void> {
+    await api.post(`/helpdesk/${helpdeskId}/messages`, input);
+  },
 };
 
 // Mock API calls (for when backend is offline)
