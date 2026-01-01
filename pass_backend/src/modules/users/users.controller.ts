@@ -16,6 +16,12 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Post('auth')
+  @ApiOperation({ summary: 'Authenticate user (Find or Create)' })
+  authenticate(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.authenticate(createUserDto);
+  }
+
   @Get()
   @ApiOperation({ summary: 'List all users' })
   findAll() {
