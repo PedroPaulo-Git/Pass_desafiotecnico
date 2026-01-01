@@ -59,6 +59,7 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       queryKey: ["user", id],
       queryFn: () => getUserById(id),
       staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
     }))
   });
 
@@ -72,6 +73,7 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
       queryKey: ["user", id],
       queryFn: () => getUserById(id as string),
       staleTime: 5 * 60 * 1000,
+      retry: 1,
     }))
   });
 
@@ -323,7 +325,7 @@ export function HelpdeskList({ filters = {}, onCreateClick, onTicketClick, viewM
   // Show skeleton while loading or before tickets have been hydrated
   const anyUserLoading = clientQueries.some((q) => q.isLoading) || assignedQueries.some((q) => q.isLoading);
 
-  if (isLoading || anyUserLoading || tickets === null) {
+  if (isLoading || tickets === null) {
     return (
       <div className="space-y-4">
         <div className="grid gap-0.5 py-1.5">
