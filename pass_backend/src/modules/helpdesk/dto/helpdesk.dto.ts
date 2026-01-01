@@ -56,7 +56,8 @@ export class CreateHelpdeskDto {
 
   @ApiProperty()
   @IsString()
-  bucketPath: string;
+  @IsOptional()
+  bucketPath?: string;
 }
 
 import { PartialType } from '@nestjs/swagger';
