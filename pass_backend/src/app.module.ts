@@ -15,9 +15,9 @@ import { MinioModule } from './modules/minio/minio.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT, 10) || 3306,
+      port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
       username: process.env.DATABASE_USER || 'pass_user',
       password: process.env.DATABASE_PASSWORD || 'pass_password',
       database: process.env.DATABASE_NAME || 'pass_db',

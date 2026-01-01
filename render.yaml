@@ -1,25 +1,5 @@
 services:
-  # 1. MySQL Database (Docker)
-  # Render doesn't have Managed MySQL, so we deploy it as a Service.
-  - type: pserv # Private Service (not exposed to public internet, consistent with a DB)
-    name: pass-mysql-db
-    runtime: image
-    image: "mysql:8.0"
-    envVars:
-      - key: MYSQL_ROOT_PASSWORD
-        generateValue: true
-      - key: MYSQL_DATABASE
-        value: pass_db
-      - key: MYSQL_USER
-        value: pass_user
-      - key: MYSQL_PASSWORD
-        value: pass_password
-    disk:
-      name: mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 10 # Adjust size as needed
-
-  # 2. Backend API
+  # Backend API
   - type: web
     name: pass-backend-api
     runtime: docker
@@ -29,18 +9,25 @@ services:
       - key: PORT
         value: 3333
       - key: DATABASE_HOST
-        fromService:
-          type: pserv
-          name: pass-mysql-db
+        fromDatabase:
+          name: pass-postgres-db
           property: host
       - key: DATABASE_PORT
-        value: 3306
+        fromDatabase:
+          name: pass-postgres-db
+          property: port
       - key: DATABASE_USER
-        value: pass_user
+        fromDatabase:
+          name: pass-postgres-db
+          property: user
       - key: DATABASE_PASSWORD
-        value: pass_password
+        fromDatabase:
+          name: pass-postgres-db
+          property: password
       - key: DATABASE_NAME
-        value: pass_db
+        fromDatabase:
+          name: pass-postgres-db
+          property: database
       # Using the external MinIO user provided
       - key: MINIO_ENDPOINT
         value: minio-latest-q46m.onrender.com
@@ -49,6 +36,12 @@ services:
       - key: MINIO_USE_SSL
         value: true
       - key: MINIO_ACCESS_KEY
-        sync: false # User will input this in dashboard
+        sync: false
       - key: MINIO_SECRET_KEY
-        sync: false # User will input this in dashboard
+        sync: false
+
+databases:
+  - name: pass-postgres-db
+    databaseName: pass_db
+    user: pass_user
+    plan: free # Managed PostgreSQL Free Tier

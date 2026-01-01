@@ -1,0 +1,110 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pass-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pass_user
+      POSTGRES_PASSWORD: pass_password
+      POSTGRES_DB: pass_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pass_user -d pass_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pass-network
+
+  # MinIO Storage (Same as before)
+  minio:
+    image: minio/minio:latest
+    container_name: pass-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - pass-network
+
+  # Backend API (Development)
+  backend:
+    build:
+      context: .
+      dockerfile: ./pass_backend/Dockerfile.dev
+    container_name: pass-backend
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: pass_user
+      DATABASE_PASSWORD: pass_password
+      DATABASE_NAME: pass_db
+      PORT: 3333
+      NODE_ENV: development
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_BUCKET: pass-vehicles
+      MINIO_BUCKET_HELPDESK: helpdesk
+      MINIO_USE_SSL: false
+    volumes:
+      - ./pass_backend/src:/app/src
+      # Sync node_modules prevents local vs container OS conflicts for binaries like 'nest'
+      # But sometimes causes issues if local node_modules is missing.
+      # For now, let's keep simple volume sync.
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - pass-network
+
+  # Frontend (Development)
+  frontend:
+    build:
+      context: .
+      dockerfile: ./pass_frontend/Dockerfile.dev
+    container_name: pass-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3333
+      NODE_ENV: development
+    volumes:
+      - ./pass_frontend/src:/app/src
+      - ./pass_frontend/public:/app/public
+    depends_on:
+      - backend
+    networks:
+      - pass-network
+
+volumes:
+  postgres_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  pass-network:
+    driver: bridge
