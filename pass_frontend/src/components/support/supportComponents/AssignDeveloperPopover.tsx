@@ -35,8 +35,8 @@ export const AssignUserPopover: React.FC<AssignUserPopoverProps> = ({
       setLoading(true);
       try {
         const resp = await api.get("/users");
-        const users = resp.data.items as any[];
-        if (users) {
+        const users = (Array.isArray(resp.data) ? resp.data : resp.data.items || []) as any[];
+        if (users && users.length > 0) {
           console.log("Fetched users:", users);
           const devs = users
             .filter((u) => u.role === "DEVELOPER")
