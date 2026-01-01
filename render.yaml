@@ -1,0 +1,54 @@
+services:
+  # 1. MySQL Database (Docker)
+  # Render doesn't have Managed MySQL, so we deploy it as a Service.
+  - type: pserv # Private Service (not exposed to public internet, consistent with a DB)
+    name: pass-mysql-db
+    runtime: image
+    image: mysql:8.0
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: pass_db
+      - key: MYSQL_USER
+        value: pass_user
+      - key: MYSQL_PASSWORD
+        value: pass_password
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10 # Adjust size as needed
+
+  # 2. Backend API
+  - type: web
+    name: pass-backend-api
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: pass_backend/Dockerfile
+    envVars:
+      - key: PORT
+        value: 3333
+      - key: DATABASE_HOST
+        fromService:
+          type: pserv
+          name: pass-mysql-db
+          property: host
+      - key: DATABASE_PORT
+        value: 3306
+      - key: DATABASE_USER
+        value: pass_user
+      - key: DATABASE_PASSWORD
+        value: pass_password
+      - key: DATABASE_NAME
+        value: pass_db
+      # Using the external MinIO user provided
+      - key: MINIO_ENDPOINT
+        value: minio-latest-q46m.onrender.com
+      - key: MINIO_PORT
+        value: 443 # HTTPS standard port
+      - key: MINIO_USE_SSL
+        value: true
+      - key: MINIO_ACCESS_KEY
+        sync: false # User will input this in dashboard
+      - key: MINIO_SECRET_KEY
+        sync: false # User will input this in dashboard

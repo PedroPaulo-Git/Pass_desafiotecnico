@@ -1,47 +1,31 @@
-# Backend Dockerfile - Production
-FROM node:24-alpine AS base
-RUN apk add --no-cache libc6-compat
+# Backend Production Dockerfile
+FROM node:20-alpine AS builder
 
-# Build schemas
-FROM base AS schemas
-WORKDIR /pass_schemas
-COPY pass_schemas/package*.json ./
-COPY pass_schemas/tsconfig.json ./
-COPY pass_schemas/src ./src
-RUN npm install && npm run build
+WORKDIR /app
+
+# Copy dependency definitions
+COPY pass_backend/package*.json ./pass_backend/
+COPY pass_schemas ./pass_schemas/
 
 # Install dependencies
-FROM base AS deps
-WORKDIR /app
-COPY pass_backend/package*.json ./
-COPY --from=schemas /pass_schemas /pass_schemas
-RUN npm ci --only=production
+WORKDIR /app/pass_backend
+RUN npm ci
 
-# Build stage
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=schemas /pass_schemas /pass_schemas
-COPY pass_backend/package*.json ./
-COPY pass_backend/tsconfig.json ./
-COPY pass_backend/prisma ./prisma
-COPY pass_backend/src ./src
+# Copy source code
+COPY pass_backend .
 
-RUN npx prisma generate
+# Build
 RUN npm run build
 
-# Production stage
-FROM base AS runner
+# --- Production Stage ---
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
-COPY --from=schemas /pass_schemas /pass_schemas
+COPY --from=builder /app/pass_backend/dist ./dist
+COPY --from=builder /app/pass_backend/package*.json ./
+COPY --from=builder /app/pass_backend/node_modules ./node_modules
 
 EXPOSE 3333
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["npm", "run", "start:prod"]

@@ -1,0 +1,112 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: pass-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pass_db
+      MYSQL_USER: pass_user
+      MYSQL_PASSWORD: pass_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pass-network
+
+  # MinIO Storage
+  minio:
+    image: minio/minio:latest
+    container_name: pass-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - pass-network
+
+  # Backend API (Development)
+  backend:
+    build:
+      context: .
+      dockerfile: ./pass_backend/Dockerfile.dev
+    container_name: pass-backend
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    environment:
+      # Update to MySQL connection string
+      DATABASE_URL: "mysql://pass_user:pass_password@mysql:3306/pass_db"
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_USER: pass_user
+      DATABASE_PASSWORD: pass_password
+      DATABASE_NAME: pass_db
+      PORT: 3333
+      NODE_ENV: development
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BUCKET: pass-vehicles
+      MINIO_BUCKET_HELPDESK: helpdesk
+      MINIO_USE_SSL: false
+    volumes:
+      - ./pass_backend/src:/app/src
+      - ./pass_backend/prisma:/app/prisma
+      - ./pass_schemas:/schemas
+    depends_on:
+      mysql:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - pass-network
+
+  # Frontend (Development)
+  frontend:
+    build:
+      context: .
+      dockerfile: ./pass_frontend/Dockerfile.dev
+    container_name: pass-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3333
+      NODE_ENV: development
+    volumes:
+      - ./pass_frontend/src:/app/src
+      - ./pass_frontend/public:/app/public
+    depends_on:
+      - backend
+    networks:
+      - pass-network
+
+volumes:
+  mysql_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  pass-network:
+    driver: bridge
