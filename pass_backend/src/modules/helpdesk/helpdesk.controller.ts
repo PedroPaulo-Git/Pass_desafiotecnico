@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Put, Param, Delete, Query, ParseUUIDPipe, 
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { HelpdeskService } from './helpdesk.service';
 import { CreateHelpdeskDto, UpdateHelpdeskDto } from './dto/helpdesk.dto';
+import { CreateMessageDto, MessageResponseDto } from './dto/message.dto';
 
 @ApiTags('helpdesk')
 @Controller('helpdesk')
@@ -45,15 +46,17 @@ export class HelpdeskController {
 
   @Post(':id/messages')
   @ApiOperation({ summary: 'Send message to ticket' })
+  @ApiResponse({ status: 201, description: 'Message sent successfully', type: MessageResponseDto })
   createMessage(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() messageData: any,
+    @Body(ValidationPipe) createMessageDto: CreateMessageDto,
   ) {
-    return this.helpdeskService.createMessage(id, messageData);
+    return this.helpdeskService.createMessage(id, createMessageDto);
   }
 
   @Get(':id/messages')
   @ApiOperation({ summary: 'List ticket messages' })
+  @ApiResponse({ status: 200, description: 'List of messages', type: [MessageResponseDto] })
   findAllMessages(@Param('id', ParseUUIDPipe) id: string) {
     return this.helpdeskService.findAllMessages(id);
   }

@@ -8,6 +8,7 @@ import { IncidentsModule } from './modules/incidents/incidents.module';
 import { HelpdeskModule } from './modules/helpdesk/helpdesk.module';
 import { VehicleDocumentsModule } from './modules/vehicle-documents/vehicle-documents.module';
 import { MinioModule } from './modules/minio/minio.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -15,18 +16,6 @@ import { AppController } from './app.controller';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   url: process.env.DATABASE_URL,
-    //   host: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_HOST || 'localhost'),
-    //   port: process.env.DATABASE_URL ? undefined : (parseInt(process.env.DATABASE_PORT, 10) || 5432),
-    //   username: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_USER || 'pass_user'),
-    //   password: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_PASSWORD || 'pass_password'),
-    //   database: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_NAME || 'pass_db'),
-    //   entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    //   synchronize: true, // Auto-create tables (dev only)
-    //   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    // }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -55,6 +44,7 @@ import { AppController } from './app.controller';
     HelpdeskModule,
     VehicleDocumentsModule,
     MinioModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [],

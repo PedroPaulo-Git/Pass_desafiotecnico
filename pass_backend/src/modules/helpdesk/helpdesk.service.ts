@@ -6,6 +6,7 @@ import { User } from '../users/user.entity';
 import { CreateHelpdeskDto, UpdateHelpdeskDto } from './dto/helpdesk.dto';
 import { HelpdeskStatus, UserRole } from '../../common/enums';
 import { MinioService } from '../minio/minio.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
@@ -17,6 +18,7 @@ export class HelpdeskService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private minioService: MinioService,
+    private notificationsGateway: NotificationsGateway,
   ) {}
 
   async create(createHelpdeskDto: CreateHelpdeskDto): Promise<Helpdesk> {
@@ -98,7 +100,12 @@ export class HelpdeskService {
       lastMessageAt: new Date(),
     });
 
-    return this.helpdeskRepository.save(helpdesk);
+    const savedTicket = await this.helpdeskRepository.save(helpdesk);
+
+    // 7. Notify Admins and Developers
+    this.notificationsGateway.emitToSupport('ticket:created', savedTicket);
+
+    return savedTicket;
   }
 
   async findAll(query: any): Promise<{ data: Helpdesk[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
@@ -165,7 +172,12 @@ export class HelpdeskService {
     }
 
     this.helpdeskRepository.merge(helpdesk, updateHelpdeskDto);
-    return this.helpdeskRepository.save(helpdesk);
+    const updatedTicket = await this.helpdeskRepository.save(helpdesk);
+
+    // Notify client about status/priority/assignment changes
+    this.notificationsGateway.emitToUser(updatedTicket.clientId, 'ticket:updated', updatedTicket);
+
+    return updatedTicket;
   }
 
   async remove(id: string): Promise<void> {
@@ -180,28 +192,33 @@ export class HelpdeskService {
 
   // --- Message Handling ---
 
-  async createMessage(helpdeskId: string, messageData: any) {
+  async createMessage(helpdeskId: string, createMessageDto: any) {
     const helpdesk = await this.findOne(helpdeskId);
     
     // Validate author
-    const author = await this.userRepository.findOne({ where: { id: messageData.authorId } });
+    const author = await this.userRepository.findOne({ where: { id: createMessageDto.authorId } });
     if (!author) throw new NotFoundException('Author not found');
 
     // Validate author role matches authorType
-    if (messageData.authorType === 'user' && author.role !== UserRole.CLIENT) {
-      throw new BadRequestException('Author type mismatch: expected CLIENT role');
+    // Note: User can be CLIENT (user) or ADMIN/DEVELOPER (support)
+    if (createMessageDto.authorType === 'user' && author.role !== UserRole.CLIENT) {
+      throw new BadRequestException('Author type mismatch: expected CLIENT role for user type');
     }
-    if (messageData.authorType === 'support' && author.role !== UserRole.DEVELOPER) {
-      throw new BadRequestException('Author type mismatch: expected DEVELOPER role');
+    if (createMessageDto.authorType === 'support' && author.role === UserRole.CLIENT) {
+      throw new BadRequestException('Author type mismatch: support type cannot be a CLIENT');
     }
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileName = `${timestamp}_${messageData.authorType}_${messageData.authorId}.json`;
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '-');
+    const fileName = `${timestamp}_${createMessageDto.authorType}_${createMessageDto.authorId}.json`;
     const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
 
     const completeMessage = {
-      ...messageData,
-      createdAt: new Date().toISOString(),
+      AuthorId: createMessageDto.authorId,
+      AuthorType: createMessageDto.authorType,
+      Message: createMessageDto.message,
+      CreatedAt: now.toISOString(),
+      Attachments: createMessageDto.attachments || [],
     };
 
     try {
@@ -212,8 +229,23 @@ export class HelpdeskService {
         ContentType: 'application/json',
       }));
 
-      await this.helpdeskRepository.update(helpdeskId, { lastMessageAt: new Date() });
-      return { message: 'Message sent successfully', fileName };
+      await this.helpdeskRepository.update(helpdeskId, { lastMessageAt: now });
+
+      // Notify the other party
+      const notificationData = {
+        helpdeskId,
+        message: completeMessage,
+        ticketNumber: helpdesk.ticketNumber,
+        authorName: author.name,
+      };
+
+      if (createMessageDto.authorType === 'user') {
+        this.notificationsGateway.emitToSupport('message:new', notificationData);
+      } else {
+        this.notificationsGateway.emitToUser(helpdesk.clientId, 'message:new', notificationData);
+      }
+
+      return { message: 'Message sent successfully', fileName, data: completeMessage };
     } catch (error) {
       throw new InternalServerErrorException(`Failed to save message: ${error.message}`);
     }
@@ -223,27 +255,21 @@ export class HelpdeskService {
     const helpdesk = await this.findOne(helpdeskId);
     const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
     
-    // Try different prefix formats for backward compatibility (legacy logic)
-    const prefixes = [
-      `${helpdesk.bucketPath}/messages/`,
-      `${helpdesk.bucketPath.replace(/^\/+/, '')}/messages/`,
-    ];
+    const prefix = `${helpdesk.bucketPath}/messages/`.replace(/^\/+/, '');
 
     let contents = [];
-    for (const prefix of prefixes) {
-      try {
-        const listCommand = new ListObjectsV2Command({
-          Bucket: bucketName,
-          Prefix: prefix,
-        });
-        const response = await this.minioService.client.send(listCommand);
-        if (response.Contents && response.Contents.length > 0) {
-          contents = response.Contents;
-          break;
-        }
-      } catch (error) {
-        // Continue to next prefix
+    try {
+      const listCommand = new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: prefix,
+      });
+      const response = await this.minioService.client.send(listCommand);
+      if (response.Contents) {
+        contents = response.Contents;
       }
+    } catch (error) {
+      console.error('Error listing messages from MinIO:', error.message);
+      return [];
     }
 
     if (contents.length === 0) return [];
@@ -251,12 +277,18 @@ export class HelpdeskService {
     try {
       const messages = await Promise.all(
         contents
+          .filter(obj => obj.Key.endsWith('.json'))
           .sort((a, b) => a.Key!.localeCompare(b.Key!))
           .map(async (obj) => {
-            const getCommand = new GetObjectCommand({ Bucket: bucketName, Key: obj.Key });
-            const objResponse = await this.minioService.client.send(getCommand);
-            const body = await objResponse.Body?.transformToString();
-            return body ? JSON.parse(body) : null;
+            try {
+              const getCommand = new GetObjectCommand({ Bucket: bucketName, Key: obj.Key });
+              const objResponse = await this.minioService.client.send(getCommand);
+              const body = await objResponse.Body?.transformToString();
+              return body ? JSON.parse(body) : null;
+            } catch (e) {
+              console.error(`Error reading message file ${obj.Key}:`, e.message);
+              return null;
+            }
           })
       );
 
