@@ -27,42 +27,48 @@ export class MinioService implements OnModuleInit {
     const rawEndpoint = endpointEnv || 'localhost';
     const port = portEnv || '9000';
     
-    // Auto-detect SSL based on endpoint or explicit variable
+    // 1. Determine if it's a public Render URL vs Internal/Docker
     const isPublicRender = rawEndpoint.includes('.onrender.com');
-    const isLocal = rawEndpoint === 'localhost' || rawEndpoint === '127.0.0.1' || rawEndpoint === 'minio';
-    
-    // If it's a public Render URL, we MUST use SSL (true)
-    // If it's internal/local, we usually use SSL (false)
-    let useSsl = sslEnv === 'true';
-    if (isPublicRender && sslEnv !== 'false') useSsl = true;
-    if (isLocal) useSsl = false;
+    const isInternal = !rawEndpoint.includes('.') || 
+                       rawEndpoint === 'localhost' || 
+                       rawEndpoint === '127.0.0.1' || 
+                       rawEndpoint === 'minio';
+
+    // 2. Build the base protocol and hostname
+    let endpoint = rawEndpoint.trim().replace(/\/$/, "");
+    let finalUseSsl = sslEnv === 'true';
+
+    // Auto-fix for Render public domains: They MUST use HTTPS (301 redirect otherwise)
+    if (isPublicRender) {
+      finalUseSsl = true;
+      this.logger.log('Detecting public Render domain. Forcing HTTPS to avoid 301 redirects.');
+    }
+
+    if (!endpoint.startsWith('http://') && !endpoint.startsWith('https://')) {
+      const protocol = finalUseSsl ? 'https' : 'http';
+      endpoint = `${protocol}://${endpoint}`;
+
+      // 3. Port Logic:
+      // - Public Render domains DO NOT expose port 9000 externally. They use 443 (default).
+      // - Internal/Docker hostnames DO use port 9000.
+      if (isInternal) {
+        endpoint = `${endpoint}:${port}`;
+        this.logger.log(`Using INTERNAL strategy: ${endpoint}`);
+      } else {
+        // For public domains, only append if it's not standard 80/443
+        if (port !== '9000' && port !== '80' && port !== '443') {
+           endpoint = `${endpoint}:${port}`;
+        }
+        this.logger.log(`Using EXTERNAL strategy: ${endpoint}`);
+      }
+    }
 
     const accessKey = accessKeyEnv || rootUserEnv || 'minioadmin';
     const secretKey = secretKeyEnv || rootPassEnv || 'minioadmin123';
 
-    // Build endpoint URL
-    let endpoint = rawEndpoint.trim().replace(/\/$/, "");
-    
-    if (!endpoint.startsWith('http://') && !endpoint.startsWith('https://')) {
-      const protocol = useSsl ? 'https' : 'http';
-      endpoint = `${protocol}://${endpoint}`;
-
-      // Logic for Ports:
-      // 1. If public Render (.onrender.com), do NOT use port 9000. Use 443 (default for https).
-      // 2. If Internal (no dot) or Localhost, use the provided port (9000).
-      const isInternal = !rawEndpoint.includes('.');
-      
-      if (isInternal || isLocal) {
-        endpoint = `${endpoint}:${port}`;
-        this.logger.log(`Using INTERNAL/Local connection strategy for MinIO: ${endpoint}`);
-      } else {
-        this.logger.log(`Using EXTERNAL connection strategy for MinIO: ${endpoint}`);
-      }
-    }
-
     this.logger.log(`Final MinIO Client Endpoint: ${endpoint}`);
     this.logger.log(`MinIO AccessKey starts with: ${accessKey?.substring(0, 3)}...`);
-    this.logger.log(`MinIO Use SSL: ${useSsl}`);
+    this.logger.log(`MinIO Use SSL: ${finalUseSsl}`);
 
     this.s3Client = new S3Client({
       endpoint,
