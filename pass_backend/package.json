@@ -22,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",
+    "@nestjs/cli": "^11.0.14",
     "@nestjs/common": "^11.1.11",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.11",
@@ -34,8 +35,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.0",
-    "typeorm": "^0.3.28",
-    "@nestjs/cli": "^11.0.14"
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@nestjs/schematics": "^11.0.9",
