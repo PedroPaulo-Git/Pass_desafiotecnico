@@ -22,14 +22,23 @@ export class UsersService {
   }
 
   async authenticate(data: CreateUserDto): Promise<User> {
-    let user = await this.findByEmail(data.email);
-    
-    if (!user) {
-      user = this.usersRepository.create(data);
-      await this.usersRepository.save(user);
+    try {
+      let user = await this.findByEmail(data.email);
+
+      if (!user) {
+        user = this.usersRepository.create(data);
+        user = await this.usersRepository.save(user);
+      }
+
+      return user;
+    } catch (error: any) {
+      // Handle unique constraint violation (PostgreSQL code 23505)
+      if (error?.code === '23505') {
+        const user = await this.findByEmail(data.email);
+        if (user) return user;
+      }
+      throw error;
     }
-    
-    return user;
   }
 
   async findAll(): Promise<User[]> {
