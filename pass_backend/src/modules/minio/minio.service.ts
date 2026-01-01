@@ -91,30 +91,45 @@ export class MinioService implements OnModuleInit {
     this.logger.log('-----------------------------------');
   }
 
-  async ensureBucketExists(bucketName: string) {
-    try {
-      this.logger.debug(`[MINIO DEBUG] Sending HeadBucketCommand for: ${bucketName}`);
-      await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-      this.logger.log(`[MINIO SUCCESS] Bucket exists: ${bucketName}`);
-    } catch (error: any) {
-      this.logger.error(`[MINIO ERROR] Failed checking bucket "${bucketName}"`);
-      this.logger.error(`[MINIO ERROR] Name: ${error?.name}`);
-      this.logger.error(`[MINIO ERROR] Message: ${error?.message}`);
-      this.logger.error(`[MINIO ERROR] HTTP Status: ${error?.$metadata?.httpStatusCode}`);
-      
-      if (error?.name === 'NotFound' || error?.$metadata?.httpStatusCode === 404) {
-        try {
-          this.logger.log(`[MINIO] Bucket not found. Creating bucket: ${bucketName}`);
-          await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
-          this.logger.log(`[MINIO] Bucket created successfully: ${bucketName}`);
-        } catch (createError: any) {
-          this.logger.error(`[MINIO FATAL] Failed to create bucket ${bucketName}`);
-          this.logger.error(`[MINIO FATAL] Create Error: ${createError?.message}`);
+  async ensureBucketExists(bucketName: string, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        this.logger.debug(`[MINIO DEBUG] Attempt ${i + 1}/${retries}: Sending HeadBucketCommand for: ${bucketName}`);
+        await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+        this.logger.log(`[MINIO SUCCESS] Bucket exists: ${bucketName}`);
+        return; // Success, exit loop
+      } catch (error: any) {
+        const statusCode = error?.$metadata?.httpStatusCode;
+        
+        // If 404, we create it
+        if (error?.name === 'NotFound' || statusCode === 404) {
+          try {
+            this.logger.log(`[MINIO] Bucket not found. Creating bucket: ${bucketName}`);
+            await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
+            this.logger.log(`[MINIO] Bucket created successfully: ${bucketName}`);
+            return;
+          } catch (createError: any) {
+            this.logger.error(`[MINIO FATAL] Failed to create bucket ${bucketName}: ${createError?.message}`);
+            return; // Don't retry creation if it failed with something else
+          }
         }
-      } else {
-        if (error?.$metadata?.httpStatusCode === 502) {
-          this.logger.error(`[MINIO ADVICE] 502 Bad Gateway detected! This means the MinIO service at the endpoint is either down or not accepting requests on the expected port.`);
+
+        // If it's a "wake-up" candidate (502, 503, ETIMEDOUT, etc.)
+        const isRetryable = statusCode === 502 || statusCode === 503 || error?.code === 'ETIMEDOUT' || error?.code === 'ECONNREFUSED';
+        
+        if (isRetryable && i < retries - 1) {
+          this.logger.warn(`[MINIO RETRY] Service might be sleeping (Status ${statusCode}). Retrying in 5s... (${i + 1}/${retries})`);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue;
         }
+
+        this.logger.error(`[MINIO ERROR] Failed checking bucket "${bucketName}" after ${i + 1} attempts`);
+        this.logger.error(`[MINIO ERROR] Name: ${error?.name}, Status: ${statusCode}, Message: ${error?.message}`);
+        
+        if (statusCode === 502) {
+          this.logger.error(`[MINIO ADVICE] 502 Bad Gateway! Render might be waking up the service. Please try again in 30 seconds.`);
+        }
+        break; // Stop if not retryable or out of retries
       }
     }
   }
