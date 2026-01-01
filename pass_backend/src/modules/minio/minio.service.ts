@@ -8,32 +8,52 @@ export class MinioService implements OnModuleInit {
   private s3Client: S3Client;
 
   constructor(private configService: ConfigService) {
-    const rawEndpoint = this.configService.get<string>('MINIO_ENDPOINT') || 'minio';
+    const rawEndpoint = this.configService.get<string>('MINIO_ENDPOINT') || 'localhost';
     const port = this.configService.get<string>('MINIO_PORT') || '9000';
-    const useSsl = this.configService.get<string>('MINIO_USE_SSL') === 'true';
-    const accessKey = this.configService.get<string>('MINIO_ACCESS_KEY') || 'minioadmin';
-    const secretKey = this.configService.get<string>('MINIO_SECRET_KEY') || 'minioadmin123';
+    const useSsl = this.configService.get<string>('MINIO_USE_SSL') === 'true' || 
+                   this.configService.get<string>('MINIO_ENDPOINT')?.includes('onrender.com') ||
+                   false;
+    
+    const accessKey = this.configService.get<string>('MINIO_ACCESS_KEY') || 
+                      this.configService.get<string>('MINIO_ROOT_USER') || 
+                      'minioadmin';
+    const secretKey = this.configService.get<string>('MINIO_SECRET_KEY') || 
+                      this.configService.get<string>('MINIO_ROOT_PASSWORD') || 
+                      'minioadmin123';
 
     // Build endpoint URL correctly
-    let endpoint = rawEndpoint.replace(/\/$/, "");
-    if (!/^https?:\/\//i.test(endpoint)) {
-      endpoint = `${useSsl ? "https" : "http"}://${endpoint}`;
-      // Only append port if not present and no scheme was originally there
-      if (port && !endpoint.match(/:\d+$/)) {
+    let endpoint = rawEndpoint.trim().replace(/\/$/, "");
+    
+    const isPublicDomain = endpoint.includes('.') && 
+                           !endpoint.includes('localhost') && 
+                           !endpoint.includes('127.0.0.1');
+
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      // Use as provided if it's already a full URL
+      this.logger.debug(`Using absolute MinIO endpoint: ${endpoint}`);
+    } else {
+      // Automatically determine SSL for public domains (like .onrender.com)
+      const finalUseSsl = useSsl || isPublicDomain;
+      const protocol = finalUseSsl ? 'https' : 'http';
+      
+      endpoint = `${protocol}://${endpoint}`;
+
+      // Only append port if it's a local/internal service and port is provided
+      if (port && port !== '80' && port !== '443' && !isPublicDomain) {
         endpoint = `${endpoint}:${port}`;
       }
     }
 
-    this.logger.log(`Initializing MinIO client with endpoint: ${endpoint}`);
+    this.logger.log(`Final MinIO Client Endpoint: ${endpoint}`);
 
     this.s3Client = new S3Client({
       endpoint,
-      region: 'us-east-1',
+      region: this.configService.get<string>('MINIO_REGION') || 'us-east-1',
       credentials: {
         accessKeyId: accessKey,
         secretAccessKey: secretKey,
       },
-      forcePathStyle: true, // Required for MinIO
+      forcePathStyle: true,
     });
   }
 
