@@ -1,5 +1,5 @@
 import { Priority, Status } from "./types";
-import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle, Eye, UserCheck, FileText, Search, Clock, User } from "lucide-react";
+import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle, Eye, UserCheck, FileText, Search, Clock, User, CircleCheckBig } from "lucide-react";
 import { IoTimerOutline } from "react-icons/io5";
 
 
@@ -14,6 +14,15 @@ export const getPriorityStyles = (p: Priority) => {
       return "text-blue-400 border-blue-500/30 bg-blue-500/10";
     default:
       return "text-zinc-400";
+  }
+};
+
+export const getPriorityColor = (p: Priority): any => {
+  switch (p) {
+    case "Alta": return "red";
+    case "Média": return "amber";
+    case "Baixa": return "blue";
+    default: return "gray";
   }
 };
 
@@ -49,7 +58,7 @@ export const getCategoryIconAndColor = (category: string) => {
       };
     case "Visual":
       return {
-        icon: CheckCircle2,
+        icon: CircleCheckBig,
         className: "bg-green-500/10 border-green-500/20 text-green-500",
       };
     default:
@@ -99,7 +108,7 @@ export const getStatusIconAndColor = (status: Status) => {
       };
     case "Resolvido":
       return {
-        icon: CheckCircle2,
+        icon: CircleCheckBig,
         color: "text-emerald-400",
       };
     case "Fechado":
@@ -166,5 +175,17 @@ export const getStatusStyles = (s: Status) => {
       return "text-foreground/50 border-border bg-background line-through decoration-zinc-500";
     default:
       return "";
+  }
+};
+
+export const getStatusColor = (s: Status): any => {
+  switch (s) {
+    case "Aberto": return "amber";
+    case "Em Análise": return "blue";
+    case "Em Andamento": return "purple";
+    case "Aguardando Usuário": return "rose";
+    case "Resolvido": return "emerald";
+    case "Fechado": return "gray";
+    default: return "gray";
   }
 };

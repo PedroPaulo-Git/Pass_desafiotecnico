@@ -1,25 +1,23 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
-  AlertCircle,
-  Clock,
-  MessageSquare,
-  Paperclip,
-  User,
+  Mail,
+  Phone,
+  MapPin,
   Tag,
-  BarChart3,
-  UserCheck,
+  Calendar,
+  Check,
+  Copy,
+  User as UserIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { TicketData, Priority } from "../types";
-import { Badge } from "@/components/ui/badge";
-import { getPriorityStyles, getStatusStyles } from "../helpers";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface TicketInfoPopoverProps {
   children: React.ReactNode;
@@ -31,125 +29,162 @@ interface TicketInfoPopoverProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+const CopyButton = ({ value }: { value: string }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium cursor-pointer transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-muted hover:text-accent-foreground dark:bg-transparent dark:border-input dark:hover:bg-input/50 size-8 rounded-full opacity-0 group-hover:opacity-100"
+    >
+      <div className="relative">
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center transition-all duration-300 ease-in-out will-change-[transform,opacity,filter]",
+            copied
+              ? "blur-0 scale-100 opacity-100"
+              : "blur-xs scale-[0.25] opacity-0"
+          )}
+        >
+          <Check className="size-3.5" />
+        </div>
+        <div
+          className={cn(
+            "transition-[transform, opacity, filter] duration-300 ease-in-out will-change-[transform,opacity,filter]",
+            copied
+              ? "scale-100 opacity-0 blur-xs"
+              : "scale-100 opacity-100 blur-0"
+          )}
+        >
+          <Copy className="size-3.5" />
+        </div>
+      </div>
+    </button>
+  );
+};
+
 export const TicketInfoPopover: React.FC<TicketInfoPopoverProps> = ({
   children,
   data,
-  effectivePriority,
-  IconComponent,
-  iconClass,
   open,
   onOpenChange,
 }) => {
+  const userName = data.user?.name || data.clientName;
+  const userEmail = data.user?.email || "sem.email@config.com";
+  const userPhone = data.user?.telefone || "+55 11 00000-0000";
+  const userNationality = data.user?.nationality || "Brasil";
+  const initials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const formattedDate =
+    data.createdAt instanceof Date
+      ? data.createdAt.toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : new Date(data.createdAt).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
 
-      <PopoverContent className="w-96 rounded-2xl bg-card" align="start">
-        <div className="grid p-4">
-          <div className="flex items-center justify-between border-b border-border/30">
-            <div className="flex flex-col gap-0.5 font-semibold leading-none  pb-3">
-              <span className="flex gap-2">
-                <p className="text-md">Detalhes do Ticket </p>
-                <Separator orientation="vertical" className="mx-0.5" />
-                <p className="text-xs text-muted-foreground/80">
-                  {data.ticketNumber}
-                </p>
-              </span>
-
-              <p className="flex items-center gap-1 text-xs text-muted-foreground/80">
-                {" "}
-                <Clock className="w-3 h-3 text-muted-foreground/70" />
-                   {data.createdAt instanceof Date
-                    ? data.createdAt.toLocaleDateString("pt-BR")
-                    : new Date(data.createdAt).toLocaleDateString("pt-BR")}
+      <PopoverContent
+        className="bg-popover text-popover-foreground z-50 shadow-md outline-hidden rounded-[12px] w-[310px]! shadow-custom! dark:border border-0 p-0 dark:shadow-lg! overflow-hidden"
+        align="start"
+      >
+        {/* Header Section */}
+        <div className="flex flex-col gap-3 py-4 px-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="size-10">
+              <AvatarFallback className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-medium">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground truncate">
+                {userName}
+              </h3>
+              <p className="text-[13px]! text-muted-foreground truncate">
+                {userEmail}
               </p>
             </div>
           </div>
+        </div>
 
-          <div className="flex gap-4 rounded-xl pt-3">
-            <div className="flex gap-4 p-4 rounded-xl bg-muted/20 border border-border/20">
-              <div className="flex flex-col space-y-2 w-full">
-                <div className="space-y-1.5 divide-y">
-                  <div className="flex flex-col items-left gap-2 group w-full py-2.5 text-left">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-muted-foreground/70" />
-                      <span className="text-sm text-foreground capitalize">
-                        Cliente:
-                      </span>
-                      <span className="text-sm text-muted-foreground/70">
-                        {data.clientName}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-left gap-2 group w-full py-2.5 text-left">
-                    <div className="flex items-center gap-2">
-                      <Tag className="w-4 h-4 text-muted-foreground/70" />
-                      <span className="text-sm text-foreground capitalize">
-                        Categoria:
-                      </span>
-                      <span className="text-sm text-muted-foreground/70">
-                        {data.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-left gap-2 group w-full py-2.5 text-left">
-                    <div className="flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-muted-foreground/70" />
-                      <span className="text-sm text-foreground capitalize">
-                        Responsável:
-                      </span>
-                      <span className="text-sm text-muted-foreground/70">
-                        {data.assignedTo
-                          ? data.assignedTo.name
-                          : "Não atribuído"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-left gap-2 group w-full py-2.5 text-left">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-muted-foreground/70" />
-                      <span className="text-sm text-foreground">
-                        Prioridade:
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={`text-[11px] px-2 h-6 border rounded-md ${getPriorityStyles(
-                          effectivePriority
-                        )}`}
-                      >
-                        {effectivePriority}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={`text-[11px] px-2 h-6 border rounded-md ${getStatusStyles(
-                          data.status
-                        )}`}
-                      >
-                        {data.status}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm py-2.5 text-center justify-center">
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="w-4 h-4 text-muted-foreground/70" />
-                      <span className="text-sm text-muted-foreground/70">
-                        {data.messageCount} mensagens
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Paperclip className="w-4 h-4 text-muted-foreground/70" />
-                      <span className="text-sm text-muted-foreground/70">
-                        {data.attachmentCount} anexos
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* Details Box */}
+        <div className="divide-y m-4 mt-0 rounded-lg px-4 bg-[#FAFAFA] dark:bg-[#1e1e1e]">
+          {/* Email Row */}
+          <div className="group flex w-full py-2.5 items-center justify-between text-sm">
+            <div className="flex items-center gap-3 min-w-0">
+              <Mail className="size-4 text-muted-foreground/80 shrink-0" />
+              <p className="text-[13px] font-normal text-muted-foreground truncate">
+                {userEmail}
+              </p>
             </div>
+            <CopyButton value={userEmail} />
+          </div>
+
+          {/* Phone Row */}
+          <div className="group flex w-full py-2.5 items-center justify-between text-sm">
+            <div className="flex items-center gap-3 min-w-0">
+              <Phone className="size-4 text-muted-foreground/80 shrink-0" />
+              <p className="text-[13px] font-normal text-muted-foreground truncate">
+                {userPhone}
+              </p>
+            </div>
+            <CopyButton value={userPhone} />
+          </div>
+
+          {/* Nationality/Location Row */}
+          <div className="group flex w-full py-2.5 items-center justify-between text-sm">
+            <div className="flex items-center gap-3 min-w-0">
+              <MapPin className="size-4 text-muted-foreground/80 shrink-0" />
+              <p className="text-[13px] font-normal text-muted-foreground truncate">
+                {userNationality}
+              </p>
+            </div>
+            <CopyButton value={userNationality} />
+          </div>
+
+          {/* Category/Tag Row */}
+          <div className="group flex w-full py-2.5 items-center justify-between text-sm">
+            <div className="flex items-center gap-3 min-w-0">
+              <Tag className="size-4 text-muted-foreground/80 shrink-0" />
+              <p className="text-[13px] font-normal text-muted-foreground truncate">
+                {data.category}
+              </p>
+            </div>
+            <CopyButton value={data.category as string} />
+          </div>
+
+          {/* Date Row */}
+          <div className="group flex w-full py-2.5 items-center justify-between text-sm">
+            <div className="flex items-center gap-3 min-w-0">
+              <Calendar className="size-4 text-muted-foreground/80 shrink-0" />
+              <p className="text-[13px] font-normal text-muted-foreground truncate">
+                {formattedDate}
+              </p>
+            </div>
+            <CopyButton value={formattedDate} />
           </div>
         </div>
       </PopoverContent>
