@@ -131,7 +131,13 @@ export const TicketRow: React.FC<TicketRowProps> = ({
     <div
       className={cn(
         "group relative p-4 border border-border/50 rounded-lg hover:border-border transition-all duration-200 mb-3 flex flex-col h-full",
-        viewMode === "lanes" && "cursor-grab",
+        viewMode === "lanes" &&
+          cn(
+            "cursor-grab border-border",
+            effectivePriority === "Alta" && "bg-red-500/10",
+            effectivePriority === "Média" && "bg-orange-500/10",
+            effectivePriority === "Baixa" && "bg-blue-500/10"
+          ),
         viewMode === "grid" && "cursor-pointer"
       )}
       onClick={() => {
@@ -178,7 +184,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             >
               <div
                 className={cn(
-                  "flex items-center cursor-pointer my-auto gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark ",
+                  "flex items-center cursor-pointer my-auto gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] my-auto py-[3px] dark:hover:shadow-custom-dark ",
                   viewMode === "list" ? "max-w-[400px]" : "max-w-none"
                 )}
                 role="button"
