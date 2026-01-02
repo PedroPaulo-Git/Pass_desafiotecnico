@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
-import { LayoutGrid, List, Columns, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "../ui/separator";
+import { LayoutGrid, List, Columns, Bot, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -15,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ToolbarProps {
   statusFilter: string;
@@ -43,238 +43,259 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onClearFilters,
   hasActiveFilters,
 }) => {
-  const viewModeLabels = {
-    list: "Lista",
-    grid: "Grade",
-    lanes: "Faixas",
-  };
-
   return (
-    <div className="flex justify-center mb-6">
-      <div className="flex items-center gap-2 w-full sm:w-auto ">
-        {/* Área de Controles (Visualização + Limpar Filtros) */}
-        <div className="flex items-center justify-start gap-3">
-          <span className="text-foreground/90 text-sm whitespace-nowrap">
-            Visualização:{" "}
-            <span className="text-foreground/50 font-medium ml-1 text-sm">
-              {viewModeLabels[viewMode]}
-            </span>
-          </span>
+    <div className="flex justify-center mb-8">
+      <motion.div
+        layout
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="flex flex-row items-center gap-2 p-1 bg-background/50 backdrop-blur-md rounded-xl"
+        style={{ transformOrigin: "50% 50% 0px" }}
+      >
+        {/* GRUPO: AÇÕES */}
+        <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap ml-2">
+          Ações
+        </label>
+        <div className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 hover:bg-background rounded-md text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+                >
+                  <Bot className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Automações AI</p>
+              </TooltipContent>
+            </Tooltip>
 
-          <div className="flex items-center gap-2">
-            {/* Botões de View Mode */}
-            <div className="flex bg-background rounded-md border border-border p-0.5">
-              <Button
-                variant={viewMode === "list" ? "secondary" : "ghost"}
-                size="icon"
-                className={`h-7 w-7 ${
-                  viewMode === "list"
-                    ? "bg-purple-500 text-white shadow-sm hover:text-gray-100 hover:bg-purple-600"
-                    : ""
-                }`}
-                onClick={() => setViewMode("list")}
-              >
-                <List className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "grid" ? "secondary" : "ghost"}
-                size="icon"
-                className={`h-7 w-7 ${
-                  viewMode === "grid"
-                    ? "bg-purple-500 text-white shadow-sm hover:text-gray-100 hover:bg-purple-600"
-                    : ""
-                }`}
-                onClick={() => setViewMode("grid")}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "lanes" ? "secondary" : "ghost"}
-                size="icon"
-                className={`h-7 w-7 ${
-                  viewMode === "lanes"
-                    ? "bg-purple-500 text-white shadow-sm hover:text-gray-100 hover:bg-purple-600"
-                    : ""
-                }`}
-                onClick={() => setViewMode("lanes")}
-              >
-                <Columns className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-          {/* {hasActiveFilters && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    onClick={onClearFilters}
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                  >
-                    <PiFunnelX className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Limpar filtros ativos</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )} */}
-          {/* <Separator orientation="vertical" className="h-4 mx-1" /> */}
+            <div className="shrink-0 h-4 w-px bg-border/50 mx-0.5" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
+                    viewMode === "list"
+                      ? "bg-background text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background"
+                  )}
+                >
+                  <List className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Lista</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
+                    viewMode === "grid"
+                      ? "bg-background text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background"
+                  )}
+                >
+                  <LayoutGrid className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Grade</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("lanes")}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
+                    viewMode === "lanes"
+                      ? "bg-background text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background"
+                  )}
+                >
+                  <Columns className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Kanban</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
-        <div className="flex ">
-          {/* Current Filter Button */}
-          <Button
-            variant="outline"
-            className={`h-9 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap border-none rounded-r-none ${
-              statusFilter === "Todos"
-                ? "bg-muted/50 text-muted-foreground hover:text-foreground"
-                : statusFilter === "Abertos"
-                ? "bg-yellow-500/10 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-500/20"
-                : statusFilter === "Em Análise"
-                ? "bg-blue-500/10 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-500/20"
-                : statusFilter === "Em Andamento"
-                ? "bg-purple-500/10 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-500/20"
-                : statusFilter === "Aguardando Usuário"
-                ? "bg-orange-500/10 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-500/20"
-                : statusFilter === "Resolvidos"
-                ? "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-500/20"
-                : "bg-gray-500/10 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border border-gray-500/20"
-            } shadow-sm transition-all`}
+
+        {/* GRUPO: TIPO */}
+        <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap">
+          Tipo
+        </label>
+        <div
+          className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6"
+          role="tablist"
+        >
+          <button
+            type="button"
+            className="px-6 py-2 text-sm font-medium rounded-md transition-all bg-purple-500 text-white shadow-sm"
+            role="tab"
+            aria-selected="true"
           >
-            {statusFilter}{" "}
-            <span className="ml-2 bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-              {statusFilter === "Todos"
-                ? statusCounts?.total
-                : statusFilter === "Abertos"
-                ? statusCounts.abertos
-                : statusFilter === "Em Análise"
-                ? statusCounts.emAnalise
-                : statusFilter === "Em Andamento"
-                ? statusCounts.andamento
-                : statusFilter === "Aguardando Usuário"
-                ? statusCounts.aguardandoUsuario
-                : statusFilter === "Resolvidos"
-                ? statusCounts.resolvidos
-                : statusCounts.fechados}
-            </span>
-          </Button>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 bg-muted/50 shadow-sm border-0 border-l border-l-border! rounded-l-none "
-              >
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56">
-              <div className="flex flex-col gap-1 p-1">
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Todos")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Todos"
-                      ? "shadow-sm bg-muted text-foreground"
-                      : " text-muted-foreground hover:bg-muted/50"
-                  } transition-all`}
-                >
-                  Todos{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts?.total}
-                  </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Abertos")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Abertos"
-                      ? "shadow-sm hover:bg-yellow-500/10 hover:text-yellow-700 bg-yellow-500/10 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-500/20"
-                      : "  text-muted-foreground hover:bg-yellow-500/5 hover:text-yellow-600 border border-transparent"
-                  } transition-all`}
-                >
-                  Abertos{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts.abertos}
-                  </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Em Análise")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Em Análise"
-                      ? "bg-blue-500/10 hover:bg-blue-500/10 hover:text-blue-600 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-500/20"
-                      : "text-muted-foreground hover:bg-blue-500/5 hover:text-blue-600 border border-transparent"
-                  } transition-all`}
-                >
-                  Em Análise{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts.emAnalise}
-                  </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Em Andamento")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Em Andamento"
-                      ? "bg-purple-500/10 hover:bg-purple-500/10 hover:text-purple-600 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-500/20"
-                      : "text-muted-foreground hover:bg-purple-500/5 hover:text-purple-600 border border-transparent"
-                  } transition-all`}
-                >
-                  Em Andamento{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts.andamento}
-                  </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Aguardando Usuário")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Aguardando Usuário"
-                      ? "bg-orange-500/10 hover:bg-orange-500/10 hover:text-orange-600 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-500/20"
-                      : "text-muted-foreground hover:bg-orange-500/5 hover:text-orange-600 border border-transparent"
-                  } transition-all`}
-                >
-                  Aguardando Usuário{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts.aguardandoUsuario}
-                  </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Resolvidos")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Resolvidos"
-                      ? "bg-emerald-500/10 hover:bg-emerald-500/10 hover:text-emerald-600 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-500/20"
-                      : "text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 border border-transparent"
-                  } transition-all`}
-                >
-                  Resolvidos{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts.resolvidos}
-                  </span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setStatusFilter("Fechados")}
-                  className={`justify-start h-8 text-sm font-medium rounded-md px-3 py-1.5 whitespace-nowrap ${
-                    statusFilter === "Fechados"
-                      ? "bg-gray-500/10 hover:bg-gray-500/10 hover:text-gray-600 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border border-gray-500/20"
-                      : "text-muted-foreground hover:bg-gray-500/5 hover:text-gray-600 border border-transparent"
-                  } transition-all`}
-                >
-                  Fechados{" "}
-                  <span className="ml-auto bg-border px-2 py-1 rounded-full text-[11px] min-w-6 text-center">
-                    {statusCounts.fechados}
-                  </span>
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+            Journey
+          </button>
+          <button
+            type="button"
+            className="px-6 py-2 text-sm font-medium rounded-md transition-all text-muted-foreground hover:text-foreground"
+            role="tab"
+            aria-selected="false"
+          >
+            Service
+          </button>
         </div>
-      </div>
+
+        {/* GRUPO: STATUS */}
+        <div className="flex flex-row items-center gap-2 py-2 px-6">
+          <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap">
+            Status
+          </label>
+          <div
+            className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9"
+            role="tablist"
+          >
+            <button
+              type="button"
+              onClick={() => setStatusFilter("Todos")}
+              className={cn(
+                "px-6 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap cursor-pointer",
+                statusFilter === "Todos"
+                  ? "bg-purple-500 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              All
+            </button>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "px-6 py-2 text-sm font-medium rounded-md transition-all inline-flex items-center gap-2 justify-center whitespace-nowrap cursor-pointer",
+                    statusFilter !== "Todos"
+                      ? "bg-purple-500 text-white shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={statusFilter}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {statusFilter === "Todos" ? "Filtrar" : statusFilter}
+                    </motion.span>
+                  </AnimatePresence>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent variant="toolbar" align="start" className="w-10">
+                <div
+                  className="space-y-1"
+                  role="radiogroup"
+                  aria-label="Select status"
+                >
+                  {[
+                    {
+                      label: "All",
+                      count: statusCounts?.total,
+                      value: "Todos",
+                    },
+                    {
+                      label: "Abertos",
+                      count: statusCounts.abertos,
+                      value: "Abertos",
+                    },
+                    {
+                      label: "Em Análise",
+                      count: statusCounts.emAnalise,
+                      value: "Em Análise",
+                    },
+                    {
+                      label: "Em Andamento",
+                      count: statusCounts.andamento,
+                      value: "Em Andamento",
+                    },
+                    {
+                      label: "Aguardando Usuário",
+                      count: statusCounts.aguardandoUsuario,
+                      value: "Aguardando Usuário",
+                    },
+                    {
+                      label: "Resolvidos",
+                      count: statusCounts.resolvidos,
+                      value: "Resolvidos",
+                    },
+                    {
+                      label: "Fechados",
+                      count: statusCounts.fechados,
+                      value: "Fechados",
+                    },
+                  ].map((item) => (
+                    <button
+                      key={item.value}
+                      onClick={() => setStatusFilter(item.value)}
+                      role="radio"
+                      aria-checked={statusFilter === item.value}
+                      className={cn(
+                        "w-full px-2 py-1.5 text-sm rounded-md text-left transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none flex items-center justify-between font-normal",
+                        statusFilter === item.value
+                          ? "bg-accent text-accent-foreground font-medium"
+                          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {item.label}
+                      {item.count !== undefined && (
+                        <span className="text-[11px] opacity-70">
+                          {item.count}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* LIMPAR FILTROS */}
+        {hasActiveFilters && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={onClearFilters}
+                  className="mr-2 inline-flex items-center justify-center h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors rounded-md outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                >
+                  <PiFunnelX className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Limpar Filtros</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </motion.div>
     </div>
   );
 };

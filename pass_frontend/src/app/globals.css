@@ -16,11 +16,12 @@
     display: none;
   }
 
-  /* Aumentar o peso de todos os text-sm */
+  /* Removido override global que quebrava o visual premium dos componentes
   .text-sm {
     font-weight: 550 !important;
     font-size: 13px !important;
   }
+  */
 }
 /* Theme transition layers */
 .theme-layer-base {
@@ -41,7 +42,7 @@
 
 /* Overlay herda as variáveis do tema via classe .light ou .dark */
 .theme-layer-overlay.light {
---radius: 0.625rem;
+  --radius: 0.625rem;
   --background: #fff;
   --foreground: #0a0a0a;
   --card: #fff;
@@ -77,38 +78,38 @@
 }
 
 .theme-layer-overlay.dark {
-     --background: #0a0a0a;
-    --foreground: #fafafa;
-    --card: #171717;
-    --card-foreground: #fafafa;
-    --popover: #171717;
-    --popover-foreground: #fafafa;
-    --primary: #e5e5e5;
-    --primary-foreground: #171717;
-    --secondary: #262626;
-    --secondary-foreground: #fafafa;
-    --muted: #262626;
-    --muted-foreground: #a1a1a1;
-    --accent: #262626;
-    --accent-foreground: #fafafa;
-    --destructive: #ff6568;
-    --border: #ffffff1a;
-    --input: #ffffff26;
-    --ring: #737373;
-    --chart-1: #1447e6;
-    --chart-2: #00bb7f;
-    --chart-3: #f99c00;
-    --chart-4: #ac4bff;
-    --chart-5: #ff2357;
-    --sidebar: #171717;
-    --sidebar-foreground: #fafafa;
-    --sidebar-primary: #1447e6;
-    --sidebar-primary-foreground: #fafafa;
-    --sidebar-accent: #262626;
-    --sidebar-accent-foreground: #fafafa;
-    --sidebar-border: #ffffff1a;
-    --sidebar-ring: #737373;
-    --scrollbar: #2f2f2f;
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --popover: #171717;
+  --popover-foreground: #fafafa;
+  --primary: #e5e5e5;
+  --primary-foreground: #171717;
+  --secondary: #262626;
+  --secondary-foreground: #fafafa;
+  --muted: #262626;
+  --muted-foreground: #a1a1a1;
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+  --destructive: #ff6568;
+  --border: #ffffff1a;
+  --input: #ffffff26;
+  --ring: #737373;
+  --chart-1: #1447e6;
+  --chart-2: #00bb7f;
+  --chart-3: #f99c00;
+  --chart-4: #ac4bff;
+  --chart-5: #ff2357;
+  --sidebar: #171717;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #1447e6;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #262626;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #ffffff1a;
+  --sidebar-ring: #737373;
+  --scrollbar: #2f2f2f;
 }
 
 /* Força todos os children do overlay a usar pointer-events */
@@ -152,38 +153,38 @@
   --scrollbar: #e5e5e5;
 }
 .dark {
-    --background: #0a0a0a;
-    --foreground: #fafafa;
-    --card: #171717;
-    --card-foreground: #fafafa;
-    --popover: #171717;
-    --popover-foreground: #fafafa;
-    --primary: #e5e5e5;
-    --primary-foreground: #171717;
-    --secondary: #262626;
-    --secondary-foreground: #fafafa;
-    --muted: #262626;
-    --muted-foreground: #a1a1a1;
-    --accent: #262626;
-    --accent-foreground: #fafafa;
-    --destructive: #ff6568;
-    --border: #ffffff1a;
-    --input: #ffffff26;
-    --ring: #737373;
-    --chart-1: #1447e6;
-    --chart-2: #00bb7f;
-    --chart-3: #f99c00;
-    --chart-4: #ac4bff;
-    --chart-5: #ff2357;
-    --sidebar: #171717;
-    --sidebar-foreground: #fafafa;
-    --sidebar-primary: #1447e6;
-    --sidebar-primary-foreground: #fafafa;
-    --sidebar-accent: #262626;
-    --sidebar-accent-foreground: #fafafa;
-    --sidebar-border: #ffffff1a;
-    --sidebar-ring: #737373;
-    --scrollbar: #2f2f2f;
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --popover: #171717;
+  --popover-foreground: #fafafa;
+  --primary: #e5e5e5;
+  --primary-foreground: #171717;
+  --secondary: #262626;
+  --secondary-foreground: #fafafa;
+  --muted: #262626;
+  --muted-foreground: #a1a1a1;
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+  --destructive: #ff6568;
+  --border: #ffffff1a;
+  --input: #ffffff26;
+  --ring: #737373;
+  --chart-1: #1447e6;
+  --chart-2: #00bb7f;
+  --chart-3: #f99c00;
+  --chart-4: #ac4bff;
+  --chart-5: #ff2357;
+  --sidebar: #171717;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #1447e6;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #262626;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #ffffff1a;
+  --sidebar-ring: #737373;
+  --scrollbar: #2f2f2f;
 }
 
 /* Force override classes for theme transition */
@@ -400,8 +401,8 @@
 
 /* Tiny / almost invisible scrollbar for tabs */
 .tabs-scrollbar {
-  scrollbar-width:none;
-  scrollbar-color: rgba(100,116,139,0.08) transparent; /* subtle thumb */
+  scrollbar-width: none;
+  scrollbar-color: rgba(100, 116, 139, 0.08) transparent; /* subtle thumb */
 }
 .tabs-scrollbar::-webkit-scrollbar {
   height: 4px; /* smaller */
@@ -410,17 +411,17 @@
   background: transparent;
 }
 .tabs-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(100,116,139,0.04); /* very subtle */
+  background: rgba(100, 116, 139, 0.04); /* very subtle */
   border-radius: 9999px;
   border: 1px solid transparent; /* small inset look */
   background-clip: padding-box;
 }
 .tabs-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(100,116,139,0.08);
+  background: rgba(100, 116, 139, 0.08);
 }
 
 /* Add an accessible focus-visible outline for keyboard users */
 .tabs-scrollbar:focus-visible {
-  outline: 3px solid rgba(100,116,139,0.08);
+  outline: 3px solid rgba(100, 116, 139, 0.08);
   outline-offset: 2px;
 }
