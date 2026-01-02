@@ -184,6 +184,7 @@ export function useTicketUpdates({
         ? {
             ...prev,
             priority: priorityDisplayMap[priority] as any,
+            priorityApi: priority,
           }
         : null
     );
@@ -292,15 +293,48 @@ export function useTicketUpdates({
     }
   };
 
+  const handleUpdateStatus = async (id: string, status: HelpdeskStatus) => {
+    if (!ticket) return;
+
+    // Mapeamento de status da API para display
+    const statusDisplayMap: Record<HelpdeskStatus, string> = {
+      ABERTO: "Aberto",
+      EM_ANALISE: "Em Análise",
+      EM_ANDAMENTO: "Em Andamento",
+      AGUARDANDO_USUARIO: "Aguardando Usuário",
+      RESOLVIDO: "Resolvido",
+      ENCERRADO: "Fechado",
+    };
+
+    // Atualização otimista
+    setTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            status: statusDisplayMap[status] as any,
+            statusApi: status,
+          }
+        : null
+    );
+
+    try {
+      await executeUpdate(id, "status", status, onUpdateStatus);
+    } catch (error) {
+      // Em caso de erro, reverter a mudança
+      setTicket(initialTicket);
+      console.error("Erro ao atualizar status:", error);
+    }
+  };
+
   // Funções padronizadas para componentes que precisam de handlers diretos
   const handleStatusChange = async (status: HelpdeskStatus) => {
     if (!ticket) return;
-    await executeUpdate(ticket.id, "status", status, onUpdateStatus);
+    await handleUpdateStatus(ticket.id, status);
   };
 
   const handlePriorityChange = async (priority: HelpdeskPriority) => {
     if (!ticket) return;
-    await executeUpdate(ticket.id, "priority", priority, onUpdatePriority);
+    await handleUpdatePriority(ticket.id, priority);
   };
 
   const handleAssign = async (user: any) => {
@@ -361,6 +395,7 @@ export function useTicketUpdates({
     handleUpdateModule,
     handleUpdateEnvironment,
     handleUpdatePriority,
+    handleUpdateStatus,
     handleUpdateAssignedUser,
     handleUpdateDescription,
     handleUpdateTitle,

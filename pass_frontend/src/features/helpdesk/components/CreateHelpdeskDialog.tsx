@@ -21,9 +21,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateHelpdesk } from "../hooks/use-helpdesk";
-import { CreateHelpdeskInput, Helpdesk, HelpdeskModule } from "../types/helpdesk";
+import {
+  CreateHelpdeskInput,
+  Helpdesk,
+  HelpdeskModule,
+} from "../types/helpdesk";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { AlertCircle } from "lucide-react";
 
 interface CreateHelpdeskDialogProps {
   isOpen: boolean;
@@ -34,7 +40,7 @@ interface CreateHelpdeskDialogProps {
 export function CreateHelpdeskDialog({
   isOpen,
   onClose,
-  onCreate
+  onCreate,
 }: CreateHelpdeskDialogProps) {
   const { currentUser } = useAuth();
   const createMutation = useCreateHelpdesk();
@@ -47,6 +53,15 @@ export function CreateHelpdeskDialog({
     module: undefined,
     environment: "WEB",
   });
+  const [showError, setShowError] = useState(false);
+
+  const isInvalid = (value: string | undefined) => showError && !value;
+
+  React.useEffect(() => {
+    if (showError && formData.title?.trim() && formData.description?.trim()) {
+      setShowError(false);
+    }
+  }, [formData.title, formData.description, showError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +72,7 @@ export function CreateHelpdeskDialog({
     }
 
     if (!formData.title || !formData.description) {
-      alert("Título e descrição são obrigatórios");
+      setShowError(true);
       return;
     }
 
@@ -88,7 +103,11 @@ export function CreateHelpdeskDialog({
       });
     } catch (error) {
       // Show error toast with the exact message from the API
-      const errorMessage = (error as any)?.response?.data?.message || (error instanceof Error ? error.message : "Erro desconhecido ao criar chamado");
+      const errorMessage =
+        (error as any)?.response?.data?.message ||
+        (error instanceof Error
+          ? error.message
+          : "Erro desconhecido ao criar chamado");
       toast.error(errorMessage);
       console.error("Error creating ticket:", error);
     }
@@ -106,43 +125,84 @@ export function CreateHelpdeskDialog({
             <BiSupport className="h-4 w-4 text-foreground" />
           </div>
           <div>
-            <DialogTitle className="text-md font-semibold">Criar Novo Chamado</DialogTitle>
-            <p className="text-sm text-muted-foreground">Preencha os detalhes abaixo para abrir um novo chamado de suporte.</p>
+            <DialogTitle className="text-md font-semibold">
+              Criar Novo Chamado
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Preencha os detalhes abaixo para abrir um novo chamado de suporte.
+            </p>
           </div>
         </div>
 
         <div>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:max-h-[80vh]">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col sm:max-h-[80vh]"
+            noValidate
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 overflow-y-auto h-full">
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="title" className="font-medium">Título *</Label>
+                <Label
+                  htmlFor="title"
+                  className={cn(
+                    "font-medium",
+                    isInvalid(formData.title) && "text-destructive"
+                  )}
+                >
+                  Título
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   placeholder="Descreva brevemente o problema"
-                  required
-                  className="h-10"
+                  className={cn(
+                    "h-10",
+                    isInvalid(formData.title) &&
+                      "border-destructive focus-visible:ring-destructive/30"
+                  )}
                 />
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="description" className="font-medium">Descrição *</Label>
+                <Label
+                  htmlFor="description"
+                  className={cn(
+                    "font-medium",
+                    isInvalid(formData.description) && "text-destructive"
+                  )}
+                >
+                  Descrição
+                </Label>
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   placeholder="Descreva detalhadamente o problema ou solicitação"
                   rows={4}
-                  required
+                  className={cn(
+                    isInvalid(formData.description) &&
+                      "border-destructive focus-visible:ring-destructive/30"
+                  )}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category" className="font-medium">Categoria *</Label>
+                <Label htmlFor="category" className="font-medium">
+                  Categoria
+                </Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as any }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, category: value as any }))
+                  }
                 >
                   <SelectTrigger id="category" className="h-10">
                     <SelectValue placeholder="Selecione a categoria" />
@@ -152,17 +212,23 @@ export function CreateHelpdeskDialog({
                     <SelectItem value="AGENDAMENTO">Agendamento</SelectItem>
                     <SelectItem value="TREINAMENTO">Treinamento</SelectItem>
                     <SelectItem value="PERFORMANCE">Performance</SelectItem>
-                    <SelectItem value="AJUSTE_MELHORIA">Ajuste/Melhoria</SelectItem>
+                    <SelectItem value="AJUSTE_MELHORIA">
+                      Ajuste/Melhoria
+                    </SelectItem>
                     <SelectItem value="OUTRO">Outro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="priority" className="font-medium">Prioridade</Label>
+                <Label htmlFor="priority" className="font-medium">
+                  Prioridade
+                </Label>
                 <Select
                   value={formData.priority}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as any }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, priority: value as any }))
+                  }
                 >
                   <SelectTrigger id="priority" className="h-10">
                     <SelectValue placeholder="Selecione a prioridade" />
@@ -177,13 +243,20 @@ export function CreateHelpdeskDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="module" className="font-medium">Módulo</Label>
+                <Label htmlFor="module" className="font-medium">
+                  Módulo
+                </Label>
                 <Select
                   value={formData.module || "NONE"}
-                  onValueChange={(value) => setFormData(prev => ({
-                    ...prev,
-                    module: value === "NONE" ? undefined : value as HelpdeskModule
-                  }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      module:
+                        value === "NONE"
+                          ? undefined
+                          : (value as HelpdeskModule),
+                    }))
+                  }
                 >
                   <SelectTrigger id="module" className="h-10">
                     <SelectValue placeholder="Selecione o módulo (opcional)" />
@@ -199,10 +272,17 @@ export function CreateHelpdeskDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="environment" className="font-medium">Ambiente</Label>
+                <Label htmlFor="environment" className="font-medium">
+                  Ambiente
+                </Label>
                 <Select
                   value={formData.environment}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, environment: value as any }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      environment: value as any,
+                    }))
+                  }
                 >
                   <SelectTrigger id="environment" className="h-10">
                     <SelectValue placeholder="Selecione o ambiente" />
@@ -215,11 +295,32 @@ export function CreateHelpdeskDialog({
               </div>
             </div>
 
-            <div className="sticky bottom-0 flex justify-between gap-3 px-6 pb-6 pt-4 mt-4 border-t bg-background backdrop-blur-sm">
-              <Button type="button" variant="outline" onClick={onClose} className="min-w-[100px]">Cancelar</Button>
-              <Button type="submit" className="min-w-[100px]" disabled={createMutation.isPending}>
-                {createMutation.isPending ? "Criando..." : "Criar Chamado"}
-              </Button>
+            <div className="mt-auto">
+              {showError && (
+                <div className="w-full bg-red-400/10 py-3 px-6 flex items-center justify-left gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <span className="text-sm font-medium text-red-400">
+                    Por favor, preencha os campos obrigatórios.
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between gap-3 px-6 pb-6 pt-4 border-t bg-background backdrop-blur-sm">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="min-w-[100px]"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="min-w-[100px]"
+                  disabled={createMutation.isPending}
+                >
+                  {createMutation.isPending ? "Criando..." : "Criar Chamado"}
+                </Button>
+              </div>
             </div>
           </form>
         </div>

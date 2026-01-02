@@ -189,3 +189,18 @@ export const getStatusColor = (s: Status): any => {
     default: return "gray";
   }
 };
+
+export const displayToApiStatus: Record<string, string> = {
+  Aberto: "ABERTO",
+  "Em Análise": "EM_ANALISE",
+  "Em Andamento": "EM_ANDAMENTO",
+  "Aguardando Usuário": "AGUARDANDO_USUARIO",
+  Resolvido: "RESOLVIDO",
+  Fechado: "ENCERRADO",
+};
+
+export const displayToApiPriority: Record<string, string> = {
+  Baixa: "BAIXA",
+  Média: "MEDIA",
+  Alta: "ALTA",
+};

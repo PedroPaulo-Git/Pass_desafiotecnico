@@ -28,6 +28,7 @@ import {
   getCategoryIconAndColor,
   getPriorityFromCategory,
   getStatusIconAndColor,
+  displayToApiPriority,
 } from "../helpers";
 import {
   MessageSquare,
@@ -118,6 +119,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
     handleUpdateModule,
     handleUpdateEnvironment,
     handleUpdatePriority,
+    handleUpdateStatus,
     handleUpdateAssignedUser,
     handleUpdateDescription,
     handleUpdateTitle,
@@ -312,7 +314,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       className=" flex-1 flex flex-col min-h-0 w-full pb-32 h-screen  "
                       defaultValue="info"
                     >
-                      <TabsList className="mt-6 flex border-t px-4 w-full bg-transparent rounded-none">
+                      <TabsList className="mt-6 flex border-t px-4 w-full bg-transparent rounded-none first:pl-10 border-b overflow-x-auto scrollbar-hidden">
                         <TabsTrigger
                           supportTab={true}
                           value="info"
@@ -350,11 +352,11 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       {/* LEFT CONTENT AREA */}
                       <div
                         className="flex-1 min-h-0 flex flex-col 
-                      overflow-auto h-full  "
+                      overflow-auto  h-full  "
                       >
                         <TabsContent
                           value="info"
-                          className="px-4  overflow-y-auto space-y-4 py-4 "
+                          className="px-4  overflow-y-auto scrollbar-hidden space-y-4 py-4 "
                         >
                           {/* Card 1: Dados do Ticket */}
                           <motion.div
@@ -724,7 +726,12 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         </span>
                         <div className="flex items-center gap-2">
                           <Select
-                            value={ticket?.priority || ""}
+                            value={
+                              ticket?.priorityApi ||
+                              (ticket?.priority
+                                ? displayToApiPriority[ticket.priority]
+                                : "")
+                            }
                             onValueChange={(value) =>
                               handleUpdatePriority(ticket!.id, value as any)
                             }
@@ -735,8 +742,11 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   ticket?.status === "Fechado"))
                             }
                           >
-                            <SelectTrigger className="w-8 h-6 px-0! -mr-4! text-sm border-none bg-transparent p-0! focus:ring-0">
-                              <SelectValue placeholder="Selecione" />
+                            <SelectTrigger
+                              iconRight={true}
+                              className="w-4 h-6 px-0! -mr-2! border-none bg-transparent p-0! focus:ring-0 shadow-none hover:bg-transparent [&_svg]:transition-transform [&_svg]:duration-200 data-[state=open]:[&_svg]:rotate-180"
+                            >
+                              {/* <SelectValue /> */}
                             </SelectTrigger>
                             <SelectContent className="bg-popover">
                               <SelectItem className="bg-popover" value="BAIXA">
@@ -929,10 +939,10 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         <StatusPriorityPopover
                           data={ticket}
                           onStatusChange={(status) =>
-                            onUpdateStatus?.(ticket.id, status)
+                            handleUpdateStatus(ticket.id, status)
                           }
                           onPriorityChange={(priority) =>
-                            onUpdatePriority?.(ticket.id, priority)
+                            handleUpdatePriority(ticket.id, priority)
                           }
                         />
                       )}

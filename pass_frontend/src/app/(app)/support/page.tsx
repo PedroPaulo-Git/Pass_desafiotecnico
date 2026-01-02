@@ -56,11 +56,11 @@ export function SupportTicketPage() {
   }, [tempSearch, tempModuleFilter]);
 
   const handlePageChange = useCallback((page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page }));
   }, []);
 
   const handlePageSizeChange = useCallback((limit: number) => {
-    setFilters(prev => ({ ...prev, limit, page: 1 })); // Reset to page 1 when changing limit
+    setFilters((prev) => ({ ...prev, limit, page: 1 })); // Reset to page 1 when changing limit
   }, []);
 
   const memoizedFilters = React.useMemo(() => {
@@ -77,7 +77,7 @@ export function SupportTicketPage() {
     const result: HelpdeskFilters = {
       ...filters,
       status: statusMap[statusFilter as string],
-      module: moduleFilter !== "todos" ? moduleFilter as any : undefined,
+      module: moduleFilter !== "todos" ? (moduleFilter as any) : undefined,
       search,
     };
 
@@ -106,7 +106,9 @@ export function SupportTicketPage() {
 
   const modules = ["Financeiro", "Admin", "Checkout", "Integração", "Frontend"];
 
-  const handleClearFilters = useCallback(() => {    console.log("Limpando todos os filtros");    setStatusFilter("todos");
+  const handleClearFilters = useCallback(() => {
+    console.log("Limpando todos os filtros");
+    setStatusFilter("todos");
     setSearch("");
     setTempSearch("");
     setDateRange(undefined);
@@ -192,45 +194,48 @@ export function SupportTicketPage() {
 
   return (
     <div className="text-foreground overflow-y-hidden">
-      <div className="mx-auto lg:max-w-[80vw] max-w-full p-6 overflow-y-auto">
+      <div className="mx-auto lg:max-w-[90vw] max-w-full p-6 overflow-y-auto">
         <div className="flex justify-end my-4"></div>
-        <FilterHeader
-          search={search}
-          setSearch={setSearch}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          modules={modules}
-          moduleFilter={moduleFilter}
-          setModuleFilter={setModuleFilter}
-          onClearFilters={handleClearFilters}
-          onClickNewTicket={() => setIsCreateDialogOpen(true)}
-          onSearch={handleSearch}
-          tempSearch={tempSearch}
-          setTempSearch={setTempSearch}
-          tempModuleFilter={tempModuleFilter}
-          setTempModuleFilter={setTempModuleFilter}
-        />
-        <Toolbar
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          statusCounts={statusCounts}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          onClearFilters={handleClearFilters}
-          hasActiveFilters={hasActiveFilters}
-        />
+        <div className="flex w-full   mb-4 flex-row sm:flex-col items-center justify-center px-2 py-4 gap-4 relative border border-border/20 rounded-xl bg-background/40 backdrop-blur-sm shadow-lg shadow-black/20 ring-1 ring-black/5">
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[99%]"></div>
+          <div className="flex flex-wrap items-stretch gap-2 w-full sm:w-auto">
+            <FilterHeader
+              search={search}
+              setSearch={setSearch}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              modules={modules}
+              moduleFilter={moduleFilter}
+              setModuleFilter={setModuleFilter}
+              onClearFilters={handleClearFilters}
+              onClickNewTicket={() => setIsCreateDialogOpen(true)}
+              onSearch={handleSearch}
+              tempSearch={tempSearch}
+              setTempSearch={setTempSearch}
+              tempModuleFilter={tempModuleFilter}
+              setTempModuleFilter={setTempModuleFilter}
+            />
+          </div>
+          <Toolbar
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            statusCounts={statusCounts}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            onClearFilters={handleClearFilters}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </div>
         <div className="">
-
-     
-        <HelpdeskList
-          filters={memoizedFilters}
-          onCreateClick={() => setIsCreateDialogOpen(true)}
-          onTicketClick={handleTicketClick}
-          viewMode={viewMode}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-        />
-           </div>
+          <HelpdeskList
+            filters={memoizedFilters}
+            onCreateClick={() => setIsCreateDialogOpen(true)}
+            onTicketClick={handleTicketClick}
+            viewMode={viewMode}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </div>
 
         <TicketDialog
           ticket={selectedTicket}

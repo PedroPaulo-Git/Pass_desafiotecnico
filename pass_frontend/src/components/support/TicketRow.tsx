@@ -147,9 +147,9 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             ? "flex-col items-start gap-4"
             : "flex-row items-center gap-6"
         )}
-      >
+       >
         {/* Coluna 1: Info Principal do Ticket (Ticket ID + Status Icon/Title + Badges) */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 max-w-[60%] 2xl:max-w-none">
           <div
             className={cn(
               "flex items-start gap-4",
@@ -166,7 +166,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
               onOpenChange={setIsPopoverOpen}
             >
               <div
-                className="flex items-center cursor-pointer max-w-[400px] gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark"
+                className="flex items-center cursor-pointer my-auto max-w-[400px] gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark"
                 role="button"
               >
                 <div

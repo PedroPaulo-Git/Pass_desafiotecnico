@@ -20,6 +20,7 @@ import type {
   HelpdeskPriority,
 } from "@/features/helpdesk/types/helpdesk";
 import { useAuth } from "@/hooks/use-auth";
+import { displayToApiStatus, displayToApiPriority } from "../helpers";
 
 interface Props {
   data: TicketData;
@@ -50,21 +51,6 @@ export const StatusPriorityPopover: React.FC<Props> = ({
     { label: "Alta", value: "ALTA" },
   ];
 
-  const displayToApiStatus: Record<string, string> = {
-    Aberto: "ABERTO",
-    "Em Análise": "EM_ANALISE",
-    "Em Andamento": "EM_ANDAMENTO",
-    "Aguardando Usuário": "AGUARDANDO_USUARIO",
-    Resolvido: "RESOLVIDO",
-    Fechado: "ENCERRADO",
-  };
-
-  const displayToApiPriority: Record<string, string> = {
-    Baixa: "BAIXA",
-    Média: "MEDIA",
-    Alta: "ALTA",
-  };
-
   return (
     <Popover modal={true}>
       <PopoverTrigger asChild>
@@ -77,7 +63,11 @@ export const StatusPriorityPopover: React.FC<Props> = ({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="p-3 bg-popover" side="bottom" align="end">
+      <PopoverContent
+        className="p-3 bg-popover w-44!"
+        side="bottom"
+        align="end"
+      >
         <div className="space-y-2 p-2 w-40 ">
           {!(
             currentUser?.role === "CLIENT" &&
