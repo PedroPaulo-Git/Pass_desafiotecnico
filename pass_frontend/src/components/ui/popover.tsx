@@ -2,10 +2,7 @@
 
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils";
 
 function Popover({
   ...props
@@ -22,7 +19,7 @@ function PopoverTrigger({
 function PopoverContent({
   className,
   align = "center",
-  variant = "calendar",
+  variant = "default",
   sideOffset = 4,
   onInteractOutside,
   onPointerDownOutside,
@@ -37,10 +34,11 @@ function PopoverContent({
     align,
     sideOffset,
     className: cn(
-      "bg-background text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-72 origin-(--radix-popover-content-transform-origin) rounded-md border p-4 shadow-md outline-hidden",
-      variant === "calendar" && "w-auto p-0 py-0 px-0",
-      variant === "custom" && " bg-amber-700",
-      variant === "toolbar" && "bg-popover w-2 p-2",
+      "bg-background text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--radix-popover-content-transform-origin) rounded-md border p-4 shadow-md outline-hidden",
+      variant === "default" && "w-72",
+      variant === "calendar" && "w-auto p-0",
+      variant === "custom" && "bg-amber-700",
+      variant === "toolbar" && "bg-popover w-48 p-2",
       className
     ),
     ...props,
@@ -50,7 +48,6 @@ function PopoverContent({
     contentProps.onInteractOutside = (e) => {
       const target = e.target as HTMLElement;
 
-      // REGRA 1: Se clicou dentro de outro Popover ou Select, NÃO fecha
       if (
         target?.closest("[data-radix-select-content]") ||
         target?.closest("[data-radix-popover-content]") ||
@@ -61,7 +58,6 @@ function PopoverContent({
         return;
       }
 
-      // REGRA 2: Se tem callback personalizado, chama ele
       onInteractOutside(e);
     };
   }
@@ -70,7 +66,6 @@ function PopoverContent({
     contentProps.onPointerDownOutside = (e) => {
       const target = e.target as HTMLElement;
 
-      // REGRA 1: Se clicou dentro de outro Popover ou Select, NÃO fecha
       if (
         target?.closest("[data-radix-select-content]") ||
         target?.closest("[data-radix-popover-content]") ||
@@ -81,7 +76,6 @@ function PopoverContent({
         return;
       }
 
-      // REGRA 2: Se tem callback personalizado, chama ele
       onPointerDownOutside(e);
     };
   }

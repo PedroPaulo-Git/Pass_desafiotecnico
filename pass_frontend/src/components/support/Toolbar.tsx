@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { LayoutGrid, List, Columns, Bot, Filter } from "lucide-react";
+import { LayoutGrid, List, Columns, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion,Transition } from "framer-motion";
 
 interface ToolbarProps {
   statusFilter: string;
@@ -34,6 +34,13 @@ interface ToolbarProps {
   hasActiveFilters: boolean;
 }
 
+const springConfig: Transition = {
+  type: "spring" as const,
+  stiffness: 600,
+  damping: 30,
+  mass: 1,
+};
+
 export const Toolbar: React.FC<ToolbarProps> = ({
   statusFilter,
   setStatusFilter,
@@ -47,118 +54,132 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     <div className="flex justify-center mb-8">
       <motion.div
         layout
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex flex-row items-center gap-2 p-1 bg-background/50 backdrop-blur-md rounded-xl"
+        transition={springConfig}
+        className="flex flex-row items-center gap-2 p-1 bg-background/50 backdrop-blur-md rounded-xl border border-border/50"
         style={{ transformOrigin: "50% 50% 0px" }}
       >
         {/* GRUPO: AÇÕES */}
-        <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap ml-2">
-          Ações
-        </label>
-        <div className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 hover:bg-background rounded-md text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
-                >
-                  <Bot className="size-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Automações AI</p>
-              </TooltipContent>
-            </Tooltip>
+        <div className="flex items-center">
+          <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap ml-2 mr-2">
+            Ações
+          </label>
+          <div className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-colors h-7 w-7 p-0 hover:bg-background rounded-md text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+                  >
+                    <Bot className="size-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Automações AI</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <div className="shrink-0 h-4 w-px bg-border/50 mx-0.5" />
+              <div className="shrink-0 h-4 w-px bg-border/50 mx-0.5" />
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
-                    viewMode === "list"
-                      ? "bg-background text-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-background"
-                  )}
-                >
-                  <List className="size-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Lista</p>
-              </TooltipContent>
-            </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    layout
+                    transition={springConfig}
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    className={cn(
+                      "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none transition-colors",
+                      viewMode === "list"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background"
+                    )}
+                  >
+                    <List className="size-4" />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Lista</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
-                    viewMode === "grid"
-                      ? "bg-background text-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-background"
-                  )}
-                >
-                  <LayoutGrid className="size-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Grade</p>
-              </TooltipContent>
-            </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    layout
+                    transition={springConfig}
+                    type="button"
+                    onClick={() => setViewMode("grid")}
+                    className={cn(
+                      "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none transition-colors",
+                      viewMode === "grid"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background"
+                    )}
+                  >
+                    <LayoutGrid className="size-4" />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Grade</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("lanes")}
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-all h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none",
-                    viewMode === "lanes"
-                      ? "bg-background text-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-background"
-                  )}
-                >
-                  <Columns className="size-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Kanban</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    layout
+                    transition={springConfig}
+                    type="button"
+                    onClick={() => setViewMode("lanes")}
+                    className={cn(
+                      "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer h-7 w-7 p-0 rounded-md focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none transition-colors",
+                      viewMode === "lanes"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background"
+                    )}
+                  >
+                    <Columns className="size-4" />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Kanban</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
 
         {/* GRUPO: TIPO */}
-        <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap">
-          Tipo
-        </label>
-        <div
-          className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6"
-          role="tablist"
-        >
-          <button
-            type="button"
-            className="px-6 py-2 text-sm font-medium rounded-md transition-all bg-purple-500 text-white shadow-sm"
-            role="tab"
-            aria-selected="true"
+        <div className="flex items-center">
+          <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap mr-2">
+            Tipo
+          </label>
+          <div
+            className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6"
+            role="tablist"
           >
-            Journey
-          </button>
-          <button
-            type="button"
-            className="px-6 py-2 text-sm font-medium rounded-md transition-all text-muted-foreground hover:text-foreground"
-            role="tab"
-            aria-selected="false"
-          >
-            Service
-          </button>
+            <motion.button
+              layout
+              transition={springConfig}
+              type="button"
+              className="px-6 py-2 text-sm font-medium rounded-md bg-purple-500 text-white shadow-sm"
+              role="tab"
+              aria-selected="true"
+            >
+              Journey
+            </motion.button>
+            <motion.button
+              layout
+              transition={springConfig}
+              type="button"
+              className="px-6 py-2 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground transition-colors"
+              role="tab"
+              aria-selected="false"
+            >
+              Service
+            </motion.button>
+          </div>
         </div>
 
         {/* GRUPO: STATUS */}
@@ -170,44 +191,38 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9"
             role="tablist"
           >
-            <button
+            <motion.button
+              layout
+              transition={springConfig}
               type="button"
               onClick={() => setStatusFilter("Todos")}
               className={cn(
-                "px-6 py-2 text-sm font-medium rounded-md transition-all whitespace-nowrap cursor-pointer",
+                "px-6 py-2 text-sm font-medium rounded-md whitespace-nowrap cursor-pointer transition-colors",
                 statusFilter === "Todos"
                   ? "bg-purple-500 text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               All
-            </button>
+            </motion.button>
 
             <Popover>
               <PopoverTrigger asChild>
-                <button
+                <motion.button
+                  layout
+                  transition={springConfig}
                   type="button"
                   className={cn(
-                    "px-6 py-2 text-sm font-medium rounded-md transition-all inline-flex items-center gap-2 justify-center whitespace-nowrap cursor-pointer",
+                    "px-6 py-2 text-sm font-medium rounded-md inline-flex items-center gap-2 justify-center whitespace-nowrap cursor-pointer min-w-[100px] outline-none transition-colors",
                     statusFilter !== "Todos"
                       ? "bg-purple-500 text-white shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={statusFilter}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {statusFilter === "Todos" ? "Filtrar" : statusFilter}
-                    </motion.span>
-                  </AnimatePresence>
-                </button>
+                  {statusFilter === "Todos" ? "Filtrar" : statusFilter}
+                </motion.button>
               </PopoverTrigger>
-              <PopoverContent variant="toolbar" align="start" className="w-10">
+              <PopoverContent variant="toolbar" align="start" className="w-48">
                 <div
                   className="space-y-1"
                   role="radiogroup"
@@ -281,13 +296,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <motion.button
+                  layout
+                  transition={springConfig}
                   type="button"
                   onClick={onClearFilters}
                   className="mr-2 inline-flex items-center justify-center h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors rounded-md outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 >
                   <PiFunnelX className="size-4" />
-                </button>
+                </motion.button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Limpar Filtros</p>
