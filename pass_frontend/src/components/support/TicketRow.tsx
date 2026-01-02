@@ -130,9 +130,15 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   return (
     <div
       className={cn(
-        "group relative p-4 border border-border/50 rounded-lg hover:border-border transition-all duration-200 mb-3",
-        viewMode === "lanes" && "cursor-grab"
+        "group relative p-4 border border-border/50 rounded-lg hover:border-border transition-all duration-200 mb-3 flex flex-col h-full",
+        viewMode === "lanes" && "cursor-grab",
+        viewMode === "grid" && "cursor-pointer"
       )}
+      onClick={() => {
+        if (viewMode !== "list") {
+          onClick?.();
+        }
+      }}
     >
       <div
         className={cn(
@@ -147,9 +153,14 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             ? "flex-col items-start gap-4"
             : "flex-row items-center gap-6"
         )}
-       >
+      >
         {/* Coluna 1: Info Principal do Ticket (Ticket ID + Status Icon/Title + Badges) */}
-        <div className="flex-1 min-w-0 max-w-[60%] 2xl:max-w-none">
+        <div
+          className={cn(
+            "flex-1 min-w-0 max-w-[60%] 2xl:max-w-none",
+            (viewMode === "lanes" || viewMode === "grid") && "max-w-none w-full"
+          )}
+        >
           <div
             className={cn(
               "flex items-start gap-4",
@@ -166,7 +177,10 @@ export const TicketRow: React.FC<TicketRowProps> = ({
               onOpenChange={setIsPopoverOpen}
             >
               <div
-                className="flex items-center cursor-pointer my-auto max-w-[400px] gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark"
+                className={cn(
+                  "flex items-center cursor-pointer my-auto gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark w-full",
+                  viewMode === "list" ? "max-w-[400px]" : "max-w-none"
+                )}
                 role="button"
               >
                 <div
@@ -318,16 +332,18 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             </div>
           )}
 
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick?.();
-            }}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3.5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:text-accent-foreground dark:bg-transparent dark:border-input dark:hover:bg-input/50 size-8 h-8 w-8 border-border hover:bg-muted/80 !bg-transparent dark:!bg-transparent"
-            variant="outline"
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </Button>
+          {viewMode === "list" && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3.5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:text-accent-foreground dark:bg-transparent dark:border-input dark:hover:bg-input/50 size-8 h-8 w-8 border-border hover:bg-muted/80 !bg-transparent dark:!bg-transparent"
+              variant="outline"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -35,6 +35,9 @@ export const SortableTicketRow: React.FC<SortableTicketRowProps> = ({
 
   const [isHoveringIcon, setIsHoveringIcon] = React.useState(false);
 
+  // Ref to track drag distance to differentiate between click and drag
+  const dragStartPos = React.useRef<{ x: number; y: number } | null>(null);
+
   const style = {
     // Translate é mais performático e evita distorção de texto
     transform: CSS.Translate.toString(transform),
@@ -53,36 +56,44 @@ export const SortableTicketRow: React.FC<SortableTicketRowProps> = ({
     );
   }
 
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    // Call dnd-kit's listener
+    listeners?.onPointerDown(e);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!dragStartPos.current) return;
+
+    const deltaX = Math.abs(e.clientX - dragStartPos.current.x);
+    const deltaY = Math.abs(e.clientY - dragStartPos.current.y);
+
+    // Reset drag start
+    dragStartPos.current = null;
+
+    // Se moveu menos de 5px, consideramos um clique
+    if (deltaX < 5 && deltaY < 5) {
+      onClick?.();
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
+      // Spread listeners explicitly except onPointerDown which we wrap
+      onPointerDown={handlePointerDown}
+      onKeyDown={
+        listeners?.onKeyDown as React.KeyboardEventHandler<HTMLDivElement>
+      }
       className={`
         relative group transition-transform duration-200 ease-out
-        /* Efeito de hover suave apenas quando NÃO está arrastando */
-        hover:scale-[1.02] hover:-translate-y-1 touch-none
-        ${isHoveringIcon ? "scale-[1.02]" : ""}
+        hover:scale-[1.02] hover:-translate-y-1 touch-none cursor-grab active:cursor-grabbing
       `}
+      onClick={handleClick}
     >
-      {/* Botão de Visualizar - Só aparece no hover do card */}
-      <div className="absolute bottom-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <Button
-          variant="ghost"
-          onMouseEnter={() => setIsHoveringIcon(true)}
-          onMouseLeave={() => setIsHoveringIcon(false)}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick?.();
-          }}
-          className="absolute bottom-4 right-2 z-20 opacity-0 rounded-lg group-hover:opacity-100 transition-opacity duration-200 text-foreground border border-border bg-transparent w-9 h-9 hover:bg-background p-0"
-        >
-          <Eye className="w-4 h-4 text-foreground/70" />
-        </Button>
-      </div>
-
-      <div className="px-1 py-1">
+      <div className="px-1 py-1 pointer-events-none">
         <TicketRow viewMode="lanes" data={ticket} />
       </div>
     </div>
