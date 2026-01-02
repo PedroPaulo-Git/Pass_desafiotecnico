@@ -24,11 +24,39 @@ export function useTicketMessages(helpdeskId: string) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (messageIndex: number) => helpdeskAPI.deleteMessage(helpdeskId, messageIndex),
+    onMutate: async (messageIndex) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["helpdesk", helpdeskId, "messages"] });
+
+      // Snapshot previous value
+      const previousMessages = queryClient.getQueryData(["helpdesk", helpdeskId, "messages"]);
+
+      // Optimistically update
+      queryClient.setQueryData(["helpdesk", helpdeskId, "messages"], (old: HelpdeskMessage[] | undefined) => {
+        return old?.filter((_, idx) => idx !== messageIndex);
+      });
+
+      return { previousMessages };
+    },
+    onError: (err, messageIndex, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["helpdesk", helpdeskId, "messages"], context?.previousMessages);
+      toast.error("Erro ao apagar mensagem");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["helpdesk", helpdeskId, "messages"] });
+      queryClient.invalidateQueries({ queryKey: ["helpdesk"] });
+    },
+  });
+
   return {
     messages: query.data || [],
     isLoading: query.isLoading,
     isSending: mutation.isPending,
     sendMessage: mutation.mutateAsync,
+    deleteMessage: deleteMutation.mutateAsync,
     refetch: query.refetch,
   };
 }

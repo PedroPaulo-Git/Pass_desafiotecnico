@@ -144,9 +144,9 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className=" border-l border-white/20 h-full w-full flex items-center px-3  hover:bg-purple-700
+                  <span onClick={onClickNewTicket} className=" border-l border-white/20 h-full w-full flex items-center px-3  hover:bg-purple-700
                   rounded-r-lg dark:hover:bg-purple-700 cursor-pointer transition-colors">
-                    <div onClick={onClickNewTicket}>
+                    <div>
                       <Plus className="w-4 h-4" />
                     </div>
                   </span>

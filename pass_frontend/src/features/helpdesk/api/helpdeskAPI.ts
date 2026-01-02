@@ -5,7 +5,9 @@ import {
   CreateHelpdeskInput,
   UpdateHelpdeskInput,
   HelpdeskFilters,
-  PaginatedHelpdeskResponse
+  PaginatedHelpdeskResponse,
+  HelpdeskMessage,
+  CreateMessageInput
 } from "../types/helpdesk";
 import { MOCK_HELPDESK } from "./helpdeskMockData";
 
@@ -67,13 +69,48 @@ export const helpdeskAPI = {
   },
 
   // --- Messages ---
-  async getMessages(helpdeskId: string): Promise<any[]> {
-    const { data } = await api.get<any[]>(`/helpdesk/${helpdeskId}/messages`);
+  async getMessages(helpdeskId: string): Promise<HelpdeskMessage[]> {
+    const { data } = await api.get<HelpdeskMessage[]>(`/helpdesk/${helpdeskId}/messages`);
     return data;
   },
 
-  async sendMessage(helpdeskId: string, input: any): Promise<void> {
+  async sendMessage(helpdeskId: string, input: CreateMessageInput): Promise<void> {
     await api.post(`/helpdesk/${helpdeskId}/messages`, input);
+  },
+
+  async deleteMessage(helpdeskId: string, messageIndex: number): Promise<void> {
+    await api.delete(`/helpdesk/${helpdeskId}/messages/${messageIndex}`);
+  },
+
+  // --- Attachments ---
+  async uploadAttachment(helpdeskId: string, file: File): Promise<{ url: string; filename: string; path: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const { data } = await api.post<{ url: string; filename: string; path: string }>(
+      `/helpdesk/${helpdeskId}/attachments`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return data;
+  },
+
+  async listAttachments(helpdeskId: string): Promise<Array<{ filename: string; size: number; uploadedAt: string; url: string }>> {
+    const { data } = await api.get<Array<{ filename: string; size: number; uploadedAt: string; url: string }>>(
+      `/helpdesk/${helpdeskId}/attachments`
+    );
+    return data;
+  },
+
+  async downloadAttachment(helpdeskId: string, filename: string): Promise<Blob> {
+    const { data } = await api.get(`/helpdesk/${helpdeskId}/attachments/${filename}`, {
+      responseType: 'blob',
+    });
+    return data;
   },
 };
 
