@@ -178,7 +178,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
             >
               <div
                 className={cn(
-                  "flex items-center cursor-pointer my-auto gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark w-full",
+                  "flex items-center cursor-pointer my-auto gap-3 hover:shadow-custom transition duration-300 px-2.5 rounded-[8px] -my-[3px] py-[3px] dark:hover:shadow-custom-dark ",
                   viewMode === "list" ? "max-w-[400px]" : "max-w-none"
                 )}
                 role="button"
