@@ -91,7 +91,7 @@ export class MinioService implements OnModuleInit {
     this.logger.log('-----------------------------------');
   }
 
-  async ensureBucketExists(bucketName: string, retries = 3) {
+  async ensureBucketExists(bucketName: string, retries = 6) {
     for (let i = 0; i < retries; i++) {
       try {
         this.logger.debug(`[MINIO DEBUG] Attempt ${i + 1}/${retries}: Sending HeadBucketCommand for: ${bucketName}`);
@@ -100,6 +100,7 @@ export class MinioService implements OnModuleInit {
         return; // Success, exit loop
       } catch (error: any) {
         const statusCode = error?.$metadata?.httpStatusCode;
+        const isParsingError = error?.message?.includes('Expected closing tag') || error?.message?.includes('Deserialization error');
         
         // If 404, we create it
         if (error?.name === 'NotFound' || statusCode === 404) {
@@ -114,20 +115,20 @@ export class MinioService implements OnModuleInit {
           }
         }
 
-        // If it's a "wake-up" candidate (502, 503, ETIMEDOUT, etc.)
-        const isRetryable = statusCode === 502 || statusCode === 503 || error?.code === 'ETIMEDOUT' || error?.code === 'ECONNREFUSED';
+        // If it's a "wake-up" candidate (502, 503, ETIMEDOUT, etc.) OR a parsing error (Render HTML error page)
+        const isRetryable = statusCode === 502 || statusCode === 503 || isParsingError || error?.code === 'ETIMEDOUT' || error?.code === 'ECONNREFUSED';
         
         if (isRetryable && i < retries - 1) {
-          this.logger.warn(`[MINIO RETRY] Service might be sleeping (Status ${statusCode}). Retrying in 5s... (${i + 1}/${retries})`);
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          this.logger.warn(`[MINIO RETRY] Service might be sleeping (Status ${statusCode || 'HTML Error'}). Retrying in 10s... (${i + 1}/${retries})`);
+          await new Promise(resolve => setTimeout(resolve, 10000));
           continue;
         }
 
         this.logger.error(`[MINIO ERROR] Failed checking bucket "${bucketName}" after ${i + 1} attempts`);
         this.logger.error(`[MINIO ERROR] Name: ${error?.name}, Status: ${statusCode}, Message: ${error?.message}`);
         
-        if (statusCode === 502) {
-          this.logger.error(`[MINIO ADVICE] 502 Bad Gateway! Render might be waking up the service. Please try again in 30 seconds.`);
+        if (statusCode === 502 || isParsingError) {
+          this.logger.error(`[MINIO ADVICE] 502 Bad Gateway or HTML Error! Render might be waking up the service or Port 9000 is wrong for external access. Please try again in 60 seconds.`);
         }
         break; // Stop if not retryable or out of retries
       }
