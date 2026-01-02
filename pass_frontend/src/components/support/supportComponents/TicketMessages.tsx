@@ -24,6 +24,7 @@ import {
   Trash2,
   X,
   AlertCircle,
+  UserPlus,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -37,6 +38,7 @@ import {
 interface TicketMessagesProps {
   ticketId: string;
   ticketStatus?: string;
+  assignedTo?: any | null;
 }
 
 const getFileIcon = (filename: string) => {
@@ -127,6 +129,7 @@ const ImagePreview: React.FC<{
 export const TicketMessages: React.FC<TicketMessagesProps> = ({
   ticketId,
   ticketStatus,
+  assignedTo,
 }) => {
   const { currentUser } = useAuth();
   const { messages, isLoading, isSending, sendMessage, deleteMessage } =
@@ -144,6 +147,7 @@ export const TicketMessages: React.FC<TicketMessagesProps> = ({
 
   const isTicketClosed =
     ticketStatus === "Resolvido" || ticketStatus === "Fechado";
+  const isUnassigned = !assignedTo && !isTicketClosed;
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -163,13 +167,7 @@ export const TicketMessages: React.FC<TicketMessagesProps> = ({
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      (!newMessage.trim() && selectedFiles.length === 0) ||
-      !currentUser ||
-      isSending ||
-      isTicketClosed
-    )
-      return;
+    if (!currentUser || isSending || isTicketClosed || isUnassigned) return;
 
     try {
       // Upload attachments first
@@ -246,6 +244,21 @@ export const TicketMessages: React.FC<TicketMessagesProps> = ({
                   </p>
                   <p className="text-xs text-muted-foreground/80">
                     Não é mais possível enviar mensagens
+                  </p>
+                </div>
+              </>
+            ) : isUnassigned ? (
+              <>
+                <div className="relative">
+                  <UserPlus className="w-12 h-12 text-yellow-500/60" />
+                  <Clock className="w-5 h-5 absolute -bottom-1 -right-1 text-muted-foreground" />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-semibold">
+                    Aguardando Responsável
+                  </p>
+                  <p className="text-xs text-muted-foreground/80">
+                    Atribua um responsável para iniciar o atendimento
                   </p>
                 </div>
               </>
@@ -329,7 +342,6 @@ export const TicketMessages: React.FC<TicketMessagesProps> = ({
                                 todos.
                               </p>
                               <Button
-                                
                                 size="sm"
                                 className="w-full h-8 text-xs font-semibold py-0 shadow-md bg-destructive/80 hover:bg-destructive/40 hover:text-destructive cursor-pointer"
                                 onClick={(e) => {
@@ -413,17 +425,7 @@ export const TicketMessages: React.FC<TicketMessagesProps> = ({
               );
             })}
 
-            {/* Closed Ticket Indicator */}
-            {isTicketClosed && (
-              <div className="flex justify-center py-4">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/50">
-                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Chamado {ticketStatus} - Chat bloqueado
-                  </span>
-                </div>
-              </div>
-            )}
+            {/* Unassigned Ticket Indicator inside message list if needed, or just handle in footer */}
           </>
         )}
       </div>
@@ -434,8 +436,17 @@ export const TicketMessages: React.FC<TicketMessagesProps> = ({
           <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-muted/50 border border-border/50">
             <Lock className="w-4 h-4 text-muted-foreground" />
             <p className="text-sm font-medium text-muted-foreground">
-              Este chamado foi {ticketStatus.toLowerCase()} e não aceita mais
+              Este chamado foi {ticketStatus?.toLowerCase()} e não aceita mais
               mensagens
+            </p>
+          </div>
+        </div>
+      ) : isUnassigned ? (
+        <div className="p-4 border-t border-border bg-muted/30">
+          <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+            <UserPlus className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+            <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+              Aguardando atribuição de um responsável para habilitar o chat
             </p>
           </div>
         </div>

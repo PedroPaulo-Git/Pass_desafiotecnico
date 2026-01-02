@@ -190,6 +190,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
         />
         <SheetPrimitive.Content
           asChild
+          onInteractOutside={(e) => {
+            // Se existir um popover/select aberto (identificado pelo wrapper do popper), previne o fechamento do Sheet
+            // Isso permite que o clique feche apenas o popover primeiro.
+            const hasOpenPopover = document.querySelector(
+              "[data-radix-popper-content-wrapper]"
+            );
+            if (hasOpenPopover) {
+              e.preventDefault();
+            }
+          }}
           className="p-0 h-full w-full sm:max-w-3xl overflow-hidden border-border bg-card flex flex-col fixed z-50 inset-y-0 right-0 shadow-lg"
         >
           <motion.div
@@ -670,6 +680,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           <TicketMessages
                             ticketId={ticket.id}
                             ticketStatus={ticket.status}
+                            assignedTo={ticket.assignedTo}
                           />
                         </TabsContent>
 
