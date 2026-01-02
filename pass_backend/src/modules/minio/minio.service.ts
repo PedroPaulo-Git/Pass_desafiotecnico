@@ -137,4 +137,22 @@ export class MinioService implements OnModuleInit {
   get client() {
     return this.s3Client;
   }
+
+  async getPresignedUrl(bucketName: string, objectKey: string, expiresIn: number = 3600): Promise<string> {
+    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: objectKey,
+    });
+
+    try {
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn });
+      return url;
+    } catch (error) {
+      this.logger.error(`Failed to generate presigned URL for ${objectKey}: ${error.message}`);
+      throw error;
+    }
+  }
 }

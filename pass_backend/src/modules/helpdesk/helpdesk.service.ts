@@ -297,4 +297,151 @@ export class HelpdeskService {
        throw new InternalServerErrorException(`Failed to retrieve messages: ${error.message}`);
     }
   }
+
+  async deleteMessage(helpdeskId: string, messageIndex: number) {
+    const helpdesk = await this.findOne(helpdeskId);
+    const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
+    const prefix = `${helpdesk.bucketPath}/messages/`;
+
+    try {
+      // List all messages
+      const listCommand = new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: prefix,
+      });
+      const response = await this.minioService.client.send(listCommand);
+      
+      if (!response.Contents || response.Contents.length === 0) {
+        throw new NotFoundException('No messages found');
+      }
+
+      // Sort and get the message at the specified index
+      const sortedMessages = response.Contents
+        .filter(obj => obj.Key.endsWith('.json'))
+        .sort((a, b) => a.Key!.localeCompare(b.Key!));
+
+      if (messageIndex < 0 || messageIndex >= sortedMessages.length) {
+        throw new NotFoundException('Message not found');
+      }
+
+      const messageToDelete = sortedMessages[messageIndex];
+
+      // Delete the message file
+      const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+      await this.minioService.client.send(new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: messageToDelete.Key,
+      }));
+
+      return { message: 'Message deleted successfully' };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Failed to delete message: ${error.message}`);
+    }
+  }
+
+  // --- Attachment Handling ---
+
+  async uploadAttachment(
+    helpdeskId: string,
+    file: Express.Multer.File,
+  ): Promise<{ url: string; filename: string; path: string }> {
+    const helpdesk = await this.findOne(helpdeskId);
+    const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
+    
+    // Generate unique filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filename = `${timestamp}_${sanitizedOriginalName}`;
+    const filePath = `${helpdesk.bucketPath}/attachments/${filename}`;
+
+    try {
+      await this.minioService.client.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: filePath,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+          Metadata: {
+            originalName: file.originalname,
+            uploadedAt: new Date().toISOString(),
+          },
+        }),
+      );
+
+      // Generate presigned URL for download (valid for 7 days)
+      const url = await this.minioService.getPresignedUrl(bucketName, filePath, 7 * 24 * 60 * 60);
+
+      return {
+        url,
+        filename,
+        path: `attachments/${filename}`,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to upload attachment: ${error.message}`);
+    }
+  }
+
+  async getAttachment(helpdeskId: string, filename: string): Promise<{ stream: any; contentType: string; originalName: string }> {
+    const helpdesk = await this.findOne(helpdeskId);
+    const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
+    const filePath = `${helpdesk.bucketPath}/attachments/${filename}`;
+
+    try {
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: filePath,
+      });
+      
+      const response = await this.minioService.client.send(command);
+      
+      return {
+        stream: response.Body,
+        contentType: response.ContentType || 'application/octet-stream',
+        originalName: response.Metadata?.originalName || filename,
+      };
+    } catch (error) {
+      throw new NotFoundException(`Attachment not found: ${error.message}`);
+    }
+  }
+
+  async listAttachments(helpdeskId: string): Promise<Array<{ filename: string; size: number; uploadedAt: string; url: string }>> {
+    const helpdesk = await this.findOne(helpdeskId);
+    const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
+    const prefix = `${helpdesk.bucketPath}/attachments/`;
+
+    try {
+      const listCommand = new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: prefix,
+      });
+      
+      const response = await this.minioService.client.send(listCommand);
+      
+      if (!response.Contents || response.Contents.length === 0) {
+        return [];
+      }
+
+      const attachments = await Promise.all(
+        response.Contents.map(async (obj) => {
+          const filename = obj.Key!.split('/').pop()!;
+          const url = await this.minioService.getPresignedUrl(bucketName, obj.Key!, 7 * 24 * 60 * 60);
+          
+          return {
+            filename,
+            size: obj.Size || 0,
+            uploadedAt: obj.LastModified?.toISOString() || new Date().toISOString(),
+            url,
+          };
+        })
+      );
+
+      return attachments.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
+    } catch (error) {
+      console.error('Error listing attachments from MinIO:', error.message);
+      return [];
+    }
+  }
 }
