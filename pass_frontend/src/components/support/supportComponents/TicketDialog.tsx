@@ -71,6 +71,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTicketUpdates } from "./useTicketUpdates";
 import { DialogTitle } from "@/components/ui/dialog";
 import { TicketMessages } from "./TicketMessages";
+import { useTicketMessages } from "@/features/helpdesk/hooks/use-ticket-messages";
 
 interface TicketDialogProps {
   ticket: TicketData | null;
@@ -100,6 +101,10 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
   onUpdateEnvironment,
 }) => {
   const { currentUser } = useAuth();
+
+  // Get real message count
+  const { messages } = useTicketMessages(initialTicket?.id || "");
+  const realMessageCount = messages?.length || 0;
 
   const {
     ticket,
@@ -322,7 +327,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           className="text-sm font-medium px-3 py-1.5"
                         >
                           <MessageSquare className="w-4 h-4 mb-0.5 mr-1 text-inherit" />
-                          Mensagens
+                          Mensagens ({realMessageCount})
                         </TabsTrigger>
                         <TabsTrigger
                           supportTab={true}
@@ -806,7 +811,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           <span className="">Mensagens</span>
                         </div>
                         <span className="font-semibold text-xs">
-                          {ticket.messageCount}
+                          {realMessageCount}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
