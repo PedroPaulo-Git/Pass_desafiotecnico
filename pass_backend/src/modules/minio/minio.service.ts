@@ -97,28 +97,45 @@ export class MinioService implements OnModuleInit {
     this.logger.log('-----------------------------------');
   }
 
-  async waitForMinioToWakeUp(retries = 30) {
+  async waitForMinioToWakeUp(retries = 40) {
     this.logger.log(`[WAKE UP] Checking if MinIO is awake at: ${this.baseUrl}`);
     
     for (let i = 0; i < retries; i++) {
       try {
-        // Ping root or health to trigger platform wake-up.
-        // Even a simple fetch to the endpoint works like a browser visit.
-        const response = await fetch(`${this.baseUrl}/minio/health/live`);
+        // Ping BOTH the root and health endpoint to ensure Render's proxy wakes up.
+        // We use browser-like headers to fool any potential "bot" protection or just to mimic the user.
+        // Also added a cache-busting timestamp.
+        const targetUrl = i % 2 === 0 ? this.baseUrl : `${this.baseUrl}/minio/health/live`;
+        const fullUrl = `${targetUrl}?t=${Date.now()}`;
         
-        if (response.ok || response.status === 403) {
-            // 200 = OK, 403 = MinIO is running but we didn't send auth (which is expected on simple fetch)
+        this.logger.debug(`[WAKE UP DEBUG] Pinging: ${fullUrl}`);
+        
+        const response = await fetch(fullUrl, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          // Increase timeout to 10s for Render cold starts
+          signal: AbortSignal.timeout(10000)
+        });
+        
+        // Render returns 502/503 when waking up. Any other status (even 403/404) means the service is reachable.
+        if (response.status !== 502 && response.status !== 503 && response.status !== 504) {
             this.logger.log(`[WAKE UP] MinIO is awake! (Status: ${response.status})`);
             return;
         }
 
-        this.logger.warn(`[WAKE UP] MinIO responding with status ${response.status}. Retrying... (${i + 1}/${retries})`);
+        this.logger.warn(`[WAKE UP] MinIO responding with status ${response.status} (Waking up...). Retrying... (${i + 1}/${retries})`);
       } catch (error: any) {
         this.logger.warn(`[WAKE UP] MinIO unreachable (${error?.cause?.code || error?.message}). Retrying... (${i + 1}/${retries})`);
       }
       
-      // Wait 5 seconds between pings
-      await new Promise(r => setTimeout(r, 5000));
+      // Wait 3 seconds between pings (faster pings can help trigger some proxies)
+      await new Promise(r => setTimeout(r, 3000));
     }
     
     this.logger.error('[WAKE UP] Failed to wake up MinIO after multiple attempts. Subsequent bucket checks may fail.');
