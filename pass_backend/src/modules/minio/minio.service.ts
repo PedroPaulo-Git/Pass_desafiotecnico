@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 export class MinioService implements OnModuleInit {
   private readonly logger = new Logger(MinioService.name);
   private s3Client: S3Client;
+  private baseUrl: string;
 
   constructor(private configService: ConfigService) {
     const endpointEnv = this.configService.get<string>('MINIO_ENDPOINT');
@@ -66,6 +67,8 @@ export class MinioService implements OnModuleInit {
     const accessKey = accessKeyEnv || rootUserEnv || 'minioadmin';
     const secretKey = secretKeyEnv || rootPassEnv || 'minioadmin123';
 
+    this.baseUrl = endpoint;
+
     this.logger.log(`Final MinIO Client Endpoint: ${endpoint}`);
     this.logger.log(`MinIO AccessKey starts with: ${accessKey?.substring(0, 3)}...`);
     this.logger.log(`MinIO Use SSL: ${finalUseSsl}`);
@@ -82,6 +85,9 @@ export class MinioService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    // Attempt to wake up MinIO first
+    await this.waitForMinioToWakeUp();
+    
     const vehiclesBucket = this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles';
     const helpdeskBucket = this.configService.get<string>('MINIO_BUCKET_HELPDESK') || 'helpdesk';
 
@@ -91,7 +97,34 @@ export class MinioService implements OnModuleInit {
     this.logger.log('-----------------------------------');
   }
 
-  async ensureBucketExists(bucketName: string, retries = 6) {
+  async waitForMinioToWakeUp(retries = 30) {
+    this.logger.log(`[WAKE UP] Checking if MinIO is awake at: ${this.baseUrl}`);
+    
+    for (let i = 0; i < retries; i++) {
+      try {
+        // Ping root or health to trigger platform wake-up.
+        // Even a simple fetch to the endpoint works like a browser visit.
+        const response = await fetch(`${this.baseUrl}/minio/health/live`);
+        
+        if (response.ok || response.status === 403) {
+            // 200 = OK, 403 = MinIO is running but we didn't send auth (which is expected on simple fetch)
+            this.logger.log(`[WAKE UP] MinIO is awake! (Status: ${response.status})`);
+            return;
+        }
+
+        this.logger.warn(`[WAKE UP] MinIO responding with status ${response.status}. Retrying... (${i + 1}/${retries})`);
+      } catch (error: any) {
+        this.logger.warn(`[WAKE UP] MinIO unreachable (${error?.cause?.code || error?.message}). Retrying... (${i + 1}/${retries})`);
+      }
+      
+      // Wait 5 seconds between pings
+      await new Promise(r => setTimeout(r, 5000));
+    }
+    
+    this.logger.error('[WAKE UP] Failed to wake up MinIO after multiple attempts. Subsequent bucket checks may fail.');
+  }
+
+  async ensureBucketExists(bucketName: string, retries = 30) {
     for (let i = 0; i < retries; i++) {
       try {
         this.logger.debug(`[MINIO DEBUG] Attempt ${i + 1}/${retries}: Sending HeadBucketCommand for: ${bucketName}`);
