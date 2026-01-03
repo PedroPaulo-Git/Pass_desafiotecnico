@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { motion, Transition } from "framer-motion";
+import ButtonBot from "../ui/ButtonBot";
 
 interface ToolbarProps {
   statusFilter: string;
@@ -66,12 +67,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium cursor-pointer transition-colors h-7 w-7 p-0 hover:bg-background rounded-md text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
-                >
-                  <Bot className="size-4" />
-                </button>
+                <ButtonBot tooltip={true} />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Automações AI</p>
