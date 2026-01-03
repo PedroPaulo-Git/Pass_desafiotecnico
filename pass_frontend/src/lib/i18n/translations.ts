@@ -316,6 +316,35 @@ export const translations = {
       update: "Atualizar",
       export: "Exportar",
     },
+    supportLanding: {
+      title: "Gerenciamento de Viagens e Serviços",
+      subtitle: "Encontre e gerencie todas as suas viagens em um só lugar",
+      description1:
+        "Consulte facilmente suas viagens, voos, hotéis e outros serviços contratados. Nossa plataforma centraliza todas as informações para facilitar o gerenciamento.",
+      description2:
+        "Use o formulário acima para buscar suas viagens por localizador ou período.",
+      smartSearch: {
+        title: "Busca Inteligente",
+        description:
+          "Encontre rapidamente suas viagens usando localizador ou outros filtros avançados.",
+      },
+      centralized: {
+        title: "Centralizado",
+        description:
+          "Todas as suas viagens em um único local, com informações detalhadas e status atualizados.",
+      },
+      dateControl: {
+        title: "Controle de Datas",
+        description:
+          "Visualize e organize suas viagens por período de utilização, inclusão ou expiração das reservas.",
+      },
+      realTimeStatus: {
+        title: "Status em Tempo Real",
+        description:
+          "Acompanhe o status de todas as suas viagens, desde orçamento até confirmação e utilização.",
+      },
+      tip: "Você pode abrir múltiplas abas de busca para comparar diferentes períodos ou tipos de viagens.",
+    },
   },
   en: {
     // Language selector
@@ -633,6 +662,35 @@ export const translations = {
       update: "Update",
       export: "Export",
     },
+    supportLanding: {
+      title: "Management of Trips and Services",
+      subtitle: "Find and manage all your trips in one place",
+      description1:
+        "Easily check your trips, flights, hotels, and other contracted services. Our platform centralizes all information to simplify management.",
+      description2:
+        "Use the form above to search your trips by locator or period.",
+      smartSearch: {
+        title: "Smart Search",
+        description:
+          "Quickly find your trips using locator or other advanced filters.",
+      },
+      centralized: {
+        title: "Centralized",
+        description:
+          "All your trips in one place, with detailed information and up-to-date status.",
+      },
+      dateControl: {
+        title: "Date Control",
+        description:
+          "View and organize your trips by usage period, inclusion, or reservation expiration.",
+      },
+      realTimeStatus: {
+        title: "Real-time Status",
+        description:
+          "Track the status of all your trips, from budget to confirmation and usage.",
+      },
+      tip: "You can open multiple search tabs to compare different periods or trip types.",
+    },
   },
   es: {
     // Language selector
@@ -949,6 +1007,35 @@ export const translations = {
       logout: "Cerrar sesión",
       update: "Actualizar",
       export: "Exportar",
+    },
+    supportLanding: {
+      title: "Gestión de Viajes y Servicios",
+      subtitle: "Encuentre y gestione todos sus viajes en un solo lugar",
+      description1:
+        "Consulte fácilmente sus viajes, vuelos, hoteles y otros servicios contratados. Nuestra plataforma centraliza toda la información para facilitar la gestión.",
+      description2:
+        "Use el formulario de arriba para buscar sus viajes por localizador o período.",
+      smartSearch: {
+        title: "Búsqueda Inteligente",
+        description:
+          "Encuentre rápidamente sus viajes usando el localizador u otros filtros avanzados.",
+      },
+      centralized: {
+        title: "Centralizado",
+        description:
+          "Todos sus viajes en un solo lugar, con información detallada y estados actualizados.",
+      },
+      dateControl: {
+        title: "Control de Fechas",
+        description:
+          "Visualice y organice sus viajes por período de uso, inclusión o vencimiento de reservas.",
+      },
+      realTimeStatus: {
+        title: "Estado en Tiempo Real",
+        description:
+          "Siga el estado de todos sus viajes, desde el presupuesto hasta la confirmación y el uso.",
+      },
+      tip: "Puede abrir múltiples pestañas de búsqueda para comparar diferentes períodos o tipos de viajes.",
     },
   },
 } as const;

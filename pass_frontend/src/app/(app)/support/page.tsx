@@ -37,6 +37,7 @@ export function SupportTicketPage() {
   // Estados temporários para filtros (inicializados com os valores atuais)
   const [tempSearch, setTempSearch] = useState(search);
   const [tempModuleFilter, setTempModuleFilter] = useState(moduleFilter);
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Sincronizar valores temporários quando os valores reais mudam
   React.useEffect(() => {
@@ -52,6 +53,7 @@ export function SupportTicketPage() {
     console.log("Aplicando filtros:", { tempSearch, tempModuleFilter });
     setSearch(tempSearch);
     setModuleFilter(tempModuleFilter);
+    setHasSearched(true);
     console.log("Filtros aplicados com sucesso");
   }, [tempSearch, tempModuleFilter]);
 
@@ -114,6 +116,7 @@ export function SupportTicketPage() {
     setDateRange(undefined);
     setModuleFilter("todos");
     setTempModuleFilter("todos");
+    setHasSearched(false);
   }, []);
 
   const hasActiveFilters = Boolean(
@@ -228,6 +231,7 @@ export function SupportTicketPage() {
         </div>
         <div className="">
           <HelpdeskList
+            hasSearched={hasSearched}
             filters={memoizedFilters}
             onCreateClick={() => setIsCreateDialogOpen(true)}
             onTicketClick={handleTicketClick}

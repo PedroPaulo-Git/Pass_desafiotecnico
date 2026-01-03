@@ -286,7 +286,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
         {/* Coluna 2: Metadados (Atribuição e Tempo) e Ações */}
         <div className="flex items-center gap-2 lg:justify-end">
           {viewMode === "list" && (
-            <div className="flex items-center gap-4 border-t lg:border-t-0 border-border pt-3 lg:pt-0">
+            <div className="flex items-center gap-4 ">
               {/* Atribuído a */}
               <div className="flex flex-col gap-1 min-w-40">
                 <span className="text-xs font-semibold text-foreground/80 tracking-wider">
