@@ -97,102 +97,88 @@ export class MinioService implements OnModuleInit {
     this.logger.log('-----------------------------------');
   }
 
-  async waitForMinioToWakeUp(retries = 30) {
-    const https = await import('https');
-    const http = await import('http');
-    const { URL } = await import('url');
+  async waitForMinioToWakeUp(retries = 20) {
+    this.logger.log(`[WAKE UP] Starting EXTERNAL PROXY wake-up sequence for: ${this.baseUrl}`);
     
-    this.logger.log(`[WAKE UP] Starting NATIVE HTTPS wake-up sequence for: ${this.baseUrl}`);
+    // Strategy: Use external proxy services to make the request appear to come from outside Render
+    // This bypasses any internal service-to-service blocking that Render might have
+    const targetUrl = encodeURIComponent(this.baseUrl);
     
-    const parsedUrl = new URL(this.baseUrl);
-    const isHttps = parsedUrl.protocol === 'https:';
-    const hostname = parsedUrl.hostname;
-    const port = parsedUrl.port || (isHttps ? 443 : 80);
-    
-    const paths = ['/', '/minio/health/live', '/minio/health/ready'];
+    const proxyUrls = [
+      // Direct request (still try it)
+      this.baseUrl,
+      // AllOrigins proxy - makes request from their servers
+      `https://api.allorigins.win/get?url=${targetUrl}`,
+      // Alternative: corsproxy.io
+      `https://corsproxy.io/?${this.baseUrl}`,
+    ];
     
     for (let i = 0; i < retries; i++) {
-      const path = paths[i % paths.length];
-      
-      try {
-        const statusCode = await new Promise<number>((resolve) => {
-          const options = {
-            hostname,
-            port: Number(port),
-            path: `${path}?t=${Date.now()}`,
+      for (const proxyUrl of proxyUrls) {
+        try {
+          const isProxy = proxyUrl !== this.baseUrl;
+          const displayUrl = isProxy ? `PROXY -> ${this.baseUrl}` : this.baseUrl;
+          
+          this.logger.debug(`[WAKE UP] Attempt ${i + 1}/${retries} via: ${isProxy ? 'EXTERNAL PROXY' : 'DIRECT'}`);
+          
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          
+          const response = await fetch(proxyUrl, {
             method: 'GET',
-            timeout: 30000, // 30 second timeout
             headers: {
-              'Host': hostname,
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-              'Accept-Language': 'en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7',
-              'Accept-Encoding': 'gzip, deflate, br',
-              'Connection': 'keep-alive',
-              'Upgrade-Insecure-Requests': '1',
-              'Sec-Fetch-Dest': 'document',
-              'Sec-Fetch-Mode': 'navigate',
-              'Sec-Fetch-Site': 'none',
-              'Sec-Fetch-User': '?1',
-              'Cache-Control': 'max-age=0',
-              'sec-ch-ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
-              'sec-ch-ua-mobile': '?0',
-              'sec-ch-ua-platform': '"Windows"'
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': '*/*',
             },
-            // Critical TLS options for proper SNI
-            ...(isHttps ? {
-              servername: hostname, // SNI - Server Name Indication
-              rejectUnauthorized: true,
-              minVersion: 'TLSv1.2' as const,
-            } : {})
-          };
-          
-          this.logger.debug(`[WAKE UP] Attempt ${i + 1}/${retries}: ${isHttps ? 'https' : 'http'}://${hostname}:${port}${path}`);
-          
-          const client = isHttps ? https : http;
-          const req = client.request(options, (res) => {
-            // Consume response to complete the request
-            res.on('data', () => {});
-            res.on('end', () => {
-              resolve(res.statusCode || 0);
-            });
+            signal: controller.signal
           });
           
-          req.on('error', (err: any) => {
-            this.logger.debug(`[WAKE UP] Request error: ${err.message}`);
-            resolve(0);
-          });
+          clearTimeout(timeoutId);
           
-          req.on('timeout', () => {
-            this.logger.debug(`[WAKE UP] Request timeout`);
-            req.destroy();
-            resolve(0);
-          });
+          this.logger.debug(`[WAKE UP] Response from ${isProxy ? 'proxy' : 'direct'}: ${response.status}`);
           
-          req.end();
-        });
-        
-        this.logger.debug(`[WAKE UP] Response status: ${statusCode}`);
-        
-        // Any non-5xx response means the service is awake
-        if (statusCode > 0 && statusCode < 500) {
-          this.logger.log(`[WAKE UP] ✅ MinIO is AWAKE! (Status: ${statusCode})`);
-          // Give it 2 more seconds to fully stabilize
-          await new Promise(r => setTimeout(r, 2000));
-          return;
+          // For proxies, a 200 means the proxy worked, which means it reached our service
+          // For direct, anything < 500 means the service is awake
+          if (isProxy && response.ok) {
+            // Proxy returned 200, now let's verify the actual service
+            const directCheck = await this.checkMinioDirectly();
+            if (directCheck) {
+              this.logger.log(`[WAKE UP] ✅ MinIO woke up via EXTERNAL PROXY!`);
+              await new Promise(r => setTimeout(r, 2000));
+              return;
+            }
+          } else if (!isProxy && response.status > 0 && response.status < 500) {
+            this.logger.log(`[WAKE UP] ✅ MinIO is AWAKE via direct request! (Status: ${response.status})`);
+            await new Promise(r => setTimeout(r, 2000));
+            return;
+          }
+        } catch (error: any) {
+          this.logger.debug(`[WAKE UP] Request failed: ${error.message?.substring(0, 50)}`);
         }
-        
-        this.logger.warn(`[WAKE UP] MinIO returned ${statusCode}, still waking... (${i + 1}/${retries})`);
-        
-      } catch (error: any) {
-        this.logger.warn(`[WAKE UP] Error: ${error.message} (${i + 1}/${retries})`);
       }
       
-      // Wait 5 seconds between attempts
+      this.logger.warn(`[WAKE UP] MinIO still sleeping... waiting 5s (${i + 1}/${retries})`);
       await new Promise(r => setTimeout(r, 5000));
     }
     
-    this.logger.error('[WAKE UP] ❌ Failed to wake up MinIO after all attempts.');
+    this.logger.error('[WAKE UP] ❌ Failed to wake up MinIO. The service may need manual activation.');
+  }
+
+  private async checkMinioDirectly(): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(`${this.baseUrl}/minio/health/live`, {
+        method: 'GET',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response.status > 0 && response.status < 500;
+    } catch {
+      return false;
+    }
   }
 
   async ensureBucketExists(bucketName: string, retries = 30) {
