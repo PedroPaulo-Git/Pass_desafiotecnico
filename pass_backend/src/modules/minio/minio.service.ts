@@ -85,9 +85,28 @@ export class MinioService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // Attempt to wake up MinIO first
-    await this.waitForMinioToWakeUp();
+    // Run MinIO initialization in background - don't block NestJS startup
+    this.initializeMinioAsync().catch(err => {
+      this.logger.error(`[MINIO BACKGROUND] Initialization failed: ${err.message}`);
+    });
+  }
+
+  private async initializeMinioAsync() {
+    // Small delay to let NestJS finish bootstrapping first
+    await new Promise(r => setTimeout(r, 3000));
     
+    this.logger.log('[MINIO] Starting background initialization...');
+    
+    // Try to wake up MinIO (non-blocking, best-effort)
+    const isAwake = await this.tryWakeUpMinio();
+    
+    if (!isAwake) {
+      this.logger.warn('[MINIO] MinIO is not available. Storage features will be limited.');
+      this.logger.warn('[MINIO] To activate MinIO, visit: ' + this.baseUrl);
+      return;
+    }
+    
+    // If MinIO is awake, ensure buckets exist
     const vehiclesBucket = this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles';
     const helpdeskBucket = this.configService.get<string>('MINIO_BUCKET_HELPDESK') || 'helpdesk';
 
@@ -95,6 +114,38 @@ export class MinioService implements OnModuleInit {
     await this.ensureBucketExists(vehiclesBucket);
     await this.ensureBucketExists(helpdeskBucket);
     this.logger.log('-----------------------------------');
+  }
+
+  private async tryWakeUpMinio(): Promise<boolean> {
+    this.logger.log(`[WAKE UP] Attempting quick wake-up for: ${this.baseUrl}`);
+    
+    // Just try a few times - don't block forever
+    for (let i = 0; i < 5; i++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await fetch(`${this.baseUrl}/minio/health/live`, {
+          method: 'GET',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.status > 0 && response.status < 500) {
+          this.logger.log(`[WAKE UP] ✅ MinIO is available! (Status: ${response.status})`);
+          return true;
+        }
+        
+        this.logger.debug(`[WAKE UP] MinIO returned ${response.status} (${i + 1}/5)`);
+      } catch (error: any) {
+        this.logger.debug(`[WAKE UP] Connection failed: ${error.message?.substring(0, 30)} (${i + 1}/5)`);
+      }
+      
+      await new Promise(r => setTimeout(r, 3000));
+    }
+    
+    return false;
   }
 
   async waitForMinioToWakeUp(retries = 20) {
