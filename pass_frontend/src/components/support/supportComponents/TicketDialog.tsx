@@ -741,49 +741,24 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           Prioridade
                         </span>
                         <div className="flex items-center gap-2">
-                          <Select
-                            value={
-                              ticket?.priorityApi ||
-                              (ticket?.priority
-                                ? displayToApiPriority[ticket.priority]
-                                : "")
+                          <StatusPriorityPopover
+                            data={ticket}
+                            onStatusChange={(status) =>
+                              handleUpdateStatus(ticket.id, status)
                             }
-                            onValueChange={(value) =>
-                              handleUpdatePriority(ticket!.id, value as any)
-                            }
-                            disabled={
-                              !currentUser ||
-                              (currentUser?.role === "CLIENT" &&
-                                (ticket?.status === "Resolvido" ||
-                                  ticket?.status === "Fechado"))
+                            onPriorityChange={(priority) =>
+                              handleUpdatePriority(ticket.id, priority)
                             }
                           >
-                            <SelectTrigger
-                              iconRight={true}
-                              className="w-4 h-6 px-0! -mr-2! border-none bg-transparent p-0! focus:ring-0 shadow-none hover:bg-transparent [&_svg]:transition-transform [&_svg]:duration-200 data-[state=open]:[&_svg]:rotate-180"
+                            <Badge
+                              variant="outline"
+                              className={`${getPriorityStyles(
+                                ticket?.priority || effectivePriority
+                              )} text-xs hover:scale-105 active:scale-95 transition-transform`}
                             >
-                              {/* <SelectValue /> */}
-                            </SelectTrigger>
-                            <SelectContent className="bg-popover">
-                              <SelectItem className="bg-popover" value="BAIXA">
-                                Baixa
-                              </SelectItem>
-                              <SelectItem className="bg-popover" value="MEDIA">
-                                Média
-                              </SelectItem>
-                              <SelectItem className="bg-popover" value="ALTA">
-                                Alta
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Badge
-                            variant="outline"
-                            className={`${getPriorityStyles(
-                              ticket?.priority || effectivePriority
-                            )} text-xs`}
-                          >
-                            {ticket?.priority || effectivePriority}
-                          </Badge>
+                              {ticket?.priority || effectivePriority}
+                            </Badge>
+                          </StatusPriorityPopover>
                         </div>
                       </div>
 
@@ -936,11 +911,11 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                       {!(
+                      {!(
                         currentUser?.role === "CLIENT" &&
                         (ticket?.status === "Resolvido" ||
                           ticket?.status === "Fechado")
-                      ) && (
+                      ) ? (
                         <StatusPriorityPopover
                           data={ticket}
                           onStatusChange={(status) =>
@@ -949,20 +924,34 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           onPriorityChange={(priority) =>
                             handleUpdatePriority(ticket.id, priority)
                           }
-                        />
+                        >
+                          {(() => {
+                            const statusIcon = getStatusIconAndColor(
+                              ticket.status
+                            );
+                            return statusIcon ? (
+                              <statusIcon.icon
+                                className={`w-6 h-6 ${statusIcon.color} transition-transform hover:scale-110 active:scale-90`}
+                              />
+                            ) : (
+                              <CheckCircle2 className="w-8 h-8 text-muted-foreground transition-transform hover:scale-110 active:scale-90" />
+                            );
+                          })()}
+                        </StatusPriorityPopover>
+                      ) : (
+                        (() => {
+                          const statusIcon = getStatusIconAndColor(
+                            ticket.status
+                          );
+                          return statusIcon ? (
+                            <statusIcon.icon
+                              className={`w-8 h-8 ${statusIcon.color}`}
+                            />
+                          ) : (
+                            <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+                          );
+                        })()
                       )}
-                      {(() => {
-                        const statusIcon = getStatusIconAndColor(ticket.status);
-                        return statusIcon ? (
-                          <statusIcon.icon
-                            className={`w-6 h-6 ${statusIcon.color}`}
-                          />
-                        ) : (
-                          <CheckCircle2 className="w-6 h-6 text-muted-foreground" />
-                        );
-                      })()}
-
-                     
                     </div>
                   </motion.div>
 

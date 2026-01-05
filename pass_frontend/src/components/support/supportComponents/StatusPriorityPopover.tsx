@@ -27,6 +27,7 @@ interface Props {
   onStatusChange: (apiStatus: HelpdeskStatus) => void;
   onPriorityChange: (apiPriority: HelpdeskPriority) => void;
   showPriority?: boolean;
+  children?: React.ReactNode;
 }
 
 export const StatusPriorityPopover: React.FC<Props> = ({
@@ -34,6 +35,7 @@ export const StatusPriorityPopover: React.FC<Props> = ({
   onStatusChange,
   onPriorityChange,
   showPriority = true,
+  children,
 }) => {
   const { currentUser } = useAuth();
   const STATUS_OPTIONS = [
@@ -54,13 +56,17 @@ export const StatusPriorityPopover: React.FC<Props> = ({
   return (
     <Popover modal={true}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 px-2 flex items-center gap-2"
-        >
-          <Edit3 className="w-4 h-4 text-muted-foreground" />
-        </Button>
+        {children ? (
+          <div className="cursor-pointer">{children}</div>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 flex items-center gap-2"
+          >
+            <Edit3 className="w-4 h-4 text-muted-foreground" />
+          </Button>
+        )}
       </PopoverTrigger>
 
       <PopoverContent
