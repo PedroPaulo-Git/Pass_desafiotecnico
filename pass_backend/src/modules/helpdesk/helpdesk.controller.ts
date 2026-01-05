@@ -112,4 +112,13 @@ export class HelpdeskController {
 
     return new StreamableFile(stream);
   }
+
+  // --- Ticket History ---
+
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Get ticket history' })
+  @ApiResponse({ status: 200, description: 'Ticket history log' })
+  findAllHistory(@Param('id', ParseUUIDPipe) id: string) {
+    return this.helpdeskService.findAllHistory(id);
+  }
 }

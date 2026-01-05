@@ -112,6 +112,11 @@ export const helpdeskAPI = {
     });
     return data;
   },
+
+  async getHistory(helpdeskId: string): Promise<Array<{ id: string; type: string; title: string; description: string; userName: string; createdAt: string }>> {
+    const { data } = await api.get(`/helpdesk/${helpdeskId}/history`);
+    return data;
+  },
 };
 
 // Mock API calls (for when backend is offline)

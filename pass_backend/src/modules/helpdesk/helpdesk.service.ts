@@ -4,9 +4,10 @@ import { Repository, Like, Raw } from 'typeorm';
 import { Helpdesk } from './helpdesk.entity';
 import { User } from '../users/user.entity';
 import { CreateHelpdeskDto, UpdateHelpdeskDto } from './dto/helpdesk.dto';
-import { HelpdeskStatus, UserRole } from '../../common/enums';
+import { HelpdeskStatus, UserRole, HelpdeskHistoryType } from '../../common/enums';
 import { MinioService } from '../minio/minio.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { HelpdeskHistory } from './history.entity';
 import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
@@ -17,6 +18,8 @@ export class HelpdeskService {
     private helpdeskRepository: Repository<Helpdesk>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(HelpdeskHistory)
+    private historyRepository: Repository<HelpdeskHistory>,
     private minioService: MinioService,
     private notificationsGateway: NotificationsGateway,
   ) {}
@@ -102,7 +105,17 @@ export class HelpdeskService {
 
     const savedTicket = await this.helpdeskRepository.save(helpdesk);
 
-    // 7. Notify Admins and Developers
+    // 7. Record History
+    await this.recordHistory({
+      helpdeskId: savedTicket.id,
+      type: HelpdeskHistoryType.CREATION,
+      title: "Chamado Criado",
+      description: `Ticket ${savedTicket.ticketNumber} aberto pelo cliente.`,
+      userId: savedTicket.clientId,
+      userName: client.name,
+    });
+
+    // 8. Notify Admins and Developers
     this.notificationsGateway.emitToSupport('ticket:created', savedTicket);
 
     return savedTicket;
@@ -158,11 +171,20 @@ export class HelpdeskService {
 
   async update(id: string, updateHelpdeskDto: UpdateHelpdeskDto): Promise<Helpdesk> {
     const helpdesk = await this.findOne(id);
+    const oldStatus = helpdesk.status;
+    const oldPriority = helpdesk.priority;
+    const oldAssigneeId = helpdesk.assignedUserId;
+    const oldTitle = helpdesk.title;
+    const oldDescription = helpdesk.description;
+    const oldCategory = helpdesk.category;
+    const oldModule = helpdesk.module;
+    const oldEnvironment = helpdesk.environment;
 
     // Validate assignedUserId
+    let newAssignee = null;
     if (updateHelpdeskDto.assignedUserId) {
-      const assignee = await this.userRepository.findOne({ where: { id: updateHelpdeskDto.assignedUserId } });
-      if (!assignee || assignee.role !== UserRole.DEVELOPER) {
+      newAssignee = await this.userRepository.findOne({ where: { id: updateHelpdeskDto.assignedUserId } });
+      if (!newAssignee || newAssignee.role !== UserRole.DEVELOPER) {
         throw new BadRequestException('Assigned user must be a developer.');
       }
     }
@@ -173,6 +195,104 @@ export class HelpdeskService {
 
     this.helpdeskRepository.merge(helpdesk, updateHelpdeskDto);
     const updatedTicket = await this.helpdeskRepository.save(helpdesk);
+
+    // --- Record History for Changes ---
+    
+    // 1. Status Change
+    if (updateHelpdeskDto.status && updateHelpdeskDto.status !== oldStatus) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.STATUS_CHANGE,
+        title: "Status Alterado",
+        description: `O status foi alterado para ${updatedTicket.status}.`,
+        oldValue: oldStatus,
+        newValue: updatedTicket.status,
+      });
+    }
+
+    // 2. Priority Change
+    if (updateHelpdeskDto.priority && updateHelpdeskDto.priority !== oldPriority) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.PRIORITY_CHANGE,
+        title: "Prioridade Alterada",
+        description: `A prioridade foi definida como ${updatedTicket.priority}.`,
+        oldValue: oldPriority,
+        newValue: updatedTicket.priority,
+      });
+    }
+
+    // 3. Assignment Change
+    if (updateHelpdeskDto.assignedUserId && updateHelpdeskDto.assignedUserId !== oldAssigneeId) {
+      const assigneeName = (await this.userRepository.findOne({ where: { id: updateHelpdeskDto.assignedUserId } }))?.name || "Desenvolvedor";
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.ASSIGNMENT,
+        title: "Responsável Atribuído",
+        description: `Chamado atribuído a ${assigneeName}.`,
+        newValue: assigneeName,
+        userId: updatedTicket.assignedUserId,
+        userName: assigneeName,
+      });
+    }
+
+    // 4. Title Change
+    if (updateHelpdeskDto.title && updateHelpdeskDto.title !== oldTitle) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.UPDATE,
+        title: "Título Alterado",
+        description: `Título alterado para: ${updatedTicket.title}`,
+        oldValue: oldTitle,
+        newValue: updatedTicket.title,
+      });
+    }
+
+    // 5. Description Change
+    if (updateHelpdeskDto.description && updateHelpdeskDto.description !== oldDescription) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.UPDATE,
+        title: "Descrição Alterada",
+        description: "A descrição do chamado foi atualizada.",
+      });
+    }
+
+    // 6. Category Change
+    if (updateHelpdeskDto.category && updateHelpdeskDto.category !== oldCategory) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.UPDATE,
+        title: "Categoria Alterada",
+        description: `Categoria alterada de ${oldCategory} para ${updatedTicket.category}.`,
+        oldValue: oldCategory,
+        newValue: updatedTicket.category,
+      });
+    }
+
+    // 7. Module Change
+    if (updateHelpdeskDto.module && updateHelpdeskDto.module !== oldModule) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.UPDATE,
+        title: "Módulo Alterado",
+        description: `Módulo alterado de ${oldModule} para ${updatedTicket.module}.`,
+        oldValue: oldModule,
+        newValue: updatedTicket.module,
+      });
+    }
+
+    // 8. Environment Change
+    if (updateHelpdeskDto.environment && updateHelpdeskDto.environment !== oldEnvironment) {
+      await this.recordHistory({
+        helpdeskId: updatedTicket.id,
+        type: HelpdeskHistoryType.UPDATE,
+        title: "Ambiente Alterado",
+        description: `Ambiente alterado de ${oldEnvironment} para ${updatedTicket.environment}.`,
+        oldValue: oldEnvironment,
+        newValue: updatedTicket.environment,
+      });
+    }
 
     // Notify client about status/priority/assignment changes
     this.notificationsGateway.emitToUser(updatedTicket.clientId, 'ticket:updated', updatedTicket);
@@ -244,6 +364,16 @@ export class HelpdeskService {
       } else {
         this.notificationsGateway.emitToUser(helpdesk.clientId, 'message:new', notificationData);
       }
+
+      // Record History
+      await this.recordHistory({
+        helpdeskId,
+        type: HelpdeskHistoryType.MESSAGE,
+        title: "Nova Mensagem",
+        description: `Enviada por ${author.name}.`,
+        userId: author.id,
+        userName: author.name,
+      });
 
       return { message: 'Message sent successfully', fileName, data: completeMessage };
     } catch (error) {
@@ -374,6 +504,15 @@ export class HelpdeskService {
       // Generate presigned URL for download (valid for 7 days)
       const url = await this.minioService.getPresignedUrl(bucketName, filePath, 7 * 24 * 60 * 60);
 
+      // Record History
+      await this.recordHistory({
+        helpdeskId,
+        type: HelpdeskHistoryType.ATTACHMENT,
+        title: "Novo Anexo",
+        description: `Arquivo "${file.originalname}" enviado.`,
+        newValue: filename,
+      });
+
       return {
         url,
         filename,
@@ -442,6 +581,58 @@ export class HelpdeskService {
     } catch (error) {
       console.error('Error listing attachments from MinIO:', error.message);
       return [];
+    }
+  }
+
+  // --- History Handling ---
+
+  async findAllHistory(helpdeskId: string): Promise<HelpdeskHistory[]> {
+    return this.historyRepository.find({
+      where: { helpdeskId },
+      order: { createdAt: 'DESC' },
+      relations: ['user'],
+    });
+  }
+
+  private async recordHistory(params: {
+    helpdeskId: string;
+    type: HelpdeskHistoryType;
+    title: string;
+    description?: string;
+    oldValue?: string;
+    newValue?: string;
+    userId?: string;
+    userName?: string;
+  }): Promise<void> {
+    try {
+      // 1. Save to Database
+      const history = this.historyRepository.create(params);
+      const savedHistory = await this.historyRepository.save(history);
+
+      // 2. Save to MinIO Bucket
+      const helpdesk = await this.helpdeskRepository.findOne({ where: { id: params.helpdeskId } });
+      if (helpdesk) {
+        const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, '-');
+        const fileName = `${timestamp}_${params.type}.json`;
+        
+        const historyJson = {
+          ...params,
+          id: savedHistory.id,
+          createdAt: now.toISOString(),
+        };
+
+        await this.minioService.client.send(new PutObjectCommand({
+          Bucket: bucketName,
+          Key: `${helpdesk.bucketPath}/history/${fileName}`,
+          Body: JSON.stringify(historyJson),
+          ContentType: 'application/json',
+        }));
+      }
+    } catch (error) {
+      // Don't throw - history recording should not break main flow
+      console.error(`[HISTORY ERROR] Failed to record history: ${error.message}`);
     }
   }
 }

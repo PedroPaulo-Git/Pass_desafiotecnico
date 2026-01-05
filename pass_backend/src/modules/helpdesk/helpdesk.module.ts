@@ -4,12 +4,13 @@ import { HelpdeskService } from './helpdesk.service';
 import { HelpdeskController } from './helpdesk.controller';
 import { Helpdesk } from './helpdesk.entity';
 import { User } from '../users/user.entity';
+import { HelpdeskHistory } from './history.entity';
 import { MinioModule } from '../minio/minio.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Helpdesk, User]),
+    TypeOrmModule.forFeature([Helpdesk, User, HelpdeskHistory]),
     MinioModule,
     UsersModule,
   ],
