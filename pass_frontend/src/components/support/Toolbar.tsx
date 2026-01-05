@@ -20,6 +20,8 @@ import ButtonBot from "../ui/ButtonBot";
 interface ToolbarProps {
   statusFilter: string;
   setStatusFilter: (value: string) => void;
+  priorityFilter: string;
+  setPriorityFilter: (value: string) => void;
   statusCounts: {
     total: number;
     abertos: number;
@@ -45,6 +47,8 @@ const springConfig = {
 export const Toolbar: React.FC<ToolbarProps> = ({
   statusFilter,
   setStatusFilter,
+  priorityFilter,
+  setPriorityFilter,
   statusCounts,
   viewMode,
   setViewMode,
@@ -145,35 +149,77 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
       </div>
 
-      {/* GRUPO: TIPO */}
+      {/* GRUPO: PRIORIDADE */}
       <div className="flex items-center">
         <label className="flex items-center gap-2 select-none text-xs font-semibold text-muted-foreground tracking-wide uppercase whitespace-nowrap mr-2">
-          Tipo
+          Prioridade
         </label>
         <div
-          className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9 p-1 mr-6"
+          className="flex flex-row items-center gap-1 bg-muted/50 rounded-lg h-9"
           role="tablist"
         >
           <motion.button
             layout
             transition={springConfig}
             type="button"
-            className="px-6 py-2 text-sm font-medium rounded-md bg-purple-500 text-white shadow-sm"
-            role="tab"
-            aria-selected="true"
+            onClick={() => setPriorityFilter("Todos")}
+            className={cn(
+              "px-6 py-2 text-sm font-medium rounded-md whitespace-nowrap cursor-pointer transition-colors",
+              priorityFilter === "Todos"
+                ? "bg-purple-500 text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            Journey
+            All
           </motion.button>
-          <motion.button
-            layout
-            transition={springConfig}
-            type="button"
-            className="px-6 py-2 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground transition-colors"
-            role="tab"
-            aria-selected="false"
-          >
-            Service
-          </motion.button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <motion.button
+                layout
+                transition={springConfig}
+                type="button"
+                className={cn(
+                  "px-6 py-2 text-sm font-medium rounded-md inline-flex items-center gap-2 justify-center whitespace-nowrap cursor-pointer min-w-[100px] outline-none transition-colors",
+                  priorityFilter !== "Todos"
+                    ? "bg-purple-500 text-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {priorityFilter === "Todos" ? "Filtrar" : priorityFilter}
+              </motion.button>
+            </PopoverTrigger>
+            <PopoverContent variant="toolbar" align="start" className="w-48">
+              <div
+                className="space-y-1"
+                role="radiogroup"
+                aria-label="Select priority"
+              >
+                {[
+                  { label: "All", value: "Todos" },
+                  { label: "Baixa", value: "Baixa" },
+                  { label: "Média", value: "Média" },
+                  { label: "Alta", value: "Alta" },
+                  { label: "Crítica", value: "Crítica" },
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    onClick={() => setPriorityFilter(item.value)}
+                    role="radio"
+                    aria-checked={priorityFilter === item.value}
+                    className={cn(
+                      "w-full px-2 py-1.5 text-sm rounded-md text-left transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none flex items-center justify-between font-normal",
+                      priorityFilter === item.value
+                        ? "bg-accent text-accent-foreground font-medium"
+                        : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 

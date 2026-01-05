@@ -29,6 +29,7 @@ export function SupportTicketPage() {
 
   // Estados para Toolbar e FilterHeader
   const [statusFilter, setStatusFilter] = useState("Todos");
+  const [priorityFilter, setPriorityFilter] = useState("Todos");
   const [viewMode, setViewMode] = useState<"list" | "grid" | "lanes">("list");
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -76,9 +77,18 @@ export function SupportTicketPage() {
       Fechados: "ENCERRADO",
     };
 
+    const priorityMap: Record<string, any> = {
+      Todos: undefined,
+      Baixa: "BAIXA",
+      Média: "MEDIA",
+      Alta: "ALTA",
+      Crítica: "CRITICA",
+    };
+
     const result: HelpdeskFilters = {
       ...filters,
       status: statusMap[statusFilter as string],
+      priority: priorityMap[priorityFilter as string],
       module: moduleFilter !== "todos" ? (moduleFilter as any) : undefined,
       search,
     };
@@ -91,6 +101,7 @@ export function SupportTicketPage() {
     filters.sortBy,
     filters.sortOrder,
     statusFilter,
+    priorityFilter,
     moduleFilter,
     search,
   ]);
@@ -110,7 +121,8 @@ export function SupportTicketPage() {
 
   const handleClearFilters = useCallback(() => {
     console.log("Limpando todos os filtros");
-    setStatusFilter("todos");
+    setStatusFilter("Todos");
+    setPriorityFilter("Todos");
     setSearch("");
     setTempSearch("");
     setDateRange(undefined);
@@ -120,7 +132,11 @@ export function SupportTicketPage() {
   }, []);
 
   const hasActiveFilters = Boolean(
-    statusFilter !== "todos" || search || dateRange || moduleFilter !== "todos"
+    statusFilter !== "Todos" ||
+      priorityFilter !== "Todos" ||
+      search ||
+      dateRange ||
+      moduleFilter !== "todos"
   );
 
   // Dialog states
@@ -222,6 +238,8 @@ export function SupportTicketPage() {
           <Toolbar
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            priorityFilter={priorityFilter}
+            setPriorityFilter={setPriorityFilter}
             statusCounts={statusCounts}
             viewMode={viewMode}
             setViewMode={setViewMode}
