@@ -29,6 +29,8 @@ import {
   getCategoryIconAndColor,
   getPriorityFromCategory,
   getStatusIconAndColor,
+  getStatusColor,
+  getPriorityColor,
 } from "../helpers";
 import {
   MessageSquare,
@@ -53,6 +55,7 @@ import {
   PanelLeft,
   PanelRight,
   MoreHorizontal,
+  Calendar,
 } from "lucide-react";
 import StatusPriorityPopover from "./StatusPriorityPopover";
 import { AssignUserPopover } from "./AssignDeveloperPopover";
@@ -76,6 +79,7 @@ import { TicketMessages } from "./TicketMessages";
 import { useTicketMessages } from "@/features/helpdesk/hooks/use-ticket-messages";
 import { TicketHistory } from "./TicketHistory";
 import { TicketAttachments } from "./TicketAttachments";
+import { UserInfoPopover } from "./UserInfoPopover";
 
 interface TicketDialogProps {
   ticket: TicketData | null;
@@ -173,7 +177,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
   if (!ticket) return null;
 
-  const effectivePriority = ticket.priority || getPriorityFromCategory(ticket.category);
+  const effectivePriority =
+    ticket.priority || getPriorityFromCategory(ticket.category);
 
   const categoryIcon = getCategoryIconAndColor(ticket.category);
 
@@ -306,23 +311,41 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                               Código do ticket:
                             </span>
                             {ticket.ticketNumber}{" "}
-                            {copied ? (
+                                  {copied ? (
                               <Check className="ml-1 mb-0.5 w-3.5 h-3.5 text-green-500" />
-                            ) : (
+                                  ) : (
                               <Copy className="ml-1 mb-0.5 w-3.5 h-3.5 border-border" />
-                            )}
+                                  )}
                           </div>
                         </button>
 
                         <div className="flex items-center gap-3 mt-3">
-                          <Badge
-                            variant="outline"
-                            className={`${getStatusStyles(
-                              ticket.status
-                            )} capitalize`}
-                          >
-                            {ticket.status}
-                          </Badge>
+                            {ticket.status && (
+                            <Badge
+                              variant="subtle"
+                              color={getStatusColor(ticket.status)}
+                            >
+                              {(() => {
+                                const statusInfo = getStatusIconAndColor(
+                                  ticket.status
+                                );
+                                const StatusIcon = statusInfo?.icon;
+                                return StatusIcon ? (
+                                  <StatusIcon className="w-3 h-3" />
+                                ) : null;
+                              })()}
+                              {ticket.status}
+                            </Badge>
+                          )}
+
+                          {effectivePriority && (
+                            <Badge
+                              variant="subtle"
+                              color={getPriorityColor(effectivePriority)}
+                            >
+                              {effectivePriority}
+                            </Badge>
+                          )}
                           <span className="flex items-center text-center gap-1 text-xs text-muted-foreground">
                             <CalendarDays className="w-4 h-4 mb-0.5" />
                             {ticket.createdAt instanceof Date
@@ -439,14 +462,22 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                     handleUpdatePriority(ticket.id, priority)
                                   }
                                 >
-                                  <Badge
+                                  {/* <Badge
                                     variant="outline"
                                     className={`${getPriorityStyles(
                                       ticket?.priority || effectivePriority
                                     )} text-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer`}
                                   >
                                     {ticket?.priority || effectivePriority}
-                                  </Badge>
+                                  </Badge> */}
+                                   {effectivePriority && (
+                            <Badge
+                              variant="subtle"
+                              color={getPriorityColor(effectivePriority)}
+                            >
+                              {effectivePriority}
+                            </Badge>
+                          )}
                                 </StatusPriorityPopover>
                               </div>
                             </div>
@@ -731,7 +762,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                   {/* --- HEADER SECTION --- */}
 
                   {/* --- MAIN CONTENT AREA --- */}
-                  <div className="flex-1 overflow-y-auto p-4 scrollbar-thin bg-card">
+                  <div className="flex-1 overflow-y-auto p-4 scrollbar-thin bg-card scrollbar-hidden">
                     <TabsContent value="info" className="space-y-6 mt-0">
                       {/* Card 1: Dados do Ticket */}
                       <motion.div
@@ -767,6 +798,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 Categoria
                               </label>
                               <Select
+                              
                                 value={ticket?.categoryApi || ""}
                                 onValueChange={(value) =>
                                   handleUpdateCategory(ticket.id, value as any)
@@ -781,7 +813,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
                                   <SelectValue placeholder="Selecione uma categoria" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-popover">
+                                <SelectContent showSearch={true} className="bg-popover">
                                   <SelectItem
                                     className="bg-popover"
                                     value="BUG"
@@ -843,7 +875,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
                                   <SelectValue placeholder="Selecione um módulo" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-popover">
+                                <SelectContent  showSearch={true}className="bg-popover">
                                   <SelectItem
                                     className="bg-popover"
                                     value="AGENDAMENTO"
@@ -896,7 +928,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
                                   <SelectValue placeholder="Selecione um ambiente" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-popover">
+                                <SelectContent showSearch={true} className="bg-popover">
                                   <SelectItem
                                     className="bg-popover"
                                     value="WEB"

@@ -103,7 +103,7 @@ export const getStatusIconAndColor = (status: Status) => {
     case "Aberto":
       return {
         icon: AlertCircle,
-        color: "text-yellow-500",
+        color: "text-amber-500",
       };
     case "Em Análise":
       return {
@@ -118,7 +118,7 @@ export const getStatusIconAndColor = (status: Status) => {
     case "Aguardando Usuário":
       return {
         icon: User,
-        color: "text-orange-500",
+        color: "text-rose-500",
       };
     case "Resolvido":
       return {
@@ -138,13 +138,13 @@ export const getStatusIconAndColor = (status: Status) => {
 export const getStatusContainerClass = (status: Status) => {
   switch (status) {
     case "Aberto":
-      return "bg-yellow-500/10 border-yellow-500/20 text-yellow-500";
+      return "bg-amber-500/10 border-amber-500/20 text-amber-500";
     case "Em Análise":
       return "bg-blue-500/10 border-blue-500/20 text-blue-500";
     case "Em Andamento":
       return "bg-purple-500/10 border-purple-500/20 text-purple-400";
     case "Aguardando Usuário":
-      return "bg-orange-500/10 border-orange-500/20 text-orange-500";
+      return "bg-rose-500/10 border-rose-500/20 text-rose-500";
     case "Resolvido":
       return "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
     case "Fechado":
@@ -157,13 +157,13 @@ export const getStatusContainerClass = (status: Status) => {
 export const getStatusBorderColor = (status: Status) => {
   switch (status) {
     case "Aberto":
-      return "border-l-yellow-500";
+      return "border-l-amber-500";
     case "Em Análise":
       return "border-l-blue-500";
     case "Em Andamento":
       return "border-l-purple-500";
     case "Aguardando Usuário":
-      return "border-l-orange-500";
+      return "border-l-rose-500";
     case "Resolvido":
       return "border-l-emerald-500";
     case "Fechado":
@@ -176,13 +176,13 @@ export const getStatusBorderColor = (status: Status) => {
 export const getStatusStyles = (s: Status) => {
   switch (s) {
     case "Aberto":
-      return "text-yellow-500 border-yellow-500 bg-yellow-500/10";
+      return "text-amber-500 border-amber-500 bg-amber-500/10";
     case "Em Análise":
       return "text-blue-500 border-blue-500 bg-blue-500/10";
     case "Em Andamento":
       return "text-purple-400 border-purple-500/30 bg-purple-500/10";
     case "Aguardando Usuário":
-      return "text-orange-500 border-orange-500 bg-orange-500/10";
+      return "text-rose-500 border-rose-500 bg-rose-500/10";
     case "Resolvido":
       return "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
     case "Fechado":
