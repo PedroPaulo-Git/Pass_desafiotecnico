@@ -85,97 +85,101 @@ export class MinioService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // Run MinIO initialization in background - don't block NestJS startup
-    this.initializeMinioAsync().catch(err => {
-      this.logger.error(`[MINIO BACKGROUND] Initialization failed: ${err.message}`);
+    // Non-blocking: Run MinIO setup in background
+    this.setupMinioInBackground();
+  }
+
+  private setupMinioInBackground() {
+    // Don't await - let NestJS continue starting
+    (async () => {
+      // Wait for NestJS to finish bootstrapping
+      await new Promise(r => setTimeout(r, 1000));
+      
+      this.logger.log('');
+      this.logger.log('╔═══════════════════════════════════════════════════════════╗');
+      this.logger.log('║            🚀 MINIO INITIALIZATION STARTING               ║');
+      this.logger.log('╚═══════════════════════════════════════════════════════════╝');
+      this.logger.log(`║ Endpoint: ${this.baseUrl}`);
+      this.logger.log('');
+      
+      const buckets = [
+        this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles',
+        this.configService.get<string>('MINIO_BUCKET_HELPDESK') || 'helpdesk'
+      ];
+      
+      // ========== PHASE 1: Direct SDK Connection ==========
+      this.logger.log('┌─────────────────────────────────────────────────────────────┐');
+      this.logger.log('│ PHASE 1: Direct S3 SDK Connection                           │');
+      this.logger.log('└─────────────────────────────────────────────────────────────┘');
+      
+      let allBucketsReady = true;
+      
+      for (const bucket of buckets) {
+        const success = await this.initializeBucket(bucket);
+        if (!success) {
+          allBucketsReady = false;
+        }
+      }
+      
+      // ========== PHASE 2: External Proxy Fallback (if needed) ==========
+      if (!allBucketsReady) {
+        this.logger.log('');
+        this.logger.log('┌─────────────────────────────────────────────────────────────┐');
+        this.logger.log('│ PHASE 2: External Proxy Wake-Up (Fallback)                  │');
+        this.logger.log('└─────────────────────────────────────────────────────────────┘');
+        
+        const wokenUp = await this.tryExternalProxyWakeUp();
+        
+        if (wokenUp) {
+          this.logger.log('');
+          this.logger.log('┌─────────────────────────────────────────────────────────────┐');
+          this.logger.log('│ PHASE 3: Retry Bucket Initialization After Wake-Up         │');
+          this.logger.log('└─────────────────────────────────────────────────────────────┘');
+          
+          for (const bucket of buckets) {
+            await this.initializeBucket(bucket);
+          }
+        } else {
+          this.logger.warn('[MINIO] ⚠️ Could not wake up MinIO via external proxy');
+          this.logger.warn(`[MINIO] 💡 Manual action: Visit ${this.baseUrl} in your browser`);
+        }
+      }
+      
+      this.logger.log('');
+      this.logger.log('╔═══════════════════════════════════════════════════════════╗');
+      this.logger.log('║            ✅ MINIO INITIALIZATION COMPLETE               ║');
+      this.logger.log('╚═══════════════════════════════════════════════════════════╝');
+      this.logger.log('');
+    })().catch(err => {
+      this.logger.error(`[MINIO] ❌ Background init error: ${err.message}`);
     });
   }
 
-  private async initializeMinioAsync() {
-    // Small delay to let NestJS finish bootstrapping first
-    await new Promise(r => setTimeout(r, 3000));
-    
-    this.logger.log('[MINIO] Starting background initialization...');
-    
-    // Try to wake up MinIO (non-blocking, best-effort)
-    const isAwake = await this.tryWakeUpMinio();
-    
-    if (!isAwake) {
-      this.logger.warn('[MINIO] MinIO is not available. Storage features will be limited.');
-      this.logger.warn('[MINIO] To activate MinIO, visit: ' + this.baseUrl);
-      return;
-    }
-    
-    // If MinIO is awake, ensure buckets exist
-    const vehiclesBucket = this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles';
-    const helpdeskBucket = this.configService.get<string>('MINIO_BUCKET_HELPDESK') || 'helpdesk';
-
-    this.logger.log('--- MINIO BUCKET INITIALIZATION ---');
-    await this.ensureBucketExists(vehiclesBucket);
-    await this.ensureBucketExists(helpdeskBucket);
-    this.logger.log('-----------------------------------');
-  }
-
-  private async tryWakeUpMinio(): Promise<boolean> {
-    this.logger.log(`[WAKE UP] Attempting quick wake-up for: ${this.baseUrl}`);
-    
-    // Just try a few times - don't block forever
-    for (let i = 0; i < 5; i++) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        
-        const response = await fetch(`${this.baseUrl}/minio/health/live`, {
-          method: 'GET',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.status > 0 && response.status < 500) {
-          this.logger.log(`[WAKE UP] ✅ MinIO is available! (Status: ${response.status})`);
-          return true;
-        }
-        
-        this.logger.debug(`[WAKE UP] MinIO returned ${response.status} (${i + 1}/5)`);
-      } catch (error: any) {
-        this.logger.debug(`[WAKE UP] Connection failed: ${error.message?.substring(0, 30)} (${i + 1}/5)`);
-      }
-      
-      await new Promise(r => setTimeout(r, 3000));
-    }
-    
-    return false;
-  }
-
-  async waitForMinioToWakeUp(retries = 20) {
-    this.logger.log(`[WAKE UP] Starting EXTERNAL PROXY wake-up sequence for: ${this.baseUrl}`);
-    
-    // Strategy: Use external proxy services to make the request appear to come from outside Render
-    // This bypasses any internal service-to-service blocking that Render might have
+  /**
+   * Try to wake up MinIO using external proxy services
+   * This makes the request appear to come from outside Render's network
+   */
+  private async tryExternalProxyWakeUp(): Promise<boolean> {
     const targetUrl = encodeURIComponent(this.baseUrl);
     
-    const proxyUrls = [
-      // Direct request (still try it)
-      this.baseUrl,
-      // AllOrigins proxy - makes request from their servers
-      `https://api.allorigins.win/get?url=${targetUrl}`,
-      // Alternative: corsproxy.io
-      `https://corsproxy.io/?${this.baseUrl}`,
+    const proxyServices = [
+      { name: 'AllOrigins', url: `https://api.allorigins.win/get?url=${targetUrl}` },
+      { name: 'CorsProxy', url: `https://corsproxy.io/?${this.baseUrl}` },
     ];
     
-    for (let i = 0; i < retries; i++) {
-      for (const proxyUrl of proxyUrls) {
+    const maxAttempts = 3;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      this.logger.log(`[PROXY] Attempt ${attempt}/${maxAttempts}...`);
+      
+      for (const proxy of proxyServices) {
         try {
-          const isProxy = proxyUrl !== this.baseUrl;
-          const displayUrl = isProxy ? `PROXY -> ${this.baseUrl}` : this.baseUrl;
-          
-          this.logger.debug(`[WAKE UP] Attempt ${i + 1}/${retries} via: ${isProxy ? 'EXTERNAL PROXY' : 'DIRECT'}`);
+          this.logger.debug(`[PROXY] Trying ${proxy.name}...`);
           
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
           
-          const response = await fetch(proxyUrl, {
+          const response = await fetch(proxy.url, {
             method: 'GET',
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -186,39 +190,38 @@ export class MinioService implements OnModuleInit {
           
           clearTimeout(timeoutId);
           
-          this.logger.debug(`[WAKE UP] Response from ${isProxy ? 'proxy' : 'direct'}: ${response.status}`);
+          this.logger.debug(`[PROXY] ${proxy.name} returned: ${response.status}`);
           
-          // For proxies, a 200 means the proxy worked, which means it reached our service
-          // For direct, anything < 500 means the service is awake
-          if (isProxy && response.ok) {
-            // Proxy returned 200, now let's verify the actual service
-            const directCheck = await this.checkMinioDirectly();
-            if (directCheck) {
-              this.logger.log(`[WAKE UP] ✅ MinIO woke up via EXTERNAL PROXY!`);
-              await new Promise(r => setTimeout(r, 2000));
-              return;
+          if (response.ok) {
+            // Proxy succeeded, now verify MinIO is actually awake
+            const isUp = await this.verifyMinioIsUp();
+            if (isUp) {
+              this.logger.log(`[PROXY] ✅ MinIO woke up via ${proxy.name}!`);
+              return true;
             }
-          } else if (!isProxy && response.status > 0 && response.status < 500) {
-            this.logger.log(`[WAKE UP] ✅ MinIO is AWAKE via direct request! (Status: ${response.status})`);
-            await new Promise(r => setTimeout(r, 2000));
-            return;
           }
         } catch (error: any) {
-          this.logger.debug(`[WAKE UP] Request failed: ${error.message?.substring(0, 50)}`);
+          this.logger.debug(`[PROXY] ${proxy.name} failed: ${error.message?.substring(0, 30)}`);
         }
       }
       
-      this.logger.warn(`[WAKE UP] MinIO still sleeping... waiting 5s (${i + 1}/${retries})`);
-      await new Promise(r => setTimeout(r, 5000));
+      // Wait before next attempt
+      if (attempt < maxAttempts) {
+        this.logger.log(`[PROXY] Waiting 5s before next attempt...`);
+        await new Promise(r => setTimeout(r, 5000));
+      }
     }
     
-    this.logger.error('[WAKE UP] ❌ Failed to wake up MinIO. The service may need manual activation.');
+    return false;
   }
 
-  private async checkMinioDirectly(): Promise<boolean> {
+  /**
+   * Quick check if MinIO is responding
+   */
+  private async verifyMinioIsUp(): Promise<boolean> {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
       const response = await fetch(`${this.baseUrl}/minio/health/live`, {
         method: 'GET',
@@ -232,47 +235,96 @@ export class MinioService implements OnModuleInit {
     }
   }
 
-  async ensureBucketExists(bucketName: string, retries = 30) {
-    for (let i = 0; i < retries; i++) {
+  private async initializeBucket(bucketName: string): Promise<boolean> {
+    const maxAttempts = 10;
+    const retryDelay = 3000; // 3 seconds between attempts
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        this.logger.debug(`[MINIO DEBUG] Attempt ${i + 1}/${retries}: Sending HeadBucketCommand for: ${bucketName}`);
+        this.logger.log(`[MINIO] Checking bucket "${bucketName}" (attempt ${attempt}/${maxAttempts})...`);
+        
+        // Try to check if bucket exists using S3 SDK
         await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-        this.logger.log(`[MINIO SUCCESS] Bucket exists: ${bucketName}`);
-        return; // Success, exit loop
+        this.logger.log(`[MINIO] ✅ Bucket "${bucketName}" exists and is accessible!`);
+        return true;
+        
       } catch (error: any) {
         const statusCode = error?.$metadata?.httpStatusCode;
-        const isParsingError = error?.message?.includes('Expected closing tag') || error?.message?.includes('Deserialization error');
+        const errorName = error?.name;
         
-        // If 404, we create it
-        if (error?.name === 'NotFound' || statusCode === 404) {
+        // Bucket doesn't exist - create it
+        if (errorName === 'NotFound' || statusCode === 404) {
+          this.logger.log(`[MINIO] Bucket "${bucketName}" not found. Creating...`);
           try {
-            this.logger.log(`[MINIO] Bucket not found. Creating bucket: ${bucketName}`);
             await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
-            this.logger.log(`[MINIO] Bucket created successfully: ${bucketName}`);
-            return;
-          } catch (createError: any) {
-            this.logger.error(`[MINIO FATAL] Failed to create bucket ${bucketName}: ${createError?.message}`);
-            return; // Don't retry creation if it failed with something else
+            this.logger.log(`[MINIO] ✅ Bucket "${bucketName}" created successfully!`);
+            return true;
+          } catch (createErr: any) {
+            // BucketAlreadyOwnedByYou means it exists (race condition)
+            if (createErr?.name === 'BucketAlreadyOwnedByYou' || createErr?.name === 'BucketAlreadyExists') {
+              this.logger.log(`[MINIO] ✅ Bucket "${bucketName}" already exists!`);
+              return true;
+            }
+            this.logger.error(`[MINIO] ❌ Failed to create bucket: ${createErr.message}`);
+            return false;
           }
         }
-
-        // If it's a "wake-up" candidate (502, 503, ETIMEDOUT, etc.) OR a parsing error (Render HTML error page)
-        const isRetryable = statusCode === 502 || statusCode === 503 || isParsingError || error?.code === 'ETIMEDOUT' || error?.code === 'ECONNREFUSED';
         
-        if (isRetryable && i < retries - 1) {
-          this.logger.warn(`[MINIO RETRY] Service might be sleeping (Status ${statusCode || 'HTML Error'}). Retrying in 10s... (${i + 1}/${retries})`);
-          await new Promise(resolve => setTimeout(resolve, 10000));
-          continue;
+        // Service unavailable (502/503) - MinIO might be sleeping
+        if (statusCode === 502 || statusCode === 503 || statusCode === 504) {
+          this.logger.warn(`[MINIO] MinIO returned ${statusCode} - service may be waking up...`);
+          
+          if (attempt < maxAttempts) {
+            this.logger.log(`[MINIO] Waiting ${retryDelay / 1000}s before retry...`);
+            await new Promise(r => setTimeout(r, retryDelay));
+            continue;
+          }
         }
-
-        this.logger.error(`[MINIO ERROR] Failed checking bucket "${bucketName}" after ${i + 1} attempts`);
-        this.logger.error(`[MINIO ERROR] Name: ${error?.name}, Status: ${statusCode}, Message: ${error?.message}`);
         
-        if (statusCode === 502 || isParsingError) {
-          this.logger.error(`[MINIO ADVICE] 502 Bad Gateway or HTML Error! Render might be waking up the service or Port 9000 is wrong for external access. Please try again in 60 seconds.`);
+        // Connection errors
+        if (error?.code === 'ECONNREFUSED' || error?.code === 'ETIMEDOUT' || error?.message?.includes('fetch failed')) {
+          this.logger.warn(`[MINIO] Connection failed: ${error.code || error.message?.substring(0, 50)}`);
+          
+          if (attempt < maxAttempts) {
+            await new Promise(r => setTimeout(r, retryDelay));
+            continue;
+          }
         }
-        break; // Stop if not retryable or out of retries
+        
+        // Unknown error - log and break
+        this.logger.error(`[MINIO] ❌ Unexpected error: ${errorName} (${statusCode}) - ${error.message?.substring(0, 100)}`);
+        
+        if (attempt >= maxAttempts) {
+          return false;
+        }
+        
+        await new Promise(r => setTimeout(r, retryDelay));
       }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Public method to check if MinIO is currently available
+   */
+  async isMinioAvailable(): Promise<boolean> {
+    try {
+      const bucket = this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles';
+      await this.s3Client.send(new HeadBucketCommand({ Bucket: bucket }));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Legacy method - kept for compatibility but simplified
+   */
+  async ensureBucketExists(bucketName: string): Promise<void> {
+    const success = await this.initializeBucket(bucketName);
+    if (!success) {
+      this.logger.warn(`[MINIO] Could not ensure bucket "${bucketName}" exists`);
     }
   }
 
