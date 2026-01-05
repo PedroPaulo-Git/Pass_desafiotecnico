@@ -97,62 +97,102 @@ export class MinioService implements OnModuleInit {
     this.logger.log('-----------------------------------');
   }
 
-  async waitForMinioToWakeUp(retries = 10) {
-    this.logger.log(`[WAKE UP] Starting HYPER-ROBUST wake-up sequence for: ${this.baseUrl}`);
+  async waitForMinioToWakeUp(retries = 30) {
+    const https = await import('https');
+    const http = await import('http');
+    const { URL } = await import('url');
     
-    const paths = ['', '/minio/health/live', '/minio/health/ready', '/minio/login'];
-    const browserHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
-    };
-
+    this.logger.log(`[WAKE UP] Starting NATIVE HTTPS wake-up sequence for: ${this.baseUrl}`);
+    
+    const parsedUrl = new URL(this.baseUrl);
+    const isHttps = parsedUrl.protocol === 'https:';
+    const hostname = parsedUrl.hostname;
+    const port = parsedUrl.port || (isHttps ? 443 : 80);
+    
+    const paths = ['/', '/minio/health/live', '/minio/health/ready'];
+    
     for (let i = 0; i < retries; i++) {
+      const path = paths[i % paths.length];
+      
       try {
-        // We ping multiple paths in parallel to increase the chance of hitting the proxy trigger
-        const pingResults = await Promise.all(paths.map(async (path) => {
-          try {
-            const url = `${this.baseUrl}${path}?wake=${Date.now()}`;
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-            
-            const res = await fetch(url, {
-              method: 'GET',
-              headers: browserHeaders,
-              signal: controller.signal
+        const statusCode = await new Promise<number>((resolve) => {
+          const options = {
+            hostname,
+            port: Number(port),
+            path: `${path}?t=${Date.now()}`,
+            method: 'GET',
+            timeout: 30000, // 30 second timeout
+            headers: {
+              'Host': hostname,
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+              'Accept-Language': 'en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'Connection': 'keep-alive',
+              'Upgrade-Insecure-Requests': '1',
+              'Sec-Fetch-Dest': 'document',
+              'Sec-Fetch-Mode': 'navigate',
+              'Sec-Fetch-Site': 'none',
+              'Sec-Fetch-User': '?1',
+              'Cache-Control': 'max-age=0',
+              'sec-ch-ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+              'sec-ch-ua-mobile': '?0',
+              'sec-ch-ua-platform': '"Windows"'
+            },
+            // Critical TLS options for proper SNI
+            ...(isHttps ? {
+              servername: hostname, // SNI - Server Name Indication
+              rejectUnauthorized: true,
+              minVersion: 'TLSv1.2' as const,
+            } : {})
+          };
+          
+          this.logger.debug(`[WAKE UP] Attempt ${i + 1}/${retries}: ${isHttps ? 'https' : 'http'}://${hostname}:${port}${path}`);
+          
+          const client = isHttps ? https : http;
+          const req = client.request(options, (res) => {
+            // Consume response to complete the request
+            res.on('data', () => {});
+            res.on('end', () => {
+              resolve(res.statusCode || 0);
             });
-            
-            clearTimeout(timeoutId);
-            return res.status;
-          } catch (e) {
-            return 0; // Failed attempt
-          }
-        }));
-
-        this.logger.debug(`[WAKE UP DEBUG] Attempt ${i + 1} statuses: [${pingResults.join(', ')}]`);
-
-        // If ANY request returned a "reachable" status code (anything but 502/503/504 or 0)
-        const isAwake = pingResults.some(status => status > 0 && status < 500);
+          });
+          
+          req.on('error', (err: any) => {
+            this.logger.debug(`[WAKE UP] Request error: ${err.message}`);
+            resolve(0);
+          });
+          
+          req.on('timeout', () => {
+            this.logger.debug(`[WAKE UP] Request timeout`);
+            req.destroy();
+            resolve(0);
+          });
+          
+          req.end();
+        });
         
-        if (isAwake) {
-          this.logger.log(`[WAKE UP] MinIO is finally awake! (Confirmed by one of the endpoints)`);
+        this.logger.debug(`[WAKE UP] Response status: ${statusCode}`);
+        
+        // Any non-5xx response means the service is awake
+        if (statusCode > 0 && statusCode < 500) {
+          this.logger.log(`[WAKE UP] ✅ MinIO is AWAKE! (Status: ${statusCode})`);
+          // Give it 2 more seconds to fully stabilize
+          await new Promise(r => setTimeout(r, 2000));
           return;
         }
-
-        this.logger.warn(`[WAKE UP] MinIO still waking up... retrying in 4s (Attempt ${i + 1}/${retries})`);
+        
+        this.logger.warn(`[WAKE UP] MinIO returned ${statusCode}, still waking... (${i + 1}/${retries})`);
+        
       } catch (error: any) {
-        this.logger.warn(`[WAKE UP] Ping batch failed: ${error?.message}`);
+        this.logger.warn(`[WAKE UP] Error: ${error.message} (${i + 1}/${retries})`);
       }
       
-      await new Promise(r => setTimeout(r, 4000));
+      // Wait 5 seconds between attempts
+      await new Promise(r => setTimeout(r, 5000));
     }
     
-    this.logger.error('[WAKE UP] Failed to wake up MinIO. Transitioning to bucket checks anyway...');
+    this.logger.error('[WAKE UP] ❌ Failed to wake up MinIO after all attempts.');
   }
 
   async ensureBucketExists(bucketName: string, retries = 30) {
