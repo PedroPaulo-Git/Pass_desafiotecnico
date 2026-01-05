@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, MapPin, Calendar, Clock } from "lucide-react";
+import { Search, LifeBuoy, History, Clock } from "lucide-react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 
 interface SupportLandingProps {
@@ -48,7 +48,7 @@ export const SupportLanding: React.FC<SupportLandingProps> = ({
           <div className="p-6 bg-card border rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center space-x-3 mb-3">
               <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                <MapPin className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <LifeBuoy className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="font-semibold">
                 {t.supportLanding.centralized.title}
@@ -63,7 +63,7 @@ export const SupportLanding: React.FC<SupportLandingProps> = ({
           <div className="p-6 bg-card border rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center space-x-3 mb-3">
               <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <History className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="font-semibold">
                 {t.supportLanding.dateControl.title}

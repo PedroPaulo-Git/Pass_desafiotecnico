@@ -317,33 +317,33 @@ export const translations = {
       export: "Exportar",
     },
     supportLanding: {
-      title: "Gerenciamento de Viagens e Serviços",
-      subtitle: "Encontre e gerencie todas as suas viagens em um só lugar",
+      title: "Central de Suporte e Chamados",
+      subtitle: "Tudo o que você precisa para gerenciar e acompanhar seus chamados.",
       description1:
-        "Consulte facilmente suas viagens, voos, hotéis e outros serviços contratados. Nossa plataforma centraliza todas as informações para facilitar o gerenciamento.",
+        "Nossa plataforma centraliza o atendimento para que você tenha total visibilidade sobre o status, prioridades e histórico de todas as suas solicitações em um só lugar.",
       description2:
-        "Use o formulário acima para buscar suas viagens por localizador ou período.",
+        "Utilize os filtros acima para localizar chamados específicos ou inicie uma nova busca por ID.",
       smartSearch: {
-        title: "Busca Inteligente",
+        title: "Busca Avançada",
         description:
-          "Encontre rapidamente suas viagens usando localizador ou outros filtros avançados.",
+          "Localize chamados instantaneamente por ID, assunto, empresa ou status através dos filtros dinâmicos.",
       },
       centralized: {
-        title: "Centralizado",
+        title: "Gestão Unificada",
         description:
-          "Todas as suas viagens em um único local, com informações detalhadas e status atualizados.",
+          "Visualize todos os seus chamados em uma única interface, facilitando o acompanhamento de pendências.",
       },
       dateControl: {
-        title: "Controle de Datas",
+        title: "Linha do Tempo",
         description:
-          "Visualize e organize suas viagens por período de utilização, inclusão ou expiração das reservas.",
+          "Acompanhe a trajetória de cada solicitação, desde a abertura até a resolução final com registro de datas.",
       },
       realTimeStatus: {
         title: "Status em Tempo Real",
         description:
-          "Acompanhe o status de todas as suas viagens, desde orçamento até confirmação e utilização.",
+          "Fique por dentro de cada atualização e mudança de status assim que elas acontecerem pela equipe operacional.",
       },
-      tip: "Você pode abrir múltiplas abas de busca para comparar diferentes períodos ou tipos de viagens.",
+      tip: "Dica: Filtre por nível de prioridade para focar nos itens mais críticos e urgentes primeiro.",
     },
   },
   en: {
@@ -663,33 +663,33 @@ export const translations = {
       export: "Export",
     },
     supportLanding: {
-      title: "Management of Trips and Services",
-      subtitle: "Find and manage all your trips in one place",
+      title: "Support and Ticket Center",
+      subtitle: "Everything you need to manage and track your support requests.",
       description1:
-        "Easily check your trips, flights, hotels, and other contracted services. Our platform centralizes all information to simplify management.",
+        "Our platform centralizes support so you have full visibility over the status, priorities, and history of all your requests in one place.",
       description2:
-        "Use the form above to search your trips by locator or period.",
+        "Use the filters above to locate specific tickets or start a new search by ID.",
       smartSearch: {
-        title: "Smart Search",
+        title: "Advanced Search",
         description:
-          "Quickly find your trips using locator or other advanced filters.",
+          "Instantly locate tickets by ID, subject, company, or status using dynamic filters.",
       },
       centralized: {
-        title: "Centralized",
+        title: "Unified Management",
         description:
-          "All your trips in one place, with detailed information and up-to-date status.",
+          "View all your tickets in a single interface, making it easier to track pending items.",
       },
       dateControl: {
-        title: "Date Control",
+        title: "Timeline Tracking",
         description:
-          "View and organize your trips by usage period, inclusion, or reservation expiration.",
+          "Follow the journey of each request, from opening to final resolution with date tracking.",
       },
       realTimeStatus: {
         title: "Real-time Status",
         description:
-          "Track the status of all your trips, from budget to confirmation and usage.",
+          "Stay up to date with every update and status change as they happen by the operational team.",
       },
-      tip: "You can open multiple search tabs to compare different periods or trip types.",
+      tip: "Tip: Filter by priority level to focus on the most critical and urgent items first.",
     },
   },
   es: {
@@ -1009,33 +1009,33 @@ export const translations = {
       export: "Exportar",
     },
     supportLanding: {
-      title: "Gestión de Viajes y Servicios",
-      subtitle: "Encuentre y gestione todos sus viajes en un solo lugar",
+      title: "Central de Soporte y Tickets",
+      subtitle: "Todo lo que necesitas para gestionar y seguir tus solicitudes de soporte.",
       description1:
-        "Consulte fácilmente sus viajes, vuelos, hoteles y otros servicios contratados. Nuestra plataforma centraliza toda la información para facilitar la gestión.",
+        "Nuestra plataforma centraliza la atención para que tengas visibilidad total sobre el estado, prioridades e historial de todas sus solicitudes en un solo lugar.",
       description2:
-        "Use el formulario de arriba para buscar sus viajes por localizador o período.",
+        "Utilice los filtros de arriba para localizar tickets específicos o inicie una nueva búsqueda por ID.",
       smartSearch: {
-        title: "Búsqueda Inteligente",
+        title: "Búsqueda Avanzada",
         description:
-          "Encuentre rápidamente sus viajes usando el localizador u otros filtros avanzados.",
+          "Localice tickets instantáneamente por ID, asunto, empresa o estado a través de filtros dinámicos.",
       },
       centralized: {
-        title: "Centralizado",
+        title: "Gestión Unificada",
         description:
-          "Todos sus viajes en un solo lugar, con información detallada y estados actualizados.",
+          "Visualice todos sus tickets en una única interfaz, facilitando el seguimiento de pendientes.",
       },
       dateControl: {
-        title: "Control de Fechas",
+        title: "Línea de Tiempo",
         description:
-          "Visualice y organice sus viajes por período de uso, inclusión o vencimiento de reservas.",
+          "Siga la trayectoria de cada solicitud, desde la apertura hasta la resolución final con registro de fechas.",
       },
       realTimeStatus: {
         title: "Estado en Tiempo Real",
         description:
-          "Siga el estado de todos sus viajes, desde el presupuesto hasta la confirmación y el uso.",
+          "Manténgase al tanto de cada actualización y cambio de estado tan pronto como ocurran por el equipo operativo.",
       },
-      tip: "Puede abrir múltiples pestañas de búsqueda para comparar diferentes períodos o tipos de viajes.",
+      tip: "Sugerencia: Filtre por nivel de prioridad para enfocarse primero en los elementos más críticos e urgentes.",
     },
   },
 } as const;

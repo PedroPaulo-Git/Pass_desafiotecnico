@@ -50,6 +50,7 @@ import {
   Play,
   XCircle,
   Check,
+  Copy,
 } from "lucide-react";
 import { IoMdCopy } from "react-icons/io";
 import StatusPriorityPopover from "./StatusPriorityPopover";
@@ -286,7 +287,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                             {copied ? (
                               <Check className="ml-1 mb-0.5 w-3.5 h-3.5 text-green-500" />
                             ) : (
-                              <IoMdCopy className="ml-1 mb-0.5 w-3.5 h-3.5 border-border" />
+                              <Copy className="ml-1 mb-0.5 w-3.5 h-3.5 border-border" />
                             )}
                           </div>
                         </button>
