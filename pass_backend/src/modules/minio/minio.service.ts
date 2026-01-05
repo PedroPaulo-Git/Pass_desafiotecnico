@@ -170,14 +170,14 @@ export class MinioService implements OnModuleInit {
     const maxAttempts = 3;
     
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      this.logger.log(`[PROXY] Attempt ${attempt}/${maxAttempts}...`);
+      this.logger.log(`[PROXY] 📡 Attempt ${attempt}/${maxAttempts}...`);
       
       for (const proxy of proxyServices) {
         try {
-          this.logger.debug(`[PROXY] Trying ${proxy.name}...`);
+          this.logger.log(`[PROXY] Trying ${proxy.name}...`);
           
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000);
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
           
           const response = await fetch(proxy.url, {
             method: 'GET',
@@ -190,25 +190,39 @@ export class MinioService implements OnModuleInit {
           
           clearTimeout(timeoutId);
           
-          this.logger.debug(`[PROXY] ${proxy.name} returned: ${response.status}`);
+          this.logger.log(`[PROXY] ${proxy.name} returned: ${response.status}`);
           
           if (response.ok) {
-            // Proxy succeeded, now verify MinIO is actually awake
-            const isUp = await this.verifyMinioIsUp();
-            if (isUp) {
-              this.logger.log(`[PROXY] ✅ MinIO woke up via ${proxy.name}!`);
-              return true;
+            // Proxy reached the service! But Render takes time to fully boot.
+            // Wait and then verify multiple times
+            this.logger.log(`[PROXY] ✅ ${proxy.name} reached MinIO! Waiting 15s for boot...`);
+            await new Promise(r => setTimeout(r, 15000));
+            
+            // Try to verify MinIO is actually ready (3 attempts, 5s apart)
+            for (let verifyAttempt = 1; verifyAttempt <= 3; verifyAttempt++) {
+              this.logger.log(`[PROXY] Verifying MinIO status (${verifyAttempt}/3)...`);
+              const isUp = await this.verifyMinioIsUp();
+              if (isUp) {
+                this.logger.log(`[PROXY] 🎉 MinIO is LIVE via ${proxy.name}!`);
+                return true;
+              }
+              if (verifyAttempt < 3) {
+                this.logger.log(`[PROXY] Not ready yet, waiting 5s...`);
+                await new Promise(r => setTimeout(r, 5000));
+              }
             }
+            
+            this.logger.warn(`[PROXY] MinIO didn't respond after wakeup. Continuing...`);
           }
         } catch (error: any) {
-          this.logger.debug(`[PROXY] ${proxy.name} failed: ${error.message?.substring(0, 30)}`);
+          this.logger.warn(`[PROXY] ${proxy.name} failed: ${error.message?.substring(0, 40)}`);
         }
       }
       
-      // Wait before next attempt
+      // Wait before next round of attempts
       if (attempt < maxAttempts) {
-        this.logger.log(`[PROXY] Waiting 5s before next attempt...`);
-        await new Promise(r => setTimeout(r, 5000));
+        this.logger.log(`[PROXY] ⏳ Waiting 10s before next attempt...`);
+        await new Promise(r => setTimeout(r, 10000));
       }
     }
     
