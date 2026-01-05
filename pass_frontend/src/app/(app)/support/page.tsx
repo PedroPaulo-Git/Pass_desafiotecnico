@@ -85,11 +85,18 @@ export function SupportTicketPage() {
       Crítica: "CRITICA",
     };
 
+    const moduleMap: Record<string, any> = {
+      Agendamento: "AGENDAMENTO",
+      Treinamentos: "TREINAMENTOS",
+      Financeiro: "FINANCEIRO",
+      Usuários: "USUARIOS",
+    };
+
     const result: HelpdeskFilters = {
       ...filters,
       status: statusMap[statusFilter as string],
       priority: priorityMap[priorityFilter as string],
-      module: moduleFilter !== "todos" ? (moduleFilter as any) : undefined,
+      module: moduleFilter !== "todos" ? moduleMap[moduleFilter] : undefined,
       search,
     };
 
@@ -117,7 +124,7 @@ export function SupportTicketPage() {
     fechados: 0,
   };
 
-  const modules = ["Financeiro", "Admin", "Checkout", "Integração", "Frontend"];
+  const modules = ["Agendamento", "Treinamentos", "Financeiro", "Usuários"];
 
   const handleClearFilters = useCallback(() => {
     console.log("Limpando todos os filtros");

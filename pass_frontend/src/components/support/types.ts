@@ -1,8 +1,8 @@
 // --- Tipos de Dados Baseados na sua Estrutura ---
 export type Priority = "Alta" | "Média" | "Baixa" ;
 export type Status = "Aberto" | "Em Análise" | "Em Andamento" | "Aguardando Usuário" | "Resolvido" | "Fechado";
-export type Category = "Bug" | "Acesso" | "Dúvida" | "Visual";
-export type Module = "Financeiro" | "Admin" | "Checkout" | "Integração" | "Frontend";
+export type Category = "Bug" | "Agendamento" | "Treinamento" | "Performance" | "Ajuste/Melhoria" | "Outro";
+export type Module = "Agendamento" | "Treinamentos" | "Financeiro" | "Usuários";
 
 export interface Developer {
   id: string;

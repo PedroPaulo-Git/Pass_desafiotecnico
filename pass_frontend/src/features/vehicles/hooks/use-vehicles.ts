@@ -34,9 +34,24 @@ export function useVehicles(filters: VehicleFilters = {}) {
       const search = (filters as unknown as { search?: string }).search;
       if (search) params.append("search", search);
 
-      const { data } = await api.get<PaginatedResponse<Vehicle>>(
-        `/vehicles?${params.toString()}`
+      const response = await api.get<PaginatedResponse<Vehicle> | Vehicle[]>(
+        `/vehicles`,
+        { params }
       );
+      
+      const data = response.data;
+      
+      // If backend returns a plain array, normalize it to PaginatedResponse format
+      if (Array.isArray(data)) {
+        return {
+          items: data,
+          page: filters.page || 1,
+          limit: filters.limit || data.length,
+          total: data.length,
+          totalPages: 1
+        };
+      }
+      
       return data;
     },
   });
@@ -103,10 +118,12 @@ export function useVehicleCounts() {
     queryKey: ["vehicle-counts"],
     queryFn: async () => {
       // First, fetch with limit=1 to get the total count
-      const { data: firstData } = await api.get<PaginatedResponse<Vehicle>>(
-        "/vehicles?limit=1"
+      const { data: firstData } = await api.get<PaginatedResponse<Vehicle> | Vehicle[]>(
+        "/vehicles",
+        { params: { limit: 1 } }
       );
-      const total = firstData.total;
+      
+      const total = Array.isArray(firstData) ? firstData.length : firstData.total;
 
       if (total === 0) {
         return {
@@ -125,10 +142,13 @@ export function useVehicleCounts() {
         };
       }
 
-      // Then, fetch all vehicles with the total limit
-      const { data } = await api.get<PaginatedResponse<Vehicle>>(
-        `/vehicles?limit=${total}`
+      // Then, fetch all vehicles
+      const { data: rawData } = await api.get<PaginatedResponse<Vehicle> | Vehicle[]>(
+        `/vehicles`,
+        { params: { limit: total } }
       );
+
+      const items = Array.isArray(rawData) ? rawData : rawData.items;
 
       const categoryCounts: Record<VehicleCategory, number> = {
         ONIBUS: 0,
@@ -142,7 +162,8 @@ export function useVehicleCounts() {
         INDISPONIVEL: 0,
         VENDIDO: 0,
       };
-      data.items.forEach((vehicle) => {
+      
+      items.forEach((vehicle) => {
         if (categoryCounts[vehicle.category] !== undefined) {
           categoryCounts[vehicle.category]++;
         }

@@ -1,5 +1,5 @@
 import { Priority, Status } from "./types";
-import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle, Eye, UserCheck, FileText, Search, Clock, User, CircleCheckBig } from "lucide-react";
+import { AlertCircle, CheckCircle2, HelpCircle, UserPlus, Play, XCircle, Eye, UserCheck, FileText, Search, Clock, User, CircleCheckBig, Calendar, Zap, MoreHorizontal, Settings } from "lucide-react";
 import { IoTimerOutline } from "react-icons/io5";
 
 
@@ -46,20 +46,30 @@ export const getCategoryIconAndColor = (category: string) => {
         icon: AlertCircle,
         className: "bg-red-500/10 border-red-500/20 text-red-500",
       };
-    case "Acesso":
+    case "Agendamento":
       return {
-        icon: UserPlus,
+        icon: Calendar,
         className: "bg-blue-500/10 border-blue-500/20 text-blue-500",
       };
-    case "Dúvida":
+    case "Treinamento":
       return {
-        icon: HelpCircle,
-        className: "bg-yellow-500/10 border-yellow-500/20 text-yellow-500",
+        icon: Play,
+        className: "bg-purple-500/10 border-purple-500/20 text-purple-500",
       };
-    case "Visual":
+    case "Performance":
+      return {
+        icon: Zap,
+        className: "bg-amber-500/10 border-amber-500/20 text-amber-500",
+      };
+    case "Ajuste/Melhoria":
       return {
         icon: CircleCheckBig,
         className: "bg-green-500/10 border-green-500/20 text-green-500",
+      };
+    case "Outro":
+      return {
+        icon: MoreHorizontal,
+        className: "bg-zinc-500/10 border-zinc-500/20 text-zinc-500",
       };
     default:
       return {
@@ -73,11 +83,15 @@ export const getPriorityFromCategory = (category: string): Priority => {
   switch (category) {
     case "Bug":
       return "Alta";
-    case "Acesso":
-      return "Baixa";
-    case "Dúvida":
+    case "Performance":
+      return "Alta";
+    case "Agendamento":
       return "Média";
-    case "Visual":
+    case "Treinamento":
+      return "Baixa";
+    case "Ajuste/Melhoria":
+      return "Baixa";
+    case "Outro":
       return "Baixa";
     default:
       return "Baixa";

@@ -877,10 +877,6 @@ export function VehicleModal({ isCreate = false }: VehicleModalProps) {
                                         control={control}
                                         rules={{
                                           required: "UF é obrigatória",
-                                          pattern: {
-                                            value: /^[A-Z]{2}$/,
-                                            message: "UF deve conter 2 letras",
-                                          },
                                         }}
                                         placeholder="RJ"
                                         className="h-8"

@@ -26,7 +26,7 @@ export const formatUf = (value: string) => {
 };
 
 export const formatLetters = (value: string) => {
-  return (value || "").toString().replace(/[^^\p{L} \-\.]/gu, "");
+  return (value || "").toString().replace(/[^\p{L} \-\.]/gu, "");
 };
 
 export const sanitizePayload = (payload: any) => {

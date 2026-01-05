@@ -208,9 +208,13 @@ export const CreateTicketDialog: React.FC<CreateTicketDialogProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Bug">Bug</SelectItem>
-                    <SelectItem value="Acesso">Acesso</SelectItem>
-                    <SelectItem value="Dúvida">Dúvida</SelectItem>
-                    <SelectItem value="Visual">Visual</SelectItem>
+                    <SelectItem value="Agendamento">Agendamento</SelectItem>
+                    <SelectItem value="Treinamento">Treinamento</SelectItem>
+                    <SelectItem value="Performance">Performance</SelectItem>
+                    <SelectItem value="Ajuste/Melhoria">
+                      Ajuste/Melhoria
+                    </SelectItem>
+                    <SelectItem value="Outro">Outro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -241,11 +245,10 @@ export const CreateTicketDialog: React.FC<CreateTicketDialogProps> = ({
                     <SelectValue placeholder="Selecione o módulo" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Agendamento">Agendamento</SelectItem>
+                    <SelectItem value="Treinamentos">Treinamentos</SelectItem>
                     <SelectItem value="Financeiro">Financeiro</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Checkout">Checkout</SelectItem>
-                    <SelectItem value="Integração">Integração</SelectItem>
-                    <SelectItem value="Frontend">Frontend</SelectItem>
+                    <SelectItem value="Usuários">Usuários</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

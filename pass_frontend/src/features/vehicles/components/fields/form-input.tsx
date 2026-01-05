@@ -37,11 +37,28 @@ export function FormInput({
   const { field } = useController({ name, control, rules });
 
   const [local, setLocal] = useState<string>(field.value ?? "");
+  const [isFocused, setIsFocused] = useState(false);
+  const lastInternalValueRef = React.useRef<string>(field.value ?? "");
+
+  console.log(`[FormInput:${name}] render`, {
+    fieldValue: field.value,
+    local,
+    lastInternal: lastInternalValueRef.current,
+    isFocused,
+  });
 
   useEffect(() => {
-    // keep local in sync if external value changes
-    setLocal(field.value ?? "");
-  }, [field.value]);
+    // Sync local state ONLY if the form value changed externally AND we are not focused.
+    // If we are focused, we trust the local state while the user is typing.
+    if (!isFocused && field.value !== lastInternalValueRef.current) {
+      console.log(`[FormInput:${name}] External SYNC`, {
+        from: lastInternalValueRef.current,
+        to: field.value,
+      });
+      setLocal(field.value ?? "");
+      lastInternalValueRef.current = field.value ?? "";
+    }
+  }, [field.value, isFocused]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +67,12 @@ export function FormInput({
       if (maxLength && formatted.length > maxLength) {
         formatted = formatted.slice(0, maxLength);
       }
+
+      console.log(`[FormInput:${name}] handleChange`, { raw, formatted });
+
       setLocal(formatted);
+      lastInternalValueRef.current = formatted;
+
       // update RHF immediately so validation runs (useForm mode: 'onChange')
       field.onChange(formatted);
       if (clearErrors) clearErrors(name);
@@ -58,7 +80,12 @@ export function FormInput({
     [formatter, maxLength, field, clearErrors, name]
   );
 
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
   const handleBlur = useCallback(() => {
+    setIsFocused(false);
     field.onBlur();
     if (clearErrors) clearErrors(name);
     if (onBlurSave) {
@@ -71,6 +98,7 @@ export function FormInput({
       variant="modal"
       value={local}
       onChange={handleChange}
+      onFocus={handleFocus}
       onBlur={handleBlur}
       placeholder={placeholder}
       maxLength={maxLength}

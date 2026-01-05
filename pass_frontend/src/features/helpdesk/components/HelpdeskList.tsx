@@ -148,11 +148,11 @@ export function HelpdeskList({
   const mapHelpdeskToTicketData = (ticket: Helpdesk): TicketData => {
     const categoryMap: Record<string, TicketData["category"]> = {
       BUG: "Bug",
-      AGENDAMENTO: "Acesso",
-      TREINAMENTO: "Dúvida",
-      PERFORMANCE: "Visual",
-      AJUSTE_MELHORIA: "Visual",
-      OUTRO: "Dúvida",
+      AGENDAMENTO: "Agendamento",
+      TREINAMENTO: "Treinamento",
+      PERFORMANCE: "Performance",
+      AJUSTE_MELHORIA: "Ajuste/Melhoria",
+      OUTRO: "Outro",
     };
 
     const priorityMap: Record<string, TicketData["priority"]> = {
@@ -172,10 +172,10 @@ export function HelpdeskList({
     };
 
     const moduleMap: Record<string, TicketData["module"]> = {
-      AGENDAMENTO: "Financeiro",
-      TREINAMENTOS: "Admin",
+      AGENDAMENTO: "Agendamento",
+      TREINAMENTOS: "Treinamentos",
       FINANCEIRO: "Financeiro",
-      USUARIOS: "Admin",
+      USUARIOS: "Usuários",
     };
 
     return {
@@ -184,9 +184,11 @@ export function HelpdeskList({
       title: ticket.title,
       description: ticket.description,
       environment: ticket.environment,
-      category: categoryMap[ticket.category] || "Dúvida",
+      category: categoryMap[ticket.category] || "Outro",
       categoryApi: ticket.category || "", // valor original do backend
-      module: ticket.module ? moduleMap[ticket.module] || "Admin" : "Admin",
+      module: ticket.module
+        ? moduleMap[ticket.module] || "Treinamentos"
+        : "Treinamentos",
       moduleApi: ticket.module || "", // valor original do backend
       clientName: clientsMap[ticket.clientId]?.name || "Cliente",
       priority: priorityMap[ticket.priority] || "Baixa",

@@ -83,11 +83,11 @@ export function useTicketUpdates({
     // Atualização otimista - atualizar estado local imediatamente
     const categoryMap: Record<string, TicketData["category"]> = {
       BUG: "Bug",
-      AGENDAMENTO: "Acesso",
-      TREINAMENTO: "Dúvida",
-      PERFORMANCE: "Visual",
-      AJUSTE_MELHORIA: "Visual",
-      OUTRO: "Dúvida",
+      AGENDAMENTO: "Agendamento",
+      TREINAMENTO: "Treinamento",
+      PERFORMANCE: "Performance",
+      AJUSTE_MELHORIA: "Ajuste/Melhoria",
+      OUTRO: "Outro",
     };
 
     setTicket((prev) =>
@@ -114,10 +114,10 @@ export function useTicketUpdates({
 
     // Atualização otimista
     const moduleMap: Record<string, TicketData["module"]> = {
-      AGENDAMENTO: "Financeiro",
-      TREINAMENTOS: "Admin",
+      AGENDAMENTO: "Agendamento",
+      TREINAMENTOS: "Treinamentos",
       FINANCEIRO: "Financeiro",
-      USUARIOS: "Admin",
+      USUARIOS: "Usuários",
     };
 
     setTicket((prev) =>

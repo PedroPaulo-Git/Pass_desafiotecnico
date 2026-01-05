@@ -31,7 +31,7 @@ const createVehicleSchema = z.object({
   category: z.enum(["ONIBUS", "VAN", "CARRO", "CAMINHAO"]),
   classification: z.enum(["PREMIUM", "BASIC", "EXECUTIVO"]),
 
-  state: z.string().length(2, "State must be exactly 2 characters").optional(),
+  state: z.string().max(2, "UF deve ter no máximo 2 caracteres").optional(),
   status: z
     .enum(["LIBERADO", "EM_MANUTENCAO", "VENDIDO", "INDISPONIVEL"])
     .optional(),
@@ -59,7 +59,7 @@ const vehicleSchemaQuery = z.object({
     .optional(),
   category: z.enum(["ONIBUS", "VAN", "CARRO", "CAMINHAO"]).optional(),
   classification: z.enum(["PREMIUM", "BASIC", "EXECUTIVO"]).optional(),
-  state: z.string().length(2, "State must be exactly 2 characters").optional(),
+  state: z.string().max(2, "UF deve ter no máximo 2 caracteres").optional(),
   sortBy: z
     .enum([
       "createdAt",
