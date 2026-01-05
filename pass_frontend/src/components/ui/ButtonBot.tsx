@@ -66,7 +66,7 @@ const ButtonBot = ({ tooltip = false }: { tooltip?: boolean }) => {
             <div
               className={cn(
                 "flex size-9 shrink-0 items-center justify-center rounded-full shadow-sm",
-                tooltip ? "bg-foreground" : "bg-white"
+                tooltip ? "dark:bg-black bg-foreground" : "bg-white"
               )}
             >
               {/* SVG da Logo (Recolocado aqui) */}
@@ -91,7 +91,7 @@ const ButtonBot = ({ tooltip = false }: { tooltip?: boolean }) => {
                     <rect
                       width="720"
                       height="720"
-                      fill="white"
+                      fill="bg-background"
                       transform="translate(0.606934 0.0999756)"
                     ></rect>
                   </clipPath>
@@ -99,7 +99,7 @@ const ButtonBot = ({ tooltip = false }: { tooltip?: boolean }) => {
                     <rect
                       width="484.139"
                       height="479.818"
-                      fill="white"
+                      fill="bg-background"
                       transform="translate(118.557 119.958)"
                     ></rect>
                   </clipPath>
