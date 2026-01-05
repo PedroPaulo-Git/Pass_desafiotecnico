@@ -74,6 +74,8 @@ import { useTicketUpdates } from "./useTicketUpdates";
 import { DialogTitle } from "@/components/ui/dialog";
 import { TicketMessages } from "./TicketMessages";
 import { useTicketMessages } from "@/features/helpdesk/hooks/use-ticket-messages";
+import { TicketHistory } from "./TicketHistory";
+import { TicketAttachments } from "./TicketAttachments";
 
 interface TicketDialogProps {
   ticket: TicketData | null;
@@ -685,16 +687,18 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           />
                         </TabsContent>
 
-                        <TabsContent value="historico" className="px-4 mt-4">
-                          <div className="text-center py-10 text-muted-foreground italic">
-                            Em breve: Histórico de alterações do ticket.
-                          </div>
+                        <TabsContent
+                          value="historico"
+                          className="px-4 mt-4 overflow-y-auto scrollbar-hidden"
+                        >
+                          <TicketHistory ticket={ticket} />
                         </TabsContent>
 
-                        <TabsContent value="anexos" className="px-4 mt-4">
-                          <div className="text-center py-10 text-muted-foreground italic">
-                            Em breve: Gerenciamento de arquivos e anexos.
-                          </div>
+                        <TabsContent
+                          value="anexos"
+                          className="px-4 mt-4 overflow-y-auto scrollbar-hidden"
+                        >
+                          <TicketAttachments ticketId={ticket.id} />
                         </TabsContent>
                       </div>
                     </Tabs>
@@ -932,18 +936,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {(() => {
-                        const statusIcon = getStatusIconAndColor(ticket.status);
-                        return statusIcon ? (
-                          <statusIcon.icon
-                            className={`w-6 h-6 ${statusIcon.color}`}
-                          />
-                        ) : (
-                          <CheckCircle2 className="w-6 h-6 text-muted-foreground" />
-                        );
-                      })()}
-
-                      {!(
+                       {!(
                         currentUser?.role === "CLIENT" &&
                         (ticket?.status === "Resolvido" ||
                           ticket?.status === "Fechado")
@@ -958,6 +951,18 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           }
                         />
                       )}
+                      {(() => {
+                        const statusIcon = getStatusIconAndColor(ticket.status);
+                        return statusIcon ? (
+                          <statusIcon.icon
+                            className={`w-6 h-6 ${statusIcon.color}`}
+                          />
+                        ) : (
+                          <CheckCircle2 className="w-6 h-6 text-muted-foreground" />
+                        );
+                      })()}
+
+                     
                     </div>
                   </motion.div>
 
