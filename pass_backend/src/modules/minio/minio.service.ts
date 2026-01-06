@@ -110,7 +110,7 @@ export class MinioService implements OnModuleInit {
       
       // Aumentado para 15 tentativas de 4s = 60 segundos de buffer inicial
       for (const bucket of buckets) {
-        const success = await this.initializeBucket(bucket, 15, 4000); 
+        const success = await this.initializeBucket(bucket, 3, 4000); 
         if (!success) {
           allBucketsReady = false;
         }
@@ -143,7 +143,7 @@ export class MinioService implements OnModuleInit {
       // Total acumulado de espera: 60s (P1) + ~30s (P2) + 100s (P3) = ~3 minutos (Suficiente para Render)
       for (const bucket of buckets) {
         this.logger.log(`[MINIO] Final check for bucket "${bucket}"...`);
-        const finalSuccess = await this.initializeBucket(bucket, 20, 5000);
+        const finalSuccess = await this.initializeBucket(bucket, 5, 5000);
         if (!finalSuccess) {
             this.logger.error(`[MINIO] ❌ CRITICAL: Could not connect to bucket "${bucket}" after all phases.`);
         }
