@@ -12,6 +12,19 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs-support";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { useDeleteHelpdesk } from "@/features/helpdesk/hooks/use-helpdesk";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -61,7 +74,21 @@ import {
   PanelRight,
   MoreHorizontal,
   Calendar,
+  Trash2,
+  Menu,
+  RotateCw,
+  X,
+  RefreshCw,
 } from "lucide-react";
+import { MdEmail } from "react-icons/md";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { IoTimerOutline } from "react-icons/io5";
 import { displayToApiStatus, displayToApiPriority } from "../helpers";
 import { SelectStatusPopover } from "./SelectStatusPopover";
@@ -89,7 +116,7 @@ import { TicketMessages } from "./TicketMessages";
 import { useTicketMessages } from "@/features/helpdesk/hooks/use-ticket-messages";
 import { TicketHistory } from "./TicketHistory";
 import { TicketAttachments } from "./TicketAttachments";
-
+import { FaWhatsapp } from "react-icons/fa6";
 
 interface TicketDialogProps {
   ticket: TicketData | null;
@@ -119,6 +146,9 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
   onUpdateEnvironment,
 }) => {
   const { currentUser } = useAuth();
+  const deleteMutation = useDeleteHelpdesk();
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Get real message count
   const { messages } = useTicketMessages(initialTicket?.id || "");
@@ -172,18 +202,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
   };
 
   // Bloquear scroll do body quando o dialog estiver aberto
+  // Bloquear scroll do body quando o dialog estiver aberto e garantir limpeza ao desmontar
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    // Cleanup: garantir que o scroll seja restaurado quando o componente for desmontado
+    // Cleanup de segurança para garantir que não sobrem estilos de bloqueio
     return () => {
-      document.body.style.overflow = "unset";
+      setTimeout(() => {
+        document.body.style.pointerEvents = "";
+        document.body.style.overflow = "";
+      }, 100);
     };
-  }, [isOpen]);
+  }, []);
 
   if (!ticket) return null;
 
@@ -368,10 +396,139 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       </div>
                     </div>
 
-                    {/* Close Button */}
-                    <div className="flex items-center">
-                      <Button variant="ghost" onClick={onClose} className="p-2">
-                        <XIcon className="w-5 h-5" />
+                    {/* Header Actions */}
+                    <div className="flex items-center gap-2">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 bg-red-500/20 hover:bg-red-500/20! hover:text-red-600 text-red-500 rounded-lg transition-colors border border-red-500/20"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir Ticket?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Você tem certeza que deseja excluir o ticket{" "}
+                              <span className="font-semibold text-foreground">
+                                {ticket.ticketNumber}
+                              </span>
+                              ? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-red-600 hover:bg-red-700 text-white border-none"
+                              onClick={(e) => {
+                                e.preventDefault(); // Prevent closing immediately to allow mutation to start/finish if needed,
+                                // but standard behavior is usually fine. Let's just run it.
+                                deleteMutation.mutate(ticket.id, {
+                                  onSuccess: () => {
+                                    // Forçar a limpeza dos estilos do Radix UI que podem travar a tela
+                                    setTimeout(() => {
+                                      document.body.style.pointerEvents = "";
+                                      document.body.style.overflow = "";
+                                    }, 100);
+                                    onClose();
+                                  },
+                                });
+                              }}
+                            >
+                              {deleteMutation.isPending
+                                ? "Excluindo..."
+                                : "Excluir"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      <Separator
+                        orientation="vertical"
+                        className="h-6 w-px bg-border/50 mx-1"
+                      />
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 bg-muted/40 hover:bg-muted/60 text-foreground rounded-lg border border-border/50 transition-colors"
+                          >
+                            <Menu className="w-5 h-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => {
+                              if (
+                                ticket.user?.email ||
+                                ticket.assignedTo?.email
+                              ) {
+                                window.open(
+                                  `mailto:${
+                                    ticket.user?.email ||
+                                    ticket.assignedTo?.email
+                                  }`
+                                );
+                              }
+                            }}
+                          >
+                            <MdEmail className="w-4 h-4 mr-2" />
+                            Enviar email
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => {
+                              const phone = (
+                                ticket.user?.telefone ||
+                                ticket.assignedTo?.phone ||
+                                ""
+                              ).replace(/\D/g, "");
+                              if (phone) {
+                                window.open(`https://wa.me/${phone}`, "_blank");
+                              }
+                            }}
+                          >
+                            <FaWhatsapp className="w-4 h-4 mr-2" />
+                            Whatsapp
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+{/* 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 bg-muted/40 hover:bg-muted/60 text-foreground rounded-lg border border-border/50 transition-colors"
+                        onClick={async () => {
+                          setIsRefreshing(true);
+                          await queryClient.invalidateQueries({
+                            queryKey: ["helpdesk"],
+                          });
+                          setTimeout(() => setIsRefreshing(false), 1000);
+                        }}
+                        disabled={isRefreshing}
+                      >
+                        <RefreshCw
+                          className={`w-5 h-5 ${
+                            isRefreshing ? "animate-spin" : ""
+                          }`}
+                        />
+                      </Button> */}
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 bg-muted/40 hover:bg-muted/60 text-foreground rounded-lg border border-border/50 transition-colors"
+                        onClick={onClose}
+                      >
+                        <X className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>

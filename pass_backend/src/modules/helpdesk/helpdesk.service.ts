@@ -302,11 +302,6 @@ export class HelpdeskService {
 
   async remove(id: string): Promise<void> {
     const helpdesk = await this.findOne(id);
-
-    if (helpdesk.status !== HelpdeskStatus.ENCERRADO) {
-      throw new BadRequestException('Cannot delete an open ticket.');
-    }
-
     await this.helpdeskRepository.remove(helpdesk);
   }
 
