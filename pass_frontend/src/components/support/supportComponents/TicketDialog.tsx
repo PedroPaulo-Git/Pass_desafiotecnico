@@ -89,7 +89,7 @@ import { TicketMessages } from "./TicketMessages";
 import { useTicketMessages } from "@/features/helpdesk/hooks/use-ticket-messages";
 import { TicketHistory } from "./TicketHistory";
 import { TicketAttachments } from "./TicketAttachments";
-import { UserInfoPopover } from "./UserInfoPopover";
+
 
 interface TicketDialogProps {
   ticket: TicketData | null;

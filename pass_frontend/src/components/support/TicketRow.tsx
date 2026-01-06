@@ -51,7 +51,6 @@ import { UserInfoPopover } from "./supportComponents/UserInfoPopover";
 import { AssignedUserPopover } from "./supportComponents/AssignedUserPopover";
 import { AssignUserPopover } from "./supportComponents/AssignDeveloperPopover";
 import { TicketInfoPopover } from "./supportComponents/TicketInfoPopover";
-import StatusPriorityPopover from "./supportComponents/StatusPriorityPopover";
 import {
   useTicketUpdates,
   type UseTicketUpdatesProps,
@@ -323,18 +322,6 @@ export const TicketRow: React.FC<TicketRowProps> = ({
                 )}
               </div>
 
-              {/* <div className="flex items-center gap-2">
-                {!(
-                  currentUser?.role === "CLIENT" &&
-                  (data.status === "Resolvido" || data.status === "Fechado")
-                ) && (
-                  <StatusPriorityPopover
-                    data={data}
-                    onStatusChange={handleStatusChange}
-                    onPriorityChange={handlePriorityChange}
-                  />
-                )}
-              </div> */}
             </div>
           )}
 
