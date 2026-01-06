@@ -31,6 +31,7 @@ import {
   getStatusIconAndColor,
   getStatusColor,
   getPriorityColor,
+  getStatusContainerClass,
 } from "../helpers";
 import {
   MessageSquare,
@@ -331,17 +332,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                         <div className="flex items-center gap-3 mt-3">
                           {ticket.status && (
                             <div className="flex items-center gap-1.5">
-                             
                               <Badge
                                 variant="subtle"
                                 color={getStatusColor(ticket.status)}
                               >
                                 <SelectStatusPopover
-                                data={ticket}
-                                onStatusChange={(val) =>
-                                  handleUpdateStatus(ticket.id, val)
-                                }
-                              />
+                                  data={ticket}
+                                  onStatusChange={(val) =>
+                                    handleUpdateStatus(ticket.id, val)
+                                  }
+                                />
                                 {ticket.status}
                               </Badge>
                             </div>
@@ -576,7 +576,11 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                               {ticket.status} desde a abertura
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 border border-border/40 p-2.5 rounded-full">
+                          <div
+                            className={`flex items-center gap-2 border border-border/40 p-2.5 rounded-full ${getStatusContainerClass(
+                              ticket.status
+                            )}`}
+                          >
                             {!(
                               currentUser?.role === "CLIENT" &&
                               (ticket?.status === "Resolvido" ||
