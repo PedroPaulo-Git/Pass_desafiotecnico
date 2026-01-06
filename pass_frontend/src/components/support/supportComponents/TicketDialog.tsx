@@ -62,7 +62,9 @@ import { AssignUserPopover } from "./AssignDeveloperPopover";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -822,42 +824,50 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   showSearch={true}
                                   className="bg-popover"
                                 >
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="BUG"
-                                  >
-                                    Bug
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="AGENDAMENTO"
-                                  >
-                                    Agendamento
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="TREINAMENTO"
-                                  >
-                                    Treinamento
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="PERFORMANCE"
-                                  >
-                                    Performance
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="AJUSTE_MELHORIA"
-                                  >
-                                    Ajuste/Melhoria
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="OUTRO"
-                                  >
-                                    Outro
-                                  </SelectItem>
+                                  <SelectGroup>
+                                    <SelectLabel>Técnico / Suporte</SelectLabel>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="BUG"
+                                    >
+                                      Bug
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="PERFORMANCE"
+                                    >
+                                      Performance
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="OUTRO"
+                                    >
+                                      Outro
+                                    </SelectItem>
+                                  </SelectGroup>
+                                  <SelectGroup>
+                                    <SelectLabel>
+                                      Solicitações / Dúvidas
+                                    </SelectLabel>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="AGENDAMENTO"
+                                    >
+                                      Agendamento
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="TREINAMENTO"
+                                    >
+                                      Treinamento
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="AJUSTE_MELHORIA"
+                                    >
+                                      Ajuste/Melhoria
+                                    </SelectItem>
+                                  </SelectGroup>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -897,30 +907,38 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   showSearch={true}
                                   className="bg-popover"
                                 >
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="AGENDAMENTO"
-                                  >
-                                    Agendamento
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="TREINAMENTOS"
-                                  >
-                                    Treinamentos
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="FINANCEIRO"
-                                  >
-                                    Financeiro
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="USUARIOS"
-                                  >
-                                    Usuários
-                                  </SelectItem>
+                                  <SelectGroup>
+                                    <SelectLabel>Operacional</SelectLabel>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="AGENDAMENTO"
+                                    >
+                                      Agendamento
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="TREINAMENTOS"
+                                    >
+                                      Treinamentos
+                                    </SelectItem>
+                                  </SelectGroup>
+                                  <SelectGroup>
+                                    <SelectLabel>
+                                      Gestão / Administrativo
+                                    </SelectLabel>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="FINANCEIRO"
+                                    >
+                                      Financeiro
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="USUARIOS"
+                                    >
+                                      Usuários
+                                    </SelectItem>
+                                  </SelectGroup>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -963,18 +981,21 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   showSearch={true}
                                   className="bg-popover"
                                 >
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="WEB"
-                                  >
-                                    Web
-                                  </SelectItem>
-                                  <SelectItem
-                                    className="bg-popover"
-                                    value="MOBILE"
-                                  >
-                                    Mobile
-                                  </SelectItem>
+                                  <SelectGroup>
+                                    <SelectLabel>Plataformas</SelectLabel>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="WEB"
+                                    >
+                                      Web
+                                    </SelectItem>
+                                    <SelectItem
+                                      className="bg-popover"
+                                      value="MOBILE"
+                                    >
+                                      Mobile
+                                    </SelectItem>
+                                  </SelectGroup>
                                 </SelectContent>
                               </Select>
                             </div>

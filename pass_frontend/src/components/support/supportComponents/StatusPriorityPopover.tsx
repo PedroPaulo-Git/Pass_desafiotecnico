@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
 } from "@/components/ui/select";
 import {
@@ -94,15 +96,30 @@ export const StatusPriorityPopover: React.FC<Props> = ({
                   />
                 </SelectTrigger>
                 <SelectContent showSearch={true} className="bg-popover">
-                  {STATUS_OPTIONS.map((opt) => (
-                    <SelectItem
-                      className="bg-popover hover:bg-accent/40"
-                      key={opt.value}
-                      value={opt.value}
-                    >
-                      {opt.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    <SelectLabel>Ciclo de Vida</SelectLabel>
+                    {STATUS_OPTIONS.slice(0, 3).map((opt) => (
+                      <SelectItem
+                        className="bg-popover"
+                        key={opt.value}
+                        value={opt.value}
+                      >
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Ações Finais</SelectLabel>
+                    {STATUS_OPTIONS.slice(3).map((opt) => (
+                      <SelectItem
+                        className="bg-popover"
+                        key={opt.value}
+                        value={opt.value}
+                      >
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
@@ -129,15 +146,18 @@ export const StatusPriorityPopover: React.FC<Props> = ({
                     <SelectValue placeholder={data.priority} />
                   </SelectTrigger>
                   <SelectContent showSearch={true} className="bg-popover">
-                    {PRIORITY_OPTIONS.map((opt) => (
-                      <SelectItem
-                        className="bg-popover hover:bg-accent/40"
-                        key={opt.value}
-                        value={opt.value}
-                      >
-                        {opt.label}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel>Níveis de Criticidade</SelectLabel>
+                      {PRIORITY_OPTIONS.map((opt) => (
+                        <SelectItem
+                          className="bg-popover"
+                          key={opt.value}
+                          value={opt.value}
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
