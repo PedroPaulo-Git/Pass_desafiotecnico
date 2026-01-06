@@ -39,7 +39,7 @@ export class MinioService implements OnModuleInit {
     let endpoint = rawEndpoint.trim().replace(/\/$/, "");
     let finalUseSsl = sslEnv === 'true';
 
-    // Auto-fix for Render public domains: They MUST use HTTPS (301 redirect otherwise)
+    // Auto-fix for Render public domains: They MUST use HTTPS
     if (isPublicRender) {
       finalUseSsl = true;
       this.logger.log('Detecting public Render domain. Forcing HTTPS to avoid 301 redirects.');
@@ -49,14 +49,10 @@ export class MinioService implements OnModuleInit {
       const protocol = finalUseSsl ? 'https' : 'http';
       endpoint = `${protocol}://${endpoint}`;
 
-      // 3. Port Logic:
-      // - Public Render domains DO NOT expose port 9000 externally. They use 443 (default).
-      // - Internal/Docker hostnames DO use port 9000.
       if (isInternal) {
         endpoint = `${endpoint}:${port}`;
         this.logger.log(`Using INTERNAL strategy: ${endpoint}`);
       } else {
-        // For public domains, only append if it's not standard 80/443
         if (port !== '9000' && port !== '80' && port !== '443') {
            endpoint = `${endpoint}:${port}`;
         }
@@ -85,15 +81,13 @@ export class MinioService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // Non-blocking: Run MinIO setup in background
     this.setupMinioInBackground();
   }
 
   private setupMinioInBackground() {
-    // Don't await - let NestJS continue starting
     (async () => {
-      // Wait for NestJS to finish bootstrapping
-      await new Promise(r => setTimeout(r, 1000));
+      // Espera inicial para o NestJS subir
+      await new Promise(r => setTimeout(r, 2000));
       
       this.logger.log('');
       this.logger.log('╔═══════════════════════════════════════════════════════════╗');
@@ -107,57 +101,71 @@ export class MinioService implements OnModuleInit {
         this.configService.get<string>('MINIO_BUCKET_HELPDESK') || 'helpdesk'
       ];
       
-      // ========== PHASE 1: Direct SDK Connection ==========
+      // ========== PHASE 1: Direct SDK Connection (Initial Attempt) ==========
       this.logger.log('┌─────────────────────────────────────────────────────────────┐');
       this.logger.log('│ PHASE 1: Direct S3 SDK Connection                           │');
       this.logger.log('└─────────────────────────────────────────────────────────────┘');
       
       let allBucketsReady = true;
       
+      // Aumentado para 15 tentativas de 4s = 60 segundos de buffer inicial
       for (const bucket of buckets) {
-        const success = await this.initializeBucket(bucket);
+        const success = await this.initializeBucket(bucket, 15, 4000); 
         if (!success) {
           allBucketsReady = false;
         }
       }
       
-      // ========== PHASE 2: External Proxy Fallback (if needed) ==========
-      if (!allBucketsReady) {
-        this.logger.log('');
-        this.logger.log('┌─────────────────────────────────────────────────────────────┐');
-        this.logger.log('│ PHASE 2: External Proxy Wake-Up (Fallback)                  │');
-        this.logger.log('└─────────────────────────────────────────────────────────────┘');
-        
-        const wokenUp = await this.tryExternalProxyWakeUp();
-        
-        if (wokenUp) {
-          this.logger.log('');
-          this.logger.log('┌─────────────────────────────────────────────────────────────┐');
-          this.logger.log('│ PHASE 3: Retry Bucket Initialization After Wake-Up         │');
-          this.logger.log('└─────────────────────────────────────────────────────────────┘');
-          
-          for (const bucket of buckets) {
-            await this.initializeBucket(bucket);
-          }
-        } else {
-          this.logger.warn('[MINIO] ⚠️ Could not wake up MinIO via external proxy');
-          this.logger.warn(`[MINIO] 💡 Manual action: Visit ${this.baseUrl} in your browser`);
+      if (allBucketsReady) {
+        this.logComplete();
+        return;
+      }
+
+      // ========== PHASE 2: External Proxy Wake-Up (Trigger Only) ==========
+      // Se falhar a fase 1, tentamos acordar via proxy, mas NÃO abortamos se o proxy falhar.
+      this.logger.log('');
+      this.logger.log('┌─────────────────────────────────────────────────────────────┐');
+      this.logger.log('│ PHASE 2: External Proxy Wake-Up (Trigger)                   │');
+      this.logger.log('└─────────────────────────────────────────────────────────────┘');
+      
+      // Executa o wakeup, mas ignora o resultado booleano. O importante é o "ping".
+      await this.tryExternalProxyWakeUp();
+
+      // ========== PHASE 3: Final Persistence (The "Catch-All") ==========
+      // Agora tentamos conectar de novo, independente do resultado do Proxy.
+      // O Proxy pode ter falhado (502), mas ter acordado a máquina.
+      this.logger.log('');
+      this.logger.log('┌─────────────────────────────────────────────────────────────┐');
+      this.logger.log('│ PHASE 3: Final Persistence (Waiting for Service Boot)       │');
+      this.logger.log('└─────────────────────────────────────────────────────────────┘');
+      
+      // Loop final agressivo: 20 tentativas de 5s = +100 segundos de espera
+      // Total acumulado de espera: 60s (P1) + ~30s (P2) + 100s (P3) = ~3 minutos (Suficiente para Render)
+      for (const bucket of buckets) {
+        this.logger.log(`[MINIO] Final check for bucket "${bucket}"...`);
+        const finalSuccess = await this.initializeBucket(bucket, 20, 5000);
+        if (!finalSuccess) {
+            this.logger.error(`[MINIO] ❌ CRITICAL: Could not connect to bucket "${bucket}" after all phases.`);
         }
       }
-      
-      this.logger.log('');
-      this.logger.log('╔═══════════════════════════════════════════════════════════╗');
-      this.logger.log('║            ✅ MINIO INITIALIZATION COMPLETE               ║');
-      this.logger.log('╚═══════════════════════════════════════════════════════════╝');
-      this.logger.log('');
+
+      this.logComplete();
+
     })().catch(err => {
       this.logger.error(`[MINIO] ❌ Background init error: ${err.message}`);
     });
   }
 
+  private logComplete() {
+    this.logger.log('');
+    this.logger.log('╔═══════════════════════════════════════════════════════════╗');
+    this.logger.log('║            ✅ MINIO INITIALIZATION COMPLETE               ║');
+    this.logger.log('╚═══════════════════════════════════════════════════════════╝');
+    this.logger.log('');
+  }
+
   /**
    * Try to wake up MinIO using external proxy services
-   * This makes the request appear to come from outside Render's network
    */
   private async tryExternalProxyWakeUp(): Promise<boolean> {
     const targetUrl = encodeURIComponent(this.baseUrl);
@@ -167,95 +175,56 @@ export class MinioService implements OnModuleInit {
       { name: 'CorsProxy', url: `https://corsproxy.io/?${this.baseUrl}` },
     ];
     
-    const maxAttempts = 3;
+    // Reduzi tentativas aqui para ser mais rápido e ir logo para a Phase 3
+    const maxAttempts = 2; 
     
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       this.logger.log(`[PROXY] 📡 Attempt ${attempt}/${maxAttempts}...`);
       
       for (const proxy of proxyServices) {
         try {
-          this.logger.log(`[PROXY] Trying ${proxy.name}...`);
+          this.logger.log(`[PROXY] Pinging via ${proxy.name}...`);
           
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
           
           const response = await fetch(proxy.url, {
             method: 'GET',
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              'Accept': '*/*',
-            },
+            headers: { 'User-Agent': 'MinIO-Waker/1.0' },
             signal: controller.signal
           });
           
           clearTimeout(timeoutId);
           
-          this.logger.log(`[PROXY] ${proxy.name} returned: ${response.status}`);
+          this.logger.log(`[PROXY] ${proxy.name} returned status: ${response.status}`);
           
-          if (response.ok) {
-            // Proxy reached the service! But Render takes time to fully boot.
-            // Wait and then verify multiple times
-            this.logger.log(`[PROXY] ✅ ${proxy.name} reached MinIO! Waiting 15s for boot...`);
-            await new Promise(r => setTimeout(r, 15000));
-            
-            // Try to verify MinIO is actually ready (3 attempts, 5s apart)
-            for (let verifyAttempt = 1; verifyAttempt <= 3; verifyAttempt++) {
-              this.logger.log(`[PROXY] Verifying MinIO status (${verifyAttempt}/3)...`);
-              const isUp = await this.verifyMinioIsUp();
-              if (isUp) {
-                this.logger.log(`[PROXY] 🎉 MinIO is LIVE via ${proxy.name}!`);
-                return true;
-              }
-              if (verifyAttempt < 3) {
-                this.logger.log(`[PROXY] Not ready yet, waiting 5s...`);
-                await new Promise(r => setTimeout(r, 5000));
-              }
-            }
-            
-            this.logger.warn(`[PROXY] MinIO didn't respond after wakeup. Continuing...`);
+          // Se retornou 200, 500, 502, 503... o servidor foi atingido (ou o load balancer).
+          // Isso já conta como "acordar".
+          if (response.status) {
+             this.logger.log(`[PROXY] ✅ Signal sent via ${proxy.name}. Render should be waking up.`);
+             // Damos um pequeno tempo para o Render processar o sinal
+             await new Promise(r => setTimeout(r, 5000));
+             return true; 
           }
+
         } catch (error: any) {
-          this.logger.warn(`[PROXY] ${proxy.name} failed: ${error.message?.substring(0, 40)}`);
+          this.logger.warn(`[PROXY] ${proxy.name} request failed: ${error.message?.substring(0, 40)}`);
         }
       }
       
-      // Wait before next round of attempts
       if (attempt < maxAttempts) {
-        this.logger.log(`[PROXY] ⏳ Waiting 10s before next attempt...`);
-        await new Promise(r => setTimeout(r, 10000));
+        await new Promise(r => setTimeout(r, 5000));
       }
     }
     
+    this.logger.warn('[PROXY] Proxies failed to get a clean response, but traffic may have triggered wakeup. Proceeding to Phase 3.');
     return false;
   }
 
-  /**
-   * Quick check if MinIO is responding
-   */
-  private async verifyMinioIsUp(): Promise<boolean> {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await fetch(`${this.baseUrl}/minio/health/live`, {
-        method: 'GET',
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      return response.status > 0 && response.status < 500;
-    } catch {
-      return false;
-    }
-  }
-
-  private async initializeBucket(bucketName: string): Promise<boolean> {
-    const maxAttempts = 10;
-    const retryDelay = 3000; // 3 seconds between attempts
-    
+  private async initializeBucket(bucketName: string, maxAttempts: number = 10, retryDelay: number = 3000): Promise<boolean> {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        this.logger.log(`[MINIO] Checking bucket "${bucketName}" (attempt ${attempt}/${maxAttempts})...`);
+        if (attempt > 1) this.logger.log(`[MINIO] Checking bucket "${bucketName}" (attempt ${attempt}/${maxAttempts})...`);
         
         // Try to check if bucket exists using S3 SDK
         await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
@@ -265,7 +234,11 @@ export class MinioService implements OnModuleInit {
       } catch (error: any) {
         const statusCode = error?.$metadata?.httpStatusCode;
         const errorName = error?.name;
+        const errorMessage = error?.message || '';
         
+        // CORREÇÃO CRÍTICA: Detectar erro de XML parsing (HTML retornado pelo Load Balancer 502)
+        const isXmlParseError = errorMessage.includes('Expected closing tag') || errorMessage.includes('Unexpected token');
+
         // Bucket doesn't exist - create it
         if (errorName === 'NotFound' || statusCode === 404) {
           this.logger.log(`[MINIO] Bucket "${bucketName}" not found. Creating...`);
@@ -274,7 +247,6 @@ export class MinioService implements OnModuleInit {
             this.logger.log(`[MINIO] ✅ Bucket "${bucketName}" created successfully!`);
             return true;
           } catch (createErr: any) {
-            // BucketAlreadyOwnedByYou means it exists (race condition)
             if (createErr?.name === 'BucketAlreadyOwnedByYou' || createErr?.name === 'BucketAlreadyExists') {
               this.logger.log(`[MINIO] ✅ Bucket "${bucketName}" already exists!`);
               return true;
@@ -284,20 +256,20 @@ export class MinioService implements OnModuleInit {
           }
         }
         
-        // Service unavailable (502/503) - MinIO might be sleeping
-        if (statusCode === 502 || statusCode === 503 || statusCode === 504) {
-          this.logger.warn(`[MINIO] MinIO returned ${statusCode} - service may be waking up...`);
+        // Service unavailable (502/503/504) OR XML Parsing Error (que é um 502 disfarçado)
+        if (statusCode === 502 || statusCode === 503 || statusCode === 504 || isXmlParseError) {
+          const msg = isXmlParseError ? 'Received HTML instead of XML (Service likely waking up)' : `Status ${statusCode}`;
+          this.logger.warn(`[MINIO] Connection pending: ${msg}. Waiting ${retryDelay/1000}s...`);
           
           if (attempt < maxAttempts) {
-            this.logger.log(`[MINIO] Waiting ${retryDelay / 1000}s before retry...`);
             await new Promise(r => setTimeout(r, retryDelay));
             continue;
           }
         }
         
         // Connection errors
-        if (error?.code === 'ECONNREFUSED' || error?.code === 'ETIMEDOUT' || error?.message?.includes('fetch failed')) {
-          this.logger.warn(`[MINIO] Connection failed: ${error.code || error.message?.substring(0, 50)}`);
+        if (error?.code === 'ECONNREFUSED' || error?.code === 'ETIMEDOUT' || errorMessage.includes('fetch failed')) {
+          this.logger.warn(`[MINIO] Connection failed: ${error.code || errorMessage.substring(0, 30)}. Retrying in ${retryDelay/1000}s...`);
           
           if (attempt < maxAttempts) {
             await new Promise(r => setTimeout(r, retryDelay));
@@ -305,23 +277,19 @@ export class MinioService implements OnModuleInit {
           }
         }
         
-        // Unknown error - log and break
-        this.logger.error(`[MINIO] ❌ Unexpected error: ${errorName} (${statusCode}) - ${error.message?.substring(0, 100)}`);
+        // Unknown error - log and continue retrying if possible
+        this.logger.error(`[MINIO] ❌ Unexpected error: ${errorName} (${statusCode}) - ${errorMessage.substring(0, 100)}`);
         
-        if (attempt >= maxAttempts) {
-          return false;
+        if (attempt < maxAttempts) {
+            await new Promise(r => setTimeout(r, retryDelay));
+            continue;
         }
-        
-        await new Promise(r => setTimeout(r, retryDelay));
       }
     }
     
     return false;
   }
 
-  /**
-   * Public method to check if MinIO is currently available
-   */
   async isMinioAvailable(): Promise<boolean> {
     try {
       const bucket = this.configService.get<string>('MINIO_BUCKET') || 'pass-vehicles';
@@ -332,11 +300,9 @@ export class MinioService implements OnModuleInit {
     }
   }
 
-  /**
-   * Legacy method - kept for compatibility but simplified
-   */
   async ensureBucketExists(bucketName: string): Promise<void> {
-    const success = await this.initializeBucket(bucketName);
+    // Usa uma tentativa curta para chamadas manuais
+    const success = await this.initializeBucket(bucketName, 3, 1000);
     if (!success) {
       this.logger.warn(`[MINIO] Could not ensure bucket "${bucketName}" exists`);
     }
