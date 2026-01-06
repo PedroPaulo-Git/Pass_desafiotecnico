@@ -419,7 +419,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                     {isSidebarOpen && (
                       <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 animate-in fade-in zoom-in duration-300">
                         <Briefcase className="w-4 h-4 text-muted-foreground" />
-                        Detalhes doResumo
+                        Detalhes do Resumo
                       </h4>
                     )}
                     <Button
@@ -792,8 +792,12 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           </Badge>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-6 p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden">
-                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                        <div className="flex flex-col sm:flex-row flex-wrap p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden gap-y-4 gap-x-0">
+                          <div
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
+                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                            }`}
+                          >
                             <Tag className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
@@ -861,10 +865,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                           <Separator
                             orientation="vertical"
-                            className="hidden sm:block h-8 bg-border/50"
+                            className="hidden sm:block h-8 bg-border/50 mx-0"
                           />
 
-                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                          <div
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
+                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                            }`}
+                          >
                             <Package className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
@@ -920,10 +928,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                           <Separator
                             orientation="vertical"
-                            className="hidden sm:block h-8 bg-border/50"
+                            className="hidden sm:block h-8 bg-border/50 mx-0"
                           />
 
-                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                          <div
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
+                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                            }`}
+                          >
                             <Play className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
@@ -1043,8 +1055,12 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           </Badge>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-6 p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden">
-                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                        <div className="flex flex-col sm:flex-row flex-wrap p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden gap-y-4 gap-x-0">
+                          <div
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
+                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                            }`}
+                          >
                             <User className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
@@ -1058,10 +1074,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                           <Separator
                             orientation="vertical"
-                            className="hidden sm:block h-8 bg-border/50"
+                            className="hidden sm:block h-8 bg-border/50 mx-0"
                           />
 
-                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                          <div
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
+                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                            }`}
+                          >
                             <Phone className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
@@ -1075,10 +1095,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                           <Separator
                             orientation="vertical"
-                            className="hidden sm:block h-8 bg-border/50"
+                            className="hidden sm:block h-8 bg-border/50 mx-0"
                           />
 
-                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                          <div
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
+                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                            }`}
+                          >
                             <Mail className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
