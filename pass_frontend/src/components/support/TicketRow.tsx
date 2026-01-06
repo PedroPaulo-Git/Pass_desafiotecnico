@@ -371,17 +371,17 @@ export const TicketRowSkeleton: React.FC<{
         </div>
         {viewMode === "list" && (
           <div className="flex items-center flex-wrap justify-center w-full gap-10 lg:w-auto mt-2 lg:mt-0 lg:justify-end border-t lg:border-t-0 border-border pt-3 lg:pt-0">
-            <div className="flex flex-col gap-1 min-w-30">
+            {/* <div className="flex flex-col gap-1 min-w-30">
               <Skeleton className="h-3 w-16 mb-1 bg-muted-foreground/50" />
               <Skeleton className="h-6 w-20 bg-muted-foreground/50" />
-            </div>
+            </div> */}
             <div className="flex flex-col gap-1 min-w-25 mb-1">
               <Skeleton className="h-3 w-12 mb-1 bg-muted-foreground/50" />
               <Skeleton className="h-4 w-24 bg-muted-foreground/50" />
             </div>
             <div className="flex items-center gap-3 border-l border-border pl-4">
-              <Skeleton className="h-4 w-4 bg-muted-foreground/50" />
-              <Skeleton className="h-4 w-4 bg-muted-foreground/50" />
+              <Skeleton className="h-6 w-6 bg-muted-foreground/50 rounded-sm!" />
+              {/* <Skeleton className="h-4 w-4 bg-muted-foreground/50" /> */}
             </div>
           </div>
         )}
