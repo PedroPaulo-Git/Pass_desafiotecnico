@@ -311,16 +311,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                               Código do ticket:
                             </span>
                             {ticket.ticketNumber}{" "}
-                                  {copied ? (
+                            {copied ? (
                               <Check className="ml-1 mb-0.5 w-3.5 h-3.5 text-green-500" />
-                                  ) : (
+                            ) : (
                               <Copy className="ml-1 mb-0.5 w-3.5 h-3.5 border-border" />
-                                  )}
+                            )}
                           </div>
                         </button>
 
                         <div className="flex items-center gap-3 mt-3">
-                            {ticket.status && (
+                          {ticket.status && (
                             <Badge
                               variant="subtle"
                               color={getStatusColor(ticket.status)}
@@ -470,14 +470,16 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   >
                                     {ticket?.priority || effectivePriority}
                                   </Badge> */}
-                                   {effectivePriority && (
-                            <Badge
-                              variant="subtle"
-                              color={getPriorityColor(effectivePriority)}
-                            >
-                              {effectivePriority}
-                            </Badge>
-                          )}
+                                  {effectivePriority && (
+                                    <Badge
+                                      variant="subtle"
+                                      color={getPriorityColor(
+                                        effectivePriority
+                                      )}
+                                    >
+                                      {effectivePriority}
+                                    </Badge>
+                                  )}
                                 </StatusPriorityPopover>
                               </div>
                             </div>
@@ -515,7 +517,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <MessageSquare className="w-4 h-4 text-yellow-500" />
+                                <MessageSquare className="w-4 h-4 text-blue-600" />
                                 <span className="">Mensagens</span>
                               </div>
                               <span className="font-semibold text-xs">
@@ -648,14 +650,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                     ) : (
                       /* --- COLLAPSED VIEW (Icons Only) --- */
                       <TooltipProvider delayDuration={0}>
-                        <div className="flex flex-col items-center space-y-2 animate-in fade-in duration-300">
+                        <div className="flex flex-col items-center space-y-2 animate-in fade-in duration-300 mt-4">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="w-full flex justify-center">
                                 <button className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-yellow-600 relative">
                                   <MessageSquare className="h-4 w-4" />
                                   {realMessageCount > 0 && (
-                                    <span className="absolute top-2 right-2 flex h-3 w-3 items-center justify-center rounded-full bg-yellow-500 text-[8px] font-bold text-white">
+                                    <span className="absolute top-2 right-2 flex h-3 w-3 items-center justify-center rounded-full bg-blue-600 text-[8px] font-bold text-white">
                                       {realMessageCount}
                                     </span>
                                   )}
@@ -695,7 +697,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   }
                                 >
                                   <button className="flex h-10 w-10 items-center justify-center rounded-md transition-colors hover:bg-muted">
-                                    <Avatar className="h-6 w-6 border border-background shadow-xs">
+                                    <Avatar className="h-6 w-6 shadow-xs">
                                       <AvatarFallback className="text-primary text-[10px] font-bold">
                                         {ticket.assignedTo?.name
                                           ? ticket.assignedTo.name
@@ -790,15 +792,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           </Badge>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 space-y-3 gap-x-8 p-4 bg-muted/20 rounded-lg border border-border/30">
-                          <div className="flex gap-2">
-                            <Tag className="w-3 h-3 mt-1 text-violet-600" />
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-6 p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden">
+                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                            <Tag className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
                                 Categoria
                               </label>
                               <Select
-                              
                                 value={ticket?.categoryApi || ""}
                                 onValueChange={(value) =>
                                   handleUpdateCategory(ticket.id, value as any)
@@ -810,10 +811,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                       ticket?.status === "Fechado"))
                                 }
                               >
-                                <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
-                                  <SelectValue placeholder="Selecione uma categoria" />
+                                <SelectTrigger className="w-full h-5 text-sm border-none bg-transparent p-0 focus:ring-0">
+                                  <SelectValue placeholder="Selecione..." />
                                 </SelectTrigger>
-                                <SelectContent showSearch={true} className="bg-popover">
+                                <SelectContent
+                                  showSearch={true}
+                                  className="bg-popover"
+                                >
                                   <SelectItem
                                     className="bg-popover"
                                     value="BUG"
@@ -852,12 +856,18 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
-                            </span>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Package className="w-3 h-3 mt-1 text-violet-600" />
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+
+                          <Separator
+                            orientation="vertical"
+                            className="hidden sm:block h-8 bg-border/50"
+                          />
+
+                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                            <Package className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
                                 Módulo
                               </label>
                               <Select
@@ -872,10 +882,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                       ticket?.status === "Fechado"))
                                 }
                               >
-                                <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
-                                  <SelectValue placeholder="Selecione um módulo" />
+                                <SelectTrigger className="w-full h-5 text-sm border-none bg-transparent p-0 focus:ring-0">
+                                  <SelectValue placeholder="Selecione..." />
                                 </SelectTrigger>
-                                <SelectContent  showSearch={true}className="bg-popover">
+                                <SelectContent
+                                  showSearch={true}
+                                  className="bg-popover"
+                                >
                                   <SelectItem
                                     className="bg-popover"
                                     value="AGENDAMENTO"
@@ -902,12 +915,18 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
-                            </span>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Play className="w-3 h-3 mt-1 text-violet-600" />
-                            <span className="mt-0.5 text-sm font-medium flex-1">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+
+                          <Separator
+                            orientation="vertical"
+                            className="hidden sm:block h-8 bg-border/50"
+                          />
+
+                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                            <Play className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
                                 Ambiente
                               </label>
                               <Select
@@ -925,10 +944,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                       ticket?.status === "Fechado"))
                                 }
                               >
-                                <SelectTrigger className="w-full h-6 text-sm border-none bg-transparent p-0 focus:ring-0">
-                                  <SelectValue placeholder="Selecione um ambiente" />
+                                <SelectTrigger className="w-full h-5 text-sm border-none bg-transparent p-0 focus:ring-0">
+                                  <SelectValue placeholder="Selecione..." />
                                 </SelectTrigger>
-                                <SelectContent showSearch={true} className="bg-popover">
+                                <SelectContent
+                                  showSearch={true}
+                                  className="bg-popover"
+                                >
                                   <SelectItem
                                     className="bg-popover"
                                     value="WEB"
@@ -943,16 +965,15 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
-                            </span>
+                            </div>
                           </div>
-                          <Separator
-                            orientation="horizontal"
-                            className="md:col-span-2 bg-border/50"
-                          />
+                        </div>
 
-                          <div className="md:col-span-2 flex gap-2">
+                        {/* Descrição em uma área separada abaixo */}
+                        <div className="mt-3 p-4  bg-muted/20 rounded-lg border border-border/30">
+                          <div className="flex gap-2">
                             <FileText className="w-3 h-3 mt-1 text-violet-600" />
-                            <span className="mt-0.5 text-sm font-medium flex-1">
+                            <div className="flex-1 min-w-0">
                               <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
                                 Descrição / Assunto
                               </label>
@@ -991,7 +1012,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                   {ticket.description || "Sem descrição"}
                                 </p>
                               )}
-                            </span>
+                            </div>
                           </div>
                         </div>
                       </motion.div>
@@ -1022,42 +1043,51 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           </Badge>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 space-y-3 gap-x-8 p-4 bg-muted/20 rounded-lg border border-border/30">
-                          <div className="flex gap-2">
-                            <User className="w-3 h-3 mt-1 text-blue-600" />
-                            <span className="mt-0.5 text-sm font-medium">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-6 p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden">
+                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                            <User className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
                                 Nome do Cliente
                               </label>
-                              <p>{ticket.clientName}</p>
-                            </span>
+                              <p className="text-sm truncate font-medium">
+                                {ticket.clientName}
+                              </p>
+                            </div>
                           </div>
+
                           <Separator
-                            orientation="horizontal"
-                            className="md:col-span-2 bg-border/50"
+                            orientation="vertical"
+                            className="hidden sm:block h-8 bg-border/50"
                           />
 
-                          <div className="flex gap-2">
-                            <Phone className="w-3 h-3 mt-1 text-blue-600" />
-                            <span className="mt-0.5 text-sm font-medium">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                            <Phone className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
                                 Telefone
                               </label>
-                              <p className="text-sm">
+                              <p className="text-sm truncate font-medium">
                                 {ticket.user?.telefone || "+55 11 99999-9999"}
                               </p>
-                            </span>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Mail className="w-3 h-3 mt-1 text-blue-600" />
-                            <span className="mt-0.5 text-sm font-medium">
-                              <label className="text-xs font-medium text-muted-foreground tracking-wider flex items-center gap-1">
+
+                          <Separator
+                            orientation="vertical"
+                            className="hidden sm:block h-8 bg-border/50"
+                          />
+
+                          <div className="flex flex-1 gap-2 min-w-[140px]">
+                            <Mail className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] font-bold text-muted-foreground tracking-wider flex items-center gap-1 uppercase mb-0.5">
                                 Email
                               </label>
-                              <p className="text-sm">
+                              <p className="text-sm truncate text-blue-500 underline decoration-blue-500/30 cursor-pointer hover:text-blue-600 transition-colors font-medium">
                                 {ticket.user?.email || "email@exemplo.com"}
                               </p>
-                            </span>
+                            </div>
                           </div>
                         </div>
                       </motion.div>

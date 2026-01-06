@@ -91,7 +91,7 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
             Módulo
           </label>
           <Select value={tempModuleFilter} onValueChange={setTempModuleFilter}>
-            <SelectTrigger className="w-[180px] h-12 border-0 bg-input/30 bg-border  shadow-sm rounded-md pl-3 text-foreground justify-between">
+            <SelectTrigger className="w-[180px] h-12 border-0 dark:bg-input/30 bg-border bg-border  shadow-sm rounded-md pl-3 text-foreground justify-between">
               <SelectValue placeholder="Todos os módulos" />
             </SelectTrigger>
             <SelectContent showSearch className="bg-popover">
