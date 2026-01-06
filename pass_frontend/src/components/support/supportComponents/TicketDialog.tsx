@@ -276,9 +276,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
               >
                 {/* --- SIDEBAR (Absolute, Full Height, Covers Header) --- */}
                 <div
-                  className={`absolute top-0 right-0 h-full z-50 bg-card border-l border-border transition-all duration-300 ease-in-out shadow-lg flex flex-col ${
-                    isSidebarOpen ? "w-[300px]" : "w-[60px]"
-                  }`}
+                  className={`absolute top-0 right-0 h-full z-50 bg-card border-l border-border transition-all duration-300 ease-in-out shadow-lg flex flex-col ${isSidebarOpen ? "w-[300px]" : "w-[60px]"
+                    }`}
                 >
                   {/* Sidebar Header (Toggle) */}
                 </div>
@@ -287,9 +286,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                 <div className="flex-shrink-0 border-b border-border bg-card z-20 relative">
                   <div
                     className={`flex flex-col md:flex-row md:items-start
-                   md:justify-between gap-4 px-4 py-4 transition-all duration-300 ease-in-out ${
-                     isSidebarOpen ? "mr-[300px]" : "mr-[64px]"
-                   }`}
+                   md:justify-between gap-4 px-4 py-4 transition-all duration-300 ease-in-out ${isSidebarOpen ? "mr-[300px]" : "mr-[64px]"
+                      }`}
                   >
                     {/* Toggle Sidebar Button + Title Group */}
                     <div className="flex items-start gap-4 flex-1">
@@ -325,15 +323,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           ) : (
                             <span
                               onClick={startEditingTitle}
-                              className={`cursor-pointer hover:text-primary transition-colors flex-1 min-w-0 truncate ${
-                                !(
+                              className={`cursor-pointer hover:text-primary transition-colors flex-1 min-w-0 truncate ${!(
                                   currentUser?.role === "CLIENT" &&
                                   (ticket?.status === "Resolvido" ||
                                     ticket?.status === "Fechado")
                                 )
                                   ? "hover:underline"
                                   : ""
-                              }`}
+                                }`}
                             >
                               {ticket.title}
                             </span>
@@ -389,8 +386,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                             {ticket.createdAt instanceof Date
                               ? ticket.createdAt.toLocaleDateString("pt-BR")
                               : new Date(ticket.createdAt).toLocaleDateString(
-                                  "pt-BR"
-                                )}
+                                "pt-BR"
+                              )}
                           </span>
                         </div>
                       </div>
@@ -472,9 +469,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 ticket.assignedTo?.email
                               ) {
                                 window.open(
-                                  `mailto:${
-                                    ticket.user?.email ||
-                                    ticket.assignedTo?.email
+                                  `mailto:${ticket.user?.email ||
+                                  ticket.assignedTo?.email
                                   }`
                                 );
                               }
@@ -501,7 +497,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-{/* 
+                      {/* 
                       <Button
                         variant="ghost"
                         size="icon"
@@ -573,15 +569,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                 {/* --- SIDEBAR (Absolute, Full Height, Covers Header) --- */}
                 <div
-                  className={`absolute top-0 right-0 h-full z-50 bg-card border-l border-border transition-all duration-300 ease-in-out shadow-lg flex flex-col ${
-                    isSidebarOpen ? "w-[300px]" : "w-[64px]"
-                  }`}
+                  className={`absolute top-0 right-0 h-full z-50 bg-card border-l border-border transition-all duration-300 ease-in-out shadow-lg flex flex-col ${isSidebarOpen ? "w-[300px]" : "w-[64px]"
+                    }`}
                 >
                   {/* Sidebar Header (Toggle) */}
                   <div
-                    className={`flex items-center ${
-                      isSidebarOpen ? "justify-between px-4" : "justify-center"
-                    } py-4 border-b border-border/50 min-h-[60px]`}
+                    className={`flex items-center ${isSidebarOpen ? "justify-between px-4" : "justify-center"
+                      } py-4 border-b border-border/50 min-h-[60px]`}
                   >
                     {isSidebarOpen && (
                       <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 animate-in fade-in zoom-in duration-300">
@@ -596,9 +590,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                       className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     >
                       <PanelRight
-                        className={`w-5 h-5 transition-transform duration-300 ${
-                          isSidebarOpen ? "rotate-180" : "rotate-0"
-                        }`}
+                        className={`w-5 h-5 transition-transform duration-300 ${isSidebarOpen ? "rotate-180" : "rotate-0"
+                          }`}
                       />
                     </Button>
                   </div>
@@ -647,8 +640,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 {ticket.createdAt instanceof Date
                                   ? ticket.createdAt.toLocaleDateString()
                                   : new Date(
-                                      ticket.createdAt
-                                    ).toLocaleDateString()}
+                                    ticket.createdAt
+                                  ).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
@@ -709,8 +702,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                               <AvatarFallback className="text-primary">
                                 {ticket.assignedTo?.name
                                   ? ticket.assignedTo.name
-                                      .substring(0, 2)
-                                      .toUpperCase()
+                                    .substring(0, 2)
+                                    .toUpperCase()
                                   : "?"}
                               </AvatarFallback>
                             </Avatar>
@@ -788,7 +781,7 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="w-full flex justify-center">
-                                <button className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-yellow-600 relative">
+                                <button className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-blue-600 relative">
                                   <MessageSquare className="h-4 w-4" />
                                   {realMessageCount > 0 && (
                                     <span className="absolute top-2 right-2 flex h-3 w-3 items-center justify-center rounded-full bg-blue-600 text-[8px] font-bold text-white">
@@ -835,8 +828,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                       <AvatarFallback className="text-primary text-[10px] font-bold">
                                         {ticket.assignedTo?.name
                                           ? ticket.assignedTo.name
-                                              .substring(0, 2)
-                                              .toUpperCase()
+                                            .substring(0, 2)
+                                            .toUpperCase()
                                           : "?"}
                                       </AvatarFallback>
                                     </Avatar>
@@ -873,9 +866,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                 {/* --- WRAPPER FOR HEADER & CONTENT (Pushed by Sidebar) --- */}
                 <div
-                  className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden transition-all duration-300 ease-in-out ${
-                    isSidebarOpen ? "mr-[300px]" : "mr-[64px]"
-                  }`}
+                  className={`flex-1 flex flex-col min-w-0 h-full overflow-hidden transition-all duration-300 ease-in-out ${isSidebarOpen ? "mr-[300px]" : "mr-[64px]"
+                    }`}
                 >
                   {/* --- HEADER SECTION --- */}
 
@@ -910,9 +902,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                         <div className="flex flex-col sm:flex-row flex-wrap p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden gap-y-4 gap-x-0">
                           <div
-                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
-                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
-                            }`}
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                              }`}
                           >
                             <Tag className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -993,9 +984,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           />
 
                           <div
-                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
-                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
-                            }`}
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                              }`}
                           >
                             <Package className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -1064,9 +1054,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           />
 
                           <div
-                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
-                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
-                            }`}
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                              }`}
                           >
                             <Play className="w-3.5 h-3.5 mt-1 text-violet-600 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -1146,15 +1135,14 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                               ) : (
                                 <p
                                   onClick={startEditingDescription}
-                                  className={`text-foreground/90 leading-relaxed cursor-pointer hover:text-primary transition-colors ${
-                                    !(
+                                  className={`text-foreground/90 leading-relaxed cursor-pointer hover:text-primary transition-colors ${!(
                                       currentUser?.role === "CLIENT" &&
                                       (ticket?.status === "Resolvido" ||
                                         ticket?.status === "Fechado")
                                     )
                                       ? "hover:underline"
                                       : ""
-                                  }`}
+                                    }`}
                                 >
                                   {ticket.description || "Sem descrição"}
                                 </p>
@@ -1192,9 +1180,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                         <div className="flex flex-col sm:flex-row flex-wrap p-4 bg-muted/20 rounded-lg border border-border/30 overflow-hidden gap-y-4 gap-x-0">
                           <div
-                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
-                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
-                            }`}
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                              }`}
                           >
                             <User className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -1213,9 +1200,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           />
 
                           <div
-                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
-                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
-                            }`}
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                              }`}
                           >
                             <Phone className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -1234,9 +1220,8 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                           />
 
                           <div
-                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${
-                              isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
-                            }`}
+                            className={`flex-1 min-w-[140px] flex gap-2 px-3 ${isSidebarOpen ? "sm:max-w-[calc(50%-1px)]" : ""
+                              }`}
                           >
                             <Mail className="w-3.5 h-3.5 mt-1 text-blue-600 shrink-0" />
                             <div className="flex-1 min-w-0">
