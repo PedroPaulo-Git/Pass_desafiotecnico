@@ -129,7 +129,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   return (
     <div
       className={cn(
-        "group relative p-4 border border-border/50 rounded-lg hover:border-border transition-all duration-200 mb-3 flex flex-col h-full",
+        "group relative p-4  border border-border/50 rounded-lg hover:border-border transition-all duration-200 mb-3 flex flex-col h-full",
         viewMode === "lanes" &&
           cn(
             "cursor-grab border-border",
@@ -144,7 +144,7 @@ export const TicketRow: React.FC<TicketRowProps> = ({
           onClick?.();
         }
       }}
-    >
+     >
       <div
         className={cn(
           "absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all duration-200",

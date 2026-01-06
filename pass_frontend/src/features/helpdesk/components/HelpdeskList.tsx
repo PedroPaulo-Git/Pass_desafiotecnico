@@ -442,7 +442,7 @@ export function HelpdeskList({
   }
 
   return (
-    <div className="space-y-4 ">
+    <div className="space-y-4  ">
       {/* <BackendStatus allowToggle={status === "online"} /> */}
 
       {(tickets?.length ?? 0) === 0 ? (
@@ -464,7 +464,7 @@ export function HelpdeskList({
       ) : (
         <>
           {viewMode === "list" && (
-            <div className="space-y-4">
+            <div className="space-y-4 ">
               <AnimatePresence mode="popLayout" initial={false}>
                 {tickets?.map((ticket) => (
                   <motion.div

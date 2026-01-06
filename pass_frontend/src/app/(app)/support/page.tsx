@@ -219,7 +219,7 @@ export function SupportTicketPage() {
   );
 
   return (
-    <div className="text-foreground overflow-y-hidden">
+    <div className="text-foreground ">
       <div className="mx-auto lg:max-w-[90vw] max-w-full p-6 overflow-y-auto ">
         <div className="flex justify-end my-4"></div>
         <div className="flex w-full mb-4 flex-row sm:flex-col items-center justify-center px-2 py-4 gap-4 relative border border-border/20 rounded-xl bg-background/40 backdrop-blur-sm shadow-lg shadow-black/20 ring-1 ring-black/5 z-20">
@@ -254,7 +254,9 @@ export function SupportTicketPage() {
             hasActiveFilters={hasActiveFilters}
           />
         </div>
-        <div className="">
+        <div className=" ">
+
+      
           <HelpdeskList
             hasSearched={hasSearched}
             filters={memoizedFilters}
@@ -264,8 +266,7 @@ export function SupportTicketPage() {
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
           />
-        </div>
-
+  </div>
         <TicketDialog
           ticket={selectedTicket}
           isOpen={isDialogOpen}

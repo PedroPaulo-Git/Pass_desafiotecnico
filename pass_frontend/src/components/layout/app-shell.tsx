@@ -27,7 +27,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <PageTitleProvider>
-      <div className="min-h-screen bg-sidebar flex w-screen">
+      <div className="min-h-screen bg-sidebar flex w-full ">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">
           <AppSidebar
