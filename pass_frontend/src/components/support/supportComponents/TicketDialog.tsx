@@ -39,6 +39,10 @@ import {
   User,
   CalendarDays,
   CheckCircle2,
+  AlertCircle,
+  Search,
+  CircleCheckBig,
+  XCircle,
   Share2,
   Download,
   Briefcase,
@@ -57,7 +61,10 @@ import {
   MoreHorizontal,
   Calendar,
 } from "lucide-react";
-import StatusPriorityPopover from "./StatusPriorityPopover";
+import { IoTimerOutline } from "react-icons/io5";
+import { displayToApiStatus, displayToApiPriority } from "../helpers";
+import { SelectStatusPopover } from "./SelectStatusPopover";
+import { SelectPriorityPopover } from "./SelectPriorityPopover";
 import { AssignUserPopover } from "./AssignDeveloperPopover";
 import {
   Select,
@@ -323,30 +330,31 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                         <div className="flex items-center gap-3 mt-3">
                           {ticket.status && (
-                            <Badge
-                              variant="subtle"
-                              color={getStatusColor(ticket.status)}
-                            >
-                              {(() => {
-                                const statusInfo = getStatusIconAndColor(
-                                  ticket.status
-                                );
-                                const StatusIcon = statusInfo?.icon;
-                                return StatusIcon ? (
-                                  <StatusIcon className="w-3 h-3" />
-                                ) : null;
-                              })()}
-                              {ticket.status}
-                            </Badge>
+                            <div className="flex items-center gap-1.5">
+                             
+                              <Badge
+                                variant="subtle"
+                                color={getStatusColor(ticket.status)}
+                              >
+                                <SelectStatusPopover
+                                data={ticket}
+                                onStatusChange={(val) =>
+                                  handleUpdateStatus(ticket.id, val)
+                                }
+                              />
+                                {ticket.status}
+                              </Badge>
+                            </div>
                           )}
 
                           {effectivePriority && (
-                            <Badge
-                              variant="subtle"
-                              color={getPriorityColor(effectivePriority)}
-                            >
-                              {effectivePriority}
-                            </Badge>
+                            <SelectPriorityPopover
+                              data={ticket}
+                              onPriorityChange={(val) =>
+                                handleUpdatePriority(ticket.id, val)
+                              }
+                              align="start"
+                            />
                           )}
                           <span className="flex items-center text-center gap-1 text-xs text-muted-foreground">
                             <CalendarDays className="w-4 h-4 mb-0.5" />
@@ -455,34 +463,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                                 Prioridade
                               </span>
                               <div className="flex items-center gap-2">
-                                <StatusPriorityPopover
+                                <SelectPriorityPopover
                                   data={ticket}
-                                  onStatusChange={(status) =>
-                                    handleUpdateStatus(ticket.id, status)
+                                  onPriorityChange={(val) =>
+                                    handleUpdatePriority(ticket.id, val)
                                   }
-                                  onPriorityChange={(priority) =>
-                                    handleUpdatePriority(ticket.id, priority)
-                                  }
-                                >
-                                  {/* <Badge
-                                    variant="outline"
-                                    className={`${getPriorityStyles(
-                                      ticket?.priority || effectivePriority
-                                    )} text-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer`}
-                                  >
-                                    {ticket?.priority || effectivePriority}
-                                  </Badge> */}
-                                  {effectivePriority && (
-                                    <Badge
-                                      variant="subtle"
-                                      color={getPriorityColor(
-                                        effectivePriority
-                                      )}
-                                    >
-                                      {effectivePriority}
-                                    </Badge>
-                                  )}
-                                </StatusPriorityPopover>
+                                  align="end"
+                                />
                               </div>
                             </div>
                             <Separator className="bg-border/50" />
@@ -589,34 +576,18 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
                               {ticket.status} desde a abertura
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 border border-border/40 p-2.5 rounded-full">
                             {!(
                               currentUser?.role === "CLIENT" &&
                               (ticket?.status === "Resolvido" ||
                                 ticket?.status === "Fechado")
                             ) ? (
-                              <StatusPriorityPopover
+                              <SelectStatusPopover
                                 data={ticket}
-                                onStatusChange={(status) =>
-                                  handleUpdateStatus(ticket.id, status)
+                                onStatusChange={(val) =>
+                                  handleUpdateStatus(ticket.id, val)
                                 }
-                                onPriorityChange={(priority) =>
-                                  handleUpdatePriority(ticket.id, priority)
-                                }
-                              >
-                                {(() => {
-                                  const statusIcon = getStatusIconAndColor(
-                                    ticket.status
-                                  );
-                                  return statusIcon ? (
-                                    <statusIcon.icon
-                                      className={`w-6 h-6 ${statusIcon.color} transition-transform hover:scale-110 active:scale-90`}
-                                    />
-                                  ) : (
-                                    <CheckCircle2 className="w-8 h-8 text-muted-foreground transition-transform hover:scale-110 active:scale-90" />
-                                  );
-                                })()}
-                              </StatusPriorityPopover>
+                              />
                             ) : (
                               (() => {
                                 const statusIcon = getStatusIconAndColor(
@@ -720,31 +691,13 @@ export const TicketDialog: React.FC<TicketDialogProps> = ({
 
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="w-full flex justify-center">
-                                <StatusPriorityPopover
+                              <div className="w-full flex justify-center min-h-10 min-w-10 ">
+                                <SelectStatusPopover
                                   data={ticket}
                                   onStatusChange={(status) =>
                                     handleUpdateStatus(ticket.id, status)
                                   }
-                                  onPriorityChange={(priority) =>
-                                    handleUpdatePriority(ticket.id, priority)
-                                  }
-                                >
-                                  <button className="flex h-10 w-10 items-center justify-center rounded-md transition-all hover:bg-muted active:scale-90">
-                                    {(() => {
-                                      const statusIcon = getStatusIconAndColor(
-                                        ticket.status
-                                      );
-                                      return statusIcon ? (
-                                        <statusIcon.icon
-                                          className={`h-4 w-4 ${statusIcon.color}`}
-                                        />
-                                      ) : (
-                                        <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                                      );
-                                    })()}
-                                  </button>
-                                </StatusPriorityPopover>
+                                />
                               </div>
                             </TooltipTrigger>
                             <TooltipContent side="left">

@@ -35,11 +35,13 @@ function SelectTrigger({
   variant = "default",
   children,
   iconRight = false,
+  hideIcon = false,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default";
-  variant?: "default" | "pagination" | "modal";
+  variant?: "default" | "pagination" | "modal" | "ghost";
   iconRight?: boolean;
+  hideIcon?: boolean;
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -51,19 +53,23 @@ function SelectTrigger({
         variant === "pagination" &&
           "h-8 w-[110px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
         variant === "modal" &&
-          "h-10 rounded-md border border-border bg-background  px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+          "h-10 rounded-md border border-border bg-background  px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
+        variant === "ghost" &&
+          "border-none bg-transparent p-0 h-auto w-auto shadow-none focus-visible:ring-0"
       )}
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon
-          className={cn(
-            "size-4 opacity-50 absolute",
-            iconRight ? "right-2" : "right-3"
-          )}
-        />
-      </SelectPrimitive.Icon>
+      {!hideIcon && (
+        <SelectPrimitive.Icon asChild>
+          <ChevronDownIcon
+            className={cn(
+              "size-4 opacity-50 absolute",
+              iconRight ? "right-2" : "right-3"
+            )}
+          />
+        </SelectPrimitive.Icon>
+      )}
     </SelectPrimitive.Trigger>
   );
 }
