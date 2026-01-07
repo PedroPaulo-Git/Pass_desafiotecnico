@@ -62,6 +62,8 @@ export function useHelpdeskWithRoleFilters(additionalFilters: HelpdeskFilters = 
     staleTime: backendStatus === "online" ? 30000 : Infinity,
     gcTime: backendStatus === "online" ? 300000 : Infinity,
     enabled: !!currentUser, // Só executa quando há usuário
+    refetchInterval: backendStatus === "online" ? 60000 : false, // Poll every 60s to keep backend alive
+    refetchIntervalInBackground: true, // Continue polling even when tab is not focused
   });
 }
 
