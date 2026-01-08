@@ -13,7 +13,7 @@ function Card({ className, variant = 'card-date', ...props }: CardProps) {
       className={cn(
         'bg-card text-card-foreground flex flex-col gap-6 py-6 rounded-xl border shadow-sm',
         className,
-        variant === 'card-date' && 'p-0 py-0 bg-background border-none shadow-none',
+        variant === 'card-date' && 'p-0 py-0 bg-background border-border shadow-none p-6',
       )}
       {...props}
     />

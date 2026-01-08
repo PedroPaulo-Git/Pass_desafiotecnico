@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { motion, Transition } from "framer-motion";
 import ButtonBot from "../ui/ButtonBot";
+import ButtonStats from "../ui/ButtonStats";
 
 interface ToolbarProps {
   statusFilter: string;
@@ -35,6 +36,8 @@ interface ToolbarProps {
   setViewMode: (mode: "list" | "grid" | "lanes") => void;
   onClearFilters: () => void;
   hasActiveFilters: boolean;
+  showStats?: boolean;
+  onToggleStats?: () => void;
 }
 
 const springConfig = {
@@ -54,6 +57,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   setViewMode,
   onClearFilters,
   hasActiveFilters,
+  showStats = false,
+  onToggleStats,
 }) => {
   return (
     <motion.div
@@ -75,6 +80,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               </TooltipTrigger>
               <TooltipContent>
                 <p>Automações AI</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <div className="shrink-0 h-4 w-px bg-border/50 mx-0.5" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <ButtonStats active={showStats} onClick={onToggleStats} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Estatísticas</p>
               </TooltipContent>
             </Tooltip>
 

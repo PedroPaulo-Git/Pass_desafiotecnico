@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useUpdateHelpdesk } from "@/features/helpdesk/hooks/use-helpdesk";
 import { useSetPageTitle } from "@/lib/contexts/page-title-context";
+import { StatsDashboard } from "@/features/helpdesk/components/statistics";
 
 // --- Componente Principal da Página ---
 export function SupportTicketPage() {
@@ -39,6 +40,11 @@ export function SupportTicketPage() {
   const [tempSearch, setTempSearch] = useState(search);
   const [tempModuleFilter, setTempModuleFilter] = useState(moduleFilter);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showStatsDashboard, setShowStatsDashboard] = useState(false);
+
+  const handleToggleStatsDashboard = useCallback(() => {
+    setShowStatsDashboard(prev => !prev);
+  }, []);
 
   // Sincronizar valores temporários quando os valores reais mudam
   React.useEffect(() => {
@@ -140,10 +146,10 @@ export function SupportTicketPage() {
 
   const hasActiveFilters = Boolean(
     statusFilter !== "Todos" ||
-      priorityFilter !== "Todos" ||
-      search ||
-      dateRange ||
-      moduleFilter !== "todos"
+    priorityFilter !== "Todos" ||
+    search ||
+    dateRange ||
+    moduleFilter !== "todos"
   );
 
   // Dialog states
@@ -221,8 +227,11 @@ export function SupportTicketPage() {
   return (
     <div className="text-foreground ">
       <div className="mx-auto lg:max-w-[90vw] max-w-full p-6 overflow-y-auto ">
-        <div className="flex justify-end my-4"></div>
-        <div className="flex w-full mb-4 flex-row sm:flex-col items-center justify-center px-2 py-4 gap-4 relative border border-border/20 rounded-xl bg-background/40 backdrop-blur-sm shadow-lg shadow-black/20 ring-1 ring-black/5 z-20">
+
+        {/* Statistics Dashboard - Conditionally rendered */}
+        <StatsDashboard isVisible={showStatsDashboard} />
+
+        <div className="flex w-full my-4 flex-row sm:flex-col items-center justify-center px-2 py-4 gap-4 relative border border-border/20 rounded-xl bg-background/40 backdrop-blur-sm shadow-lg shadow-black/20 ring-1 ring-black/5 z-20">
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[99%]"></div>
           <div className="flex flex-wrap items-stretch gap-2 w-full sm:w-auto">
             <FilterHeader
@@ -252,11 +261,13 @@ export function SupportTicketPage() {
             setViewMode={setViewMode}
             onClearFilters={handleClearFilters}
             hasActiveFilters={hasActiveFilters}
+            showStats={showStatsDashboard}
+            onToggleStats={handleToggleStatsDashboard}
           />
         </div>
         <div className=" ">
 
-      
+
           <HelpdeskList
             hasSearched={hasSearched}
             filters={memoizedFilters}
@@ -266,7 +277,7 @@ export function SupportTicketPage() {
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
           />
-  </div>
+        </div>
         <TicketDialog
           ticket={selectedTicket}
           isOpen={isDialogOpen}

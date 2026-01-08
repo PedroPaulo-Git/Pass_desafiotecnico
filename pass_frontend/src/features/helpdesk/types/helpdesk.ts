@@ -100,3 +100,42 @@ export interface CreateMessageInput {
   message: string;
   attachments?: string[];
 }
+
+// Statistics Types
+export interface TicketTrend {
+  month: string;
+  count: number;
+  opened: number;
+  closed: number;
+}
+
+export interface MessageStats {
+  totalMessages: number;
+  totalAttachments: number;
+  avgMessagesPerTicket: number;
+}
+
+export interface StatsTotals {
+  total: number;
+  open: number;
+  inProgress: number;
+  resolved: number;
+  closed: number;
+}
+
+export interface PercentageChange {
+  tickets: number;
+  messages: number;
+}
+
+export interface HelpdeskStatistics {
+  ticketsByStatus: Record<HelpdeskStatus, number>;
+  ticketsByPriority: Record<HelpdeskPriority, number>;
+  ticketsByModule: Record<HelpdeskModule | string, number>;
+  ticketsTrend: TicketTrend[];
+  messagesStats: MessageStats;
+  totals: StatsTotals;
+  percentageChange: PercentageChange;
+  role: string;
+  userId?: string;
+}

@@ -7,7 +7,8 @@ import {
   HelpdeskFilters,
   PaginatedHelpdeskResponse,
   HelpdeskMessage,
-  CreateMessageInput
+  CreateMessageInput,
+  HelpdeskStatistics
 } from "../types/helpdesk";
 import { MOCK_HELPDESK } from "./helpdeskMockData";
 
@@ -32,7 +33,7 @@ export const helpdeskAPI = {
     const { data } = await api.get<{ data: Helpdesk[], pagination: { page: number, limit: number, total: number, totalPages: number } }>(
       `/helpdesk?${params.toString()}`
     );
-    
+
     // Map backend response to expected format
     return {
       items: data.data,
@@ -86,7 +87,7 @@ export const helpdeskAPI = {
   async uploadAttachment(helpdeskId: string, file: File): Promise<{ url: string; filename: string; path: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const { data } = await api.post<{ url: string; filename: string; path: string }>(
       `/helpdesk/${helpdeskId}/attachments`,
       formData,
@@ -115,6 +116,16 @@ export const helpdeskAPI = {
 
   async getHistory(helpdeskId: string): Promise<Array<{ id: string; type: string; title: string; description: string; userName: string; createdAt: string }>> {
     const { data } = await api.get(`/helpdesk/${helpdeskId}/history`);
+    return data;
+  },
+
+  // --- Statistics ---
+  async getStatistics(userId?: string, role?: string): Promise<HelpdeskStatistics> {
+    const params = new URLSearchParams();
+    if (userId) params.append('userId', userId);
+    if (role) params.append('role', role);
+
+    const { data } = await api.get<HelpdeskStatistics>(`/helpdesk/statistics?${params.toString()}`);
     return data;
   },
 };
@@ -251,5 +262,60 @@ export const helpdeskMockAPI = {
     }
 
     MOCK_HELPDESK.splice(ticketIndex, 1);
+  },
+
+  // --- Statistics (Mock) ---
+  async getStatistics(userId?: string, role?: string): Promise<HelpdeskStatistics> {
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Mock statistics data
+    return {
+      ticketsByStatus: {
+        ABERTO: 5,
+        EM_ANALISE: 2,
+        EM_ANDAMENTO: 3,
+        AGUARDANDO_USUARIO: 1,
+        RESOLVIDO: 8,
+        ENCERRADO: 4,
+      },
+      ticketsByPriority: {
+        BAIXA: 7,
+        MEDIA: 8,
+        ALTA: 5,
+        CRITICA: 3,
+      },
+      ticketsByModule: {
+        AGENDAMENTO: 6,
+        TREINAMENTOS: 4,
+        FINANCEIRO: 8,
+        USUARIOS: 5,
+      },
+      ticketsTrend: [
+        { month: 'Ago 2025', count: 12, opened: 12, closed: 8 },
+        { month: 'Set 2025', count: 15, opened: 15, closed: 10 },
+        { month: 'Out 2025', count: 18, opened: 18, closed: 14 },
+        { month: 'Nov 2025', count: 14, opened: 14, closed: 12 },
+        { month: 'Dez 2025', count: 20, opened: 20, closed: 16 },
+        { month: 'Jan 2026', count: 23, opened: 23, closed: 18 },
+      ],
+      messagesStats: {
+        totalMessages: 156,
+        totalAttachments: 34,
+        avgMessagesPerTicket: 6.8,
+      },
+      totals: {
+        total: 23,
+        open: 8,
+        inProgress: 3,
+        resolved: 8,
+        closed: 4,
+      },
+      percentageChange: {
+        tickets: 15.0,
+        messages: 8.5,
+      },
+      role: role || 'CLIENT',
+      userId,
+    };
   },
 };
