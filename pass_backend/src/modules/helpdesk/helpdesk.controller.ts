@@ -10,7 +10,7 @@ import { AttachmentResponseDto } from './dto/attachment.dto';
 @ApiTags('helpdesk')
 @Controller('helpdesk')
 export class HelpdeskController {
-  constructor(private readonly helpdeskService: HelpdeskService) {}
+  constructor(private readonly helpdeskService: HelpdeskService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create ticket' })
@@ -22,6 +22,16 @@ export class HelpdeskController {
   @ApiOperation({ summary: 'List tickets' })
   findAll(@Query() query: any) {
     return this.helpdeskService.findAll(query);
+  }
+
+  @Get('statistics')
+  @ApiOperation({ summary: 'Get helpdesk statistics with role-based filtering' })
+  @ApiResponse({ status: 200, description: 'Statistics data for charts' })
+  getStatistics(
+    @Query('userId') userId?: string,
+    @Query('role') role?: string,
+  ) {
+    return this.helpdeskService.getStatistics(userId, role);
   }
 
   @Get(':id')
@@ -104,7 +114,7 @@ export class HelpdeskController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { stream, contentType, originalName } = await this.helpdeskService.getAttachment(id, filename);
-    
+
     res.set({
       'Content-Type': contentType,
       'Content-Disposition': `attachment; filename="${originalName}"`,

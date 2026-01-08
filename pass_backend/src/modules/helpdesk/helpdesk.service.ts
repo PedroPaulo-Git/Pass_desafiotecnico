@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Raw } from 'typeorm';
+import { Repository, Like, Raw, Between, MoreThanOrEqual } from 'typeorm';
+import { HelpdeskStatisticsDto } from './dto/statistics.dto';
 import { Helpdesk } from './helpdesk.entity';
 import { User } from '../users/user.entity';
 import { CreateHelpdeskDto, UpdateHelpdeskDto } from './dto/helpdesk.dto';
@@ -22,7 +23,7 @@ export class HelpdeskService {
     private historyRepository: Repository<HelpdeskHistory>,
     private minioService: MinioService,
     private notificationsGateway: NotificationsGateway,
-  ) {}
+  ) { }
 
   async create(createHelpdeskDto: CreateHelpdeskDto): Promise<Helpdesk> {
     // 1. Validate client exists
@@ -149,8 +150,8 @@ export class HelpdeskService {
       .take(limitNum);
 
     const [data, total] = await queryBuilder.getManyAndCount();
-    
-    return { 
+
+    return {
       data,
       pagination: {
         page: pageNum,
@@ -197,7 +198,7 @@ export class HelpdeskService {
     const updatedTicket = await this.helpdeskRepository.save(helpdesk);
 
     // --- Record History for Changes ---
-    
+
     // 1. Status Change
     if (updateHelpdeskDto.status && updateHelpdeskDto.status !== oldStatus) {
       await this.recordHistory({
@@ -309,7 +310,7 @@ export class HelpdeskService {
 
   async createMessage(helpdeskId: string, createMessageDto: any) {
     const helpdesk = await this.findOne(helpdeskId);
-    
+
     // Validate author
     const author = await this.userRepository.findOne({ where: { id: createMessageDto.authorId } });
     if (!author) throw new NotFoundException('Author not found');
@@ -379,7 +380,7 @@ export class HelpdeskService {
   async findAllMessages(helpdeskId: string) {
     const helpdesk = await this.findOne(helpdeskId);
     const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
-    
+
     const prefix = `${helpdesk.bucketPath}/messages/`.replace(/^\/+/, '');
 
     let contents = [];
@@ -419,7 +420,7 @@ export class HelpdeskService {
 
       return messages.filter(m => m !== null);
     } catch (error) {
-       throw new InternalServerErrorException(`Failed to retrieve messages: ${error.message}`);
+      throw new InternalServerErrorException(`Failed to retrieve messages: ${error.message}`);
     }
   }
 
@@ -435,7 +436,7 @@ export class HelpdeskService {
         Prefix: prefix,
       });
       const response = await this.minioService.client.send(listCommand);
-      
+
       if (!response.Contents || response.Contents.length === 0) {
         throw new NotFoundException('No messages found');
       }
@@ -475,7 +476,7 @@ export class HelpdeskService {
   ): Promise<{ url: string; filename: string; path: string }> {
     const helpdesk = await this.findOne(helpdeskId);
     const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
-    
+
     // Generate unique filename with timestamp
     const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -528,9 +529,9 @@ export class HelpdeskService {
         Bucket: bucketName,
         Key: filePath,
       });
-      
+
       const response = await this.minioService.client.send(command);
-      
+
       return {
         stream: response.Body,
         contentType: response.ContentType || 'application/octet-stream',
@@ -551,9 +552,9 @@ export class HelpdeskService {
         Bucket: bucketName,
         Prefix: prefix,
       });
-      
+
       const response = await this.minioService.client.send(listCommand);
-      
+
       if (!response.Contents || response.Contents.length === 0) {
         return [];
       }
@@ -562,7 +563,7 @@ export class HelpdeskService {
         response.Contents.map(async (obj) => {
           const filename = obj.Key!.split('/').pop()!;
           const url = await this.minioService.getPresignedUrl(bucketName, obj.Key!, 7 * 24 * 60 * 60);
-          
+
           return {
             filename,
             size: obj.Size || 0,
@@ -611,7 +612,7 @@ export class HelpdeskService {
         const now = new Date();
         const timestamp = now.toISOString().replace(/[:.]/g, '-');
         const fileName = `${timestamp}_${params.type}.json`;
-        
+
         const historyJson = {
           ...params,
           id: savedHistory.id,
@@ -629,5 +630,163 @@ export class HelpdeskService {
       // Don't throw - history recording should not break main flow
       console.error(`[HISTORY ERROR] Failed to record history: ${error.message}`);
     }
+  }
+
+  // --- Statistics ---
+
+  async getStatistics(requestingUserId?: string, role?: string): Promise<HelpdeskStatisticsDto> {
+    const userRole = role || 'CLIENT';
+
+    // Build base query based on role
+    let whereCondition: any = {};
+
+    if (userRole === 'CLIENT' && requestingUserId) {
+      // Client sees only their own tickets
+      whereCondition.clientId = requestingUserId;
+    } else if (userRole === 'DEVELOPER' && requestingUserId) {
+      // Developer sees only assigned tickets
+      whereCondition.assignedUserId = requestingUserId;
+    }
+    // ADMIN sees all tickets (no filter)
+
+    // Get all tickets matching the role filter
+    const tickets = await this.helpdeskRepository.find({ where: whereCondition });
+
+    // Calculate tickets by status
+    const ticketsByStatus: Record<string, number> = {
+      ABERTO: 0,
+      EM_ANALISE: 0,
+      EM_ANDAMENTO: 0,
+      AGUARDANDO_USUARIO: 0,
+      RESOLVIDO: 0,
+      ENCERRADO: 0,
+    };
+
+    // Calculate tickets by priority
+    const ticketsByPriority: Record<string, number> = {
+      BAIXA: 0,
+      MEDIA: 0,
+      ALTA: 0,
+      CRITICA: 0,
+    };
+
+    // Calculate tickets by module
+    const ticketsByModule: Record<string, number> = {
+      AGENDAMENTO: 0,
+      TREINAMENTOS: 0,
+      FINANCEIRO: 0,
+      USUARIOS: 0,
+    };
+
+    // Aggregate counts
+    for (const ticket of tickets) {
+      if (ticket.status && ticketsByStatus[ticket.status] !== undefined) {
+        ticketsByStatus[ticket.status]++;
+      }
+      if (ticket.priority && ticketsByPriority[ticket.priority] !== undefined) {
+        ticketsByPriority[ticket.priority]++;
+      }
+      if (ticket.module && ticketsByModule[ticket.module] !== undefined) {
+        ticketsByModule[ticket.module]++;
+      }
+    }
+
+    // Calculate monthly trends (last 6 months)
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const ticketsTrend: Array<{ month: string; count: number; opened: number; closed: number }> = [];
+
+    for (let i = 0; i < 6; i++) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - 5 + i + 1, 0, 23, 59, 59);
+
+      const monthName = monthStart.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+
+      const openedThisMonth = tickets.filter(t => {
+        const created = new Date(t.createdAt);
+        return created >= monthStart && created <= monthEnd;
+      }).length;
+
+      const closedThisMonth = tickets.filter(t => {
+        if (!t.closedAt) return false;
+        const closed = new Date(t.closedAt);
+        return closed >= monthStart && closed <= monthEnd;
+      }).length;
+
+      ticketsTrend.push({
+        month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+        count: openedThisMonth,
+        opened: openedThisMonth,
+        closed: closedThisMonth,
+      });
+    }
+
+    // Calculate message statistics from MinIO
+    let totalMessages = 0;
+    let totalAttachments = 0;
+    const bucketName = process.env.MINIO_BUCKET_HELPDESK || 'helpdesk';
+
+    for (const ticket of tickets) {
+      if (!ticket.bucketPath) continue;
+
+      try {
+        // Count messages
+        const messagesPrefix = `${ticket.bucketPath}/messages/`;
+        const messagesResponse = await this.minioService.client.send(new ListObjectsV2Command({
+          Bucket: bucketName,
+          Prefix: messagesPrefix,
+        }));
+        totalMessages += (messagesResponse.Contents || []).filter(obj => obj.Key?.endsWith('.json')).length;
+
+        // Count attachments
+        const attachmentsPrefix = `${ticket.bucketPath}/attachments/`;
+        const attachmentsResponse = await this.minioService.client.send(new ListObjectsV2Command({
+          Bucket: bucketName,
+          Prefix: attachmentsPrefix,
+        }));
+        totalAttachments += (attachmentsResponse.Contents || []).length;
+      } catch (error) {
+        // Ignore individual MinIO errors
+        console.warn(`[STATS] Failed to count messages for ticket ${ticket.id}:`, error.message);
+      }
+    }
+
+    const avgMessagesPerTicket = tickets.length > 0 ? Math.round((totalMessages / tickets.length) * 10) / 10 : 0;
+
+    // Calculate totals
+    const totals = {
+      total: tickets.length,
+      open: ticketsByStatus.ABERTO + ticketsByStatus.EM_ANALISE + ticketsByStatus.AGUARDANDO_USUARIO,
+      inProgress: ticketsByStatus.EM_ANDAMENTO,
+      resolved: ticketsByStatus.RESOLVIDO,
+      closed: ticketsByStatus.ENCERRADO,
+    };
+
+    // Calculate month-over-month percentage change
+    const currentMonthTickets = ticketsTrend[5]?.opened || 0;
+    const previousMonthTickets = ticketsTrend[4]?.opened || 0;
+    const ticketPercentChange = previousMonthTickets > 0
+      ? Math.round(((currentMonthTickets - previousMonthTickets) / previousMonthTickets) * 100 * 10) / 10
+      : 0;
+
+    return {
+      ticketsByStatus,
+      ticketsByPriority,
+      ticketsByModule,
+      ticketsTrend,
+      messagesStats: {
+        totalMessages,
+        totalAttachments,
+        avgMessagesPerTicket,
+      },
+      totals,
+      percentageChange: {
+        tickets: ticketPercentChange,
+        messages: 0, // Would need historical message data
+      },
+      role: userRole,
+      userId: requestingUserId,
+    };
   }
 }
